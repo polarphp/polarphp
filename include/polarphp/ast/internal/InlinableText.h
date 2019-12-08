@@ -18,9 +18,13 @@
 #include "llvm/ADT/StringRef.h"
 #include "llvm/ADT/SmallVector.h"
 
+namespace polar::basic {
+class SourceManager;
+} // polar::basic
+
 namespace polar::ast {
 
-class SourceManager;
+using polar::basic::SourceManager;
 
 /// Extracts the text of this ASTNode from the source buffer, ignoring
 /// all #if declarations and clauses except the elements that are active.

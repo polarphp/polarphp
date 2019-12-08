@@ -1975,7 +1975,7 @@ public:
 // support ==.
 template<>
 inline bool AnyValue::Holder<Type>::equals(const HolderBase &other) const {
-  assert(typeId == other.typeId && "Caller should match type IDs");
+  assert(typeID == other.typeID && "Caller should match type IDs");
   return value.getPointer() ==
       static_cast<const Holder<Type> &>(other).value.getPointer();
 }
@@ -1985,7 +1985,7 @@ template <>
 inline bool
 AnyValue::Holder<GenericSignature>::equals(const HolderBase &other) const
 {
-  assert(typeId == other.typeId && "Caller should match type IDs");
+  assert(typeID == other.typeID && "Caller should match type IDs");
   return value.getPointer() ==
          static_cast<const Holder<GenericSignature> &>(other)
              .value.getPointer();

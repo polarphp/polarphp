@@ -1,4 +1,4 @@
-//===--- DiagnosticsIRGen.h - Diagnostic Definitions ------------*- C++ -*-===//
+//===--- DiagnosticsModuleDiffer.h - Diagnostic Definitions ----*- C++ -*-===//
 //
 // This source file is part of the Swift.org open source project
 //
@@ -11,22 +11,22 @@
 //===----------------------------------------------------------------------===//
 //
 /// \file
-/// This file defines diagnostics for IR generation.
+/// This file defines diagnostics for the Swift module differ.
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef POLARPHP_AST_DIAGNOSTICSIRGEN_H
-#define POLARPHP_AST_DIAGNOSTICSIRGEN_H
+#ifndef POLARPHP_AST_DIAGNOSTICS_MODULE_DIFFER_H
+#define POLARPHP_AST_DIAGNOSTICS_MODULE_DIFFER_H
 
-#include "polarphp/ast/DiagnosticsCommon.h"
+#include "swift/AST/DiagnosticsCommon.h"
 
 namespace polar::ast {
 namespace diag {
 // Declare common diagnostics objects with their appropriate types.
 #define DIAG(KIND,ID,Options,Text,Signature) \
   extern internal::DiagWithArguments<void Signature>::type ID;
-#include "polarphp/ast/DiagnosticsIRGenDefs.h"
-} // diag
+#include "DiagnosticsModuleDiffer.def"
+}
 } // polar::ast
 
-#endif // POLARPHP_AST_DIAGNOSTICSIRGEN_H
+#endif // POLARPHP_AST_DIAGNOSTICS_MODULE_DIFFER_H

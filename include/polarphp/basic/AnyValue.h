@@ -39,7 +39,7 @@ namespace polar::ast {
 ///
 ///   - Copy constructor
 ///   - Equality operator (==)
-///   - TypeId support (see swift/Basic/TypeId.h)
+///   - TypeID support (see swift/Basic/TypeID.h)
 ///   - Display support (free function):
 ///       void simple_display(llvm::raw_ostream &, const T &);
 class AnyValue {
@@ -47,7 +47,7 @@ class AnyValue {
   class HolderBase {
   public:
     /// Type ID number.
-    const uint64_t typeId;
+    const uint64_t typeID;
 
     HolderBase() = delete;
     HolderBase(const HolderBase &) = delete;
@@ -56,7 +56,7 @@ class AnyValue {
     HolderBase &operator=(HolderBase &&) = delete;
 
     /// Initialize base with type ID.
-    HolderBase(uint64_t TypeId) : typeId(TypeId) { }
+    HolderBase(uint64_t typeID) : typeID(typeID) { }
 
     virtual ~HolderBase();
 
@@ -87,7 +87,7 @@ class AnyValue {
     ///
     /// The caller guarantees that the type IDs are the same.
     virtual bool equals(const HolderBase &other) const override {
-      assert(typeId == other.typeId && "Caller should match type IDs");
+      assert(typeID == other.typeID && "Caller should match type IDs");
       return value == static_cast<const Holder<T> &>(other).value;
     }
 
@@ -111,7 +111,7 @@ public:
   /// Cast to a specific (known) type.
   template<typename T>
   const T &castTo() const {
-    assert(stored->typeId == TypeId<T>::value);
+    assert(stored->typeID == TypeId<T>::value);
     return static_cast<const Holder<T> *>(stored.get())->value;
   }
 
@@ -119,7 +119,7 @@ public:
   /// failure.
   template<typename T>
   const T *getAs() const {
-    if (stored->typeId != TypeId<T>::value)
+    if (stored->typeID != TypeId<T>::value)
       return nullptr;
 
     return &static_cast<const Holder<T> *>(stored.get())->value;
@@ -127,7 +127,7 @@ public:
 
   /// Compare two instances for equality.
   friend bool operator==(const AnyValue &lhs, const AnyValue &rhs) {
-    if (lhs.stored->typeId != rhs.stored->typeId)
+    if (lhs.stored->typeID != rhs.stored->typeID)
       return false;
 
     return lhs.stored->equals(*rhs.stored);
@@ -175,4 +175,6 @@ namespace llvm {
   }
 } // end namespace llvm
 
-#endif // POLARPHP_BASIC_ANYVALUE_H
+#endif //
+
+

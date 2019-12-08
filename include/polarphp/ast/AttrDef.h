@@ -112,406 +112,406 @@ TYPE_ATTR(_opaqueReturnTypeOf)
 // - Please create a "NOTE" comment if a unique number is skipped.
 
 DECL_ATTR(_silgen_name, SILGenName,
-  OnAbstractFunction |
-  LongAttribute | UserInaccessible | ABIStableToAdd | ABIStableToRemove |
-  APIStableToAdd | APIStableToRemove,
-  0)
+          OnAbstractFunction |
+          LongAttribute | UserInaccessible | ABIStableToAdd | ABIStableToRemove |
+          APIStableToAdd | APIStableToRemove,
+          0)
 DECL_ATTR(available, Available,
-  OnAbstractFunction | OnGenericType | OnVar | OnSubscript | OnEnumElement |
-  OnExtension | OnGenericTypeParam |
-  AllowMultipleAttributes | LongAttribute |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  1)
+          OnAbstractFunction | OnGenericType | OnVar | OnSubscript | OnEnumElement |
+          OnExtension | OnGenericTypeParam |
+          AllowMultipleAttributes | LongAttribute |
+          ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+          1)
 CONTEXTUAL_SIMPLE_DECL_ATTR(final, Final,
-  OnClass | OnFunc | OnAccessor | OnVar | OnSubscript |
-  DeclModifier |
-  ABIBreakingToAdd | ABIBreakingToRemove | APIBreakingToAdd | APIStableToRemove,
-  2)
+                            OnClass | OnFunc | OnAccessor | OnVar | OnSubscript |
+                            DeclModifier |
+                            ABIBreakingToAdd | ABIBreakingToRemove | APIBreakingToAdd | APIStableToRemove,
+                            2)
 DECL_ATTR(objc, ObjC,
-  OnAbstractFunction | OnClass | OnInterface | OnExtension | OnVar |
-  OnSubscript | OnEnum | OnEnumElement |
-  ABIBreakingToAdd | ABIBreakingToRemove | APIStableToAdd | APIStableToRemove,
-  3)
+          OnAbstractFunction | OnClass | OnInterface | OnExtension | OnVar |
+          OnSubscript | OnEnum | OnEnumElement |
+          ABIBreakingToAdd | ABIBreakingToRemove | APIStableToAdd | APIStableToRemove,
+          3)
 CONTEXTUAL_SIMPLE_DECL_ATTR(required, Required,
-  OnConstructor |
-  DeclModifier |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  4)
+                            OnConstructor |
+                            DeclModifier |
+                            ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                            4)
 CONTEXTUAL_SIMPLE_DECL_ATTR(optional, Optional,
-  OnConstructor | OnFunc | OnAccessor | OnVar | OnSubscript |
-  DeclModifier |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  5)
+                            OnConstructor | OnFunc | OnAccessor | OnVar | OnSubscript |
+                            DeclModifier |
+                            ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                            5)
 SIMPLE_DECL_ATTR(dynamicCallable, DynamicCallable,
-  OnNominalType |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  6)
+                 OnNominalType |
+                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                 6)
 // NOTE: 7 is unused
 SIMPLE_DECL_ATTR(_exported, Exported,
-  OnImport |
-  UserInaccessible |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  8)
+                 OnImport |
+                 UserInaccessible |
+                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                 8)
 SIMPLE_DECL_ATTR(dynamicMemberLookup, DynamicMemberLookup,
-  OnNominalType |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  9)
+                 OnNominalType |
+                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                 9)
 SIMPLE_DECL_ATTR(NSCopying, NSCopying,
-  OnVar |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  10)
+                 OnVar |
+                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                 10)
 SIMPLE_DECL_ATTR(IBAction, IBAction,
-  OnFunc |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  11)
+                 OnFunc |
+                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                 11)
 SIMPLE_DECL_ATTR(IBDesignable, IBDesignable,
-  OnClass | OnExtension |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  12)
+                 OnClass | OnExtension |
+                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                 12)
 SIMPLE_DECL_ATTR(IBInspectable, IBInspectable,
-  OnVar |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  13)
+                 OnVar |
+                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                 13)
 SIMPLE_DECL_ATTR(IBOutlet, IBOutlet,
-  OnVar |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  14)
+                 OnVar |
+                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                 14)
 SIMPLE_DECL_ATTR(NSManaged, NSManaged,
-  OnVar | OnFunc | OnAccessor |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  15)
+                 OnVar | OnFunc | OnAccessor |
+                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                 15)
 CONTEXTUAL_SIMPLE_DECL_ATTR(lazy, Lazy, DeclModifier |
-  OnVar |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  16)
+                                        OnVar |
+                                        ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                            16)
 SIMPLE_DECL_ATTR(LLDBDebuggerFunction, LLDBDebuggerFunction,
-  OnFunc |
-  UserInaccessible |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  17)
+                 OnFunc |
+                 UserInaccessible |
+                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                 17)
 SIMPLE_DECL_ATTR(UIApplicationMain, UIApplicationMain,
-  OnClass |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  18)
+                 OnClass |
+                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                 18)
 SIMPLE_DECL_ATTR(unsafe_no_objc_tagged_pointer, UnsafeNoObjCTaggedPointer,
-  OnInterface |
-  UserInaccessible |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  19)
+                 OnInterface |
+                 UserInaccessible |
+                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                 19)
 DECL_ATTR(inline, Inline,
-  OnVar | OnSubscript | OnAbstractFunction |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  20)
+          OnVar | OnSubscript | OnAbstractFunction |
+          ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+          20)
 DECL_ATTR(_semantics, Semantics,
-  OnAbstractFunction | OnSubscript | OnNominalType | OnVar |
-  AllowMultipleAttributes | UserInaccessible |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  21)
+          OnAbstractFunction | OnSubscript | OnNominalType | OnVar |
+          AllowMultipleAttributes | UserInaccessible |
+          ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+          21)
 CONTEXTUAL_SIMPLE_DECL_ATTR(dynamic, Dynamic,
-  OnFunc | OnAccessor | OnVar | OnSubscript | OnConstructor |
-  DeclModifier | ABIBreakingToAdd | ABIBreakingToRemove |
-  APIStableToAdd | APIStableToRemove,
-  22)
+                            OnFunc | OnAccessor | OnVar | OnSubscript | OnConstructor |
+                            DeclModifier | ABIBreakingToAdd | ABIBreakingToRemove |
+                            APIStableToAdd | APIStableToRemove,
+                            22)
 CONTEXTUAL_SIMPLE_DECL_ATTR(infix, Infix,
-  OnFunc | OnOperator |
-  DeclModifier |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  23)
+                            OnFunc | OnOperator |
+                            DeclModifier |
+                            ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                            23)
 CONTEXTUAL_SIMPLE_DECL_ATTR(prefix, Prefix,
-  OnFunc | OnOperator |
-  DeclModifier |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  24)
+                            OnFunc | OnOperator |
+                            DeclModifier |
+                            ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                            24)
 CONTEXTUAL_SIMPLE_DECL_ATTR(postfix, Postfix,
-  OnFunc | OnOperator |
-  DeclModifier |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  25)
+                            OnFunc | OnOperator |
+                            DeclModifier |
+                            ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                            25)
 SIMPLE_DECL_ATTR(_transparent, Transparent,
-  OnFunc | OnAccessor | OnConstructor | OnVar | UserInaccessible |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  26)
+                 OnFunc | OnAccessor | OnConstructor | OnVar | UserInaccessible |
+                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                 26)
 SIMPLE_DECL_ATTR(requires_stored_property_inits, RequiresStoredPropertyInits,
-  OnClass |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  27)
+                 OnClass |
+                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                 27)
 SIMPLE_DECL_ATTR(nonobjc, NonObjC,
-  OnExtension | OnFunc | OnAccessor | OnVar | OnSubscript | OnConstructor |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  30)
+                 OnExtension | OnFunc | OnAccessor | OnVar | OnSubscript | OnConstructor |
+                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                 30)
 SIMPLE_DECL_ATTR(_fixed_layout, FixedLayout,
-  OnVar | OnClass | OnStruct |
-  UserInaccessible | ABIBreakingToAdd | ABIBreakingToRemove |
-  APIStableToAdd | APIStableToRemove,
-  31)
+                 OnVar | OnClass | OnStruct |
+                 UserInaccessible | ABIBreakingToAdd | ABIBreakingToRemove |
+                 APIStableToAdd | APIStableToRemove,
+                 31)
 SIMPLE_DECL_ATTR(inlinable, Inlinable,
-  OnVar | OnSubscript | OnAbstractFunction |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  32)
+                 OnVar | OnSubscript | OnAbstractFunction |
+                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                 32)
 DECL_ATTR(_specialize, Specialize,
-  OnConstructor | OnFunc | OnAccessor |
-  AllowMultipleAttributes | LongAttribute | UserInaccessible |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  33)
+          OnConstructor | OnFunc | OnAccessor |
+          AllowMultipleAttributes | LongAttribute | UserInaccessible |
+          ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+          33)
 SIMPLE_DECL_ATTR(objcMembers, ObjCMembers,
-  OnClass |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  34)
+                 OnClass |
+                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                 34)
 CONTEXTUAL_SIMPLE_DECL_ATTR(__consuming, Consuming,
-  OnFunc | OnAccessor |
-  DeclModifier |
-  UserInaccessible |
-  NotSerialized |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove, 40)
+                            OnFunc | OnAccessor |
+                            DeclModifier |
+                            UserInaccessible |
+                            NotSerialized |
+                            ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove, 40)
 CONTEXTUAL_SIMPLE_DECL_ATTR(mutating, Mutating,
-  OnFunc | OnAccessor |
-  DeclModifier |
-  NotSerialized |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove, 41)
+                            OnFunc | OnAccessor |
+                            DeclModifier |
+                            NotSerialized |
+                            ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove, 41)
 CONTEXTUAL_SIMPLE_DECL_ATTR(nonmutating, NonMutating,
-  OnFunc | OnAccessor |
-  DeclModifier |
-  NotSerialized |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove, 42)
+                            OnFunc | OnAccessor |
+                            DeclModifier |
+                            NotSerialized |
+                            ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove, 42)
 CONTEXTUAL_SIMPLE_DECL_ATTR(convenience, Convenience,
-  OnConstructor |
-  DeclModifier |
-  NotSerialized |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove, 43)
+                            OnConstructor |
+                            DeclModifier |
+                            NotSerialized |
+                            ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove, 43)
 CONTEXTUAL_SIMPLE_DECL_ATTR(override, Override,
-  OnFunc | OnAccessor | OnVar | OnSubscript | OnConstructor | OnAssociatedType |
-  DeclModifier |
-  NotSerialized |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove, 44)
+                            OnFunc | OnAccessor | OnVar | OnSubscript | OnConstructor | OnAssociatedType |
+                            DeclModifier |
+                            NotSerialized |
+                            ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove, 44)
 SIMPLE_DECL_ATTR(_hasStorage, HasStorage,
-  OnVar |
-  UserInaccessible |
-  NotSerialized |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove, 45)
+                 OnVar |
+                 UserInaccessible |
+                 NotSerialized |
+                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove, 45)
 DECL_ATTR(private, AccessControl,
-  OnFunc | OnAccessor | OnExtension | OnGenericType | OnVar | OnSubscript |
-  OnConstructor |
-  DeclModifier |
-  NotSerialized |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove, 46)
+          OnFunc | OnAccessor | OnExtension | OnGenericType | OnVar | OnSubscript |
+          OnConstructor |
+          DeclModifier |
+          NotSerialized |
+          ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove, 46)
 DECL_ATTR_ALIAS(fileprivate, AccessControl)
 DECL_ATTR_ALIAS(internal, AccessControl)
 DECL_ATTR_ALIAS(public, AccessControl)
 CONTEXTUAL_DECL_ATTR_ALIAS(open, AccessControl)
 DECL_ATTR(__setter_access, SetterAccess,
-  OnVar | OnSubscript |
-  DeclModifier | RejectByParser |
-  NotSerialized |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove, 47)
+          OnVar | OnSubscript |
+          DeclModifier | RejectByParser |
+          NotSerialized |
+          ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove, 47)
 DECL_ATTR(__raw_doc_comment, RawDocComment,
-  OnAnyDecl |
-  RejectByParser |
-  NotSerialized |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove, 48)
+          OnAnyDecl |
+          RejectByParser |
+          NotSerialized |
+          ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove, 48)
 CONTEXTUAL_DECL_ATTR(weak, ReferenceOwnership,
-  OnVar |
-  DeclModifier |
-  NotSerialized |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove, 49)
+                     OnVar |
+                     DeclModifier |
+                     NotSerialized |
+                     ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove, 49)
 CONTEXTUAL_DECL_ATTR_ALIAS(unowned, ReferenceOwnership)
 DECL_ATTR(_effects, Effects,
-  OnAbstractFunction |
-  UserInaccessible |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  50)
+          OnAbstractFunction |
+          UserInaccessible |
+          ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+          50)
 DECL_ATTR(__objc_bridged, ObjCBridged,
-  OnClass |
-  RejectByParser |
-  NotSerialized |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  51)
+          OnClass |
+          RejectByParser |
+          NotSerialized |
+          ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+          51)
 SIMPLE_DECL_ATTR(NSApplicationMain, NSApplicationMain,
-  OnClass |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  52)
+                 OnClass |
+                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                 52)
 SIMPLE_DECL_ATTR(_objc_non_lazy_realization, ObjCNonLazyRealization,
-  OnClass |
-  UserInaccessible |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  53)
+                 OnClass |
+                 UserInaccessible |
+                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                 53)
 DECL_ATTR(__synthesized_protocol, SynthesizedInterface,
-  OnConcreteNominalType |
-  RejectByParser |
-  NotSerialized |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove, 54)
+          OnConcreteNominalType |
+          RejectByParser |
+          NotSerialized |
+          ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove, 54)
 SIMPLE_DECL_ATTR(testable, Testable,
-  OnImport |
-  UserInaccessible |
-  NotSerialized |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  55)
+                 OnImport |
+                 UserInaccessible |
+                 NotSerialized |
+                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                 55)
 DECL_ATTR(_alignment, Alignment,
-  OnStruct | OnEnum |
-  UserInaccessible |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  56)
+          OnStruct | OnEnum |
+          UserInaccessible |
+          ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+          56)
 SIMPLE_DECL_ATTR(rethrows, Rethrows,
-  OnFunc | OnAccessor | OnConstructor |
-  RejectByParser |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  57)
+                 OnFunc | OnAccessor | OnConstructor |
+                 RejectByParser |
+                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                 57)
 DECL_ATTR(_swift_native_objc_runtime_base, SwiftNativeObjCRuntimeBase,
-  OnClass |
-  UserInaccessible |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  59)
+          OnClass |
+          UserInaccessible |
+          ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+          59)
 CONTEXTUAL_SIMPLE_DECL_ATTR(indirect, Indirect, DeclModifier |
-  OnEnum | OnEnumElement |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  60)
+                                                OnEnum | OnEnumElement |
+                                                ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                            60)
 SIMPLE_DECL_ATTR(warn_unqualified_access, WarnUnqualifiedAccess,
-  OnFunc | OnAccessor /*| OnVar*/ |
-  LongAttribute |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  61)
+                 OnFunc | OnAccessor /*| OnVar*/ |
+                 LongAttribute |
+                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                 61)
 SIMPLE_DECL_ATTR(_show_in_interface, ShowInInterface,
-  OnInterface |
-  UserInaccessible |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  62)
+                 OnInterface |
+                 UserInaccessible |
+                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                 62)
 DECL_ATTR(_cdecl, CDecl,
-  OnFunc | OnAccessor |
-  LongAttribute | UserInaccessible |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  63)
+          OnFunc | OnAccessor |
+          LongAttribute | UserInaccessible |
+          ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+          63)
 SIMPLE_DECL_ATTR(usableFromInline, UsableFromInline,
-  OnAbstractFunction | OnVar | OnSubscript | OnNominalType | OnTypeAlias |
-  LongAttribute |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  64)
+                 OnAbstractFunction | OnVar | OnSubscript | OnNominalType | OnTypeAlias |
+                 LongAttribute |
+                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                 64)
 SIMPLE_DECL_ATTR(discardableResult, DiscardableResult,
-  OnFunc | OnAccessor | OnConstructor |
-  LongAttribute |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  65)
+                 OnFunc | OnAccessor | OnConstructor |
+                 LongAttribute |
+                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                 65)
 SIMPLE_DECL_ATTR(GKInspectable, GKInspectable,
-  OnVar |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  66)
+                 OnVar |
+                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                 66)
 DECL_ATTR(_implements, Implements,
-  OnFunc | OnAccessor | OnVar | OnSubscript | OnTypeAlias |
-  UserInaccessible |
-  NotSerialized |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  67)
+          OnFunc | OnAccessor | OnVar | OnSubscript | OnTypeAlias |
+          UserInaccessible |
+          NotSerialized |
+          ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+          67)
 
 // NOTE: 71 is unused
 // NOTE: 72 is unused
 DECL_ATTR(_optimize, Optimize,
-  OnAbstractFunction | OnSubscript | OnVar |
-  UserInaccessible |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  73)
+          OnAbstractFunction | OnSubscript | OnVar |
+          UserInaccessible |
+          ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+          73)
 DECL_ATTR(_clangImporterSynthesizedType, ClangImporterSynthesizedType,
-  OnGenericType |
-  LongAttribute | RejectByParser | UserInaccessible |
-  NotSerialized |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  74)
+          OnGenericType |
+          LongAttribute | RejectByParser | UserInaccessible |
+          NotSerialized |
+          ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+          74)
 SIMPLE_DECL_ATTR(_weakLinked, WeakLinked,
-  OnNominalType | OnAssociatedType | OnFunc | OnAccessor | OnVar |
-  OnSubscript | OnConstructor | OnEnumElement | OnExtension | UserInaccessible |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  75)
+                 OnNominalType | OnAssociatedType | OnFunc | OnAccessor | OnVar |
+                 OnSubscript | OnConstructor | OnEnumElement | OnExtension | UserInaccessible |
+                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                 75)
 SIMPLE_DECL_ATTR(frozen, Frozen,
-  OnEnum | OnStruct | ABIBreakingToAdd | ABIBreakingToRemove | APIBreakingToRemove | APIStableToAdd,
-  76)
+                 OnEnum | OnStruct | ABIBreakingToAdd | ABIBreakingToRemove | APIBreakingToRemove | APIStableToAdd,
+                 76)
 DECL_ATTR_ALIAS(_frozen, Frozen)
 SIMPLE_DECL_ATTR(_forbidSerializingReference, ForbidSerializingReference,
-  OnAnyDecl |
-  LongAttribute | RejectByParser | UserInaccessible | NotSerialized |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  77)
+                 OnAnyDecl |
+                 LongAttribute | RejectByParser | UserInaccessible | NotSerialized |
+                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                 77)
 SIMPLE_DECL_ATTR(_hasInitialValue, HasInitialValue,
-  OnVar |
-  UserInaccessible |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  78)
+                 OnVar |
+                 UserInaccessible |
+                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                 78)
 SIMPLE_DECL_ATTR(_nonoverride, NonOverride,
-  OnFunc | OnAccessor | OnVar | OnSubscript | OnConstructor | OnAssociatedType |
-  UserInaccessible | NotSerialized |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  79)
+                 OnFunc | OnAccessor | OnVar | OnSubscript | OnConstructor | OnAssociatedType |
+                 UserInaccessible | NotSerialized |
+                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                 79)
 DECL_ATTR(_dynamicReplacement, DynamicReplacement,
-  OnAbstractFunction | OnVar | OnSubscript | UserInaccessible |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  80)
+          OnAbstractFunction | OnVar | OnSubscript | UserInaccessible |
+          ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+          80)
 SIMPLE_DECL_ATTR(_borrowed, Borrowed,
-  OnVar | OnSubscript | UserInaccessible |
-  NotSerialized |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  81)
+                 OnVar | OnSubscript | UserInaccessible |
+                 NotSerialized |
+                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                 81)
 DECL_ATTR(_private, PrivateImport,
-  OnImport |
-  UserInaccessible |
-  NotSerialized |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  82)
+          OnImport |
+          UserInaccessible |
+          NotSerialized |
+          ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+          82)
 SIMPLE_DECL_ATTR(_alwaysEmitIntoClient, AlwaysEmitIntoClient,
-  OnVar | OnSubscript | OnAbstractFunction | UserInaccessible |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  83)
+                 OnVar | OnSubscript | OnAbstractFunction | UserInaccessible |
+                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                 83)
 
 SIMPLE_DECL_ATTR(_implementationOnly, ImplementationOnly,
-  OnImport | OnFunc | OnConstructor | OnVar | OnSubscript | UserInaccessible |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  84)
+                 OnImport | OnFunc | OnConstructor | OnVar | OnSubscript | UserInaccessible |
+                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                 84)
 DECL_ATTR(_custom, Custom,
-  OnAnyDecl | UserInaccessible |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  85)
+          OnAnyDecl | UserInaccessible |
+          ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+          85)
 SIMPLE_DECL_ATTR(propertyWrapper, PropertyWrapper,
-  OnStruct | OnClass | OnEnum |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  86)
+                 OnStruct | OnClass | OnEnum |
+                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                 86)
 SIMPLE_DECL_ATTR(_disfavoredOverload, DisfavoredOverload,
-  OnAbstractFunction | OnVar | OnSubscript | UserInaccessible |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  87)
+                 OnAbstractFunction | OnVar | OnSubscript | UserInaccessible |
+                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                 87)
 SIMPLE_DECL_ATTR(_functionBuilder, FunctionBuilder,
-  OnNominalType |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  88)
+                 OnNominalType |
+                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                 88)
 DECL_ATTR(_projectedValueProperty, ProjectedValueProperty,
-  OnVar | UserInaccessible |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  89)
+          OnVar | UserInaccessible |
+          ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+          89)
 SIMPLE_DECL_ATTR(_nonEphemeral, NonEphemeral,
-  OnParam | UserInaccessible |
-  ABIStableToAdd | ABIStableToRemove | APIBreakingToAdd | APIStableToRemove,
-  90)
+                 OnParam | UserInaccessible |
+                 ABIStableToAdd | ABIStableToRemove | APIBreakingToAdd | APIStableToRemove,
+                 90)
 
 DECL_ATTR(differentiable, Differentiable,
-  OnAccessor | OnConstructor | OnFunc | OnVar | OnSubscript | LongAttribute |
-  AllowMultipleAttributes |
-  ABIStableToAdd | ABIBreakingToRemove | APIStableToAdd | APIBreakingToRemove,
-  91)
+          OnAccessor | OnConstructor | OnFunc | OnVar | OnSubscript | LongAttribute |
+          AllowMultipleAttributes |
+          ABIStableToAdd | ABIBreakingToRemove | APIStableToAdd | APIBreakingToRemove,
+          91)
 
 SIMPLE_DECL_ATTR(_hasMissingDesignatedInitializers,
-  HasMissingDesignatedInitializers, OnClass | UserInaccessible | NotSerialized |
-  APIBreakingToAdd | ABIBreakingToAdd | APIStableToRemove | ABIStableToRemove,
-  92)
+                 HasMissingDesignatedInitializers, OnClass | UserInaccessible | NotSerialized |
+                                                   APIBreakingToAdd | ABIBreakingToAdd | APIStableToRemove | ABIStableToRemove,
+                 92)
 
 SIMPLE_DECL_ATTR(_inheritsConvenienceInitializers,
-  InheritsConvenienceInitializers, OnClass | UserInaccessible | NotSerialized |
-  APIStableToAdd | ABIStableToAdd | APIBreakingToRemove | ABIBreakingToRemove,
-  93)
+                 InheritsConvenienceInitializers, OnClass | UserInaccessible | NotSerialized |
+                                                  APIStableToAdd | ABIStableToAdd | APIBreakingToRemove | ABIBreakingToRemove,
+                 93)
 
 SIMPLE_DECL_ATTR(IBSegueAction, IBSegueAction,
-  OnFunc |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  95)
+                 OnFunc |
+                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+                 95)
 
 DECL_ATTR(_originallyDefinedIn, OriginallyDefinedIn,
-  OnNominalType | OnFunc | OnVar | OnExtension | UserInaccessible |
-  AllowMultipleAttributes |
-  ABIBreakingToAdd | ABIBreakingToRemove | APIStableToAdd | APIStableToRemove,
-  96)
+          OnNominalType | OnFunc | OnVar | OnExtension | UserInaccessible |
+          AllowMultipleAttributes |
+          ABIBreakingToAdd | ABIBreakingToRemove | APIStableToAdd | APIStableToRemove,
+          96)
 
 #undef TYPE_ATTR
 #undef DECL_ATTR_ALIAS

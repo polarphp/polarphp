@@ -40,11 +40,15 @@
 #define AST_SCOPE_UNREACHABLE(message)                                          \
   llvm_unreachable(message " Try compiling with '-disable-astscope-lookup'.")
 
+namespace polar::basic {
+class Syntax;
+}
+
 namespace polar::ast {
 
 using polar::basic::SourceRange;
 using polar::basic::SourceLoc;
-using polar::syntax::Syntax;
+using polar::basic::Syntax;
 using polar::basic::NullablePtr;
 
 class AbstractStorageDecl;

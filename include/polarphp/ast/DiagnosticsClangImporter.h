@@ -1,4 +1,4 @@
-//===--- DiagnosticsIRGen.h - Diagnostic Definitions ------------*- C++ -*-===//
+//===--- DiagnosticsClangImporter.h - Diagnostic Definitions ----*- C++ -*-===//
 //
 // This source file is part of the Swift.org open source project
 //
@@ -11,12 +11,12 @@
 //===----------------------------------------------------------------------===//
 //
 /// \file
-/// This file defines diagnostics for IR generation.
+/// This file defines diagnostics for the Clang importer.
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef POLARPHP_AST_DIAGNOSTICSIRGEN_H
-#define POLARPHP_AST_DIAGNOSTICSIRGEN_H
+#ifndef POLARPHP_AST_DIAGNOSTICSCLANGIMPORTER_H
+#define POLARPHP_AST_DIAGNOSTICSCLANGIMPORTER_H
 
 #include "polarphp/ast/DiagnosticsCommon.h"
 
@@ -25,8 +25,8 @@ namespace diag {
 // Declare common diagnostics objects with their appropriate types.
 #define DIAG(KIND,ID,Options,Text,Signature) \
   extern internal::DiagWithArguments<void Signature>::type ID;
-#include "polarphp/ast/DiagnosticsIRGenDefs.h"
-} // diag
+#include "DiagnosticsClangImporter.def"
+}
 } // polar::ast
 
-#endif // POLARPHP_AST_DIAGNOSTICSIRGEN_H
+#endif // POLARPHP_AST_DIAGNOSTICSCLANGIMPORTER_H

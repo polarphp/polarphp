@@ -27,9 +27,14 @@
 
 namespace polar::ast {
 
+#define PATTERN(Id, _) \
+  static_assert(std::is_trivially_destructible<Id##Pattern>::value, \
+                "Patterns are BumpPtrAllocated; the d'tor is never called");
+
+#include "polarphp/ast/PatternNodesDef.h"
+
 /// Diagnostic printing of PatternKinds.
-llvm::raw_ostream &operator<<(llvm::raw_ostream &OS, PatternKind kind)
-{
+llvm::raw_ostream &operator<<(llvm::raw_ostream &OS, PatternKind kind) {
    switch (kind) {
       case PatternKind::Paren:
          return OS << "parenthesized pattern";
@@ -57,45 +62,49 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &OS, PatternKind kind)
    llvm_unreachable("bad PatternKind");
 }
 
-StringRef Pattern::getKindName(PatternKind K)
-{
+StringRef Pattern::getKindName(PatternKind K) {
    switch (K) {
 #define PATTERN(Id, Parent) case PatternKind::Id: return #Id;
+
 #include "polarphp/ast/PatternNodesDef.h"
    }
    llvm_unreachable("bad PatternKind");
 }
 
 // Metaprogram to verify that every concrete class implements
-//// a 'static bool classof(const Pattern*)'.
-template <bool fn(const Pattern*)> struct CheckClassOfPattern {
+// a 'static bool classof(const Pattern*)'.
+template<bool fn(const Pattern *)>
+struct CheckClassOfPattern {
    static const bool IsImplemented = true;
 };
-template <> struct CheckClassOfPattern<Pattern::classof> {
+template<>
+struct CheckClassOfPattern<Pattern::classof> {
    static const bool IsImplemented = false;
 };
 
 #define PATTERN(ID, PARENT) \
-   static_assert(CheckClassOfPattern<ID##Pattern::classof>::IsImplemented, \
-#ID "Pattern is missing classof(const Pattern*)");
+static_assert(CheckClassOfPattern<ID##Pattern::classof>::IsImplemented, \
+              #ID "Pattern is missing classof(const Pattern*)");
 #include "polarphp/ast/PatternNodesDef.h"
 
 // Metaprogram to verify that every concrete class implements
 // 'SourceRange getSourceRange()'.
 typedef const char (&TwoChars)[2];
+
 template<typename Class>
 inline char checkSourceRangeType(SourceRange (Class::*)() const);
+
 inline TwoChars checkSourceRangeType(SourceRange (Pattern::*)() const);
 
 /// getSourceRange - Return the full source range of the pattern.
-SourceRange Pattern::getSourceRange() const
-{
+SourceRange Pattern::getSourceRange() const {
    switch (getKind()) {
 #define PATTERN(ID, PARENT) \
-   case PatternKind::ID: \
-   static_assert(sizeof(checkSourceRangeType(&ID##Pattern::getSourceRange)) == 1, \
-#ID "Pattern is missing getSourceRange()"); \
-   return cast<ID##Pattern>(this)->getSourceRange();
+case PatternKind::ID: \
+static_assert(sizeof(checkSourceRangeType(&ID##Pattern::getSourceRange)) == 1, \
+              #ID "Pattern is missing getSourceRange()"); \
+return cast<ID##Pattern>(this)->getSourceRange();
+
 #include "polarphp/ast/PatternNodesDef.h"
    }
 
@@ -125,7 +134,7 @@ Type Pattern::getType() const {
       if (auto genericEnv = dc->getGenericEnvironmentOfContext()) {
          ctx.DelayedPatternContexts.erase(this);
          Ty = genericEnv->mapTypeIntoContext(Ty);
-         const_cast<Pattern*>(this)->Bits.Pattern.hasInterfaceType = false;
+         const_cast<Pattern *>(this)->Bits.Pattern.hasInterfaceType = false;
       }
    }
 
@@ -136,10 +145,11 @@ Type Pattern::getType() const {
 SourceLoc Pattern::getLoc() const {
    switch (getKind()) {
 #define PATTERN(ID, PARENT) \
-      case PatternKind::ID: \
-   if (&Pattern::getLoc != &ID##Pattern::getLoc) \
-   return cast<ID##Pattern>(this)->getLoc(); \
-   break;
+  case PatternKind::ID: \
+    if (&Pattern::getLoc != &ID##Pattern::getLoc) \
+      return cast<ID##Pattern>(this)->getLoc(); \
+    break;
+
 #include "polarphp/ast/PatternNodesDef.h"
    }
 
@@ -160,10 +170,10 @@ VarDecl *Pattern::getSingleVar() const {
 
 namespace {
 class WalkToVarDecls : public AstWalker {
-   const std::function<void(VarDecl*)> &fn;
+   const std::function<void(VarDecl *)> &fn;
 public:
 
-   WalkToVarDecls(const std::function<void(VarDecl*)> &fn)
+   WalkToVarDecls(const std::function<void(VarDecl *)> &fn)
       : fn(fn) {}
 
    Pattern *walkToPatternPost(Pattern *P) override {
@@ -177,18 +187,22 @@ public:
    // that is, don't walk into a closure body.
    std::pair<bool, Expr *> walkToExprPre(Expr *E) override {
       if (isa<ClosureExpr>(E)) {
-         return { false, E };
+         return {false, E};
       }
-      return { true, E };
+      return {true, E};
    }
 
    // Don't walk into anything else.
    std::pair<bool, Stmt *> walkToStmtPre(Stmt *S) override {
-      return { false, S };
+      return {false, S};
    }
+
    bool walkToTypeLocPre(TypeLoc &TL) override { return false; }
+
    bool walkToTypeReprPre(TypeRepr *T) override { return false; }
+
    bool walkToParameterListPre(ParameterList *PL) override { return false; }
+
    bool walkToDeclPre(Decl *D) override { return false; }
 };
 } // end anonymous namespace
@@ -234,14 +248,14 @@ void Pattern::forEachVariable(llvm::function_ref<void(VarDecl *)> fn) const {
          // An ExprPattern only exists before sema has resolved a refutable pattern
          // into a concrete pattern.  We have to use an AST Walker to find the
          // VarDecls buried down inside of it.
-         const_cast<Pattern*>(this)->walk(WalkToVarDecls(fn));
+         const_cast<Pattern *>(this)->walk(WalkToVarDecls(fn));
          return;
    }
 }
 
 /// apply the specified function to all pattern nodes recursively in
 /// this pattern.  This is a pre-order traversal.
-void Pattern::forEachNode(llvm::function_ref<void(Pattern*)> f) {
+void Pattern::forEachNode(llvm::function_ref<void(Pattern *)> f) {
    f(this);
 
    switch (getKind()) {
@@ -318,7 +332,7 @@ static bool isIrrefutableExprPattern(const ExprPattern *EP) {
 /// Return true if this pattern (or a subpattern) is refutable.
 bool Pattern::isRefutablePattern() const {
    bool foundRefutablePattern = false;
-   const_cast<Pattern*>(this)->forEachNode([&](Pattern *Node) {
+   const_cast<Pattern *>(this)->forEachNode([&](Pattern *Node) {
 
       // If this is an always matching 'is' pattern, then it isn't refutable.
       if (auto *is = dyn_cast<IsPattern>(Node))
@@ -337,7 +351,8 @@ bool Pattern::isRefutablePattern() const {
       switch (Node->getKind()) {
 #define PATTERN(ID, PARENT) case PatternKind::ID: break;
 #define REFUTABLE_PATTERN(ID, PARENT) \
-                  case PatternKind::ID: foundRefutablePattern = true; break;
+case PatternKind::ID: foundRefutablePattern = true; break;
+
 #include "polarphp/ast/PatternNodesDef.h"
       }
    });
@@ -374,7 +389,7 @@ TuplePattern *TuplePattern::create(AstContext &C, SourceLoc lp,
    unsigned n = elts.size();
    void *buffer = C.Allocate(totalSizeToAlloc<TuplePatternElt>(n),
                              alignof(TuplePattern));
-   TuplePattern *pattern = ::new (buffer) TuplePattern(lp, n, rp, *implicit);
+   TuplePattern *pattern = ::new(buffer) TuplePattern(lp, n, rp, *implicit);
    std::uninitialized_copy(elts.begin(), elts.end(),
                            pattern->getTrailingObjects<TuplePatternElt>());
    return pattern;
@@ -388,8 +403,8 @@ Pattern *TuplePattern::createSimple(AstContext &C, SourceLoc lp,
 
    if (elements.size() == 1 &&
        elements[0].getPattern()->getBoundName().empty()) {
-      auto &first = const_cast<TuplePatternElt&>(elements.front());
-      return new (C) ParenPattern(lp, first.getPattern(), rp, implicit);
+      auto &first = const_cast<TuplePatternElt &>(elements.front());
+      return new(C) ParenPattern(lp, first.getPattern(), rp, implicit);
    }
 
    return create(C, lp, elements, rp, implicit);
@@ -397,12 +412,12 @@ Pattern *TuplePattern::createSimple(AstContext &C, SourceLoc lp,
 
 SourceRange TuplePattern::getSourceRange() const {
    if (LPLoc.isValid())
-      return { LPLoc, RPLoc };
+      return {LPLoc, RPLoc};
    auto Fields = getElements();
    if (Fields.empty())
       return {};
-   return { Fields.front().getPattern()->getStartLoc(),
-            Fields.back().getPattern()->getEndLoc() };
+   return {Fields.front().getPattern()->getStartLoc(),
+           Fields.back().getPattern()->getEndLoc()};
 }
 
 TypedPattern::TypedPattern(Pattern *pattern, TypeRepr *tr,
@@ -443,8 +458,8 @@ SourceRange TypedPattern::getSourceRange() const {
    if (SubPattern->isImplicit())
       return PatTypeRepr->getSourceRange();
 
-   return { SubPattern->getSourceRange().start,
-            PatTypeRepr->getSourceRange().end };
+   return {SubPattern->getSourceRange().start,
+           PatTypeRepr->getSourceRange().end};
 }
 
 /// Construct an ExprPattern.
@@ -469,7 +484,6 @@ SourceRange ExprPattern::getSourceRange() const {
 } // polar::ast
 
 namespace polar::basic {
-
 using namespace polar::ast;
 // See swift/Basic/Statistic.h for declaration: this enables tracing Patterns, is
 // defined here to avoid too much layering violation / circular linkage
@@ -484,6 +498,7 @@ struct PatternTraceFormatter : public UnifiedStatsReporter::TraceFormatter {
          OS << NP->getBoundName();
       }
    }
+
    void traceLoc(const void *Entity, SourceManager *SM,
                  clang::SourceManager *CSM, raw_ostream &OS) const {
       if (!Entity)
@@ -496,10 +511,8 @@ struct PatternTraceFormatter : public UnifiedStatsReporter::TraceFormatter {
 static PatternTraceFormatter TF;
 
 template<>
-const UnifiedStatsReporter::TraceFormatter*
-FrontendStatsTracer::getTraceFormatter<const Pattern *>()
-{
+const UnifiedStatsReporter::TraceFormatter *
+FrontendStatsTracer::getTraceFormatter<const Pattern *>() {
    return &TF;
 }
-
-}
+} // polar::ast

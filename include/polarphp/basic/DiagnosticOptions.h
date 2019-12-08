@@ -32,37 +32,53 @@ namespace polar::basic {
 class DiagnosticOptions
 {
 public:
-   /// Indicates whether textual diagnostics should use color.
-   bool useColor = false;
+  /// Indicates whether textual diagnostics should use color.
+  bool UseColor = false;
 
-   /// Indicates whether the diagnostics produced during compilation should be
-   /// checked against expected diagnostics, indicated by markers in the
-   /// input source file.
-   enum {
-      NoVerify,
-      Verify,
-      VerifyAndApplyFixes
-   } verifyMode = NoVerify;
+  /// Indicates whether the diagnostics produced during compilation should be
+  /// checked against expected diagnostics, indicated by markers in the
+  /// input source file.
+  enum {
+    NoVerify,
+    Verify,
+    VerifyAndApplyFixes
+  } VerifyMode = NoVerify;
 
-   /// Indicates whether to allow diagnostics for \c <unknown> locations if
-   /// \c VerifyMode is not \c NoVerify.
-   bool verifyIgnoreUnknown = false;
+  /// Indicates whether to allow diagnostics for \c <unknown> locations if
+  /// \c VerifyMode is not \c NoVerify.
+  bool VerifyIgnoreUnknown = false;
 
-   /// Indicates whether diagnostic passes should be skipped.
-   bool skipDiagnosticPasses = false;
+  /// Indicates whether diagnostic passes should be skipped.
+  bool SkipDiagnosticPasses = false;
 
-   /// Keep emitting subsequent diagnostics after a fatal error.
-   bool showDiagnosticsAfterFatalError = false;
+  /// Keep emitting subsequent diagnostics after a fatal error.
+  bool ShowDiagnosticsAfterFatalError = false;
 
-   /// When emitting fixits as code edits, apply all fixits from diagnostics
-   /// without any filtering.
-   bool fixitCodeForAllDiagnostics = false;
+  /// When emitting fixits as code edits, apply all fixits from diagnostics
+  /// without any filtering.
+  bool FixitCodeForAllDiagnostics = false;
 
-   /// Suppress all warnings
-   bool suppressWarnings = false;
+  /// Suppress all warnings
+  bool SuppressWarnings = false;
 
-   /// Treat all warnings as errors
-   bool warningsAsErrors = false;
+  /// Treat all warnings as errors
+  bool WarningsAsErrors = false;
+
+  // When printing diagnostics, include the diagnostic name at the end
+  bool PrintDiagnosticNames = false;
+
+  /// If set to true, produce more descriptive diagnostic output if available.
+  /// Descriptive diagnostic output is not intended to be machine-readable.
+  bool EnableDescriptiveDiagnostics = false;
+
+  std::string DiagnosticDocumentationPath = "";
+
+  /// Return a hash code of any components from these options that should
+  /// contribute to a Swift Bridging PCH hash.
+  llvm::hash_code getPCHHashComponents() const {
+    // Nothing here that contributes anything significant when emitting the PCH.
+    return llvm::hash_value(0);
+  }
 };
 
 } // polar::basic

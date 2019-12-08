@@ -2169,7 +2169,8 @@ void KeyPathExpr::Component::setSubscriptIndexHashableConformances(
 }
 
 void InterpolatedStringLiteralExpr::forEachSegment(AstContext &Ctx,
-                                                   llvm::function_ref<void(bool, CallExpr *)> callback) {
+                                                   llvm::function_ref<void(bool, CallExpr *)> callback)
+{
    auto appendingExpr = getAppendingExpr();
    for (auto stmt : appendingExpr->getBody()->getElements()) {
       if (auto expr = stmt.dyn_cast<Expr*>()) {
@@ -2193,7 +2194,8 @@ void InterpolatedStringLiteralExpr::forEachSegment(AstContext &Ctx,
 
 TapExpr::TapExpr(Expr * SubExpr, BraceStmt *Body)
    : Expr(ExprKind::Tap, /*Implicit=*/true),
-     SubExpr(SubExpr), Body(Body) {
+     SubExpr(SubExpr), Body(Body)
+{
    if (Body) {
       assert(!Body->empty() &&
              Body->getFirstElement().isDecl(DeclKind::Var) &&

@@ -16,16 +16,6 @@
 //  followed by a signature describing the diagnostic argument kinds.
 //
 //===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
-//
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/04/25.
 
 #if !(defined(DIAG) || (defined(ERROR) && defined(WARNING) && defined(NOTE) && defined(REMARK)))
 #  error Must define either DIAG or the set {ERROR,WARNING,NOTE,REMARK}
@@ -55,50 +45,50 @@
 #  define FIXIT(ID, Text, Signature)
 #endif
 
-ERROR(invalid_diagnostic, NoneType,
+ERROR(invalid_diagnostic,none,
       "INTERNAL ERROR: this diagnostic should not be produced", ())
 
-ERROR(not_implemented,NoneType,
+ERROR(not_implemented,none,
       "INTERNAL ERROR: feature not implemented: %0", (StringRef))
 
-ERROR(error_opening_output,NoneType,
+ERROR(error_opening_output,none,
       "error opening '%0' for output: %1", (StringRef, StringRef))
 
-ERROR(cannot_find_group_info_file,NoneType,
+ERROR(cannot_find_group_info_file,none,
       "cannot find group info file at path: '%0'", (StringRef))
 
-ERROR(cannot_parse_group_info_file,NoneType,
+ERROR(cannot_parse_group_info_file,none,
       "cannot parse group info file at path: '%0'", (StringRef))
 
-ERROR(error_no_group_info,NoneType,
+ERROR(error_no_group_info,none,
       "no group info found for file: '%0'", (StringRef))
 
-NOTE(previous_decldef,NoneType,
+NOTE(previous_decldef,none,
      "previous definition of %0 is here", (DeclBaseName))
 
-NOTE(brace_stmt_suggest_do,NoneType,
+NOTE(brace_stmt_suggest_do,none,
      "did you mean to use a 'do' statement?", ())
 
 // Generic disambiguation
-NOTE(while_parsing_as_left_angle_bracket,NoneType,
+NOTE(while_parsing_as_left_angle_bracket,none,
      "while parsing this '<' as a type parameter bracket", ())
 
 // Generic determinism-forcing override.
-REMARK(remark_max_determinism_overriding,NoneType,
-         "POLARPHPC_MAXIMUM_DETERMINISM overriding %0", (StringRef))
+REMARK(remark_max_determinism_overriding,none,
+         "SWIFTC_MAXIMUM_DETERMINISM overriding %0", (StringRef))
 
 // FIXME: This is used both as a parse error (a literal "super" outside a
 // method) and a type-checker error ("super" in a method of a non-class type).
-ERROR(super_not_in_class_method,NoneType,
+ERROR(super_not_in_class_method,none,
       "'super' cannot be used outside of class members", ())
 
-ERROR(class_func_not_in_class,NoneType,
+ERROR(class_func_not_in_class,none,
       "class methods are only allowed within classes; "
       "use 'static' to declare a %select{static|requirement fulfilled by either a static or class}0 method", (bool))
-ERROR(class_var_not_in_class,NoneType,
+ERROR(class_var_not_in_class,none,
       "class properties are only allowed within classes; "
       "use 'static' to declare a %select{static|requirement fulfilled by either a static or class}0 property", (bool))
-ERROR(class_subscript_not_in_class,NoneType,
+ERROR(class_subscript_not_in_class,none,
       "class subscripts are only allowed within classes; "
       "use 'static' to declare a %select{static|requirement fulfilled by either a static or class}0 subscript", (bool))
 
@@ -106,71 +96,71 @@ ERROR(class_subscript_not_in_class,NoneType,
 ERROR(func_decl_without_brace,PointsToFirstBadToken,
       "expected '{' in body of function declaration", ())
 
-NOTE(convert_let_to_var,NoneType,
+NOTE(convert_let_to_var,none,
      "change 'let' to 'var' to make it mutable", ())
 
-NOTE(note_typo_candidate,NoneType,
+NOTE(note_typo_candidate,none,
      "did you mean '%0'?", (StringRef))
 
-NOTE(profile_read_error,NoneType,
+NOTE(profile_read_error,none,
      "failed to load profile data '%0': '%1'", (StringRef, StringRef))
 
-WARNING(protocol_extension_redundant_requirement,NoneType,
+WARNING(protocol_extension_redundant_requirement,none,
       "requirement of '%1' to '%2' is redundant in an extension of '%0'",
       (StringRef, StringRef, StringRef))
 
-ERROR(attr_only_on_parameters, NoneType,
+ERROR(attr_only_on_parameters, none,
       "'%0' may only be used on parameters", (StringRef))
 
-ERROR(function_type_no_parens,NoneType,
+ERROR(function_type_no_parens,none,
       "single argument function types require parentheses", ())
 
 // Used by -verify-generic-signatures
-ERROR(generic_signature_not_minimal,NoneType,
+ERROR(generic_signature_not_minimal,none,
       "generic requirement '%0' is redundant in %1", (StringRef, StringRef))
-ERROR(generic_signature_not_valid,NoneType,
+ERROR(generic_signature_not_valid,none,
       "generic signature %0 is invalid", (StringRef))
-ERROR(generic_signature_not_equal,NoneType,
+ERROR(generic_signature_not_equal,none,
       "generic signature %0 is not equal to new signature %1",
       (StringRef, StringRef))
 
-// FIXME: Used by polarphp-api-digester. Don't want to set up a separate diagnostics
+// FIXME: Used by swift-api-digester. Don't want to set up a separate diagnostics
 // file just for a few errors.
-ERROR(sdk_node_unrecognized_key,NoneType,
+ERROR(sdk_node_unrecognized_key,none,
       "unrecognized key '%0' in SDK node", (StringRef))
-ERROR(sdk_node_unrecognized_node_kind,NoneType,
+ERROR(sdk_node_unrecognized_node_kind,none,
       "unrecognized SDK node kind '%0'", (StringRef))
-ERROR(sdk_node_unrecognized_type_attr_kind,NoneType,
+ERROR(sdk_node_unrecognized_type_attr_kind,none,
       "unrecognized type attribute '%0' in SDK node", (StringRef))
-ERROR(sdk_node_unrecognized_decl_attr_kind,NoneType,
+ERROR(sdk_node_unrecognized_decl_attr_kind,none,
       "unrecognized declaration attribute '%0' in SDK node", (StringRef))
-ERROR(sdk_node_unrecognized_decl_kind,NoneType,
+ERROR(sdk_node_unrecognized_decl_kind,none,
       "unrecognized declaration kind '%0' in SDK node", (StringRef))
-ERROR(sdk_node_unrecognized_accessor_kind,NoneType,
+ERROR(sdk_node_unrecognized_accessor_kind,none,
       "unrecognized accessor kind '%0' in SDK node", (StringRef))
 
 //------------------------------------------------------------------------------
 // MARK: Circular reference diagnostics
 //------------------------------------------------------------------------------
-ERROR(circular_reference, NoneType,
+ERROR(circular_reference, none,
       "circular reference", ())
 
-NOTE(circular_reference_through, NoneType,
+NOTE(circular_reference_through, none,
      "through reference here", ())
 
-ERROR(circular_class_inheritance,NoneType,
+ERROR(circular_class_inheritance,none,
       "%0 inherits from itself", (Identifier))
 
-ERROR(circular_enum_inheritance,NoneType,
+ERROR(circular_enum_inheritance,none,
       "%0 has a raw type that depends on itself", (Identifier))
 
-ERROR(circular_protocol_def,NoneType,
+ERROR(circular_protocol_def,none,
       "protocol %0 refines itself", (Identifier))
 
-NOTE(kind_declname_declared_here,NoneType,
+NOTE(kind_declname_declared_here,none,
      "%0 %1 declared here", (DescriptiveDeclKind, DeclName))
 
-WARNING(warn_property_wrapper_module_scope,NoneType,
+WARNING(warn_property_wrapper_module_scope,none,
         "ignoring associated type %0 in favor of module-scoped property "
         "wrapper %0; please qualify the reference with %1",
         (DeclName, Identifier))

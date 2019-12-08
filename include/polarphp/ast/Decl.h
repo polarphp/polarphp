@@ -9,16 +9,6 @@
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
 //===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
-//
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/12/05.
 //
 // This file defines the Decl class and subclasses.
 //
@@ -44,17 +34,25 @@
 #include "polarphp/ast/Types.h"
 #include "polarphp/ast/Witness.h"
 #include "polarphp/basic/ArrayRefView.h"
+#include "polarphp/basic/Debug.h"
 #include "polarphp/basic/InlineBitfield.h"
 #include "polarphp/basic/NullablePtr.h"
 #include "polarphp/basic/OptionalEnum.h"
 #include "polarphp/basic/Range.h"
-#include "polarphp/global/CompilerFeature.h"
 #include "llvm/ADT/DenseMap.h"
 #include "llvm/ADT/DenseSet.h"
 #include "llvm/Support/TrailingObjects.h"
 #include <type_traits>
 
 namespace polar::ast {
+
+using polar::basic::count_bits_used;
+using polar::basic::bitmax;
+using llvm::cast_or_null;
+using polar::basic::range;
+using polar::basic::OptionalEnum;
+using polar::basic::DowncastFilterRange;
+using polar::basic::NullablePtr;
 
 enum class AccessSemantics : unsigned char;
 class AccessorDecl;
@@ -104,14 +102,6 @@ class ValueDecl;
 class VarDecl;
 class OpaqueReturnTypeRepr;
 
-using polar::basic::count_bits_used;
-using polar::basic::bitmax;
-using polar::basic::range;
-using polar::basic::OptionalEnum;
-using polar::basic::DowncastFilterRange;
-using polar::basic::NullablePtr;
-using llvm::cast_or_null;
-
 namespace ast_scope {
 class AbstractPatternEntryScope;
 class PatternEntryDeclScope;
@@ -122,11 +112,11 @@ enum class DeclKind : uint8_t {
 #define DECL(Id, Parent) Id,
 #define LAST_DECL(Id) Last_Decl = Id,
 #define DECL_RANGE(Id, FirstId, LastId) \
-   First_##Id##Decl = FirstId, Last_##Id##Decl = LastId,
+  First_##Id##Decl = FirstId, Last_##Id##Decl = LastId,
 #include "polarphp/ast/DeclNodesDef.h"
 };
 enum : unsigned { NumDeclKindBits =
-                  count_bits_used(static_cast<unsigned>(DeclKind::Last_Decl)) };
+   count_bits_used(static_cast<unsigned>(DeclKind::Last_Decl)) };
 
 
 /// Fine-grained declaration kind that provides a description of the
@@ -205,11 +195,11 @@ enum class StaticSpellingKind : uint8_t {
 /// Keeps track of whether an enum has cases that have associated values.
 enum class AssociatedValueCheck {
    /// We have not yet checked.
-   Unchecked,
+      Unchecked,
    /// The enum contains no cases or all cases contain no associated values.
-   NoAssociatedValues,
+      NoAssociatedValues,
    /// The enum contains at least one case with associated values.
-   HasAssociatedValues,
+      HasAssociatedValues,
 };
 
 /// Diagnostic printing of \c StaticSpellingKind.
@@ -246,7 +236,7 @@ struct OverloadSignature {
    /// Whether this is a type alias.
    unsigned IsTypeAlias : 1;
 
-   /// Whether this signature is part of a protocol extension.
+   /// Whether this signature is part of a Interface extension.
    unsigned InInterfaceExtension : 1;
 
    /// Whether this signature is of a member defined in an extension of a generic
@@ -266,8 +256,8 @@ struct OverloadSignature {
 ///
 /// \param sig1 The overload signature of the first declaration.
 /// \param sig2 The overload signature of the second declaration.
-/// \param skipInterfaceExtensionCheck If \c true, members of protocol extensions
-///        will be allowed to conflict with members of protocol declarations.
+/// \param skipInterfaceExtensionCheck If \c true, members of Interface extensions
+///        will be allowed to conflict with members of Interface declarations.
 bool conflicting(const OverloadSignature& sig1, const OverloadSignature& sig2,
                  bool skipInterfaceExtensionCheck = false);
 
@@ -281,8 +271,8 @@ bool conflicting(const OverloadSignature& sig1, const OverloadSignature& sig2,
 /// \param wouldConflictInSwift5 If non-null, the referenced boolean will be set
 ///        to \c true iff the function returns \c false for this version of
 ///        Swift, but the given overloads will conflict in Swift 5 mode.
-/// \param skipInterfaceExtensionCheck If \c true, members of protocol extensions
-///        will be allowed to conflict with members of protocol declarations.
+/// \param skipInterfaceExtensionCheck If \c true, members of Interface extensions
+///        will be allowed to conflict with members of Interface declarations.
 bool conflicting(AstContext &ctx,
                  const OverloadSignature& sig1, CanType sig1Type,
                  const OverloadSignature& sig2, CanType sig2Type,
@@ -291,363 +281,363 @@ bool conflicting(AstContext &ctx,
 
 /// Decl - Base class for all declarations in Swift.
 class alignas(1 << DeclAlignInBits) Decl {
-   protected:
+protected:
    union { uint64_t OpaqueBits;
 
-           POLAR_INLINE_BITFIELD_BASE(Decl, bitmax(NumDeclKindBits,8)+1+1+1+1+1,
-                                      Kind : bitmax(NumDeclKindBits,8),
-
-                                      /// Whether this declaration is invalid.
-                                      Invalid : 1,
-
-                                      /// Whether this declaration was implicitly created, e.g.,
-                                      /// an implicit constructor in a struct.
-                                      Implicit : 1,
+      POLAR_INLINE_BITFIELD_BASE(Decl, bitmax(NumDeclKindBits,8)+1+1+1+1+1,
+      Kind : bitmax(NumDeclKindBits,8),
+
+      /// Whether this declaration is invalid.
+         Invalid : 1,
+
+      /// Whether this declaration was implicitly created, e.g.,
+      /// an implicit constructor in a struct.
+         Implicit : 1,
 
-                                      /// Whether this declaration was mapped directly from a Clang AST.
-                                      ///
-                                      /// Use getClangNode() to retrieve the corresponding Clang AST.
-                                      FromClang : 1,
+      /// Whether this declaration was mapped directly from a Clang AST.
+      ///
+      /// Use getClangNode() to retrieve the corresponding Clang AST.
+         FromClang : 1,
 
-                                      /// Whether this declaration was added to the surrounding
-                                      /// DeclContext of an active #if config clause.
-                                      EscapedFromIfConfig : 1
-                                      );
+      /// Whether this declaration was added to the surrounding
+      /// DeclContext of an active #if config clause.
+         EscapedFromIfConfig : 1
+      );
 
-                POLAR_INLINE_BITFIELD_FULL(PatternBindingDecl, Decl, 1+2+16,
-                                           /// Whether this pattern binding declares static variables.
-                                           IsStatic : 1,
+      POLAR_INLINE_BITFIELD_FULL(PatternBindingDecl, Decl, 1+2+16,
+      /// Whether this pattern binding declares static variables.
+      IsStatic : 1,
 
-                                           /// Whether 'static' or 'class' was used.
-                                           StaticSpelling : 2,
+      /// Whether 'static' or 'class' was used.
+         StaticSpelling : 2,
 
-                                           : NumPadBits,
+         : NumPadBits,
 
-                                           /// The number of pattern binding declarations.
-                                           NumPatternEntries : 16
-                                           );
+      /// The number of pattern binding declarations.
+         NumPatternEntries : 16
+      );
 
-                     POLAR_INLINE_BITFIELD_FULL(EnumCaseDecl, Decl, 32,
-                                                : NumPadBits,
+      POLAR_INLINE_BITFIELD_FULL(EnumCaseDecl, Decl, 32,
+      : NumPadBits,
 
-                                                /// The number of tail-allocated element pointers.
-                                                NumElements : 32
-                                                );
+      /// The number of tail-allocated element pointers.
+      NumElements : 32
+      );
 
-                          POLAR_INLINE_BITFIELD(ValueDecl, Decl, 1+1+1,
-                                                AlreadyInLookupTable : 1,
+      POLAR_INLINE_BITFIELD(ValueDecl, Decl, 1+1+1,
+      AlreadyInLookupTable : 1,
 
-                                                /// Whether we have already checked whether this declaration is a
-                                                /// redeclaration.
-                                                CheckedRedeclaration : 1,
+      /// Whether we have already checked whether this declaration is a
+      /// redeclaration.
+         CheckedRedeclaration : 1,
 
-                                                /// Whether the decl can be accessed by swift users; for instance,
-                                                /// a.storage for lazy var a is a decl that cannot be accessed.
-                                                IsUserAccessible : 1
-                                                );
+      /// Whether the decl can be accessed by swift users; for instance,
+      /// a.storage for lazy var a is a decl that cannot be accessed.
+         IsUserAccessible : 1
+      );
 
-                               POLAR_INLINE_BITFIELD(AbstractStorageDecl, ValueDecl, 1,
-                                                     /// Whether this property is a type property (currently unfortunately
-                                                     /// called 'static').
-                                                     IsStatic : 1
-                                                     );
+      POLAR_INLINE_BITFIELD(AbstractStorageDecl, ValueDecl, 1,
+      /// Whether this property is a type property (currently unfortunately
+      /// called 'static').
+      IsStatic : 1
+      );
 
-                                    POLAR_INLINE_BITFIELD(VarDecl, AbstractStorageDecl, 1+1+1+1+1+1,
-                                                          /// Encodes whether this is a 'let' binding.
-                                                          Introducer : 1,
+      POLAR_INLINE_BITFIELD(VarDecl, AbstractStorageDecl, 1+1+1+1+1+1,
+      /// Encodes whether this is a 'let' binding.
+      Introducer : 1,
 
-                                                          /// Whether this declaration was an element of a capture list.
-                                                          IsCaptureList : 1,
+      /// Whether this declaration was an element of a capture list.
+         IsCaptureList : 1,
 
-                                                          /// Whether this vardecl has an initial value bound to it in a way
-                                                          /// that isn't represented in the AST with an initializer in the pattern
-                                                          /// binding.  This happens in cases like "for i in ...", switch cases, etc.
-                                                          HasNonPatternBindingInit : 1,
-
-                                                          /// Whether this is a property used in expressions in the debugger.
-                                                          /// It is up to the debugger to instruct SIL how to access this variable.
-                                                          IsDebuggerVar : 1,
-
-                                                          /// Whether this is the backing storage for a lazy property.
-                                                          IsLazyStorageProperty : 1,
+      /// Whether this vardecl has an initial value bound to it in a way
+      /// that isn't represented in the AST with an initializer in the pattern
+      /// binding.  This happens in cases like "for i in ...", switch cases, etc.
+         HasNonPatternBindingInit : 1,
+
+      /// Whether this is a property used in expressions in the debugger.
+      /// It is up to the debugger to instruct SIL how to access this variable.
+         IsDebuggerVar : 1,
+
+      /// Whether this is the backing storage for a lazy property.
+         IsLazyStorageProperty : 1,
 
-                                                          /// Whether this is the backing storage for a property wrapper.
-                                                          IsPropertyWrapperBackingProperty : 1
-                                                          );
+      /// Whether this is the backing storage for a property wrapper.
+         IsPropertyWrapperBackingProperty : 1
+      );
 
-                                         POLAR_INLINE_BITFIELD(ParamDecl, VarDecl, 1+2+NumDefaultArgumentKindBits,
-                                                               /// Whether we've computed the specifier yet.
-                                                               SpecifierComputed : 1,
+      POLAR_INLINE_BITFIELD(ParamDecl, VarDecl, 1+2+NumDefaultArgumentKindBits,
+      /// Whether we've computed the specifier yet.
+      SpecifierComputed : 1,
 
-                                                               /// The specifier associated with this parameter.  This determines
-                                                               /// the storage semantics of the value e.g. mutability.
-                                                               Specifier : 2,
+      /// The specifier associated with this parameter.  This determines
+      /// the storage semantics of the value e.g. mutability.
+         Specifier : 2,
 
-                                                               /// Information about a symbolic default argument, like #file.
-                                                               defaultArgumentKind : NumDefaultArgumentKindBits
-                                                               );
+      /// Information about a symbolic default argument, like #file.
+         defaultArgumentKind : NumDefaultArgumentKindBits
+      );
 
-                                              POLAR_INLINE_BITFIELD(SubscriptDecl, VarDecl, 2,
-                                                                    StaticSpelling : 2
-                                                                    );
-                                                   POLAR_INLINE_BITFIELD(AbstractFunctionDecl, ValueDecl, 3+8+1+1+1+1+1+1,
-                                                                         /// \see AbstractFunctionDecl::BodyKind
-                                                                         BodyKind : 3,
+      POLAR_INLINE_BITFIELD(SubscriptDecl, VarDecl, 2,
+      StaticSpelling : 2
+      );
+      POLAR_INLINE_BITFIELD(AbstractFunctionDecl, ValueDecl, 3+8+1+1+1+1+1+1,
+      /// \see AbstractFunctionDecl::BodyKind
+      BodyKind : 3,
 
-                                                                         /// Import as member status.
-                                                                         IAMStatus : 8,
-
-                                                                         /// Whether the function has an implicit 'self' parameter.
-                                                                         HasImplicitSelfDecl : 1,
-
-                                                                         /// Whether we are overridden later.
-                                                                         Overridden : 1,
+      /// Import as member status.
+         IAMStatus : 8,
+
+      /// Whether the function has an implicit 'self' parameter.
+         HasImplicitSelfDecl : 1,
+
+      /// Whether we are overridden later.
+         Overridden : 1,
 
-                                                                         /// Whether the function body throws.
-                                                                         Throws : 1,
+      /// Whether the function body throws.
+         Throws : 1,
 
-                                                                         /// Whether this member was synthesized as part of a derived
-                                                                         /// protocol conformance.
-                                                                         Synthesized : 1,
+      /// Whether this member was synthesized as part of a derived
+      /// Interface conformance.
+         Synthesized : 1,
 
-                                                                         /// Whether this member's body consists of a single expression.
-                                                                         HasSingleExpressionBody : 1
-                                                                         );
+      /// Whether this member's body consists of a single expression.
+         HasSingleExpressionBody : 1
+      );
 
-                                                        POLAR_INLINE_BITFIELD(FuncDecl, AbstractFunctionDecl, 1+1+2+1+1+2,
-                                                                              /// Whether we've computed the 'static' flag yet.
-                                                                              IsStaticComputed : 1,
+      POLAR_INLINE_BITFIELD(FuncDecl, AbstractFunctionDecl, 1+1+2+1+1+2,
+      /// Whether we've computed the 'static' flag yet.
+      IsStaticComputed : 1,
 
-                                                                              /// Whether this function is a 'static' method.
-                                                                              IsStatic : 1,
+      /// Whether this function is a 'static' method.
+         IsStatic : 1,
 
-                                                                              /// Whether 'static' or 'class' was used.
-                                                                              StaticSpelling : 2,
+      /// Whether 'static' or 'class' was used.
+         StaticSpelling : 2,
 
-                                                                              /// Whether we are statically dispatched even if overridable
-                                                                              ForcedStaticDispatch : 1,
+      /// Whether we are statically dispatched even if overridable
+         ForcedStaticDispatch : 1,
 
-                                                                              /// Whether we've computed the 'self' access kind yet.
-                                                                              SelfAccessComputed : 1,
+      /// Whether we've computed the 'self' access kind yet.
+         SelfAccessComputed : 1,
 
-                                                                              /// Backing bits for 'self' access kind.
-                                                                              SelfAccess : 2
-                                                                              );
+      /// Backing bits for 'self' access kind.
+         SelfAccess : 2
+      );
 
-                                                             POLAR_INLINE_BITFIELD(AccessorDecl, FuncDecl, 4+1+1,
-                                                                                   /// The kind of accessor this is.
-                                                                                   AccessorKind : 4,
+      POLAR_INLINE_BITFIELD(AccessorDecl, FuncDecl, 4+1+1,
+      /// The kind of accessor this is.
+      AccessorKind : 4,
 
-                                                                                   /// Whether the accessor is transparent.
-                                                                                   IsTransparent : 1,
+      /// Whether the accessor is transparent.
+         IsTransparent : 1,
 
-                                                                                   /// Whether we have computed the above.
-                                                                                   IsTransparentComputed : 1
-                                                                                   );
+      /// Whether we have computed the above.
+         IsTransparentComputed : 1
+      );
 
-                                                                  POLAR_INLINE_BITFIELD(ConstructorDecl, AbstractFunctionDecl, 3+1+1,
-                                                                                        /// The body initialization kind (+1), or zero if not yet computed.
-                                                                                        ///
-                                                                                        /// This value is cached but is not serialized, because it is a property
-                                                                                        /// of the definition of the constructor that is useful only to semantic
-                                                                                        /// analysis and SIL generation.
-                                                                                        ComputedBodyInitKind : 3,
+      POLAR_INLINE_BITFIELD(ConstructorDecl, AbstractFunctionDecl, 3+1+1,
+      /// The body initialization kind (+1), or zero if not yet computed.
+      ///
+      /// This value is cached but is not serialized, because it is a property
+      /// of the definition of the constructor that is useful only to semantic
+      /// analysis and SIL generation.
+      ComputedBodyInitKind : 3,
 
-                                                                                        /// Whether this constructor can fail, by building an Optional type.
-                                                                                        Failable : 1,
+      /// Whether this constructor can fail, by building an Optional type.
+         Failable : 1,
 
-                                                                                        /// Whether this initializer is a stub placed into a subclass to
-                                                                                        /// catch invalid delegations to a designated initializer not
-                                                                                        /// overridden by the subclass. A stub will always trap at runtime.
-                                                                                        ///
-                                                                                        /// Initializer stubs can be invoked from Objective-C or through
-                                                                                        /// the Objective-C runtime; there is no way to directly express
-                                                                                        /// an object construction that will invoke a stub.
-                                                                                        HasStubImplementation : 1
-                                                                                        );
+      /// Whether this initializer is a stub placed into a subclass to
+      /// catch invalid delegations to a designated initializer not
+      /// overridden by the subclass. A stub will always trap at runtime.
+      ///
+      /// Initializer stubs can be invoked from Objective-C or through
+      /// the Objective-C runtime; there is no way to directly express
+      /// an object construction that will invoke a stub.
+         HasStubImplementation : 1
+      );
 
-                                                                       POLAR_INLINE_BITFIELD_EMPTY(TypeDecl, ValueDecl);
-                                                                            POLAR_INLINE_BITFIELD_EMPTY(AbstractTypeParamDecl, TypeDecl);
+      POLAR_INLINE_BITFIELD_EMPTY(TypeDecl, ValueDecl);
+      POLAR_INLINE_BITFIELD_EMPTY(AbstractTypeParamDecl, TypeDecl);
 
-                                                                                 POLAR_INLINE_BITFIELD_FULL(GenericTypeParamDecl, AbstractTypeParamDecl, 16+16,
-                                                                                                            : NumPadBits,
+      POLAR_INLINE_BITFIELD_FULL(GenericTypeParamDecl, AbstractTypeParamDecl, 16+16,
+      : NumPadBits,
 
-                                                                                                            Depth : 16,
-                                                                                                            Index : 16
-                                                                                                            );
+      Depth : 16,
+         Index : 16
+      );
 
-                                                                                      POLAR_INLINE_BITFIELD_EMPTY(GenericTypeDecl, TypeDecl);
+      POLAR_INLINE_BITFIELD_EMPTY(GenericTypeDecl, TypeDecl);
 
-                                                                                           POLAR_INLINE_BITFIELD(TypeAliasDecl, GenericTypeDecl, 1+1,
-                                                                                                                 /// Whether the typealias forwards perfectly to its underlying type.
-                                                                                                                 IsCompatibilityAlias : 1,
-                                                                                                                 /// Whether this was a global typealias synthesized by the debugger.
-                                                                                                                 IsDebuggerAlias : 1
-                                                                                                                 );
+      POLAR_INLINE_BITFIELD(TypeAliasDecl, GenericTypeDecl, 1+1,
+      /// Whether the typealias forwards perfectly to its underlying type.
+      IsCompatibilityAlias : 1,
+      /// Whether this was a global typealias synthesized by the debugger.
+         IsDebuggerAlias : 1
+      );
 
-                                                                                                POLAR_INLINE_BITFIELD(NominalTypeDecl, GenericTypeDecl, 1+1+1,
-                                                                                                                      /// Whether we have already added implicitly-defined initializers
-                                                                                                                      /// to this declaration.
-                                                                                                                      AddedImplicitInitializers : 1,
+      POLAR_INLINE_BITFIELD(NominalTypeDecl, GenericTypeDecl, 1+1+1,
+      /// Whether we have already added implicitly-defined initializers
+      /// to this declaration.
+      AddedImplicitInitializers : 1,
 
-                                                                                                                      /// Whether there is are lazily-loaded conformances for this nominal type.
-                                                                                                                      HasLazyConformances : 1,
+      /// Whether there is are lazily-loaded conformances for this nominal type.
+         HasLazyConformances : 1,
 
-                                                                                                                      /// Whether this nominal type is having its semantic members resolved.
-                                                                                                                      IsComputingSemanticMembers : 1
-                                                                                                                      );
+      /// Whether this nominal type is having its semantic members resolved.
+         IsComputingSemanticMembers : 1
+      );
 
-                                                                                                     POLAR_INLINE_BITFIELD_FULL(InterfaceDecl, NominalTypeDecl, 1+1+1+1+1+1+1+1+1+8+16,
-                                                                                                                                /// Whether the \c RequiresClass bit is valid.
-                                                                                                                                RequiresClassValid : 1,
+      POLAR_INLINE_BITFIELD_FULL(InterfaceDecl, NominalTypeDecl, 1+1+1+1+1+1+1+1+1+8+16,
+      /// Whether the \c RequiresClass bit is valid.
+      RequiresClassValid : 1,
 
-                                                                                                                                /// Whether this is a class-bounded protocol.
-                                                                                                                                RequiresClass : 1,
+      /// Whether this is a class-bounded Interface.
+         RequiresClass : 1,
 
-                                                                                                                                /// Whether the \c ExistentialConformsToSelf bit is valid.
-                                                                                                                                ExistentialConformsToSelfValid : 1,
+      /// Whether the \c ExistentialConformsToSelf bit is valid.
+         ExistentialConformsToSelfValid : 1,
 
-                                                                                                                                /// Whether the existential of this protocol conforms to itself.
-                                                                                                                                ExistentialConformsToSelf : 1,
+      /// Whether the existential of this Interface conforms to itself.
+         ExistentialConformsToSelf : 1,
 
-                                                                                                                                /// Whether the \c ExistentialTypeSupported bit is valid.
-                                                                                                                                ExistentialTypeSupportedValid : 1,
+      /// Whether the \c ExistentialTypeSupported bit is valid.
+         ExistentialTypeSupportedValid : 1,
 
-                                                                                                                                /// Whether the existential of this protocol can be represented.
-                                                                                                                                ExistentialTypeSupported : 1,
+      /// Whether the existential of this Interface can be represented.
+         ExistentialTypeSupported : 1,
 
-                                                                                                                                /// True if the protocol has requirements that cannot be satisfied (e.g.
-                                                                                                                                /// because they could not be imported from Objective-C).
-                                                                                                                                HasMissingRequirements : 1,
+      /// True if the Interface has requirements that cannot be satisfied (e.g.
+      /// because they could not be imported from Objective-C).
+         HasMissingRequirements : 1,
 
-                                                                                                                                /// Whether we've computed the inherited protocols list yet.
-                                                                                                                                InheritedInterfacesValid : 1,
+      /// Whether we've computed the inherited Interfaces list yet.
+         InheritedInterfacesValid : 1,
 
-                                                                                                                                /// Whether we have a lazy-loaded requirement signature.
-                                                                                                                                HasLazyRequirementSignature : 1,
+      /// Whether we have a lazy-loaded requirement signature.
+         HasLazyRequirementSignature : 1,
 
-                                                                                                                                : NumPadBits,
+         : NumPadBits,
 
-                                                                                                                                /// If this is a compiler-known protocol, this will be a KnownInterfaceKind
-                                                                                                                                /// value, plus one. Otherwise, it will be 0.
-                                                                                                                                KnownInterface : 8, // '8' for speed. This only needs 6.
+      /// If this is a compiler-known Interface, this will be a KnownInterfaceKind
+      /// value, plus one. Otherwise, it will be 0.
+         KnownInterface : 8, // '8' for speed. This only needs 6.
 
-                                                                                                                                /// The number of requirements in the requirement signature.
-                                                                                                                                NumRequirementsInSignature : 16
-                                                                                                                                );
+      /// The number of requirements in the requirement signature.
+         NumRequirementsInSignature : 16
+      );
 
-                                                                                                          POLAR_INLINE_BITFIELD(ClassDecl, NominalTypeDecl, 1+1+2+1+1+1+1+1+1,
-                                                                                                                                /// Whether this class inherits its superclass's convenience initializers.
-                                                                                                                                InheritsSuperclassInits : 1,
-                                                                                                                                ComputedInheritsSuperclassInits : 1,
+      POLAR_INLINE_BITFIELD(ClassDecl, NominalTypeDecl, 1+1+2+1+1+1+1+1+1,
+      /// Whether this class inherits its superclass's convenience initializers.
+      InheritsSuperclassInits : 1,
+         ComputedInheritsSuperclassInits : 1,
 
-                                                                                                                                /// \see ClassDecl::ForeignKind
-                                                                                                                                RawForeignKind : 2,
+      /// \see ClassDecl::ForeignKind
+         RawForeignKind : 2,
 
-                                                                                                                                /// \see ClassDecl::getEmittedMembers()
-                                                                                                                                HasForcedEmittedMembers : 1,
+      /// \see ClassDecl::getEmittedMembers()
+         HasForcedEmittedMembers : 1,
 
-                                                                                                                                HasMissingDesignatedInitializers : 1,
-                                                                                                                                ComputedHasMissingDesignatedInitializers : 1,
+         HasMissingDesignatedInitializers : 1,
+         ComputedHasMissingDesignatedInitializers : 1,
 
-                                                                                                                                HasMissingVTableEntries : 1,
-                                                                                                                                ComputedHasMissingVTableEntries : 1,
+         HasMissingVTableEntries : 1,
+         ComputedHasMissingVTableEntries : 1,
 
-                                                                                                                                /// Whether instances of this class are incompatible
-                                                                                                                                /// with weak and unowned references.
-                                                                                                                                IsIncompatibleWithWeakReferences : 1
-                                                                                                                                );
+      /// Whether instances of this class are incompatible
+      /// with weak and unowned references.
+         IsIncompatibleWithWeakReferences : 1
+      );
 
-                                                                                                               POLAR_INLINE_BITFIELD(StructDecl, NominalTypeDecl, 1,
-                                                                                                                                     /// True if this struct has storage for fields that aren't accessible in
-                                                                                                                                     /// Swift.
-                                                                                                                                     HasUnreferenceableStorage : 1
-                                                                                                                                     );
+      POLAR_INLINE_BITFIELD(StructDecl, NominalTypeDecl, 1,
+      /// True if this struct has storage for fields that aren't accessible in
+      /// Swift.
+      HasUnreferenceableStorage : 1
+      );
 
-                                                                                                                    POLAR_INLINE_BITFIELD(EnumDecl, NominalTypeDecl, 2+1,
-                                                                                                                                          /// True if the enum has cases and at least one case has associated values.
-                                                                                                                                          HasAssociatedValues : 2,
-                                                                                                                                          /// True if the enum has at least one case that has some availability
-                                                                                                                                          /// attribute.  A single bit because it's lazily computed along with the
-                                                                                                                                          /// HasAssociatedValues bit.
-                                                                                                                                          HasAnyUnavailableValues : 1
-                                                                                                                                          );
+      POLAR_INLINE_BITFIELD(EnumDecl, NominalTypeDecl, 2+1,
+      /// True if the enum has cases and at least one case has associated values.
+      HasAssociatedValues : 2,
+      /// True if the enum has at least one case that has some availability
+      /// attribute.  A single bit because it's lazily computed along with the
+      /// HasAssociatedValues bit.
+         HasAnyUnavailableValues : 1
+      );
 
-                                                                                                                         POLAR_INLINE_BITFIELD(ModuleDecl, TypeDecl, 1+1+1+1+1+1+1+1,
-                                                                                                                                               /// If the module was or is being compiled with `-enable-testing`.
-                                                                                                                                               TestingEnabled : 1,
+      POLAR_INLINE_BITFIELD(ModuleDecl, TypeDecl, 1+1+1+1+1+1+1+1,
+      /// If the module was or is being compiled with `-enable-testing`.
+      TestingEnabled : 1,
 
-                                                                                                                                               /// If the module failed to load
-                                                                                                                                               FailedToLoad : 1,
+      /// If the module failed to load
+         FailedToLoad : 1,
 
-                                                                                                                                               /// Whether the module is resilient.
-                                                                                                                                               ///
-                                                                                                                                               /// \sa ResilienceStrategy
-                                                                                                                                               RawResilienceStrategy : 1,
+      /// Whether the module is resilient.
+      ///
+      /// \sa ResilienceStrategy
+         RawResilienceStrategy : 1,
 
-                                                                                                                                               /// Whether all imports have been resolved. Used to detect circular imports.
-                                                                                                                                               HasResolvedImports : 1,
+      /// Whether all imports have been resolved. Used to detect circular imports.
+         HasResolvedImports : 1,
 
-                                                                                                                                               /// If the module was or is being compiled with `-enable-private-imports`.
-                                                                                                                                               PrivateImportsEnabled : 1,
+      /// If the module was or is being compiled with `-enable-private-imports`.
+         PrivateImportsEnabled : 1,
 
-                                                                                                                                               /// If the module is compiled with `-enable-implicit-dynamic`.
-                                                                                                                                               ImplicitDynamicEnabled : 1,
+      /// If the module is compiled with `-enable-implicit-dynamic`.
+         ImplicitDynamicEnabled : 1,
 
-                                                                                                                                               /// Whether the module is a system module.
-                                                                                                                                               IsSystemModule : 1,
+      /// Whether the module is a system module.
+         IsSystemModule : 1,
 
-                                                                                                                                               /// Whether the module was imported from Clang (or, someday, maybe another
-                                                                                                                                               /// language).
-                                                                                                                                               IsNonSwiftModule : 1
-                                                                                                                                               );
+      /// Whether the module was imported from Clang (or, someday, maybe another
+      /// language).
+         IsNonSwiftModule : 1
+      );
 
-                                                                                                                              POLAR_INLINE_BITFIELD(PrecedenceGroupDecl, Decl, 1+2,
-                                                                                                                                                    /// Is this an assignment operator?
-                                                                                                                                                    IsAssignment : 1,
+      POLAR_INLINE_BITFIELD(PrecedenceGroupDecl, Decl, 1+2,
+      /// Is this an assignment operator?
+      IsAssignment : 1,
 
-                                                                                                                                                    /// The group's associativity.  A value of the Associativity enum.
-                                                                                                                                                    Associativity : 2
-                                                                                                                                                    );
+      /// The group's associativity.  A value of the Associativity enum.
+         Associativity : 2
+      );
 
-                                                                                                                                   POLAR_INLINE_BITFIELD(ImportDecl, Decl, 3+8,
-                                                                                                                                                         ImportKind : 3,
+      POLAR_INLINE_BITFIELD(ImportDecl, Decl, 3+8,
+      ImportKind : 3,
 
-                                                                                                                                                         /// The number of elements in this path.
-                                                                                                                                                         NumPathElements : 8
-                                                                                                                                                         );
+      /// The number of elements in this path.
+         NumPathElements : 8
+      );
 
-                                                                                                                                        POLAR_INLINE_BITFIELD(ExtensionDecl, Decl, 3+1,
-                                                                                                                                                              /// An encoding of the default and maximum access level for this extension.
-                                                                                                                                                              ///
-                                                                                                                                                              /// This is encoded as (1 << (maxAccess-1)) | (1 << (defaultAccess-1)),
-                                                                                                                                                              /// which works because the maximum is always greater than or equal to the
-                                                                                                                                                              /// default, and 'private' is never used. 0 represents an uncomputed value.
-                                                                                                                                                              DefaultAndMaxAccessLevel : 3,
+      POLAR_INLINE_BITFIELD(ExtensionDecl, Decl, 3+1,
+      /// An encoding of the default and maximum access level for this extension.
+      ///
+      /// This is encoded as (1 << (maxAccess-1)) | (1 << (defaultAccess-1)),
+      /// which works because the maximum is always greater than or equal to the
+      /// default, and 'private' is never used. 0 represents an uncomputed value.
+      DefaultAndMaxAccessLevel : 3,
 
-                                                                                                                                                              /// Whether there is are lazily-loaded conformances for this extension.
-                                                                                                                                                              HasLazyConformances : 1
-                                                                                                                                                              );
+      /// Whether there is are lazily-loaded conformances for this extension.
+         HasLazyConformances : 1
+      );
 
-                                                                                                                                             POLAR_INLINE_BITFIELD(IfConfigDecl, Decl, 1,
-                                                                                                                                                                   /// Whether this decl is missing its closing '#endif'.
-                                                                                                                                                                   HadMissingEnd : 1
-                                                                                                                                                                   );
+      POLAR_INLINE_BITFIELD(IfConfigDecl, Decl, 1,
+      /// Whether this decl is missing its closing '#endif'.
+      HadMissingEnd : 1
+      );
 
-                                                                                                                                                  POLAR_INLINE_BITFIELD(PoundDiagnosticDecl, Decl, 1+1,
-                                                                                                                                                                        /// `true` if the diagnostic is an error, `false` if it's a warning.
-                                                                                                                                                                        IsError : 1,
+      POLAR_INLINE_BITFIELD(PoundDiagnosticDecl, Decl, 1+1,
+      /// `true` if the diagnostic is an error, `false` if it's a warning.
+      IsError : 1,
 
-                                                                                                                                                                        /// Whether this diagnostic has already been emitted.
-                                                                                                                                                                        HasBeenEmitted : 1
-                                                                                                                                                                        );
+      /// Whether this diagnostic has already been emitted.
+         HasBeenEmitted : 1
+      );
 
-                                                                                                                                                       POLAR_INLINE_BITFIELD(MissingMemberDecl, Decl, 1+2,
-                                                                                                                                                                             NumberOfFieldOffsetVectorEntries : 1,
-                                                                                                                                                                             NumberOfVTableEntries : 2
-                                                                                                                                                                             );
+      POLAR_INLINE_BITFIELD(MissingMemberDecl, Decl, 1+2,
+      NumberOfFieldOffsetVectorEntries : 1,
+         NumberOfVTableEntries : 2
+      );
 
-         } Bits;
+   } Bits;
 
    // Storage for the declaration attributes.
    DeclAttributes Attrs;
@@ -660,7 +650,7 @@ class alignas(1 << DeclAlignInBits) Decl {
    friend class IterableDeclContext;
    friend class MemberLookupTable;
 
-   private:
+private:
    llvm::PointerUnion<DeclContext *, AstContext *> Context;
 
    Decl(const Decl&) = delete;
@@ -674,7 +664,7 @@ class alignas(1 << DeclAlignInBits) Decl {
    };
    mutable CachedExternalSourceLocs const *CachedLocs = nullptr;
    const CachedExternalSourceLocs *calculateSerializedLocs() const;
-   protected:
+protected:
 
    Decl(DeclKind kind, llvm::PointerUnion<DeclContext *, AstContext *> context)
       : Context(context) {
@@ -700,7 +690,7 @@ class alignas(1 << DeclAlignInBits) Decl {
 
    DeclContext *getDeclContextForModule() const;
 
-   public:
+public:
    DeclKind getKind() const { return DeclKind(Bits.Decl.Kind); }
 
    /// Retrieve the name of the given declaration kind.
@@ -728,7 +718,7 @@ class alignas(1 << DeclAlignInBits) Decl {
    bool canHaveComment() const;
 
    LLVM_READONLY
-         DeclContext *getDeclContext() const {
+   DeclContext *getDeclContext() const {
       if (auto dc = Context.dyn_cast<DeclContext *>())
          return dc;
 
@@ -743,11 +733,11 @@ class alignas(1 << DeclAlignInBits) Decl {
 
    /// Retrieve the module in which this declaration resides.
    LLVM_READONLY
-         ModuleDecl *getModuleContext() const;
+   ModuleDecl *getModuleContext() const;
 
    /// getAstContext - Return the AstContext that this decl lives in.
    LLVM_READONLY
-         AstContext &getAstContext() const {
+   AstContext &getAstContext() const {
       if (auto dc = Context.dyn_cast<DeclContext *>())
          return dc->getAstContext();
 
@@ -819,7 +809,7 @@ class alignas(1 << DeclAlignInBits) Decl {
    /// Mark this declaration as implicit.
    void setImplicit(bool implicit = true) { Bits.Decl.Implicit = implicit; }
 
-   public:
+public:
    bool escapedFromIfConfig() const {
       return Bits.Decl.EscapedFromIfConfig;
    }
@@ -849,7 +839,7 @@ class alignas(1 << DeclAlignInBits) Decl {
    /// Retrieve the Clang AST node from which this declaration was
    /// synthesized, if any.
    LLVM_READONLY
-         ClangNode getClangNode() const {
+   ClangNode getClangNode() const {
       if (!Bits.Decl.FromClang)
          return ClangNode();
 
@@ -859,7 +849,7 @@ class alignas(1 << DeclAlignInBits) Decl {
    /// Retrieve the Clang declaration from which this declaration was
    /// synthesized, if any.
    LLVM_READONLY
-         const clang::Decl *getClangDecl() const {
+   const clang::Decl *getClangDecl() const {
       if (!Bits.Decl.FromClang)
          return nullptr;
 
@@ -869,7 +859,7 @@ class alignas(1 << DeclAlignInBits) Decl {
    /// Retrieve the Clang macro from which this declaration was
    /// synthesized, if any.
    LLVM_READONLY
-         const clang::MacroInfo *getClangMacro() {
+   const clang::MacroInfo *getClangMacro() {
       if (!Bits.Decl.FromClang)
          return nullptr;
 
@@ -878,7 +868,7 @@ class alignas(1 << DeclAlignInBits) Decl {
 
    /// Return the GenericContext if the Decl has one.
    LLVM_READONLY
-         const GenericContext *getAsGenericContext() const;
+   const GenericContext *getAsGenericContext() const;
 
    bool isPrivateStdlibDecl(bool treatNonBuiltinInterfacesAsPublic = true) const;
 
@@ -922,14 +912,14 @@ class alignas(1 << DeclAlignInBits) Decl {
    /// Emit a diagnostic tied to this declaration.
    template<typename ...ArgTypes>
    InFlightDiagnostic diagnose(
-            Diag<ArgTypes...> ID,
-            typename internal::PassArgument<ArgTypes>::type... Args) const {
+      Diag<ArgTypes...> ID,
+      typename detail::PassArgument<ArgTypes>::type... Args) const {
       return getDiags().diagnose(this, ID, std::move(Args)...);
    }
 
    /// Retrieve the diagnostic engine for diagnostics emission.
    LLVM_READONLY
-         DiagnosticEngine &getDiags() const;
+   DiagnosticEngine &getDiags() const;
 
    // Make vanilla new/delete illegal for Decls.
    void *operator new(size_t Bytes) = delete;
@@ -968,16 +958,16 @@ void *allocateMemoryForDecl(AllocatorTy &allocator, size_t baseSize,
 enum class RequirementReprKind : unsigned {
    /// A type bound T : P, where T is a type that depends on a generic
    /// parameter and P is some type that should bound T, either as a concrete
-   /// supertype or a protocol to which T must conform.
-   TypeConstraint,
+   /// supertype or a Interface to which T must conform.
+      TypeConstraint,
 
    /// A same-type requirement T == U, where T and U are types that shall be
    /// equivalent.
-   SameType,
+      SameType,
 
    /// A layout bound T : L, where T is a type that depends on a generic
    /// parameter and L is some layout specification that should bound T.
-   LayoutConstraint,
+      LayoutConstraint,
 
    // Note: there is code that packs this enum in a 2-bit bitfield.  Audit users
    // when adding enumerators.
@@ -985,7 +975,7 @@ enum class RequirementReprKind : unsigned {
 
 /// A single requirement in a 'where' clause, which places additional
 /// restrictions on the generic parameters or associated types of a generic
-/// function, type, or protocol.
+/// function, type, or Interface.
 ///
 /// This always represents a requirement spelled in the source code.  It is
 /// never generated implicitly.
@@ -1023,11 +1013,11 @@ class RequirementRepr {
 public:
    /// Construct a new type-constraint requirement.
    ///
-   /// \param Subject The type that must conform to the given protocol or
+   /// \param Subject The type that must conform to the given Interface or
    /// composition, or be a subclass of the given class type.
    /// \param ColonLoc The location of the ':', or an invalid location if
    /// this requirement was implied.
-   /// \param Constraint The protocol or protocol composition to which the
+   /// \param Constraint The Interface or Interface composition to which the
    /// subject must conform, or superclass from which the subject must inherit.
    static RequirementRepr getTypeConstraint(TypeLoc Subject,
                                             SourceLoc ColonLoc,
@@ -1059,7 +1049,7 @@ public:
                                               SourceLoc ColonLoc,
                                               LayoutConstraintLoc Layout) {
       return {ColonLoc, RequirementReprKind::LayoutConstraint, Subject,
-               Layout};
+              Layout};
    }
 
    /// Determine the kind of requirement
@@ -1097,7 +1087,7 @@ public:
       return FirstType;
    }
 
-   /// For a type-bound requirement, return the protocol or to which
+   /// For a type-bound requirement, return the Interface or to which
    /// the subject conforms or superclass it inherits.
    Type getConstraint() const {
       assert(getKind() == RequirementReprKind::TypeConstraint);
@@ -1215,7 +1205,7 @@ public:
 /// function or type, along with extra requirements placed on those generic
 /// parameters and types derived from them.
 class GenericParamList final :
-      private llvm::TrailingObjects<GenericParamList, GenericTypeParamDecl *> {
+   private llvm::TrailingObjects<GenericParamList, GenericTypeParamDecl *> {
    friend TrailingObjects;
 
    SourceRange Brackets;
@@ -1382,45 +1372,45 @@ public:
 /// A trailing where clause.
 class alignas(RequirementRepr) TrailingWhereClause final :
    private llvm::TrailingObjects<TrailingWhereClause, RequirementRepr> {
-              friend TrailingObjects;
+   friend TrailingObjects;
 
-SourceLoc WhereLoc;
+   SourceLoc WhereLoc;
 
-/// The number of requirements. The actual requirements are tail-allocated.
-unsigned NumRequirements;
+   /// The number of requirements. The actual requirements are tail-allocated.
+   unsigned NumRequirements;
 
-TrailingWhereClause(SourceLoc whereLoc,
-                    ArrayRef<RequirementRepr> requirements);
+   TrailingWhereClause(SourceLoc whereLoc,
+                       ArrayRef<RequirementRepr> requirements);
 
 public:
-/// Create a new trailing where clause with the given set of requirements.
-static TrailingWhereClause *create(AstContext &ctx, SourceLoc whereLoc,
-                                   ArrayRef<RequirementRepr> requirements);
+   /// Create a new trailing where clause with the given set of requirements.
+   static TrailingWhereClause *create(AstContext &ctx, SourceLoc whereLoc,
+                                      ArrayRef<RequirementRepr> requirements);
 
-/// Retrieve the location of the 'where' keyword.
-SourceLoc getWhereLoc() const { return WhereLoc; }
+   /// Retrieve the location of the 'where' keyword.
+   SourceLoc getWhereLoc() const { return WhereLoc; }
 
-/// Retrieve the set of requirements.
-MutableArrayRef<RequirementRepr> getRequirements() {
-   return {getTrailingObjects<RequirementRepr>(), NumRequirements};
-}
+   /// Retrieve the set of requirements.
+   MutableArrayRef<RequirementRepr> getRequirements() {
+      return {getTrailingObjects<RequirementRepr>(), NumRequirements};
+   }
 
-/// Retrieve the set of requirements.
-ArrayRef<RequirementRepr> getRequirements() const {
-   return {getTrailingObjects<RequirementRepr>(), NumRequirements};
-}
+   /// Retrieve the set of requirements.
+   ArrayRef<RequirementRepr> getRequirements() const {
+      return {getTrailingObjects<RequirementRepr>(), NumRequirements};
+   }
 
-/// Compute the source range containing this trailing where clause.
-SourceRange getSourceRange() const {
-   return SourceRange(WhereLoc,
-                      getRequirements().back().getSourceRange().end);
-}
+   /// Compute the source range containing this trailing where clause.
+   SourceRange getSourceRange() const {
+      return SourceRange(WhereLoc,
+                         getRequirements().back().getSourceRange().end);
+   }
 };
 
 // A private class for forcing exact field layout.
 class alignas(8) _GenericContext {
-   // Not really public. See GenericContext.
-   public:
+// Not really public. See GenericContext.
+public:
    llvm::PointerIntPair<GenericParamList *, 1, bool> GenericParamsAndBit;
 
    /// The trailing where clause.
@@ -1455,7 +1445,7 @@ public:
    ///   func f2<T>() {} // isGeneric == true
    /// }
    ///
-   /// protocol P { // isGeneric == true due to implicit Self param
+   /// Interface P { // isGeneric == true due to implicit Self param
    ///   func p()   // isGeneric == false
    /// }
    /// \endcode
@@ -1514,7 +1504,7 @@ enum class ImportKind : uint8_t {
 ///   import Swift
 ///   import typealias Swift.Int
 class ImportDecl final : public Decl,
-      private llvm::TrailingObjects<ImportDecl, std::pair<Identifier,SourceLoc>> {
+                         private llvm::TrailingObjects<ImportDecl, std::pair<Identifier,SourceLoc>> {
    friend TrailingObjects;
    friend class Decl;
 public:
@@ -1553,7 +1543,7 @@ public:
 
    ArrayRef<AccessPathElement> getFullAccessPath() const {
       return {getTrailingObjects<AccessPathElement>(),
-               static_cast<size_t>(Bits.ImportDecl.NumPathElements)};
+              static_cast<size_t>(Bits.ImportDecl.NumPathElements)};
    }
 
    ArrayRef<AccessPathElement> getModulePath() const {
@@ -1603,7 +1593,7 @@ public:
 /// associated with the type.  This is not a ValueDecl and has no Type because
 /// there are no runtime values of the Extension's type.
 class ExtensionDecl final : public GenericContext, public Decl,
-      public IterableDeclContext {
+                            public IterableDeclContext {
    SourceLoc ExtensionLoc;  // Location of 'extension' keyword.
    SourceRange Braces;
 
@@ -1624,7 +1614,7 @@ class ExtensionDecl final : public GenericContext, public Decl,
    /// The bit indicates whether this extension has been resolved to refer to
    /// a known nominal type.
    llvm::PointerIntPair<ExtensionDecl *, 1, bool> NextExtension
-   = {nullptr, false};
+      = {nullptr, false};
 
    /// Note that we have added a member into the iterable declaration context.
    void addedMember(Decl *member);
@@ -1711,7 +1701,7 @@ public:
    /// Retrieve the extended type definition as written in the source, if it exists.
    TypeRepr *getExtendedTypeRepr() const { return ExtendedTypeRepr; }
 
-   /// Retrieve the set of protocols that this type inherits (i.e,
+   /// Retrieve the set of Interfaces that this type inherits (i.e,
    /// explicitly conforms to).
    MutableArrayRef<TypeLoc> getInherited() { return Inherited; }
    ArrayRef<TypeLoc> getInherited() const { return Inherited; }
@@ -1728,8 +1718,8 @@ public:
    void setDefaultAndMaxAccessLevelBits(AccessLevel defaultAccess,
                                         AccessLevel maxAccess) {
       Bits.ExtensionDecl.DefaultAndMaxAccessLevel =
-            (1 << (static_cast<unsigned>(defaultAccess) - 1)) |
-            (1 << (static_cast<unsigned>(maxAccess) - 1));
+         (1 << (static_cast<unsigned>(defaultAccess) - 1)) |
+         (1 << (static_cast<unsigned>(maxAccess) - 1));
    }
 
    AccessLevel getDefaultAccessLevel() const;
@@ -1759,11 +1749,11 @@ public:
    /// - the extension is defined in a different module from the original
    ///   nominal type decl,
    /// - the extension is constrained, or
-   /// - the extension is to a protocol.
-   /// FIXME: In a world where protocol extensions are dynamically dispatched,
-   /// "extension is to a protocol" would no longer be a reason to use the
+   /// - the extension is to a Interface.
+   /// FIXME: In a world where Interface extensions are dynamically dispatched,
+   /// "extension is to a Interface" would no longer be a reason to use the
    /// extension mangling, because an extension method implementation could be
-   /// resiliently moved into the original protocol itself.
+   /// resiliently moved into the original Interface itself.
    bool isEquivalentToExtendedContext() const;
 
    // Implement isa/cast/dyncast/etc.
@@ -1777,7 +1767,7 @@ public:
    }
    static bool classof(const IterableDeclContext *C) {
       return C->getIterableContextKind()
-            == IterableDeclContextKind::ExtensionDecl;
+             == IterableDeclContextKind::ExtensionDecl;
    }
 
    using DeclContext::operator new;
@@ -1840,7 +1830,7 @@ class PatternBindingEntry {
       /// Whether the contents of this initializer were subsumed by
       /// some other initialization, e.g., a lazy property's initializer
       /// gets subsumed by the getter body.
-      Subsumed = 1 << 2,
+         Subsumed = 1 << 2,
    };
    llvm::PointerIntPair<Pattern *, 3, OptionSet<Flags>> PatternAndFlags;
 
@@ -1872,7 +1862,7 @@ class PatternBindingEntry {
    };
    /// The initializer context used for this pattern binding entry.
    llvm::PointerIntPair<DeclContext *, 2, OptionSet<PatternFlags>>
-   InitContextAndFlags;
+      InitContextAndFlags;
 
    /// Values captured by this initializer.
    CaptureInfo Captures;
@@ -1892,7 +1882,7 @@ private:
 
    bool isFullyValidated() const {
       return InitContextAndFlags.getInt().contains(
-               PatternFlags::IsFullyValidated);
+         PatternFlags::IsFullyValidated);
    }
    void setFullyValidated() {
       InitContextAndFlags.setInt(InitContextAndFlags.getInt() |
@@ -1949,8 +1939,8 @@ private:
    /// Retrieve the location of the equal '=' token.
    SourceLoc getEqualLoc() const {
       return InitContextAndFlags.getInt().contains(PatternFlags::IsText)
-            ? SourceLoc()
-            : InitExpr.EqualLoc;
+             ? SourceLoc()
+             : InitExpr.EqualLoc;
    }
 
    /// Set the location of the equal '=' token.
@@ -2028,7 +2018,7 @@ private:
 /// pattern "(c, d)" and the initializer "bar()".
 ///
 class PatternBindingDecl final : public Decl,
-      private llvm::TrailingObjects<PatternBindingDecl, PatternBindingEntry> {
+                                 private llvm::TrailingObjects<PatternBindingDecl, PatternBindingEntry> {
    friend TrailingObjects;
    friend class Decl;
    friend class PatternBindingEntryRequest;
@@ -2062,11 +2052,11 @@ public:
                                              SourceLoc VarLoc = SourceLoc());
 
    static PatternBindingDecl *createDeserialized(
-         AstContext &Ctx, SourceLoc StaticLoc,
-         StaticSpellingKind StaticSpelling,
-         SourceLoc VarLoc,
-         unsigned NumPatternEntries,
-         DeclContext *Parent);
+      AstContext &Ctx, SourceLoc StaticLoc,
+      StaticSpellingKind StaticSpelling,
+      SourceLoc VarLoc,
+      unsigned NumPatternEntries,
+      DeclContext *Parent);
 
    SourceLoc getStartLoc() const {
       return StaticLoc.isValid() ? StaticLoc : VarLoc;
@@ -2191,7 +2181,7 @@ public:
    /// \returns the way 'static'/'class' was spelled in the source.
    StaticSpellingKind getStaticSpelling() const {
       return static_cast<StaticSpellingKind>(
-               Bits.PatternBindingDecl.StaticSpelling);
+         Bits.PatternBindingDecl.StaticSpelling);
    }
    /// \returns the way 'static'/'class' should be spelled for this declaration.
    StaticSpellingKind getCorrectStaticSpelling() const;
@@ -2264,7 +2254,7 @@ public:
    static bool classof(const DeclContext *DC) {
       if (auto LDC = dyn_cast<SerializedLocalDeclContext>(DC))
          return LDC->getLocalDeclContextKind() ==
-               LocalDeclContextKind::TopLevelCodeDecl;
+                LocalDeclContextKind::TopLevelCodeDecl;
       return false;
    }
 };
@@ -2349,7 +2339,7 @@ public:
       Bits.PoundDiagnosticDecl.HasBeenEmitted = true;
    }
 
-   SourceLoc getEndLoc() const { return EndLoc; }
+   SourceLoc getEndLoc() const { return EndLoc; };
 
    SourceRange getSourceRange() const {
       return SourceRange(StartLoc, EndLoc);
@@ -2436,9 +2426,9 @@ protected:
    }
 
 public:
-   /// Return true if this protocol member is a protocol requirement.
+   /// Return true if this Interface member is a Interface requirement.
    ///
-   /// Asserts if this is not a member of a protocol.
+   /// Asserts if this is not a member of a Interface.
    bool isInterfaceRequirement() const;
 
    /// Determine whether we have already checked whether this
@@ -2477,11 +2467,11 @@ public:
    /// with the Objective-C runtime.
    ///
    /// \returns A "selector" containing the runtime name. For non-method
-   /// entities (classes, protocols, properties), this operation will
+   /// entities (classes, Interfaces, properties), this operation will
    /// return a zero-parameter selector with the appropriate name in its
    /// first slot.
    Optional<ObjCSelector> getObjCRuntimeName(
-         bool skipIsObjCResolution = false) const;
+      bool skipIsObjCResolution = false) const;
 
    /// Determine whether the given declaration can infer @objc, or the
    /// Objective-C name, if used to satisfy the given requirement.
@@ -2583,10 +2573,10 @@ public:
    ///
    /// If \p DC is null, returns true only if this declaration is public.
    ///
-   /// If \p forConformance is true, we ignore the visibility of the protocol
-   /// when evaluating protocol extension members. This language rule allows a
-   /// protocol extension of a private protocol to provide default
-   /// implementations for the requirements of a public protocol, even when
+   /// If \p forConformance is true, we ignore the visibility of the Interface
+   /// when evaluating Interface extension members. This language rule allows a
+   /// Interface extension of a private Interface to provide default
+   /// implementations for the requirements of a public Interface, even when
    /// the default implementations are not visible to name lookup.
    bool isAccessibleFrom(const DeclContext *DC,
                          bool forConformance = false) const;
@@ -2613,7 +2603,7 @@ public:
    void setInterfaceType(Type type);
 
    /// isInstanceMember - Determine whether this value is an instance member
-   /// of an enum or protocol.
+   /// of an enum or Interface.
    bool isInstanceMember() const;
 
    /// Retrieve the context discriminator for this local value, which
@@ -2698,7 +2688,7 @@ public:
       LazySemanticInfo.isIUO = isIUO;
    }
 
-   /// Returns the protocol requirements that this decl conforms to.
+   /// Returns the Interface requirements that this decl conforms to.
    ArrayRef<ValueDecl *>
    getSatisfiedInterfaceRequirements(bool Sorted = false) const;
 
@@ -2735,7 +2725,7 @@ public:
 
    static bool classof(const Decl *D) {
       return D->getKind() >= DeclKind::First_ValueDecl &&
-            D->getKind() <= DeclKind::Last_ValueDecl;
+             D->getKind() <= DeclKind::Last_ValueDecl;
    }
 
    /// True if this is a C function that was imported as a member of a type in
@@ -2799,7 +2789,7 @@ public:
    /// metatype.
    Type getDeclaredInterfaceType() const;
 
-   /// Retrieve the set of protocols that this type inherits (i.e,
+   /// Retrieve the set of Interfaces that this type inherits (i.e,
    /// explicitly conforms to).
    MutableArrayRef<TypeLoc> getInherited() { return Inherited; }
    ArrayRef<TypeLoc> getInherited() const { return Inherited; }
@@ -2808,7 +2798,7 @@ public:
 
    static bool classof(const Decl *D) {
       return D->getKind() >= DeclKind::First_TypeDecl &&
-            D->getKind() <= DeclKind::Last_TypeDecl;
+             D->getKind() <= DeclKind::Last_TypeDecl;
    }
 
    /// Compute an ordering between two type declarations that is ABI-stable.
@@ -2844,7 +2834,7 @@ public:
    }
    static bool classof(const Decl *D) {
       return D->getKind() >= DeclKind::First_GenericTypeDecl &&
-            D->getKind() <= DeclKind::Last_GenericTypeDecl;
+             D->getKind() <= DeclKind::Last_GenericTypeDecl;
    }
 };
 
@@ -3036,13 +3026,13 @@ public:
    /// Return the superclass of the generic parameter.
    Type getSuperclass() const;
 
-   /// Retrieve the set of protocols to which this abstract type
+   /// Retrieve the set of Interfaces to which this abstract type
    /// parameter conforms.
    ArrayRef<InterfaceDecl *> getConformingInterfaces() const;
 
    static bool classof(const Decl *D) {
       return D->getKind() >= DeclKind::First_AbstractTypeParamDecl &&
-            D->getKind() <= DeclKind::Last_AbstractTypeParamDecl;
+             D->getKind() <= DeclKind::Last_AbstractTypeParamDecl;
    }
 };
 
@@ -3051,10 +3041,10 @@ public:
 /// A generic type parameter introduces a new, named type parameter along
 /// with some set of requirements on any type argument used to realize this
 /// type parameter. The requirements involve conformances to specific
-/// protocols or inheritance from a specific class type.
+/// Interfaces or inheritance from a specific class type.
 ///
 /// In the following example, 'T' is a generic type parameter with the
-/// requirement that the type argument conform to the 'Comparable' protocol.
+/// requirement that the type argument conform to the 'Comparable' Interface.
 ///
 /// \code
 /// func min<T : Comparable>(x : T, y : T) -> T { ... }
@@ -3116,17 +3106,17 @@ public:
 
 /// A declaration of an associated type.
 ///
-/// An associated type introduces a new, named type in a protocol that
+/// An associated type introduces a new, named type in a Interface that
 /// can vary from one conforming type to the next. Associated types have a
 /// set of requirements to which the type that replaces it much realize,
-/// described via conformance to specific protocols, or inheritance from a
+/// described via conformance to specific Interfaces, or inheritance from a
 /// specific class type.
 ///
 /// In the following example, 'Element' is an associated type with no
 /// requirements.
 ///
 /// \code
-/// protocol Enumerator {
+/// Interface Enumerator {
 ///   typealias Element
 ///   func getNext() -> Element?
 /// }
@@ -3155,7 +3145,7 @@ public:
                       LazyMemberLoader *definitionResolver,
                       uint64_t resolverData);
 
-   /// Get the protocol in which this associated type is declared.
+   /// Get the Interface in which this associated type is declared.
    InterfaceDecl *getInterface() const {
       return cast<InterfaceDecl>(getDeclContext());
    }
@@ -3195,7 +3185,7 @@ public:
    /// Retrieve the (first) overridden associated type declaration, if any.
    AssociatedTypeDecl *getOverriddenDecl() const {
       return cast_or_null<AssociatedTypeDecl>(
-               AbstractTypeParamDecl::getOverriddenDecl());
+         AbstractTypeParamDecl::getOverriddenDecl());
    }
 
    /// Retrieve the set of associated types overridden by this associated
@@ -3224,13 +3214,13 @@ enum PointerTypeKind : unsigned {
 
 static inline bool isRawPointerKind(PointerTypeKind PTK) {
    switch (PTK) {
-   case PTK_UnsafeMutableRawPointer:
-   case PTK_UnsafeRawPointer:
-      return true;
-   case PTK_UnsafeMutablePointer:
-   case PTK_UnsafePointer:
-   case PTK_AutoreleasingUnsafeMutablePointer:
-      return false;
+      case PTK_UnsafeMutableRawPointer:
+      case PTK_UnsafeRawPointer:
+         return true;
+      case PTK_UnsafeMutablePointer:
+      case PTK_UnsafePointer:
+      case PTK_AutoreleasingUnsafeMutablePointer:
+         return false;
    }
 
    llvm_unreachable("Unhandled PointerTypeKind in switch.");
@@ -3308,14 +3298,14 @@ class NominalTypeDecl : public GenericTypeDecl, public IterableDeclContext {
    /// so that its members can eventually be added to the lookup table.
    void addedExtension(ExtensionDecl *ext);
 
-   /// A lookup table used to find the protocol conformances of
+   /// A lookup table used to find the Interface conformances of
    /// a given nominal type.
    mutable ConformanceLookupTable *ConformanceTable = nullptr;
 
    /// Prepare the conformance table.
    void prepareConformanceTable() const;
 
-   /// Returns the protocol requirements that \c Member conforms to.
+   /// Returns the Interface requirements that \c Member conforms to.
    ArrayRef<ValueDecl *>
    getSatisfiedInterfaceRequirementsForMember(const ValueDecl *Member,
                                              bool Sorted) const;
@@ -3399,47 +3389,47 @@ public:
    enum class LookupDirectFlags {
       /// Whether to include @_implements members.
       /// Used by conformance-checking to find special @_implements members.
-      IncludeAttrImplements = 1 << 0,
+         IncludeAttrImplements = 1 << 0,
    };
 
    /// Find all of the declarations with the given name within this nominal type
    /// and its extensions.
    ///
    /// This routine does not look into superclasses, nor does it consider
-   /// protocols to which the nominal type conforms. Furthermore, the resulting
+   /// Interfaces to which the nominal type conforms. Furthermore, the resulting
    /// set of declarations has not been filtered for visibility, nor have
    /// overridden declarations been removed.
    TinyPtrVector<ValueDecl *> lookupDirect(DeclName name,
                                            OptionSet<LookupDirectFlags> flags =
-         OptionSet<LookupDirectFlags>());
+                                           OptionSet<LookupDirectFlags>());
 
-   /// Collect the set of protocols to which this type should implicitly
+   /// Collect the set of Interfaces to which this type should implicitly
    /// conform, such as AnyObject (for classes).
-   void getImplicitInterfaces(SmallVectorImpl<InterfaceDecl *> &protocols);
+   void getImplicitInterfaces(SmallVectorImpl<InterfaceDecl *> &Interfaces);
 
    /// Look for conformances of this nominal type to the given
-   /// protocol.
+   /// Interface.
    ///
    /// \param module The module from which we initiate the search.
    /// FIXME: This is currently unused.
    ///
-   /// \param protocol The protocol whose conformance is requested.
-   /// \param conformances Will be populated with the set of protocol
-   /// conformances found for this protocol.
+   /// \param Interface The Interface whose conformance is requested.
+   /// \param conformances Will be populated with the set of Interface
+   /// conformances found for this Interface.
    ///
    /// \returns true if any conformances were found.
    bool lookupConformance(
-         ModuleDecl *module, InterfaceDecl *protocol,
-         SmallVectorImpl<InterfaceConformance *> &conformances) const;
+      ModuleDecl *module, InterfaceDecl *Interface,
+      SmallVectorImpl<InterfaceConformance *> &conformances) const;
 
-   /// Retrieve all of the protocols that this nominal type conforms to.
+   /// Retrieve all of the Interfaces that this nominal type conforms to.
    SmallVector<InterfaceDecl *, 2> getAllInterfaces() const;
 
-   /// Retrieve all of the protocol conformances for this nominal type.
+   /// Retrieve all of the Interface conformances for this nominal type.
    SmallVector<InterfaceConformance *, 2> getAllConformances(
-         bool sorted = false) const;
+      bool sorted = false) const;
 
-   /// Register an externally-created protocol conformance in the
+   /// Register an externally-created Interface conformance in the
    /// conformance lookup table.
    ///
    /// This is used by deserialization of module files to report
@@ -3496,11 +3486,11 @@ public:
    // Implement isa/cast/dyncast/etc.
    static bool classof(const Decl *D) {
       return D->getKind() >= DeclKind::First_NominalTypeDecl &&
-            D->getKind() <= DeclKind::Last_NominalTypeDecl;
+             D->getKind() <= DeclKind::Last_NominalTypeDecl;
    }
    static bool classof(const GenericTypeDecl *D) {
       return D->getKind() >= DeclKind::First_NominalTypeDecl &&
-            D->getKind() <= DeclKind::Last_NominalTypeDecl;
+             D->getKind() <= DeclKind::Last_NominalTypeDecl;
    }
 
    static bool classof(const DeclContext *C) {
@@ -3510,7 +3500,7 @@ public:
    }
    static bool classof(const IterableDeclContext *C) {
       return C->getIterableContextKind()
-            == IterableDeclContextKind::NominalTypeDecl;
+             == IterableDeclContextKind::NominalTypeDecl;
    }
    static bool classof(const NominalTypeDecl *D) { return true; }
    static bool classof(const ExtensionDecl *D) { return false; }
@@ -3539,11 +3529,11 @@ class EnumDecl final : public NominalTypeDecl {
 
    enum SemanticInfoFlags : uint8_t {
       // Is the raw type valid?
-      HasComputedRawType         = 1 << 0,
+         HasComputedRawType         = 1 << 0,
       // Is the complete set of (auto-incremented) raw values available?
-      HasFixedRawValues          = 1 << 1,
+         HasFixedRawValues          = 1 << 1,
       // Is the complete set of raw values type checked?
-      HasFixedRawValuesAndTypes  = 1 << 2,
+         HasFixedRawValuesAndTypes  = 1 << 2,
    };
 
    struct {
@@ -3651,7 +3641,7 @@ public:
    void setRawType(Type rawType) {
       auto flags = LazySemanticInfo.RawTypeAndFlags.getInt();
       LazySemanticInfo.RawTypeAndFlags.setPointerAndInt(
-               rawType, flags | HasComputedRawType);
+         rawType, flags | HasComputedRawType);
    }
 
    /// True if none of the enum cases have associated values.
@@ -3758,26 +3748,26 @@ enum class ArtificialMainKind : uint8_t {
 /// interesting kinds of superclasses that a class may have.
 enum class AncestryFlags : uint8_t {
    /// The class or one of its superclasses is @objc.
-   ObjC = (1<<0),
+      ObjC = (1<<0),
 
    /// The class or one of its superclasses is @objcMembers.
-   ObjCMembers = (1<<1),
+      ObjCMembers = (1<<1),
 
    /// The class or one of its superclasses is generic.
-   Generic = (1<<2),
+      Generic = (1<<2),
 
    /// The class or one of its superclasses is resilient.
-   Resilient = (1<<3),
+      Resilient = (1<<3),
 
    /// The class or one of its superclasses has resilient metadata and is in a
    /// different resilience domain.
-   ResilientOther = (1<<4),
+      ResilientOther = (1<<4),
 
    /// The class or one of its superclasses is imported from Clang.
-   ClangImported = (1<<5),
+      ClangImported = (1<<5),
 
    /// The class or one of its superclasses requires stored property initializers.
-   RequiresStoredPropertyInits = (1<<6),
+      RequiresStoredPropertyInits = (1<<6),
 };
 
 /// Return type of ClassDecl::checkAncestry(). Describes a set of interesting
@@ -3888,7 +3878,7 @@ public:
    /// \returns \c true if \c fn returned \c Stop for any class, \c false
    /// otherwise.
    bool walkSuperclasses(
-         llvm::function_ref<TypeWalker::Action(ClassDecl *)> fn) const;
+      llvm::function_ref<TypeWalker::Action(ClassDecl *)> fn) const;
 
    //// Whether this class requires all of its stored properties to
    //// have initializers in the class definition.
@@ -3899,14 +3889,14 @@ public:
    /// \see getForeignClassKind
    enum class ForeignKind : uint8_t {
       /// A normal Swift or Objective-C class.
-      Normal = 0,
+         Normal = 0,
       /// An imported Core Foundation type. These are AnyObject-compatible but
       /// do not have runtime metadata.
-      CFType,
+         CFType,
       /// An imported Objective-C type whose class and metaclass symbols are not
       /// both available at link-time but can be accessed through the Objective-C
       /// runtime.
-      RuntimeOnly
+         RuntimeOnly
    };
 
    /// Whether this class is "foreign", meaning that it is implemented
@@ -3970,13 +3960,13 @@ public:
    /// Find a method of a class that overrides a given method.
    /// Return nullptr, if no such method exists.
    AbstractFunctionDecl *findOverridingDecl(
-         const AbstractFunctionDecl *method) const;
+      const AbstractFunctionDecl *method) const;
 
    /// Find a method implementation which will be used when a given method
    /// is invoked on an instance of this class. This implementation may stem
    /// either from a class itself or its direct or indirect superclasses.
    AbstractFunctionDecl *findImplementingMethod(
-         const AbstractFunctionDecl *method) const;
+      const AbstractFunctionDecl *method) const;
 
    /// Retrieve the destructor for this class.
    DestructorDecl *getDestructor() const;
@@ -4016,7 +4006,7 @@ public:
 
    using NominalTypeDecl::lookupDirect;
 
-   /// Look in this class and its extensions (but not any of its protocols or
+   /// Look in this class and its extensions (but not any of its Interfaces or
    /// superclasses) for declarations with a given Objective-C selector.
    ///
    /// Note that this can find methods, initializers, deinitializers,
@@ -4126,16 +4116,16 @@ private:
         other(other) { }
 };
 
-/// InterfaceDecl - A declaration of a protocol, for example:
+/// InterfaceDecl - A declaration of a Interface, for example:
 ///
-///   protocol Drawable {
+///   Interface Drawable {
 ///     func draw()
 ///   }
 ///
-/// Every protocol has an implicitly-created 'Self' generic parameter that
-/// stands for a type that conforms to the protocol. For example,
+/// Every Interface has an implicitly-created 'Self' generic parameter that
+/// stands for a type that conforms to the Interface. For example,
 ///
-///   protocol Cloneable {
+///   Interface Cloneable {
 ///     func clone() -> Self
 ///   }
 ///
@@ -4155,7 +4145,7 @@ class InterfaceDecl final : public NominalTypeDecl {
    } LazySemanticInfo;
 
    /// The generic signature representing exactly the new requirements introduced
-   /// by this protocol.
+   /// by this Interface.
    const Requirement *RequirementSignature = nullptr;
 
    /// Returns the cached result of \c requiresClass or \c None if it hasn't yet
@@ -4224,7 +4214,7 @@ public:
 
    using Decl::getAstContext;
 
-   /// Retrieve the set of protocols inherited from this protocol.
+   /// Retrieve the set of Interfaces inherited from this Interface.
    ArrayRef<InterfaceDecl *> getInheritedInterfaces() const {
       if (Bits.InterfaceDecl.InheritedInterfacesValid)
          return InheritedInterfaces;
@@ -4232,25 +4222,25 @@ public:
       return const_cast<InterfaceDecl *>(this)->getInheritedInterfacesSlow();
    }
 
-   /// Determine whether this protocol has a superclass.
+   /// Determine whether this Interface has a superclass.
    bool hasSuperclass() const { return (bool)getSuperclassDecl(); }
 
-   /// Retrieve the superclass of this protocol, or null if there is no superclass.
+   /// Retrieve the superclass of this Interface, or null if there is no superclass.
    Type getSuperclass() const;
 
-   /// Retrieve the ClassDecl for the superclass of this protocol, or null if there
+   /// Retrieve the ClassDecl for the superclass of this Interface, or null if there
    /// is no superclass.
    ClassDecl *getSuperclassDecl() const;
 
-   /// Set the superclass of this protocol.
+   /// Set the superclass of this Interface.
    void setSuperclass(Type superclass);
 
-   /// Retrieve the set of AssociatedTypeDecl members of this protocol; this
+   /// Retrieve the set of AssociatedTypeDecl members of this Interface; this
    /// saves loading the set of members in cases where there's no possibility of
-   /// a protocol having nested types (ObjC protocols).
+   /// a Interface having nested types (ObjC Interfaces).
    llvm::TinyPtrVector<AssociatedTypeDecl *> getAssociatedTypeMembers() const;
 
-   /// Returns a protocol requirement with the given name, or nullptr if the
+   /// Returns a Interface requirement with the given name, or nullptr if the
    /// name has multiple overloads, or no overloads at all.
    ValueDecl *getSingleRequirement(DeclName name) const;
 
@@ -4258,26 +4248,26 @@ public:
    /// not exist.
    AssociatedTypeDecl *getAssociatedType(Identifier name) const;
 
-   /// Walk this protocol and all of the protocols inherited by this protocol,
-   /// transitively, invoking the callback function for each protocol.
+   /// Walk this Interface and all of the Interfaces inherited by this Interface,
+   /// transitively, invoking the callback function for each Interface.
    ///
    /// \param fn The callback function that will be invoked for each inherited
-   /// protocol. It can return \c Continue to continue the traversal,
-   /// \c SkipChildren to avoid visiting the children of the given protocol
+   /// Interface. It can return \c Continue to continue the traversal,
+   /// \c SkipChildren to avoid visiting the children of the given Interface
    /// but continue the search, and \c Stop to halt the search.
    ///
-   /// \returns \c true if \c fn returned \c Stop for any protocol, \c false
+   /// \returns \c true if \c fn returned \c Stop for any Interface, \c false
    /// otherwise.
    bool walkInheritedInterfaces(
-         llvm::function_ref<TypeWalker::Action(InterfaceDecl *)> fn) const;
+      llvm::function_ref<TypeWalker::Action(InterfaceDecl *)> fn) const;
 
-   /// Determine whether this protocol inherits from the given ("super")
-   /// protocol.
+   /// Determine whether this Interface inherits from the given ("super")
+   /// Interface.
    bool inheritsFrom(const InterfaceDecl *Super) const;
 
    InterfaceType *getDeclaredType() const {
       return reinterpret_cast<InterfaceType *>(
-               NominalTypeDecl::getDeclaredType().getPointer());
+         NominalTypeDecl::getDeclaredType().getPointer());
    }
 
    SourceLoc getStartLoc() const { return InterfaceLoc; }
@@ -4285,17 +4275,17 @@ public:
       return SourceRange(InterfaceLoc, getBraces().end);
    }
 
-   /// True if this protocol can only be conformed to by class types.
+   /// True if this Interface can only be conformed to by class types.
    bool requiresClass() const;
 
-   /// Determine whether an existential conforming to this protocol can be
-   /// matched with a generic type parameter constrained to this protocol.
+   /// Determine whether an existential conforming to this Interface can be
+   /// matched with a generic type parameter constrained to this Interface.
    /// This is only permitted if there is nothing "non-trivial" that we
-   /// can do with the metatype, which means the protocol must not have
+   /// can do with the metatype, which means the Interface must not have
    /// any static methods and must be declared @objc.
    bool existentialConformsToSelf() const;
 
-   /// Does this protocol require a self-conformance witness table?
+   /// Does this Interface require a self-conformance witness table?
    bool requiresSelfConformanceWitnessTable() const;
 
    /// Find direct Self references within the given requirement.
@@ -4311,13 +4301,13 @@ public:
                                                 bool skipAssocTypes) const;
 
    /// Determine whether we are allowed to refer to an existential type
-   /// conforming to this protocol. This is only permitted if the type of
+   /// conforming to this Interface. This is only permitted if the type of
    /// the member does not contain any associated types, and does not
    /// contain 'Self' in 'parameter' or 'other' position.
    bool isAvailableInExistential(const ValueDecl *decl) const;
 
    /// Determine whether we are allowed to refer to an existential type
-   /// conforming to this protocol. This is only permitted if the types of
+   /// conforming to this Interface. This is only permitted if the types of
    /// all the members do not contain any associated types, and do not
    /// contain 'Self' in 'parameter' or 'other' position.
    bool existentialTypeSupported() const;
@@ -4326,7 +4316,7 @@ private:
    void computeKnownInterfaceKind() const;
 
 public:
-   /// If this is known to be a compiler-known protocol, returns the kind.
+   /// If this is known to be a compiler-known Interface, returns the kind.
    /// Otherwise returns None.
    Optional<KnownInterfaceKind> getKnownInterfaceKind() const {
       if (Bits.InterfaceDecl.KnownInterface == 0)
@@ -4338,7 +4328,7 @@ public:
       return static_cast<KnownInterfaceKind>(Bits.InterfaceDecl.KnownInterface - 2);
    }
 
-   /// Check whether this protocol is of a specific, known protocol kind.
+   /// Check whether this Interface is of a specific, known Interface kind.
    bool isSpecificInterface(KnownInterfaceKind kind) const {
       if (auto knownKind = getKnownInterfaceKind())
          return *knownKind == kind;
@@ -4346,14 +4336,14 @@ public:
       return false;
    }
 
-   /// Whether this protocol has a circular reference in its list of inherited
-   /// protocols.
+   /// Whether this Interface has a circular reference in its list of inherited
+   /// Interfaces.
    bool hasCircularInheritedInterfaces() const;
 
-   /// Returns true if the protocol has requirements that are not listed in its
+   /// Returns true if the Interface has requirements that are not listed in its
    /// members.
    ///
-   /// This can occur, for example, if the protocol is an Objective-C protocol
+   /// This can occur, for example, if the Interface is an Objective-C Interface
    /// with requirements that cannot be represented in Swift.
    bool hasMissingRequirements() const {
       (void)getMembers();
@@ -4387,20 +4377,20 @@ public:
    /// Set the default associated conformance witness for the given
    /// associated conformance.
    void setDefaultAssociatedConformanceWitness(
-         CanType association,
-         InterfaceDecl *requirement,
-         InterfaceConformanceRef conformance);
+      CanType association,
+      InterfaceDecl *requirement,
+      InterfaceConformanceRef conformance);
 
-   /// Retrieve the name to use for this protocol when interoperating
+   /// Retrieve the name to use for this Interface when interoperating
    /// with the Objective-C runtime.
    StringRef getObjCRuntimeName(llvm::SmallVectorImpl<char> &buffer) const;
 
-   /// Retrieve the requirements that describe this protocol.
+   /// Retrieve the requirements that describe this Interface.
    ///
-   /// These are the requirements including any inherited protocols
+   /// These are the requirements including any inherited Interfaces
    /// and conformances for associated types that are introduced in this
-   /// protocol. Requirements implied via any other protocol (e.g., inherited
-   /// protocols of the inherited protocols) are not mentioned. The conformance
+   /// Interface. Requirements implied via any other Interface (e.g., inherited
+   /// Interfaces of the inherited Interfaces) are not mentioned. The conformance
    /// requirements listed here become entries in the witness table.
    ArrayRef<Requirement> getRequirementSignature() const;
 
@@ -4460,343 +4450,343 @@ private:
    /// A record of the accessors for the declaration.
    class alignas(1 << 3) AccessorRecord final :
       private llvm::TrailingObjects<AccessorRecord, AccessorDecl*> {
-                 friend TrailingObjects;
+      friend TrailingObjects;
 
-   using AccessorIndex = uint8_t;
-   static const AccessorIndex InvalidIndex = 0;
+      using AccessorIndex = uint8_t;
+      static const AccessorIndex InvalidIndex = 0;
 
-   /// The range of the braces around the accessor clause.
-   SourceRange Braces;
+      /// The range of the braces around the accessor clause.
+      SourceRange Braces;
 
-   /// The number of accessors currently stored in this record.
-   AccessorIndex NumAccessors;
+      /// The number of accessors currently stored in this record.
+      AccessorIndex NumAccessors;
 
-   /// The storage capacity of this record for accessors.  Always includes
-   /// enough space for adding opaque accessors to the record, which are the
-   /// only accessors that should ever be added retroactively; hence this
-   /// field is only here for the purposes of safety checks.
-   AccessorIndex AccessorsCapacity;
+      /// The storage capacity of this record for accessors.  Always includes
+      /// enough space for adding opaque accessors to the record, which are the
+      /// only accessors that should ever be added retroactively; hence this
+      /// field is only here for the purposes of safety checks.
+      AccessorIndex AccessorsCapacity;
 
-   /// Either 0, meaning there is no registered accessor of the given kind,
-   /// or the index+1 of the accessor in the accessors array.
-   AccessorIndex AccessorIndices[NumAccessorKinds];
+      /// Either 0, meaning there is no registered accessor of the given kind,
+      /// or the index+1 of the accessor in the accessors array.
+      AccessorIndex AccessorIndices[NumAccessorKinds];
 
-   AccessorRecord(SourceRange braces,
-                  ArrayRef<AccessorDecl*> accessors,
-                  AccessorIndex accessorsCapacity);
-public:
-   static AccessorRecord *create(AstContext &ctx, SourceRange braces,
-                                 ArrayRef<AccessorDecl*> accessors);
+      AccessorRecord(SourceRange braces,
+                     ArrayRef<AccessorDecl*> accessors,
+                     AccessorIndex accessorsCapacity);
+   public:
+      static AccessorRecord *create(AstContext &ctx, SourceRange braces,
+                                    ArrayRef<AccessorDecl*> accessors);
 
-   SourceRange getBracesRange() const { return Braces; }
+      SourceRange getBracesRange() const { return Braces; }
 
-   inline AccessorDecl *getAccessor(AccessorKind kind) const;
+      inline AccessorDecl *getAccessor(AccessorKind kind) const;
 
-   ArrayRef<AccessorDecl *> getAllAccessors() const {
-      return { getTrailingObjects<AccessorDecl*>(), NumAccessors };
-   }
+      ArrayRef<AccessorDecl *> getAllAccessors() const {
+         return { getTrailingObjects<AccessorDecl*>(), NumAccessors };
+      }
 
-   void addOpaqueAccessor(AccessorDecl *accessor);
+      void addOpaqueAccessor(AccessorDecl *accessor);
 
-private:
-   MutableArrayRef<AccessorDecl *> getAccessorsBuffer() {
-      return { getTrailingObjects<AccessorDecl*>(), NumAccessors };
-   }
+   private:
+      MutableArrayRef<AccessorDecl *> getAccessorsBuffer() {
+         return { getTrailingObjects<AccessorDecl*>(), NumAccessors };
+      }
 
-   bool registerAccessor(AccessorDecl *accessor, AccessorIndex index);
-};
+      bool registerAccessor(AccessorDecl *accessor, AccessorIndex index);
+   };
 
-llvm::PointerIntPair<AccessorRecord*, 3, OptionalEnum<AccessLevel>> Accessors;
+   llvm::PointerIntPair<AccessorRecord*, 3, OptionalEnum<AccessLevel>> Accessors;
 
-struct {
-   unsigned IsGetterMutatingComputed : 1;
-   unsigned IsGetterMutating : 1;
-   unsigned IsSetterMutatingComputed : 1;
-   unsigned IsSetterMutating : 1;
-   unsigned OpaqueReadOwnershipComputed : 1;
-   unsigned OpaqueReadOwnership : 2;
-   unsigned ImplInfoComputed : 1;
-   unsigned RequiresOpaqueAccessorsComputed : 1;
-   unsigned RequiresOpaqueAccessors : 1;
-   unsigned RequiresOpaqueModifyCoroutineComputed : 1;
-   unsigned RequiresOpaqueModifyCoroutine : 1;
-} LazySemanticInfo = { };
+   struct {
+      unsigned IsGetterMutatingComputed : 1;
+      unsigned IsGetterMutating : 1;
+      unsigned IsSetterMutatingComputed : 1;
+      unsigned IsSetterMutating : 1;
+      unsigned OpaqueReadOwnershipComputed : 1;
+      unsigned OpaqueReadOwnership : 2;
+      unsigned ImplInfoComputed : 1;
+      unsigned RequiresOpaqueAccessorsComputed : 1;
+      unsigned RequiresOpaqueAccessors : 1;
+      unsigned RequiresOpaqueModifyCoroutineComputed : 1;
+      unsigned RequiresOpaqueModifyCoroutine : 1;
+   } LazySemanticInfo = { };
 
-/// The implementation info for the accessors.
-StorageImplInfo ImplInfo;
+   /// The implementation info for the accessors.
+   StorageImplInfo ImplInfo;
 
-/// Add a synthesized accessor.
-void setSynthesizedAccessor(AccessorKind kind, AccessorDecl *getter);
+   /// Add a synthesized accessor.
+   void setSynthesizedAccessor(AccessorKind kind, AccessorDecl *getter);
 
 protected:
-AbstractStorageDecl(DeclKind Kind, bool IsStatic, DeclContext *DC,
-                    DeclName Name, SourceLoc NameLoc,
-                    StorageIsMutable_t supportsMutation)
-   : ValueDecl(Kind, DC, Name, NameLoc),
-     ImplInfo(StorageImplInfo::getSimpleStored(supportsMutation)) {
-   Bits.AbstractStorageDecl.IsStatic = IsStatic;
-}
+   AbstractStorageDecl(DeclKind Kind, bool IsStatic, DeclContext *DC,
+                       DeclName Name, SourceLoc NameLoc,
+                       StorageIsMutable_t supportsMutation)
+      : ValueDecl(Kind, DC, Name, NameLoc),
+        ImplInfo(StorageImplInfo::getSimpleStored(supportsMutation)) {
+      Bits.AbstractStorageDecl.IsStatic = IsStatic;
+   }
 
 public:
 
-/// Should this declaration be treated as if annotated with transparent
-/// attribute.
-bool isTransparent() const;
+   /// Should this declaration be treated as if annotated with transparent
+   /// attribute.
+   bool isTransparent() const;
 
-/// Is this a type ('static') variable?
-bool isStatic() const {
-   return Bits.AbstractStorageDecl.IsStatic;
-}
-void setStatic(bool IsStatic) {
-   Bits.AbstractStorageDecl.IsStatic = IsStatic;
-}
+   /// Is this a type ('static') variable?
+   bool isStatic() const {
+      return Bits.AbstractStorageDecl.IsStatic;
+   }
+   void setStatic(bool IsStatic) {
+      Bits.AbstractStorageDecl.IsStatic = IsStatic;
+   }
 
-/// \returns the way 'static'/'class' should be spelled for this declaration.
-StaticSpellingKind getCorrectStaticSpelling() const;
+   /// \returns the way 'static'/'class' should be spelled for this declaration.
+   StaticSpellingKind getCorrectStaticSpelling() const;
 
-/// Return the interface type of the stored value.
-Type getValueInterfaceType() const;
+   /// Return the interface type of the stored value.
+   Type getValueInterfaceType() const;
 
-/// Determine how this storage is implemented.
-StorageImplInfo getImplInfo() const;
+   /// Determine how this storage is implemented.
+   StorageImplInfo getImplInfo() const;
 
-/// Overwrite the registered implementation-info.  This should be
-/// used carefully.
-void setImplInfo(StorageImplInfo implInfo) {
-   LazySemanticInfo.ImplInfoComputed = 1;
-   ImplInfo = implInfo;
-}
+   /// Overwrite the registered implementation-info.  This should be
+   /// used carefully.
+   void setImplInfo(StorageImplInfo implInfo) {
+      LazySemanticInfo.ImplInfoComputed = 1;
+      ImplInfo = implInfo;
+   }
 
-ReadImplKind getReadImpl() const {
-   return getImplInfo().getReadImpl();
-}
-WriteImplKind getWriteImpl() const {
-   return getImplInfo().getWriteImpl();
-}
-ReadWriteImplKind getReadWriteImpl() const {
-   return getImplInfo().getReadWriteImpl();
-}
+   ReadImplKind getReadImpl() const {
+      return getImplInfo().getReadImpl();
+   }
+   WriteImplKind getWriteImpl() const {
+      return getImplInfo().getWriteImpl();
+   }
+   ReadWriteImplKind getReadWriteImpl() const {
+      return getImplInfo().getReadWriteImpl();
+   }
 
 
-/// Return true if this is a VarDecl that has storage associated with
-/// it.
-bool hasStorage() const {
-   return getImplInfo().hasStorage();
-}
+   /// Return true if this is a VarDecl that has storage associated with
+   /// it.
+   bool hasStorage() const {
+      return getImplInfo().hasStorage();
+   }
 
-/// Return true if this storage has the basic accessors/capability
-/// to be mutated.  This is generally constant after the accessors are
-/// installed by the parser/importer/whatever.
-///
-/// Note that this is different from the mutability of the declaration
-/// in the user language: sometimes we can assign to declarations that
-/// don't support mutation (e.g. to initialize them), and sometimes we
-/// can't mutate things that do support mutation (e.g. because their
-/// setter is private).
-StorageIsMutable_t supportsMutation() const {
-   return getImplInfo().supportsMutation();
-}
+   /// Return true if this storage has the basic accessors/capability
+   /// to be mutated.  This is generally constant after the accessors are
+   /// installed by the parser/importer/whatever.
+   ///
+   /// Note that this is different from the mutability of the declaration
+   /// in the user language: sometimes we can assign to declarations that
+   /// don't support mutation (e.g. to initialize them), and sometimes we
+   /// can't mutate things that do support mutation (e.g. because their
+   /// setter is private).
+   StorageIsMutable_t supportsMutation() const {
+      return getImplInfo().supportsMutation();
+   }
 
-/// isSettable - Determine whether references to this decl may appear
-/// on the left-hand side of an assignment or as the operand of a
-/// `&` or 'inout' operator.
-bool isSettable(const DeclContext *UseDC,
-                const DeclRefExpr *base = nullptr) const;
+   /// isSettable - Determine whether references to this decl may appear
+   /// on the left-hand side of an assignment or as the operand of a
+   /// `&` or 'inout' operator.
+   bool isSettable(const DeclContext *UseDC,
+                   const DeclRefExpr *base = nullptr) const;
 
-/// Does this storage declaration have explicitly-defined accessors
-/// written in the source?
-bool hasParsedAccessors() const;
+   /// Does this storage declaration have explicitly-defined accessors
+   /// written in the source?
+   bool hasParsedAccessors() const;
 
-/// Return the ownership of values opaquely read from this storage.
-OpaqueReadOwnership getOpaqueReadOwnership() const;
-void setOpaqueReadOwnership(OpaqueReadOwnership ownership) {
-   LazySemanticInfo.OpaqueReadOwnership = unsigned(ownership);
-   LazySemanticInfo.OpaqueReadOwnershipComputed = true;
-}
+   /// Return the ownership of values opaquely read from this storage.
+   OpaqueReadOwnership getOpaqueReadOwnership() const;
+   void setOpaqueReadOwnership(OpaqueReadOwnership ownership) {
+      LazySemanticInfo.OpaqueReadOwnership = unsigned(ownership);
+      LazySemanticInfo.OpaqueReadOwnershipComputed = true;
+   }
 
-/// Return true if reading this storage requires the ability to
-/// modify the base value.
-bool isGetterMutating() const;
-void setIsGetterMutating(bool isMutating) {
-   LazySemanticInfo.IsGetterMutating = isMutating;
-   LazySemanticInfo.IsGetterMutatingComputed = true;
-}
+   /// Return true if reading this storage requires the ability to
+   /// modify the base value.
+   bool isGetterMutating() const;
+   void setIsGetterMutating(bool isMutating) {
+      LazySemanticInfo.IsGetterMutating = isMutating;
+      LazySemanticInfo.IsGetterMutatingComputed = true;
+   }
 
-/// Return true if modifying this storage requires the ability to
-/// modify the base value.
-bool isSetterMutating() const;
-void setIsSetterMutating(bool isMutating) {
-   LazySemanticInfo.IsSetterMutating = isMutating;
-   LazySemanticInfo.IsSetterMutatingComputed = true;
-}
+   /// Return true if modifying this storage requires the ability to
+   /// modify the base value.
+   bool isSetterMutating() const;
+   void setIsSetterMutating(bool isMutating) {
+      LazySemanticInfo.IsSetterMutating = isMutating;
+      LazySemanticInfo.IsSetterMutatingComputed = true;
+   }
 
-AccessorDecl *getAccessor(AccessorKind kind) const {
-   if (auto info = Accessors.getPointer())
-      return info->getAccessor(kind);
-   return nullptr;
-}
+   AccessorDecl *getAccessor(AccessorKind kind) const {
+      if (auto info = Accessors.getPointer())
+         return info->getAccessor(kind);
+      return nullptr;
+   }
 
-ArrayRef<AccessorDecl*> getAllAccessors() const {
-   if (const auto *info = Accessors.getPointer())
-      return info->getAllAccessors();
-   return {};
-}
+   ArrayRef<AccessorDecl*> getAllAccessors() const {
+      if (const auto *info = Accessors.getPointer())
+         return info->getAllAccessors();
+      return {};
+   }
 
-/// Return an accessor that this storage is expected to have, synthesizing
-/// one if necessary. Note that will always synthesize one, even if the
-/// accessor is not part of the expected opaque set for the storage, so use
-/// with caution.
-AccessorDecl *getSynthesizedAccessor(AccessorKind kind) const;
+   /// Return an accessor that this storage is expected to have, synthesizing
+   /// one if necessary. Note that will always synthesize one, even if the
+   /// accessor is not part of the expected opaque set for the storage, so use
+   /// with caution.
+   AccessorDecl *getSynthesizedAccessor(AccessorKind kind) const;
 
-/// Return an accessor part of the set of opaque accessors dictated by the
-/// requirements of the ABI.
-///
-/// This will synthesize the accessor if one is required but not specified
-/// in source; for example, most of the time a mutable property is required
-/// to have a 'modify' accessor, but if the property was only written with
-/// 'get' and 'set' accessors, 'modify' will be synthesized to call 'get'
-/// followed by 'set'.
-///
-/// If the accessor is not needed for ABI reasons, this returns nullptr.
-/// To ensure an accessor is always returned, use getSynthesizedAccessor().
-AccessorDecl *getOpaqueAccessor(AccessorKind kind) const;
+   /// Return an accessor part of the set of opaque accessors dictated by the
+   /// requirements of the ABI.
+   ///
+   /// This will synthesize the accessor if one is required but not specified
+   /// in source; for example, most of the time a mutable property is required
+   /// to have a 'modify' accessor, but if the property was only written with
+   /// 'get' and 'set' accessors, 'modify' will be synthesized to call 'get'
+   /// followed by 'set'.
+   ///
+   /// If the accessor is not needed for ABI reasons, this returns nullptr.
+   /// To ensure an accessor is always returned, use getSynthesizedAccessor().
+   AccessorDecl *getOpaqueAccessor(AccessorKind kind) const;
 
-/// Return an accessor that was written in source. Returns null if the
-/// accessor was not explicitly defined by the user.
-AccessorDecl *getParsedAccessor(AccessorKind kind) const;
+   /// Return an accessor that was written in source. Returns null if the
+   /// accessor was not explicitly defined by the user.
+   AccessorDecl *getParsedAccessor(AccessorKind kind) const;
 
-/// Visit all parsed accessors.
-void visitParsedAccessors(llvm::function_ref<void (AccessorDecl*)>) const;
+   /// Visit all parsed accessors.
+   void visitParsedAccessors(llvm::function_ref<void (AccessorDecl*)>) const;
 
-/// Visit all opaque accessor kinds.
-void visitExpectedOpaqueAccessors(
+   /// Visit all opaque accessor kinds.
+   void visitExpectedOpaqueAccessors(
       llvm::function_ref<void (AccessorKind)>) const;
 
-/// Visit all opaque accessors.
-void visitOpaqueAccessors(llvm::function_ref<void (AccessorDecl*)>) const;
+   /// Visit all opaque accessors.
+   void visitOpaqueAccessors(llvm::function_ref<void (AccessorDecl*)>) const;
 
-/// Visit all eagerly emitted accessors.
-///
-/// This is the union of the parsed and opaque sets.
-void visitEmittedAccessors(llvm::function_ref<void (AccessorDecl*)>) const;
+   /// Visit all eagerly emitted accessors.
+   ///
+   /// This is the union of the parsed and opaque sets.
+   void visitEmittedAccessors(llvm::function_ref<void (AccessorDecl*)>) const;
 
-void setAccessors(SourceLoc lbraceLoc, ArrayRef<AccessorDecl*> accessors,
-                  SourceLoc rbraceLoc);
+   void setAccessors(SourceLoc lbraceLoc, ArrayRef<AccessorDecl*> accessors,
+                     SourceLoc rbraceLoc);
 
-/// Add a setter to an existing Computed var.
-///
-/// This should only be used by the ClangImporter.
-void setComputedSetter(AccessorDecl *Set);
+   /// Add a setter to an existing Computed var.
+   ///
+   /// This should only be used by the ClangImporter.
+   void setComputedSetter(AccessorDecl *Set);
 
-/// Does this storage require opaque accessors of any kind?
-bool requiresOpaqueAccessors() const;
+   /// Does this storage require opaque accessors of any kind?
+   bool requiresOpaqueAccessors() const;
 
-/// Does this storage require an opaque accessor of the given kind?
-bool requiresOpaqueAccessor(AccessorKind kind) const;
+   /// Does this storage require an opaque accessor of the given kind?
+   bool requiresOpaqueAccessor(AccessorKind kind) const;
 
-/// Does this storage require a 'get' accessor in its opaque-accessors set?
-bool requiresOpaqueGetter() const {
-   return getOpaqueReadOwnership() != OpaqueReadOwnership::Borrowed;
-}
+   /// Does this storage require a 'get' accessor in its opaque-accessors set?
+   bool requiresOpaqueGetter() const {
+      return getOpaqueReadOwnership() != OpaqueReadOwnership::Borrowed;
+   }
 
-/// Does this storage require a 'read' accessor in its opaque-accessors set?
-bool requiresOpaqueReadCoroutine() const {
-   return getOpaqueReadOwnership() != OpaqueReadOwnership::Owned;
-}
+   /// Does this storage require a 'read' accessor in its opaque-accessors set?
+   bool requiresOpaqueReadCoroutine() const {
+      return getOpaqueReadOwnership() != OpaqueReadOwnership::Owned;
+   }
 
-/// Does this storage require a 'set' accessor in its opaque-accessors set?
-bool requiresOpaqueSetter() const { return supportsMutation(); }
+   /// Does this storage require a 'set' accessor in its opaque-accessors set?
+   bool requiresOpaqueSetter() const { return supportsMutation(); }
 
-/// Does this storage require a 'modify' accessor in its opaque-accessors set?
-bool requiresOpaqueModifyCoroutine() const;
+   /// Does this storage require a 'modify' accessor in its opaque-accessors set?
+   bool requiresOpaqueModifyCoroutine() const;
 
-SourceRange getBracesRange() const {
-   if (auto info = Accessors.getPointer())
-      return info->getBracesRange();
-   return SourceRange();
-}
+   SourceRange getBracesRange() const {
+      if (auto info = Accessors.getPointer())
+         return info->getBracesRange();
+      return SourceRange();
+   }
 
-AccessLevel getSetterFormalAccess() const;
+   AccessLevel getSetterFormalAccess() const;
 
-AccessScope
-getSetterFormalAccessScope(const DeclContext *useDC = nullptr,
-                           bool treatUsableFromInlineAsPublic = false) const;
+   AccessScope
+   getSetterFormalAccessScope(const DeclContext *useDC = nullptr,
+                              bool treatUsableFromInlineAsPublic = false) const;
 
-void setSetterAccess(AccessLevel accessLevel) {
-   assert(!Accessors.getInt().hasValue());
-   overwriteSetterAccess(accessLevel);
-}
+   void setSetterAccess(AccessLevel accessLevel) {
+      assert(!Accessors.getInt().hasValue());
+      overwriteSetterAccess(accessLevel);
+   }
 
-void overwriteSetterAccess(AccessLevel accessLevel);
+   void overwriteSetterAccess(AccessLevel accessLevel);
 
-/// Given that this is an Objective-C property or subscript declaration,
-/// produce its getter selector.
-ObjCSelector
-getObjCGetterSelector(Identifier preferredName = Identifier()) const;
+   /// Given that this is an Objective-C property or subscript declaration,
+   /// produce its getter selector.
+   ObjCSelector
+   getObjCGetterSelector(Identifier preferredName = Identifier()) const;
 
-/// Given that this is an Objective-C property or subscript declaration,
-/// produce its setter selector.
-ObjCSelector
-getObjCSetterSelector(Identifier preferredName = Identifier()) const;
+   /// Given that this is an Objective-C property or subscript declaration,
+   /// produce its setter selector.
+   ObjCSelector
+   getObjCSetterSelector(Identifier preferredName = Identifier()) const;
 
-AbstractStorageDecl *getOverriddenDecl() const {
-   return cast_or_null<AbstractStorageDecl>(ValueDecl::getOverriddenDecl());
-}
+   AbstractStorageDecl *getOverriddenDecl() const {
+      return cast_or_null<AbstractStorageDecl>(ValueDecl::getOverriddenDecl());
+   }
 
-/// Returns the location of 'override' keyword, if any.
-SourceLoc getOverrideLoc() const;
+   /// Returns the location of 'override' keyword, if any.
+   SourceLoc getOverrideLoc() const;
 
-/// Returns true if this declaration has a setter accessible from the given
-/// context.
-///
-/// If \p DC is null, returns true only if the setter is public.
-///
-/// See \c isAccessibleFrom for a discussion of the \p forConformance
-/// parameter.
-bool isSetterAccessibleFrom(const DeclContext *DC,
-                            bool forConformance=false) const;
+   /// Returns true if this declaration has a setter accessible from the given
+   /// context.
+   ///
+   /// If \p DC is null, returns true only if the setter is public.
+   ///
+   /// See \c isAccessibleFrom for a discussion of the \p forConformance
+   /// parameter.
+   bool isSetterAccessibleFrom(const DeclContext *DC,
+                               bool forConformance=false) const;
 
-/// Determine how this storage declaration should actually be accessed.
-AccessStrategy getAccessStrategy(AccessSemantics semantics,
-                                 AccessKind accessKind,
-                                 ModuleDecl *module,
-                                 ResilienceExpansion expansion) const;
+   /// Determine how this storage declaration should actually be accessed.
+   AccessStrategy getAccessStrategy(AccessSemantics semantics,
+                                    AccessKind accessKind,
+                                    ModuleDecl *module,
+                                    ResilienceExpansion expansion) const;
 
-/// Should this declaration behave as if it must be accessed
-/// resiliently, even when we're building a non-resilient module?
-///
-/// This is used for diagnostics, because we do not want a behavior
-/// change between builds with resilience enabled and disabled.
-bool isFormallyResilient() const;
+   /// Should this declaration behave as if it must be accessed
+   /// resiliently, even when we're building a non-resilient module?
+   ///
+   /// This is used for diagnostics, because we do not want a behavior
+   /// change between builds with resilience enabled and disabled.
+   bool isFormallyResilient() const;
 
-/// Do we need to use resilient access patterns outside of this
-/// property's resilience domain?
-bool isResilient() const;
+   /// Do we need to use resilient access patterns outside of this
+   /// property's resilience domain?
+   bool isResilient() const;
 
-/// Do we need to use resilient access patterns when accessing this
-/// property from the given module?
-bool isResilient(ModuleDecl *M, ResilienceExpansion expansion) const;
+   /// Do we need to use resilient access patterns when accessing this
+   /// property from the given module?
+   bool isResilient(ModuleDecl *M, ResilienceExpansion expansion) const;
 
-/// True if the storage can be referenced by a keypath directly.
-/// Otherwise, its override must be referenced.
-bool isValidKeyPathComponent() const;
+   /// True if the storage can be referenced by a keypath directly.
+   /// Otherwise, its override must be referenced.
+   bool isValidKeyPathComponent() const;
 
-/// True if the storage exports a property descriptor for key paths in
-/// other modules.
-bool exportsPropertyDescriptor() const;
+   /// True if the storage exports a property descriptor for key paths in
+   /// other modules.
+   bool exportsPropertyDescriptor() const;
 
-/// True if any of the accessors to the storage is private or fileprivate.
-bool hasPrivateAccessor() const;
+   /// True if any of the accessors to the storage is private or fileprivate.
+   bool hasPrivateAccessor() const;
 
-bool hasDidSetOrWillSetDynamicReplacement() const;
+   bool hasDidSetOrWillSetDynamicReplacement() const;
 
-bool hasAnyNativeDynamicAccessors() const;
+   bool hasAnyNativeDynamicAccessors() const;
 
-// Implement isa/cast/dyncast/etc.
-static bool classof(const Decl *D) {
-   return D->getKind() >= DeclKind::First_AbstractStorageDecl &&
-         D->getKind() <= DeclKind::Last_AbstractStorageDecl;
-}
+   // Implement isa/cast/dyncast/etc.
+   static bool classof(const Decl *D) {
+      return D->getKind() >= DeclKind::First_AbstractStorageDecl &&
+             D->getKind() <= DeclKind::Last_AbstractStorageDecl;
+   }
 };
 
 /// Describes which synthesized property for a property with an attached
@@ -4804,10 +4794,10 @@ static bool classof(const Decl *D) {
 enum class PropertyWrapperSynthesizedPropertyKind {
    /// The backing storage property, which is a stored property of the
    /// wrapper type.
-   Backing,
+      Backing,
    /// A storage wrapper (e.g., `$foo`), which is a wrapper over the
    /// wrapper instance's `projectedValue` property.
-   StorageWrapper,
+      StorageWrapper,
 };
 
 /// VarDecl - 'var' and 'let' declarations.
@@ -5001,7 +4991,7 @@ public:
    // the @_hasInitialValue attribute.
    bool hasInitialValue() const {
       return getAttrs().hasAttribute<HasInitialValueAttr>() ||
-            isParentInitialized();
+             isParentInitialized();
    }
 
    VarDecl *getOverriddenDecl() const {
@@ -5138,7 +5128,7 @@ public:
    /// \param kind If not \c None, only returns the original property when
    /// \c this property is the specified synthesized property.
    VarDecl *getOriginalWrappedProperty(
-         Optional<PropertyWrapperSynthesizedPropertyKind> kind = None) const;
+      Optional<PropertyWrapperSynthesizedPropertyKind> kind = None) const;
 
    /// Set the property that wraps to this property as it's backing
    /// property.
@@ -5231,15 +5221,15 @@ class ParamDecl : public VarDecl {
 
    enum class Flags : uint8_t {
       /// Whether or not this parameter is vargs.
-      IsVariadic = 1 << 0,
+         IsVariadic = 1 << 0,
 
       /// Whether or not this parameter is `@autoclosure`.
-      IsAutoClosure = 1 << 1,
+         IsAutoClosure = 1 << 1,
    };
 
    /// The default value, if any, along with flags.
    llvm::PointerIntPair<StoredDefaultArgument *, 2, OptionSet<Flags>>
-   DefaultValueAndFlags;
+      DefaultValueAndFlags;
 
    friend class ParamSpecifierRequest;
 
@@ -5365,7 +5355,7 @@ public:
    /// ```
    /// \sa getDefaultValue
    StringRef getDefaultValueStringRepresentation(
-         SmallVectorImpl<char> &scratch) const;
+      SmallVectorImpl<char> &scratch) const;
 
    void setDefaultValueStringRepresentation(StringRef stringRepresentation);
 
@@ -5460,12 +5450,12 @@ public:
    }
    static bool isImmutableSpecifier(Specifier sp) {
       switch (sp) {
-      case Specifier::Default:
-      case Specifier::Shared:
-      case Specifier::Owned:
-         return true;
-      case Specifier::InOut:
-         return false;
+         case Specifier::Default:
+         case Specifier::Shared:
+         case Specifier::Owned:
+            return true;
+         case Specifier::InOut:
+            return false;
       }
       llvm_unreachable("unhandled specifier");
    }
@@ -5476,14 +5466,14 @@ public:
 
    static ValueOwnership getValueOwnershipForSpecifier(Specifier specifier) {
       switch (specifier) {
-      case Specifier::Default:
-         return ValueOwnership::Default;
-      case Specifier::InOut:
-         return ValueOwnership::InOut;
-      case Specifier::Shared:
-         return ValueOwnership::Shared;
-      case Specifier::Owned:
-         return ValueOwnership::Owned;
+         case Specifier::Default:
+            return ValueOwnership::Default;
+         case Specifier::InOut:
+            return ValueOwnership::InOut;
+         case Specifier::Shared:
+            return ValueOwnership::Shared;
+         case Specifier::Owned:
+            return ValueOwnership::Owned;
       }
       llvm_unreachable("unhandled specifier");
    }
@@ -5491,14 +5481,14 @@ public:
    static Specifier
    getParameterSpecifierForValueOwnership(ValueOwnership ownership) {
       switch (ownership) {
-      case ValueOwnership::Default:
-         return Specifier::Default;
-      case ValueOwnership::Shared:
-         return Specifier::Shared;
-      case ValueOwnership::InOut:
-         return Specifier::InOut;
-      case ValueOwnership::Owned:
-         return Specifier::Owned;
+         case ValueOwnership::Default:
+            return Specifier::Default;
+         case ValueOwnership::Shared:
+            return Specifier::Shared;
+         case ValueOwnership::InOut:
+            return Specifier::InOut;
+         case ValueOwnership::Owned:
+            return Specifier::Owned;
       }
       llvm_unreachable("unhandled ownership");
    }
@@ -5517,10 +5507,10 @@ public:
 enum class ObjCSubscriptKind {
    /// Objective-C indexed subscripting, which is based on an integral
    /// index.
-   Indexed,
+      Indexed,
    /// Objective-C keyed subscripting, which is based on an object
    /// argument or metatype thereof.
-   Keyed
+      Keyed
 };
 
 /// Declares a subscripting operator for a type.
@@ -5568,7 +5558,7 @@ public:
         AbstractStorageDecl(DeclKind::Subscript,
                             StaticSpelling != StaticSpellingKind::None,
                             Parent, Name, SubscriptLoc,
-                            /*will be overwritten*/ StorageIsNotMutable),
+           /*will be overwritten*/ StorageIsNotMutable),
         StaticLoc(StaticLoc), ArrowLoc(ArrowLoc),
         Indices(nullptr), ElementTy(ElementTy) {
       Bits.SubscriptDecl.StaticSpelling = static_cast<unsigned>(StaticSpelling);
@@ -5609,7 +5599,7 @@ public:
 
    SubscriptDecl *getOverriddenDecl() const {
       return cast_or_null<SubscriptDecl>(
-               AbstractStorageDecl::getOverriddenDecl());
+         AbstractStorageDecl::getOverriddenDecl());
    }
 
    static bool classof(const Decl *D) {
@@ -5665,28 +5655,28 @@ class AbstractFunctionDecl : public GenericContext, public ValueDecl {
 public:
    enum class BodyKind {
       /// The function did not have a body in the source code file.
-      None,
+         None,
 
       /// Function body is delayed, to be parsed later.
-      Unparsed,
+         Unparsed,
 
       /// Function body is parsed and available as an AST subtree.
-      Parsed,
+         Parsed,
 
       /// Function body is not available, although it was written in the source.
-      Skipped,
+         Skipped,
 
       /// Function body will be synthesized on demand.
-      Synthesize,
+         Synthesize,
 
       /// Function body is present and type-checked.
-      TypeChecked,
+         TypeChecked,
 
       /// This is a memberwise initializer that will be synthesized by SILGen.
-      MemberwiseInitializer,
+         MemberwiseInitializer,
 
       /// Function body text was deserialized from a .swiftmodule.
-      Deserialized
+         Deserialized
 
       // This enum currently needs to fit in a 3-bit bitfield.
    };
@@ -5820,7 +5810,7 @@ public:
    /// parsed.
    bool hasBody() const {
       return getBodyKind() != BodyKind::None &&
-            getBodyKind() != BodyKind::Skipped;
+             getBodyKind() != BodyKind::Skipped;
    }
 
    /// Returns true if the text of this function's body can be retrieved either
@@ -5838,7 +5828,7 @@ public:
 
    void setBody(BraceStmt *S, BodyKind NewBodyKind = BodyKind::Parsed) {
       assert(getBodyKind() != BodyKind::Skipped &&
-            "cannot set a body if it was skipped");
+             "cannot set a body if it was skipped");
 
       Body = S;
       setBodyKind(NewBodyKind);
@@ -5877,8 +5867,8 @@ public:
    /// The function should return the body statement and a flag indicating
    /// whether that body is already type-checked.
    void setBodySynthesizer(
-         std::pair<BraceStmt *, bool> (* fn)(AbstractFunctionDecl *, void *),
-         void *context = nullptr) {
+      std::pair<BraceStmt *, bool> (* fn)(AbstractFunctionDecl *, void *),
+      void *context = nullptr) {
       assert(getBodyKind() == BodyKind::None);
       Synthesizer = {fn, context};
       setBodyKind(BodyKind::Synthesize);
@@ -5975,7 +5965,7 @@ public:
    /// free functions.
    const ParamDecl *getImplicitSelfDecl(bool createIfNeeded=true) const {
       return const_cast<AbstractFunctionDecl*>(this)
-            ->getImplicitSelfDecl(createIfNeeded);
+         ->getImplicitSelfDecl(createIfNeeded);
    }
    ParamDecl *getImplicitSelfDecl(bool createIfNeeded=true);
 
@@ -6012,7 +6002,7 @@ public:
 
    static bool classof(const Decl *D) {
       return D->getKind() >= DeclKind::First_AbstractFunctionDecl &&
-            D->getKind() <= DeclKind::Last_AbstractFunctionDecl;
+             D->getKind() <= DeclKind::Last_AbstractFunctionDecl;
    }
 
    static bool classof(const DeclContext *DC) {
@@ -6077,7 +6067,7 @@ protected:
 
       Bits.FuncDecl.ForcedStaticDispatch = false;
       Bits.FuncDecl.SelfAccess =
-            static_cast<unsigned>(SelfAccessKind::NonMutating);
+         static_cast<unsigned>(SelfAccessKind::NonMutating);
       Bits.FuncDecl.SelfAccessComputed = false;
       Bits.FuncDecl.IsStaticComputed = false;
       Bits.FuncDecl.IsStatic = false;
@@ -6165,7 +6155,7 @@ public:
 
    SourceLoc getStartLoc() const {
       return StaticLoc.isValid() && !isa<AccessorDecl>(this)
-            ? StaticLoc : FuncLoc;
+             ? StaticLoc : FuncLoc;
    }
    SourceRange getSourceRange() const;
 
@@ -6221,7 +6211,7 @@ public:
 
    static bool classof(const Decl *D) {
       return D->getKind() == DeclKind::Func ||
-            D->getKind() == DeclKind::Accessor;
+             D->getKind() == DeclKind::Accessor;
    }
    static bool classof(const AbstractFunctionDecl *D) {
       return classof(static_cast<const Decl*>(D));
@@ -6255,7 +6245,7 @@ class AccessorDecl final : public FuncDecl {
                 DeclContext *parent)
       : FuncDecl(DeclKind::Accessor,
                  staticLoc, staticSpelling, /*func loc*/ declLoc,
-                 /*name*/ Identifier(), /*name loc*/ declLoc,
+      /*name*/ Identifier(), /*name loc*/ declLoc,
                  throws, throwsLoc, hasImplicitSelfDecl, genericParams, parent),
         AccessorKeywordLoc(accessorKeywordLoc),
         Storage(storage) {
@@ -6321,7 +6311,7 @@ public:
    bool isAnyAddressor() const {
       auto kind = getAccessorKind();
       return kind == AccessorKind::Address
-            || kind == AccessorKind::MutableAddress;
+             || kind == AccessorKind::MutableAddress;
    }
 
    /// isGetterOrSetter - Determine whether this is specifically a getter or
@@ -6333,9 +6323,9 @@ public:
    bool isObservingAccessor() const {
       switch (getAccessorKind()) {
 #define OBSERVING_ACCESSOR(ID, KEYWORD) \
-      case AccessorKind::ID: return true;
+    case AccessorKind::ID: return true;
 #define ACCESSOR(ID) \
-      case AccessorKind::ID: return false;
+    case AccessorKind::ID: return false;
 #include "polarphp/ast/AccessorKindsDef.h"
       }
       llvm_unreachable("bad accessor kind");
@@ -6352,9 +6342,9 @@ public:
    bool isCoroutine() const {
       switch (getAccessorKind()) {
 #define COROUTINE_ACCESSOR(ID, KEYWORD) \
-      case AccessorKind::ID: return true;
+    case AccessorKind::ID: return true;
 #define ACCESSOR(ID) \
-      case AccessorKind::ID: return false;
+    case AccessorKind::ID: return false;
 #include "polarphp/ast/AccessorKindsDef.h"
       }
       llvm_unreachable("bad accessor kind");
@@ -6391,7 +6381,7 @@ AbstractStorageDecl::AccessorRecord::getAccessor(AccessorKind kind) const {
 /// This represents a 'case' declaration in an 'enum', which may declare
 /// one or more individual comma-separated EnumElementDecls.
 class EnumCaseDecl final : public Decl,
-      private llvm::TrailingObjects<EnumCaseDecl, EnumElementDecl *> {
+                           private llvm::TrailingObjects<EnumCaseDecl, EnumElementDecl *> {
    friend TrailingObjects;
    friend class Decl;
    SourceLoc CaseLoc;
@@ -6416,7 +6406,7 @@ public:
    /// Get the list of elements declared in this case.
    ArrayRef<EnumElementDecl *> getElements() const {
       return {getTrailingObjects<EnumElementDecl *>(),
-               Bits.EnumCaseDecl.NumElements};
+              Bits.EnumCaseDecl.NumElements};
    }
    SourceRange getSourceRange() const;
 
@@ -6543,7 +6533,7 @@ enum class CtorInitializerKind {
    /// designated initializer (for non-root classes).
    ///
    /// Designated initializers are never inherited.
-   Designated,
+      Designated,
 
    /// A convenience initializer is an initializer that initializes a complete
    /// object by delegating to another initializer (eventually reaching a
@@ -6551,7 +6541,7 @@ enum class CtorInitializerKind {
    ///
    /// Convenience initializers are inherited into subclasses that override
    /// all of their superclass's designated initializers.
-   Convenience,
+      Convenience,
 
    /// A convenience factory initializer is a convenience initializer introduced
    /// by an imported Objective-C factory method.
@@ -6559,7 +6549,7 @@ enum class CtorInitializerKind {
    /// Convenience factory initializers cannot be expressed directly in
    /// Swift; rather, they are produced by the Clang importer when importing
    /// an instancetype factory method from Objective-C.
-   ConvenienceFactory,
+      ConvenienceFactory,
 
    /// A factory initializer is an initializer that is neither designated nor
    /// convenience: it can be used to create an object of the given type, but
@@ -6572,7 +6562,7 @@ enum class CtorInitializerKind {
    ///
    /// FIXME: Arguably, structs and enums only have factory initializers, and
    /// using designated initializers for them is a misnomer.
-   Factory
+      Factory
 };
 
 /// ConstructorDecl - Declares a constructor for a type.  For example:
@@ -6627,16 +6617,16 @@ public:
    /// of the constructor, e.g., self.init or super.init.
    enum class BodyInitKind {
       /// There are no calls to self.init or super.init.
-      None,
+         None,
       /// There is a call to self.init, which delegates to another (peer)
       /// initializer.
-      Delegating,
+         Delegating,
       /// There is a call to super.init, which chains to a superclass initializer.
-      Chained,
+         Chained,
       /// There are no calls to self.init or super.init explicitly in the body of
       /// the constructor, but a 'super.init' call will be implicitly added
       /// by semantic analysis.
-      ImplicitChained
+         ImplicitChained
    };
 
    /// Determine whether the body of this constructor contains any delegating
@@ -6669,19 +6659,19 @@ public:
    /// Whether this is a convenience initializer.
    bool isConvenienceInit() const {
       return getInitKind() == CtorInitializerKind::Convenience ||
-            getInitKind() == CtorInitializerKind::ConvenienceFactory;
+             getInitKind() == CtorInitializerKind::ConvenienceFactory;
    }
 
    /// Whether this is a factory initializer.
    bool isFactoryInit() const {
       switch (getInitKind()) {
-      case CtorInitializerKind::Designated:
-      case CtorInitializerKind::Convenience:
-         return false;
+         case CtorInitializerKind::Designated:
+         case CtorInitializerKind::Convenience:
+            return false;
 
-      case CtorInitializerKind::Factory:
-      case CtorInitializerKind::ConvenienceFactory:
-         return true;
+         case CtorInitializerKind::Factory:
+         case CtorInitializerKind::ConvenienceFactory:
+            return true;
       }
       llvm_unreachable("bad CtorInitializerKind");
    }
@@ -6689,13 +6679,13 @@ public:
    /// Determine whether this initializer is inheritable.
    bool isInheritable() const {
       switch (getInitKind()) {
-      case CtorInitializerKind::Designated:
-      case CtorInitializerKind::Factory:
-         return false;
+         case CtorInitializerKind::Designated:
+         case CtorInitializerKind::Factory:
+            return false;
 
-      case CtorInitializerKind::Convenience:
-      case CtorInitializerKind::ConvenienceFactory:
-         return true;
+         case CtorInitializerKind::Convenience:
+         case CtorInitializerKind::ConvenienceFactory:
+            return true;
       }
       llvm_unreachable("bad CtorInitializerKind");
    }
@@ -6721,7 +6711,7 @@ public:
 
    ConstructorDecl *getOverriddenDecl() const {
       return cast_or_null<ConstructorDecl>(
-               AbstractFunctionDecl::getOverriddenDecl());
+         AbstractFunctionDecl::getOverriddenDecl());
    }
 
    /// Determine whether this initializer falls into the special case for
@@ -7019,7 +7009,7 @@ public:
       if (DeclKind::Last_Decl == DeclKind::Last_OperatorDecl)
          return D->getKind() >= DeclKind::First_OperatorDecl;
       return D->getKind() >= DeclKind::First_OperatorDecl
-            && D->getKind() <= DeclKind::Last_OperatorDecl;
+             && D->getKind() <= DeclKind::Last_OperatorDecl;
    }
 };
 
@@ -7150,7 +7140,7 @@ class MissingMemberDecl : public Decl {
       Bits.MissingMemberDecl.NumberOfVTableEntries = vtableEntries;
       assert(getNumberOfVTableEntries() == vtableEntries && "not enough bits");
       Bits.MissingMemberDecl.NumberOfFieldOffsetVectorEntries =
-            fieldOffsetVectorEntries;
+         fieldOffsetVectorEntries;
       assert(getNumberOfFieldOffsetVectorEntries() == fieldOffsetVectorEntries
              && "not enough bits");
       setImplicit();
@@ -7164,9 +7154,9 @@ public:
    create(AstContext &ctx, DeclContext *DC, DeclName name,
           unsigned numVTableEntries, bool hasStorage) {
       assert((!numVTableEntries || isa<InterfaceDecl>(DC) || isa<ClassDecl>(DC)) &&
-             "Only classes and protocols have vtable/witness table entries");
+                                                           "Only classes and Interfaces have vtable/witness table entries");
       assert((!hasStorage || !isa<InterfaceDecl>(DC)) &&
-             "Interfaces cannot have missing stored properties");
+                            "Interfaces cannot have missing stored properties");
 
       return new (ctx) MissingMemberDecl(DC, name, numVTableEntries, hasStorage);
    }
@@ -7218,14 +7208,14 @@ AbstractStorageDecl::overwriteSetterAccess(AccessLevel accessLevel) {
 /// in which case we tail-allocate storage for it.
 inline ParamDecl **AbstractFunctionDecl::getImplicitSelfDeclStorage() {
    switch (getKind()) {
-   default: llvm_unreachable("Unknown AbstractFunctionDecl!");
-   case DeclKind::Constructor:
-      return cast<ConstructorDecl>(this)->getImplicitSelfDeclStorage();
-   case DeclKind::Destructor:
-      return cast<DestructorDecl>(this)->getImplicitSelfDeclStorage();
-   case DeclKind::Func:
-   case DeclKind::Accessor:
-      return cast<FuncDecl>(this)->getImplicitSelfDeclStorage();
+      default: llvm_unreachable("Unknown AbstractFunctionDecl!");
+      case DeclKind::Constructor:
+         return cast<ConstructorDecl>(this)->getImplicitSelfDeclStorage();
+      case DeclKind::Destructor:
+         return cast<DestructorDecl>(this)->getImplicitSelfDeclStorage();
+      case DeclKind::Func:
+      case DeclKind::Accessor:
+         return cast<FuncDecl>(this)->getImplicitSelfDeclStorage();
    }
 }
 
@@ -7305,21 +7295,21 @@ inline GenericParamKey::GenericParamKey(const GenericTypeParamDecl *d)
 
 inline const GenericContext *Decl::getAsGenericContext() const {
    switch (getKind()) {
-   default: return nullptr;
+      default: return nullptr;
 #define DECL(Id, Parent) // See previous line
 #define GENERIC_DECL(Id, Parent) \
-   case DeclKind::Id: \
-   return static_cast<const Id##Decl*>(this);
+  case DeclKind::Id: \
+    return static_cast<const Id##Decl*>(this);
 #include "polarphp/ast/DeclNodesDef.h"
    }
 }
 
 inline bool DeclContext::classof(const Decl *D) {
    switch (D->getKind()) { //
-   default: return false;
+      default: return false;
 #define DECL(ID, PARENT) // See previous line
 #define CONTEXT_DECL(ID, PARENT) \
-   case DeclKind::ID: return true;
+  case DeclKind::ID: return true;
 #include "polarphp/ast/DeclNodesDef.h"
    }
 }
@@ -7329,12 +7319,12 @@ inline DeclContext *DeclContext::castDeclToDeclContext(const Decl *D) {
    // preface decls in memory, any DeclContext type will due.
    const DeclContext *DC = static_cast<const ExtensionDecl*>(D);
    switch (D->getKind()) {
-   default: llvm_unreachable("Not a DeclContext");
+      default: llvm_unreachable("Not a DeclContext");
 #define DECL(ID, PARENT) // See previous line
 #define CONTEXT_DECL(ID, PARENT) \
-   case DeclKind::ID:
+  case DeclKind::ID:
 #include "polarphp/ast/DeclNodesDef.h"
-      return const_cast<DeclContext *>(DC);
+         return const_cast<DeclContext *>(DC);
    }
 }
 
@@ -7416,6 +7406,6 @@ inline SourceLoc extractNearestSourceLoc(const AbstractFunctionDecl *func) {
    return extractNearestSourceLoc(static_cast<const Decl *>(func));
 }
 
-} // polar::ast
+} // end namespace polar::ast
 
-#endif // POLARPHP_AST_DECL_H
+#endif

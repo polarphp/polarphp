@@ -1,29 +1,18 @@
-////===--- Identifier.cpp - Uniqued Identifier ------------------------------===//
-////
-//// This source file is part of the Swift.org open source project
-////
-//// Copyright (c) 2014 - 2017 Apple Inc. and the Swift project authors
-//// Licensed under Apache License v2.0 with Runtime Library Exception
-////
-//// See https://swift.org/LICENSE.txt for license information
-//// See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
-////
-////===----------------------------------------------------------------------===//
-//// This source file is part of the polarphp.org open source project
-////
-//// Copyright (c) 2017 - 2019 polarphp software foundation
-//// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-//// Licensed under Apache License v2.0 with Runtime Library Exception
-////
-//// See https://polarphp.org/LICENSE.txt for license information
-//// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-////
-//// Created by polarboy on 2019/05/09.
-////===----------------------------------------------------------------------===//
-////
-//// This file implements the Identifier interface.
-////
-////===----------------------------------------------------------------------===//
+//===--- Identifier.cpp - Uniqued Identifier ------------------------------===//
+//
+// This source file is part of the Swift.org open source project
+//
+// Copyright (c) 2014 - 2017 Apple Inc. and the Swift project authors
+// Licensed under Apache License v2.0 with Runtime Library Exception
+//
+// See https://swift.org/LICENSE.txt for license information
+// See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
+//
+//===----------------------------------------------------------------------===//
+//
+// This file implements the Identifier interface.
+//
+//===----------------------------------------------------------------------===//
 
 #include "polarphp/ast/Identifier.h"
 #include "llvm/ADT/StringExtras.h"
@@ -33,9 +22,7 @@
 
 namespace llvm {
 
-using polar::ast::Identifier;
-using polar::ast::DeclBaseName;
-using polar::ast::DeclName;
+using namespace polar::ast;
 
 raw_ostream &operator<<(raw_ostream &OS, Identifier I) {
    if (I.get() == nullptr)
@@ -62,7 +49,10 @@ raw_ostream &operator<<(raw_ostream &OS, DeclName I) {
 
 namespace polar::ast {
 
-using namespace llvm;
+constexpr const Identifier::Aligner DeclBaseName::SubscriptIdentifierData{};
+constexpr const Identifier::Aligner DeclBaseName::ConstructorIdentifierData{};
+constexpr const Identifier::Aligner DeclBaseName::DestructorIdentifierData{};
+
 
 void simple_display(llvm::raw_ostream &out, DeclName name) {
    out << "'" << name << "'";
@@ -76,7 +66,7 @@ bool Identifier::isOperatorSlow() const {
    llvm::ConversionResult res =
       llvm::convertUTF8Sequence(&s, end, &codePoint, llvm::strictConversion);
    assert(res == llvm::conversionOK && "invalid UTF-8 in identifier?!");
-   (void)res;
+   (void) res;
    return !empty() && isOperatorStartCodePoint(codePoint);
 }
 

@@ -9,16 +9,6 @@
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
 //===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
-//
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/12/01.
 //
 /// \file
 /// This file defines diagnostics for SIL generation and analysis.
@@ -30,11 +20,13 @@
 
 #include "polarphp/ast/DiagnosticsCommon.h"
 
-namespace polar::ast::diag {
+namespace polar::ast {
+namespace diag {
 // Declare common diagnostics objects with their appropriate types.
 #define DIAG(KIND,ID,Options,Text,Signature) \
-   extern internal::DiagWithArguments<void Signature>::type ID;
+  extern internal::DiagWithArguments<void Signature>::type ID;
 #include "polarphp/ast/DiagnosticsPILDefs.h"
-} // polar::ast::diag
+}
+} // polar::ast
 
 #endif // POLARPHP_AST_DIAGNOSTICSSIL_H

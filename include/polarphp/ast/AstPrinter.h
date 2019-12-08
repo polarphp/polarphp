@@ -9,16 +9,6 @@
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
 //===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
-//
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/12/05.
 
 #ifndef POLARPHP_AST_ASTPRINTER_H
 #define POLARPHP_AST_ASTPRINTER_H
@@ -26,13 +16,18 @@
 #include "polarphp/basic/LLVM.h"
 #include "polarphp/basic/Uuid.h"
 #include "polarphp/ast/Identifier.h"
-#include "polarphp/ast/TypeOrExtensionDecl.h"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/ADT/DenseSet.h"
 #include "llvm/Support/raw_ostream.h"
 #include "polarphp/ast/PrintOptions.h"
 
+namespace polar::basic {
+class SourceLoc;
+} // polar::basic
+
 namespace polar::ast {
+
+using polar::basic::SourceLoc;
 
 class Decl;
 class DeclContext;
@@ -46,35 +41,31 @@ class Pattern;
 class ExtensionDecl;
 class NominalTypeDecl;
 class ValueDecl;
-class SourceLoc;
 enum class tok;
 enum class AccessorKind;
 
-using polar::basic::UUID;
-
 /// Describes the context in which a name is being printed, which
 /// affects the keywords that need to be escaped.
-enum class PrintNameContext
-{
+enum class PrintNameContext {
    /// Normal context
-   Normal,
+      Normal,
    /// Keyword context, where no keywords are escaped.
-   Keyword,
+      Keyword,
    /// Type member context, e.g. properties or enum cases.
-   TypeMember,
+      TypeMember,
    /// Generic parameter context, where 'Self' is not escaped.
-   GenericParameter,
+      GenericParameter,
    /// Class method return type, where 'Self' is not escaped.
-   ClassDynamicSelf,
+      ClassDynamicSelf,
    /// Function parameter context, where keywords other than let/var/inout are
    /// not escaped.
-   FunctionParameterExternal,
+      FunctionParameterExternal,
    FunctionParameterLocal,
    /// Tuple element context, similar to \c FunctionParameterExternal.
-   TupleElement,
+      TupleElement,
    /// Attributes, which are escaped as 'Normal', but differentiated for
    /// the purposes of printName* callbacks.
-   Attribute,
+      Attribute,
 };
 
 /// Describes the kind of structured entity being printed.
@@ -99,8 +90,7 @@ enum class PrintStructureKind {
 };
 
 /// An abstract class used to print an AST.
-class AstPrinter
-{
+class AstPrinter {
    unsigned CurrentIndentation = 0;
    unsigned PendingNewlines = 0;
    TypeOrExtensionDecl SynthesizeTarget;
@@ -155,8 +145,8 @@ public:
    /// \param NameContext the \c PrintNameContext which this type is being
    ///                    printed in, used to determine how to escape type names.
    virtual void printTypeRef(
-         Type T, const TypeDecl *RefTo, Identifier Name,
-         PrintNameContext NameContext = PrintNameContext::Normal);
+      Type T, const TypeDecl *RefTo, Identifier Name,
+      PrintNameContext NameContext = PrintNameContext::Normal);
 
    /// Called when printing the referenced name of a module.
    virtual void printModuleRef(ModuleEntity Mod, Identifier Name);
@@ -214,7 +204,7 @@ public:
    }
 
    void printKeyword(StringRef name, PrintOptions Opts, StringRef Suffix = "") {
-      if (Opts.skipUnderscoredKeywords && name.startswith("_"))
+      if (Opts.SkipUnderscoredKeywords && name.startswith("_"))
          return;
       callPrintNamePre(PrintNameContext::Keyword);
       *this << name;
@@ -315,10 +305,10 @@ private:
 /// An AST printer for a raw_ostream.
 class StreamPrinter : public AstPrinter {
 protected:
-   raw_ostream &ostream;
+   raw_ostream &OS;
 
 public:
-   explicit StreamPrinter(raw_ostream &ostream) : ostream(ostream) {}
+   explicit StreamPrinter(raw_ostream &OS) : OS(OS) {}
 
    void printText(StringRef Text) override;
 };
@@ -340,10 +330,10 @@ public:
 void printContext(raw_ostream &os, DeclContext *dc);
 
 bool printRequirementStub(ValueDecl *Requirement, DeclContext *Adopter,
-                          Type AdopterTy, SourceLoc TypeLoc, raw_ostream &ostream);
+                          Type AdopterTy, SourceLoc TypeLoc, raw_ostream &OS);
 
 /// Print a keyword or punctuator directly by its kind.
-llvm::raw_ostream &operator<<(llvm::raw_ostream &ostream, tok keyword);
+llvm::raw_ostream &operator<<(llvm::raw_ostream &OS, tok keyword);
 
 /// Get the length of a keyword or punctuator by its kind.
 uint8_t getKeywordLen(tok keyword);
@@ -354,14 +344,13 @@ StringRef getCodePlaceholder();
 /// Given an array of enum element decls, print them as case statements with
 /// placeholders as contents.
 void printEnumElementsAsCases(
-      llvm::DenseSet<EnumElementDecl *> &UnhandledElements,
-      llvm::raw_ostream &ostream);
+   llvm::DenseSet<EnumElementDecl *> &UnhandledElements,
+   llvm::raw_ostream &OS);
 
 void getInheritedForPrinting(const Decl *decl, const PrintOptions &options,
                              llvm::SmallVectorImpl<TypeLoc> &Results);
 
 StringRef getAccessorKindString(AccessorKind value);
-
-}
+} // namespace polar::ast
 
 #endif // POLARPHP_AST_ASTPRINTER_H

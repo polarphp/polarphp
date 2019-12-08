@@ -9,37 +9,35 @@
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
 //===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
 //
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/05/05.
-//===----------------------------------------------------------------------===//
-//
-//  This file defines all of the diagnostics emitted by polarphp.
+//  This file defines all of the diagnostics emitted by Swift.
 //
 //===----------------------------------------------------------------------===//
 
 #include "polarphp/ast/DiagnosticsCommon.h"
-
 namespace polar::ast {
 
-enum class DiagID : uint32_t
-{
-#define DIAG(KIND, ID, Options, Text, Signature) ID,
+enum class DiagID : uint32_t {
+#define DIAG(KIND,ID,Options,Text,Signature) ID,
 #include "polarphp/ast/DiagnosticsAllDefs.h"
 };
-
 static_assert(static_cast<uint32_t>(DiagID::invalid_diagnostic) == 0,
               "0 is not the invalid diagnostic ID");
 
+enum class FixItID : uint32_t {
+#define DIAG(KIND, ID, Options, Text, Signature)
+#define FIXIT(ID, Text, Signature) ID,
+#include "polarphp/ast/DiagnosticsAllDefs.h"
+};
+
+// Define all of the diagnostic objects and initialize them with their
+// diagnostic IDs.
+
 namespace diag {
 #define DIAG(KIND,ID,Options,Text,Signature) \
-  internal::DiagWithArguments<void Signature>::type ID = { DiagID::ID };
+    internal::DiagWithArguments<void Signature>::type ID = { DiagID::ID };
+#define FIXIT(ID, Text, Signature) \
+    internal::StructuredFixItWithArguments<void Signature>::type ID = {FixItID::ID};
 #include "polarphp/ast/DiagnosticsAllDefs.h"
 } // end namespace diag
-} // polar::ast
+} // end namespace polar::ast

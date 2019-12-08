@@ -10,36 +10,25 @@
 //
 //===----------------------------------------------------------------------===//
 //
-// This source file is part of the polarphp.org open source project
-//
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/04/25.
-//
-//===----------------------------------------------------------------------===//
-//
 /// \file
 /// This file defines diagnostics for lexing and parsing.
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef POLARPHP_AST_DIAGNOSTIC_PARSE_H
-#define POLARPHP_AST_DIAGNOSTIC_PARSE_H
+#ifndef POLARPHP_AST_DIAGNOSTICSPARSE_H
+#define POLARPHP_AST_DIAGNOSTICSPARSE_H
 
 #include "polarphp/ast/DiagnosticsCommon.h"
 
-namespace polar::ast::diag {
-
+namespace polar::ast {
+namespace diag {
 // Declare common diagnostics objects with their appropriate types.
-#define DIAG(KIND, ID, Options, Text, Signature) \
- extern internal::DiagWithArguments<void Signature>::type ID;
+#define DIAG(KIND,ID,Options,Text,Signature) \
+  extern internal::DiagWithArguments<void Signature>::type ID;
+#define FIXIT(ID,Text,Signature) \
+  extern internal::StructuredFixItWithArguments<void Signature>::type ID;
 #include "polarphp/ast/DiagnosticsParseDefs.h"
+}
+} // polar::ast
 
-} // polar::ast::diag
-
-#endif // POLARPHP_AST_DIAGNOSTIC_PARSE_H
+#endif // POLARPHP_AST_DIAGNOSTICSPARSE_H

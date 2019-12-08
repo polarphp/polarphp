@@ -9,16 +9,6 @@
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
 //===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
-//
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/12/05.
 //
 // This file defines the AstNode, which is a union of Stmt, Expr, and Decl.
 //
@@ -28,6 +18,7 @@
 #define POLARPHP_AST_AST_NODE_H
 
 #include "llvm/ADT/PointerUnion.h"
+#include "polarphp/basic/Debug.h"
 #include "polarphp/ast/TypeAlignments.h"
 
 namespace llvm {
@@ -40,25 +31,21 @@ class SourceRange;
 }
 
 namespace polar::ast {
-
+using polar::basic::SourceLoc;
+using polar::basic::SourceRange;
 class Expr;
 class Stmt;
 class Decl;
 class DeclContext;
-
-using polar::basic::SourceLoc;
-using polar::basic::SourceRange;
-
 class AstWalker;
 enum class ExprKind : uint8_t;
 enum class DeclKind : uint8_t;
 enum class StmtKind;
-using AstBaseNodeType = llvm::PointerUnion3<Expr*, Stmt*, Decl*>;
 
-struct AstNode : public AstBaseNodeType
-{
+struct AstNode : public llvm::PointerUnion<Expr*, Stmt*, Decl*> {
    // Inherit the constructors from PointerUnion.
-   using AstBaseNodeType::PointerUnion;
+   using PointerUnion::PointerUnion;
+
    SourceRange getSourceRange() const;
 
    /// Return the location of the start of the statement.
@@ -81,15 +68,30 @@ struct AstNode : public AstBaseNodeType
    FUNC(Decl)
 #undef FUNC
 
-   LLVM_ATTRIBUTE_DEPRECATED(
-         void dump() const LLVM_ATTRIBUTE_USED,
-         "only for use within the debugger");
-   void dump(llvm::raw_ostream &ostream, unsigned Indent = 0) const;
+   POLAR_DEBUG_DUMP;
+   void dump(llvm::raw_ostream &OS, unsigned Indent = 0) const;
 
    /// Whether the AST node is implicit.
    bool isImplicit() const;
 };
+} // namespace swift
 
-} // polar::ast
+namespace llvm {
+using polar::ast::AstNode;
+template <> struct DenseMapInfo<AstNode> {
+   static inline AstNode getEmptyKey() {
+      return DenseMapInfo<polar::ast::Expr *>::getEmptyKey();
+   }
+   static inline AstNode getTombstoneKey() {
+      return DenseMapInfo<polar::ast::Expr *>::getTombstoneKey();
+   }
+   static unsigned getHashValue(const AstNode Val) {
+      return DenseMapInfo<void *>::getHashValue(Val.getOpaqueValue());
+   }
+   static bool isEqual(const AstNode LHS, const AstNode RHS) {
+      return LHS.getOpaqueValue() == RHS.getOpaqueValue();
+   }
+};
+}
 
-#endif // POLARPHP_AST_AST_NODE_H
+#endif // LLVM_POLARPHP_AST_AST_NODE_H

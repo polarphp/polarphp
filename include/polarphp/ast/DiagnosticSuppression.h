@@ -10,19 +10,6 @@
 //
 //===----------------------------------------------------------------------===//
 //
-// This source file is part of the polarphp.org open source project
-//
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/04/25.
-//
-//===----------------------------------------------------------------------===//
-//
 //  This file implements the supporting functions for writing instrumenters of
 //  the Swift AST.
 //
@@ -40,19 +27,18 @@ class DiagnosticEngine;
 
 /// RAII class that suppresses diagnostics by temporarily disabling all of
 /// the diagnostic consumers.
-class DiagnosticSuppression
-{
-   DiagnosticEngine &m_diags;
-   std::vector<DiagnosticConsumer *> m_consumers;
+class DiagnosticSuppression {
+  DiagnosticEngine &diags;
+  std::vector<DiagnosticConsumer *> consumers;
 
-   DiagnosticSuppression(const DiagnosticSuppression &) = delete;
-   DiagnosticSuppression &operator=(const DiagnosticSuppression &) = delete;
+  DiagnosticSuppression(const DiagnosticSuppression &) = delete;
+  DiagnosticSuppression &operator=(const DiagnosticSuppression &) = delete;
 
 public:
-   explicit DiagnosticSuppression(DiagnosticEngine &diags);
-   ~DiagnosticSuppression();
+  explicit DiagnosticSuppression(DiagnosticEngine &diags);
+  ~DiagnosticSuppression();
+  static bool isEnabled(const DiagnosticEngine &diags);
 };
 
 } // polar::ast
-
 #endif // POLARPHP_AST_DIAGNOSTIC_SUPPRESSION_H

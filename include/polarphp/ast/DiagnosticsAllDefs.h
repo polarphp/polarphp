@@ -8,16 +8,6 @@
 // See https://swift.org/LICENSE.txt for license information
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
-// This source file is part of the polarphp.org open source project
-//
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/04/30.
 //===----------------------------------------------------------------------===//
 //
 //  This file imports all the other diagnostic files.
@@ -48,14 +38,22 @@
   DIAG(REMARK,ID,Options,Text,Signature)
 #endif
 
+#ifndef FIXIT
+#  define FIXIT(ID, Text, Signature)
+#endif
+
 #define DIAG_NO_UNDEF
 
 #include "polarphp/ast/DiagnosticsCommonDefs.h"
 #include "polarphp/ast/DiagnosticsParseDefs.h"
-#include "polarphp/ast/DiagnosticsDriverDefs.h"
-#include "polarphp/ast/DiagnosticsFrontendDefs.h"
-#include "polarphp/ast/DiagnosticsIRGenDefs.h"
+#include "polarphp/ast/DiagnosticsSemaDefs.h"
+#include "polarphp/ast/DiagnosticsClangImporterDefs.h"
 #include "polarphp/ast/DiagnosticsPILDefs.h"
+#include "polarphp/ast/DiagnosticsIRGenDefs.h"
+#include "polarphp/ast/DiagnosticsFrontendDefs.h"
+#include "polarphp/ast/DiagnosticsDriverDefs.h"
+#include "polarphp/ast/DiagnosticsRefactoringDefs.h"
+#include "polarphp/ast/DiagnosticsModuleDifferDefs.h"
 
 #undef DIAG_NO_UNDEF
 
@@ -66,3 +64,4 @@
 #undef WARNING
 #undef ERROR
 #undef REMARK
+#undef FIXIT

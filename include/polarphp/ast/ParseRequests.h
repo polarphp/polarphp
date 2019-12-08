@@ -71,11 +71,11 @@ public:
 };
 
 /// The zone number for the parser.
-#define POLARPHP_TYPEID_ZONE Parse
-#define POLARPHP_TYPEID_HEADER "polarphp/ast/ParseTypeIDZoneDef.h"
+#define POLAR_TYPEID_ZONE Parse
+#define POLAR_TYPEID_HEADER "polarphp/ast/ParseTypeIDZoneDef.h"
 #include "polarphp/basic/DefineTypeIDZone.h"
-#undef POLARPHP_TYPEID_ZONE
-#undef POLARPHP_TYPEID_HEADER
+#undef POLAR_TYPEID_ZONE
+#undef POLAR_TYPEID_HEADER
 
 // Set up reporting of evaluated requests.
 #define POLAR_REQUEST(Zone, RequestType, Sig, Caching, LocOptions)             \

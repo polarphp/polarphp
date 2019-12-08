@@ -1,4 +1,4 @@
-//===--- DiagnosticEngine.h - Diagnostic Display m_engine ---------*- C++ -*-===//
+//===--- DiagnosticEngine.h - Diagnostic Display Engine ---------*- C++ -*-===//
 //
 // This source file is part of the Swift.org open source project
 //
@@ -9,51 +9,38 @@
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
 //===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
-//
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/04/25.
-//===----------------------------------------------------------------------===//
 //
 //  This file declares the DiagnosticEngine class, which manages any diagnostics
-//  emitted by polarphp.
+//  emitted by Swift.
 //
+//===----------------------------------------------------------------------===//
 
-#ifndef POLARPHP_AST_DIAGNOSTIC_ENGINE_H
-#define POLARPHP_AST_DIAGNOSTIC_ENGINE_H
+#ifndef POLARPHP_BASIC_DIAGNOSTICENGINE_H
+#define POLARPHP_BASIC_DIAGNOSTICENGINE_H
 
-#include "polarphp/ast/Attr.h"
 #include "polarphp/ast/TypeLoc.h"
 #include "polarphp/ast/DeclNameLoc.h"
 #include "polarphp/ast/DiagnosticConsumer.h"
+#include "llvm/ADT/StringSet.h"
+#include "llvm/Support/Allocator.h"
 #include "llvm/Support/VersionTuple.h"
-#include "llvm/ADT/DenseMap.h"
-#include "polarphp/ast/Identifier.h"
-#include "polarphp/ast/Type.h"
 
-/// forward declare with namespace
 namespace polar::basic {
 class SourceManager;
 }
 
 namespace polar::ast {
 
+using polar::basic::SourceManager;
+
+class Decl;
+class DeclAttribute;
 class DiagnosticEngine;
+class ValueDecl;
 class SourceFile;
 
-using llvm::DenseMap;
-using polar::basic::SourceManager;
-using polar::basic::SourceRange;
-using llvm::VersionTuple;
-using llvm::raw_ostream;
-
 enum class PatternKind : uint8_t;
+enum class SelfAccessKind : uint8_t;
 enum class ReferenceOwnership : uint8_t;
 enum class StaticSpellingKind : uint8_t;
 enum class DescriptiveDeclKind : uint8_t;
@@ -69,17 +56,15 @@ enum class DiagID : uint32_t;
 ///
 /// The diagnostics header introduces instances of this type for each
 /// diagnostic, which provide both the set of argument types (used to
-/// check/convert the arguments at each call site) and the diagnostic id
+/// check/convert the arguments at each call site) and the diagnostic ID
 /// (for other information about the diagnostic).
 template<typename ...ArgTypes>
-struct Diag
-{
-   /// The diagnostic id corresponding to this diagnostic.
-   DiagID id;
+struct Diag {
+   /// The diagnostic ID corresponding to this diagnostic.
+   DiagID ID;
 };
 
-namespace internal
-{
+namespace detail {
 /// Describes how to pass a diagnostic argument of the given type.
 ///
 /// By default, diagnostic arguments are passed by value, because they
@@ -93,8 +78,7 @@ struct PassArgument {
 
 /// Describes the kind of diagnostic argument we're storing.
 ///
-enum class DiagnosticArgumentKind
-{
+enum class DiagnosticArgumentKind {
    String,
    Integer,
    Unsigned,
@@ -103,6 +87,7 @@ enum class DiagnosticArgumentKind
    Type,
    TypeRepr,
    PatternKind,
+   SelfAccessKind,
    ReferenceOwnership,
    StaticSpellingKind,
    DescriptiveDeclKind,
@@ -111,8 +96,7 @@ enum class DiagnosticArgumentKind
    LayoutConstraint,
 };
 
-namespace diag
-{
+namespace diag {
 enum class RequirementKind : uint8_t;
 }
 
@@ -120,225 +104,223 @@ enum class RequirementKind : uint8_t;
 /// type.
 ///
 /// All diagnostic arguments are converted to an instance of this class.
-class DiagnosticArgument
-{
-   DiagnosticArgumentKind m_kind;
-   union
-   {
-      int m_integerVal;
-      unsigned m_unsignedVal;
-      StringRef m_stringVal;
-      //      DeclName m_identifierVal;
-      //      ValueDecl *TheValueDecl;
-      //      Type TypeVal;
-      //      TypeRepr *TyR;
-      PatternKind m_patternKindVal;
-      ReferenceOwnership m_referenceOwnershipVal;
-      StaticSpellingKind m_staticSpellingKindVal;
-      DescriptiveDeclKind m_descriptiveDeclKindVal;
-      //      const DeclAttribute *DeclAttributeVal;
-      llvm::VersionTuple m_versionVal;
-      //      LayoutConstraint LayoutConstraintVal;
+class DiagnosticArgument {
+   DiagnosticArgumentKind Kind;
+   union {
+      int IntegerVal;
+      unsigned UnsignedVal;
+      StringRef StringVal;
+      DeclName IdentifierVal;
+      ObjCSelector ObjCSelectorVal;
+      ValueDecl *TheValueDecl;
+      Type TypeVal;
+      TypeRepr *TyR;
+      PatternKind PatternKindVal;
+      SelfAccessKind SelfAccessKindVal;
+      ReferenceOwnership ReferenceOwnershipVal;
+      StaticSpellingKind StaticSpellingKindVal;
+      DescriptiveDeclKind DescriptiveDeclKindVal;
+      const DeclAttribute *DeclAttributeVal;
+      llvm::VersionTuple VersionVal;
+      LayoutConstraint LayoutConstraintVal;
    };
 
 public:
-   DiagnosticArgument(StringRef str)
-      : m_kind(DiagnosticArgumentKind::String),
-        m_stringVal(str)
-   {
+   DiagnosticArgument(StringRef S)
+      : Kind(DiagnosticArgumentKind::String), StringVal(S) {
    }
 
-   DiagnosticArgument(int value)
-      : m_kind(DiagnosticArgumentKind::Integer),
-        m_integerVal(value)
-   {
+   DiagnosticArgument(int I)
+      : Kind(DiagnosticArgumentKind::Integer), IntegerVal(I) {
    }
 
-   DiagnosticArgument(unsigned value)
-      : m_kind(DiagnosticArgumentKind::Unsigned),
-        m_unsignedVal(value)
-   {}
+   DiagnosticArgument(unsigned I)
+      : Kind(DiagnosticArgumentKind::Unsigned), UnsignedVal(I) {
+   }
 
-   //   DiagnosticArgument(DeclName D)
-   //      : m_kind(DiagnosticArgumentKind::Identifier), m_identifierVal(D) {}
+   DiagnosticArgument(DeclName D)
+      : Kind(DiagnosticArgumentKind::Identifier), IdentifierVal(D) {}
 
-   //   DiagnosticArgument(DeclBaseName D)
-   //      : m_kind(DiagnosticArgumentKind::Identifier), m_identifierVal(D) {}
+   DiagnosticArgument(DeclBaseName D)
+      : Kind(DiagnosticArgumentKind::Identifier), IdentifierVal(D) {}
 
-   //   DiagnosticArgument(Identifier identifier)
-   //      : m_kind(DiagnosticArgumentKind::Identifier),
-   //        m_identifierVal(identifier)
-   //   {}
+   DiagnosticArgument(Identifier I)
+      : Kind(DiagnosticArgumentKind::Identifier), IdentifierVal(I) {
+   }
 
+   DiagnosticArgument(ValueDecl *VD)
+      : Kind(DiagnosticArgumentKind::ValueDecl), TheValueDecl(VD) {
+   }
 
-   //   DiagnosticArgument(ValueDecl *VD)
-   //      : m_kind(DiagnosticArgumentKind::ValueDecl), TheValueDecl(VD) {
-   //   }
+   DiagnosticArgument(Type T)
+      : Kind(DiagnosticArgumentKind::Type), TypeVal(T) {
+   }
 
-   //   DiagnosticArgument(Type T)
-   //      : m_kind(DiagnosticArgumentKind::Type), TypeVal(T) {
-   //   }
+   DiagnosticArgument(TypeRepr *T)
+      : Kind(DiagnosticArgumentKind::TypeRepr), TyR(T) {
+   }
 
-   //   DiagnosticArgument(TypeRepr *T)
-   //      : m_kind(DiagnosticArgumentKind::TypeRepr), TyR(T) {
-   //   }
+   DiagnosticArgument(const TypeLoc &TL) {
+      if (TypeRepr *tyR = TL.getTypeRepr()) {
+         Kind = DiagnosticArgumentKind::TypeRepr;
+         TyR = tyR;
+      } else {
+         Kind = DiagnosticArgumentKind::Type;
+         TypeVal = TL.getType();
+      }
+   }
 
-   //   DiagnosticArgument(const TypeLoc &TL)
-   //   {
-   //      if (TypeRepr *tyR = TL.getTypeRepr()) {
-   //         m_kind = DiagnosticArgumentKind::TypeRepr;
-   //         TyR = tyR;
-   //      } else {
-   //         m_kind = DiagnosticArgumentKind::Type;
-   //         TypeVal = TL.getType();
-   //      }
-   //   }
+   DiagnosticArgument(PatternKind K)
+      : Kind(DiagnosticArgumentKind::PatternKind), PatternKindVal(K) {}
 
-   DiagnosticArgument(PatternKind pattern)
-      : m_kind(DiagnosticArgumentKind::PatternKind),
-        m_patternKindVal(pattern) {}
+   DiagnosticArgument(ReferenceOwnership RO)
+      : Kind(DiagnosticArgumentKind::ReferenceOwnership),
+        ReferenceOwnershipVal(RO) {}
 
-   DiagnosticArgument(ReferenceOwnership ownership)
-      : m_kind(DiagnosticArgumentKind::ReferenceOwnership),
-        m_referenceOwnershipVal(ownership) {}
+   DiagnosticArgument(SelfAccessKind SAK)
+      : Kind(DiagnosticArgumentKind::SelfAccessKind),
+        SelfAccessKindVal(SAK) {}
 
-   DiagnosticArgument(StaticSpellingKind ssk)
-      : m_kind(DiagnosticArgumentKind::StaticSpellingKind),
-        m_staticSpellingKindVal(ssk) {}
+   DiagnosticArgument(StaticSpellingKind SSK)
+      : Kind(DiagnosticArgumentKind::StaticSpellingKind),
+        StaticSpellingKindVal(SSK) {}
 
-   DiagnosticArgument(DescriptiveDeclKind ddk)
-      : m_kind(DiagnosticArgumentKind::DescriptiveDeclKind),
-        m_descriptiveDeclKindVal(ddk) {}
+   DiagnosticArgument(DescriptiveDeclKind DDK)
+      : Kind(DiagnosticArgumentKind::DescriptiveDeclKind),
+        DescriptiveDeclKindVal(DDK) {}
 
-   //   DiagnosticArgument(const DeclAttribute *attr)
-   //      : m_kind(DiagnosticArgumentKind::DeclAttribute),
-   //        DeclAttributeVal(attr) {}
+   DiagnosticArgument(const DeclAttribute *attr)
+      : Kind(DiagnosticArgumentKind::DeclAttribute),
+        DeclAttributeVal(attr) {}
 
    DiagnosticArgument(llvm::VersionTuple version)
-      : m_kind(DiagnosticArgumentKind::VersionTuple),
-        m_versionVal(version) { }
+      : Kind(DiagnosticArgumentKind::VersionTuple),
+        VersionVal(version) { }
 
-   //   DiagnosticArgument(LayoutConstraint loc)
-   //      : m_kind(DiagnosticArgumentKind::LayoutConstraint), LayoutConstraintVal(loc) {
-   //   }
+   DiagnosticArgument(LayoutConstraint L)
+      : Kind(DiagnosticArgumentKind::LayoutConstraint), LayoutConstraintVal(L) {
+   }
    /// Initializes a diagnostic argument using the underlying type of the
    /// given enum.
    template<
-         typename EnumType,
-         typename std::enable_if<std::is_enum<EnumType>::value>::type* = nullptr>
+      typename EnumType,
+      typename std::enable_if<std::is_enum<EnumType>::value>::type* = nullptr>
    DiagnosticArgument(EnumType value)
       : DiagnosticArgument(
-           static_cast<typename std::underlying_type<EnumType>::type>(value)) {}
+      static_cast<typename std::underlying_type<EnumType>::type>(value)) {}
 
-   DiagnosticArgumentKind getKind() const
-   {
-      return m_kind;
-   }
+   DiagnosticArgumentKind getKind() const { return Kind; }
 
-   StringRef getAsString() const
-   {
-      assert(m_kind == DiagnosticArgumentKind::String);
-      return m_stringVal;
+   StringRef getAsString() const {
+      assert(Kind == DiagnosticArgumentKind::String);
+      return StringVal;
    }
 
    int getAsInteger() const {
-      assert(m_kind == DiagnosticArgumentKind::Integer);
-      return m_integerVal;
+      assert(Kind == DiagnosticArgumentKind::Integer);
+      return IntegerVal;
    }
 
-   unsigned getAsUnsigned() const
-   {
-      assert(m_kind == DiagnosticArgumentKind::Unsigned);
-      return m_unsignedVal;
+   unsigned getAsUnsigned() const {
+      assert(Kind == DiagnosticArgumentKind::Unsigned);
+      return UnsignedVal;
    }
 
-   //   DeclName getAsIdentifier() const
-   //   {
-   //      assert(m_kind == DiagnosticArgumentKind::Identifier);
-   //      return m_identifierVal;
-   //   }
-
-   //   ValueDecl *getAsValueDecl() const
-   //   {
-   //      assert(m_kind == DiagnosticArgumentKind::ValueDecl);
-   //      return TheValueDecl;
-   //   }
-
-   //   Type getAsType() const {
-   //      assert(m_kind == DiagnosticArgumentKind::Type);
-   //      return TypeVal;
-   //   }
-
-   //   TypeRepr *getAsTypeRepr() const {
-   //      assert(m_kind == DiagnosticArgumentKind::TypeRepr);
-   //      return TyR;
-   //   }
-
-   PatternKind getAsPatternKind() const
-   {
-      assert(m_kind == DiagnosticArgumentKind::PatternKind);
-      return m_patternKindVal;
+   DeclName getAsIdentifier() const {
+      assert(Kind == DiagnosticArgumentKind::Identifier);
+      return IdentifierVal;
    }
 
-   ReferenceOwnership getAsReferenceOwnership() const
-   {
-      assert(m_kind == DiagnosticArgumentKind::ReferenceOwnership);
-      return m_referenceOwnershipVal;
+   ValueDecl *getAsValueDecl() const {
+      assert(Kind == DiagnosticArgumentKind::ValueDecl);
+      return TheValueDecl;
    }
 
-   StaticSpellingKind getAsStaticSpellingKind() const
-   {
-      assert(m_kind == DiagnosticArgumentKind::StaticSpellingKind);
-      return m_staticSpellingKindVal;
+   Type getAsType() const {
+      assert(Kind == DiagnosticArgumentKind::Type);
+      return TypeVal;
    }
 
-   DescriptiveDeclKind getAsDescriptiveDeclKind() const
-   {
-      assert(m_kind == DiagnosticArgumentKind::DescriptiveDeclKind);
-      return m_descriptiveDeclKindVal;
+   TypeRepr *getAsTypeRepr() const {
+      assert(Kind == DiagnosticArgumentKind::TypeRepr);
+      return TyR;
    }
 
-   //   const DeclAttribute *getAsDeclAttribute() const
-   //   {
-   //      assert(m_kind == DiagnosticArgumentKind::DeclAttribute);
-   //      return DeclAttributeVal;
-   //   }
-
-   llvm::VersionTuple getAsVersionTuple() const
-   {
-      assert(m_kind == DiagnosticArgumentKind::VersionTuple);
-      return m_versionVal;
+   PatternKind getAsPatternKind() const {
+      assert(Kind == DiagnosticArgumentKind::PatternKind);
+      return PatternKindVal;
    }
 
-   //   LayoutConstraint getAsLayoutConstraint() const {
-   //      assert(m_kind == DiagnosticArgumentKind::LayoutConstraint);
-   //      return LayoutConstraintVal;
-   //   }
+   ReferenceOwnership getAsReferenceOwnership() const {
+      assert(Kind == DiagnosticArgumentKind::ReferenceOwnership);
+      return ReferenceOwnershipVal;
+   }
+
+   SelfAccessKind getAsSelfAccessKind() const {
+      assert(Kind == DiagnosticArgumentKind::SelfAccessKind);
+      return SelfAccessKindVal;
+   }
+
+   StaticSpellingKind getAsStaticSpellingKind() const {
+      assert(Kind == DiagnosticArgumentKind::StaticSpellingKind);
+      return StaticSpellingKindVal;
+   }
+
+   DescriptiveDeclKind getAsDescriptiveDeclKind() const {
+      assert(Kind == DiagnosticArgumentKind::DescriptiveDeclKind);
+      return DescriptiveDeclKindVal;
+   }
+
+   const DeclAttribute *getAsDeclAttribute() const {
+      assert(Kind == DiagnosticArgumentKind::DeclAttribute);
+      return DeclAttributeVal;
+   }
+
+   llvm::VersionTuple getAsVersionTuple() const {
+      assert(Kind == DiagnosticArgumentKind::VersionTuple);
+      return VersionVal;
+   }
+
+   LayoutConstraint getAsLayoutConstraint() const {
+      assert(Kind == DiagnosticArgumentKind::LayoutConstraint);
+      return LayoutConstraintVal;
+   }
 };
 
-struct DiagnosticFormatOptions
-{
-   const std::string openingQuotationMark;
-   const std::string closingQuotationMark;
-   const std::string akaFormatString;
-   const std::string opaqueResultFormatString;
+struct DiagnosticFormatOptions {
+   const std::string OpeningQuotationMark;
+   const std::string ClosingQuotationMark;
+   const std::string AKAFormatString;
+   const std::string OpaqueResultFormatString;
 
-   DiagnosticFormatOptions(std::string openingQuotationMark,
-                           std::string closingQuotationMark,
-                           std::string akaFormatString,
-                           std::string opaqueResultFormatString)
-      : openingQuotationMark(openingQuotationMark),
-        closingQuotationMark(closingQuotationMark),
-        akaFormatString(akaFormatString),
-        opaqueResultFormatString(opaqueResultFormatString)
-   {}
+   DiagnosticFormatOptions(std::string OpeningQuotationMark,
+                           std::string ClosingQuotationMark,
+                           std::string AKAFormatString,
+                           std::string OpaqueResultFormatString)
+      : OpeningQuotationMark(OpeningQuotationMark),
+        ClosingQuotationMark(ClosingQuotationMark),
+        AKAFormatString(AKAFormatString),
+        OpaqueResultFormatString(OpaqueResultFormatString) {}
 
    DiagnosticFormatOptions()
-      : openingQuotationMark("'"), closingQuotationMark("'"),
-        akaFormatString("'%s' (aka '%s')"),
-        opaqueResultFormatString("'%s' (%s of '%s')")
-   {}
+      : OpeningQuotationMark("'"), ClosingQuotationMark("'"),
+        AKAFormatString("'%s' (aka '%s')"),
+        OpaqueResultFormatString("'%s' (%s of '%s')") {}
+
+   /// When formatting fix-it arguments, don't include quotes or other
+   /// additions which would result in invalid code.
+   static DiagnosticFormatOptions formatForFixIts() {
+      return DiagnosticFormatOptions("", "", "%s", "%s");
+   }
 };
+
+enum class FixItID : uint32_t;
+
+/// Represents a fix-it defined  with a format string and optional
+/// DiagnosticArguments. The template parameters allow the
+/// fixIt... methods on InFlightDiagnostic to infer their own
+/// template params.
+template <typename... ArgTypes> struct StructuredFixIt { FixItID ID; };
 
 /// Diagnostic - This is a specific instance of a diagnostic along with all of
 /// the DiagnosticArguments that it requires.
@@ -347,66 +329,45 @@ public:
    typedef DiagnosticInfo::FixIt FixIt;
 
 private:
-   DiagID m_id;
-   SmallVector<DiagnosticArgument, 3> m_args;
-   SmallVector<CharSourceRange, 2> m_ranges;
-   SmallVector<FixIt, 2> m_fixIts;
-   SourceLoc m_loc;
-   //   const Decl *Decl = nullptr;
+   DiagID ID;
+   SmallVector<DiagnosticArgument, 3> Args;
+   SmallVector<CharSourceRange, 2> Ranges;
+   SmallVector<FixIt, 2> FixIts;
+   std::vector<Diagnostic> ChildNotes;
+   SourceLoc Loc;
+   bool IsChildNote = false;
+   const Decl *decl = nullptr;
+
+   friend DiagnosticEngine;
 
 public:
    // All constructors are intentionally implicit.
    template<typename ...ArgTypes>
-   Diagnostic(Diag<ArgTypes...> id,
-              typename internal::PassArgument<ArgTypes>::type... VArgs)
-      : m_id(id.id)
-   {
-      DiagnosticArgument diagArgs[] = {
+   Diagnostic(Diag<ArgTypes...> ID,
+              typename detail::PassArgument<ArgTypes>::type... VArgs)
+      : ID(ID.ID) {
+      DiagnosticArgument DiagArgs[] = {
          DiagnosticArgument(0), std::move(VArgs)...
       };
-      m_args.append(diagArgs + 1, diagArgs + 1 + sizeof...(VArgs));
+      Args.append(DiagArgs + 1, DiagArgs + 1 + sizeof...(VArgs));
    }
 
-   /*implicit*/Diagnostic(DiagID id, ArrayRef<DiagnosticArgument> args)
-      : m_id(id), m_args(args.begin(), args.end())
-   {}
+   /*implicit*/Diagnostic(DiagID ID, ArrayRef<DiagnosticArgument> Args)
+      : ID(ID), Args(Args.begin(), Args.end()) {}
 
    // Accessors.
-   DiagID getID() const
-   {
-      return m_id;
-   }
+   DiagID getID() const { return ID; }
+   ArrayRef<DiagnosticArgument> getArgs() const { return Args; }
+   ArrayRef<CharSourceRange> getRanges() const { return Ranges; }
+   ArrayRef<FixIt> getFixIts() const { return FixIts; }
+   ArrayRef<Diagnostic> getChildNotes() const { return ChildNotes; }
+   bool isChildNote() const { return IsChildNote; }
+   SourceLoc getLoc() const { return Loc; }
+   const class Decl *getDecl() const { return decl; }
 
-   ArrayRef<DiagnosticArgument> getArgs() const
-   {
-      return m_args;
-   }
-
-   ArrayRef<CharSourceRange> getRanges() const
-   {
-      return m_ranges;
-   }
-
-   ArrayRef<FixIt> getFixIts() const
-   {
-      return m_fixIts;
-   }
-
-   SourceLoc getLoc() const
-   {
-      return m_loc;
-   }
-
-   //   const class Decl *getDecl() const
-   //   {
-   //      return Decl;
-   //   }
-
-   void setLoc(SourceLoc loc)
-   {
-      m_loc = loc;
-   }
-   //   void setDecl(const class Decl *decl) { Decl = decl; }
+   void setLoc(SourceLoc loc) { Loc = loc; }
+   void setIsChildNote(bool isChildNote) { IsChildNote = isChildNote; }
+   void setDecl(const class Decl *_decl) { decl = _decl; }
 
    /// Returns true if this object represents a particular diagnostic.
    ///
@@ -414,21 +375,20 @@ public:
    /// someDiag.is(diag::invalid_diagnostic)
    /// \endcode
    template<typename ...OtherArgTypes>
-   bool is(Diag<OtherArgTypes...> other) const
-   {
-      return m_id == other.id;
+   bool is(Diag<OtherArgTypes...> Other) const {
+      return ID == Other.ID;
    }
 
-   void addRange(CharSourceRange range)
-   {
-      m_ranges.push_back(range);
+   void addRange(CharSourceRange R) {
+      Ranges.push_back(R);
    }
 
    // Avoid copying the fix-it text more than necessary.
-   void addFixIt(FixIt &&fixIt)
-   {
-      m_fixIts.push_back(std::move(fixIt));
+   void addFixIt(FixIt &&F) {
+      FixIts.push_back(std::move(F));
    }
+
+   void addChildNote(Diagnostic &&D);
 };
 
 /// Describes an in-flight diagnostic, which is currently active
@@ -438,19 +398,17 @@ public:
 /// Only a single in-flight diagnostic can be active at one time, and all
 /// additional information must be emitted through the active in-flight
 /// diagnostic.
-class InFlightDiagnostic
-{
+class InFlightDiagnostic {
    friend class DiagnosticEngine;
 
-   DiagnosticEngine *m_engine;
-   bool m_isActive;
+   DiagnosticEngine *Engine;
+   bool IsActive;
 
    /// Create a new in-flight diagnostic.
    ///
    /// This constructor is only available to the DiagnosticEngine.
-   InFlightDiagnostic(DiagnosticEngine &engine)
-      : m_engine(&engine),
-        m_isActive(true) { }
+   InFlightDiagnostic(DiagnosticEngine &Engine)
+      : Engine(&Engine), IsActive(true) { }
 
    InFlightDiagnostic(const InFlightDiagnostic &) = delete;
    InFlightDiagnostic &operator=(const InFlightDiagnostic &) = delete;
@@ -462,80 +420,130 @@ public:
    /// The resulting diagnostic can be used as a dummy, accepting the
    /// syntax to add additional information to a diagnostic without
    /// actually emitting a diagnostic.
-   InFlightDiagnostic()
-      : m_engine(nullptr),
-        m_isActive(true)
-   {}
+   InFlightDiagnostic() : Engine(0), IsActive(true) { }
 
    /// Transfer an in-flight diagnostic to a new object, which is
    /// typically used when returning in-flight diagnostics.
-   InFlightDiagnostic(InFlightDiagnostic &&other)
-      : m_engine(other.m_engine),
-        m_isActive(other.m_isActive)
-   {
-      other.m_isActive = false;
+   InFlightDiagnostic(InFlightDiagnostic &&Other)
+      : Engine(Other.Engine), IsActive(Other.IsActive) {
+      Other.IsActive = false;
    }
 
-   ~InFlightDiagnostic()
-   {
-      if (m_isActive) {
+   ~InFlightDiagnostic() {
+      if (IsActive)
          flush();
-      }
    }
 
    /// Flush the active diagnostic to the diagnostic output engine.
    void flush();
 
    /// Add a token-based range to the currently-active diagnostic.
-   InFlightDiagnostic &highlight(SourceRange range);
+   InFlightDiagnostic &highlight(SourceRange R);
 
    /// Add a character-based range to the currently-active diagnostic.
-   InFlightDiagnostic &highlightChars(SourceLoc start, SourceLoc end);
+   InFlightDiagnostic &highlightChars(SourceLoc Start, SourceLoc End);
+
+   static const char *fixItStringFor(const FixItID id);
 
    /// Add a token-based replacement fix-it to the currently-active
    /// diagnostic.
-   InFlightDiagnostic &fixItReplace(SourceRange range, StringRef str);
+   template <typename... ArgTypes>
+   InFlightDiagnostic &
+   fixItReplace(SourceRange R, StructuredFixIt<ArgTypes...> fixIt,
+                typename detail::PassArgument<ArgTypes>::type... VArgs) {
+      DiagnosticArgument DiagArgs[] = { std::move(VArgs)... };
+      return fixItReplace(R, fixItStringFor(fixIt.ID), DiagArgs);
+   }
 
    /// Add a character-based replacement fix-it to the currently-active
    /// diagnostic.
-   InFlightDiagnostic &fixItReplaceChars(SourceLoc start, SourceLoc end,
-                                         StringRef str);
+   template <typename... ArgTypes>
+   InFlightDiagnostic &
+   fixItReplaceChars(SourceLoc Start, SourceLoc End,
+                     StructuredFixIt<ArgTypes...> fixIt,
+                     typename detail::PassArgument<ArgTypes>::type... VArgs) {
+      DiagnosticArgument DiagArgs[] = { std::move(VArgs)... };
+      return fixItReplaceChars(Start, End, fixItStringFor(fixIt.ID), DiagArgs);
+   }
 
    /// Add an insertion fix-it to the currently-active diagnostic.
-   InFlightDiagnostic &fixItInsert(SourceLoc loc, StringRef str)
-   {
-      return fixItReplaceChars(loc, loc, str);
+   template <typename... ArgTypes>
+   InFlightDiagnostic &
+   fixItInsert(SourceLoc L, StructuredFixIt<ArgTypes...> fixIt,
+               typename detail::PassArgument<ArgTypes>::type... VArgs) {
+      DiagnosticArgument DiagArgs[] = { std::move(VArgs)... };
+      return fixItReplaceChars(L, L, fixItStringFor(fixIt.ID), DiagArgs);
    }
 
    /// Add an insertion fix-it to the currently-active diagnostic.  The
    /// text is inserted immediately *after* the token specified.
-   ///
-   InFlightDiagnostic &fixItInsertAfter(SourceLoc loc, StringRef);
+   template <typename... ArgTypes>
+   InFlightDiagnostic &
+   fixItInsertAfter(SourceLoc L, StructuredFixIt<ArgTypes...> fixIt,
+                    typename detail::PassArgument<ArgTypes>::type... VArgs) {
+      DiagnosticArgument DiagArgs[] = { std::move(VArgs)... };
+      return fixItInsertAfter(L, fixItStringFor(fixIt.ID), DiagArgs);
+   }
+
+   /// Add a token-based replacement fix-it to the currently-active
+   /// diagnostic.
+   InFlightDiagnostic &fixItReplace(SourceRange R, StringRef Str);
+
+   /// Add a character-based replacement fix-it to the currently-active
+   /// diagnostic.
+   InFlightDiagnostic &fixItReplaceChars(SourceLoc Start, SourceLoc End,
+                                         StringRef Str) {
+      return fixItReplaceChars(Start, End, "%0", {Str});
+   }
+
+   /// Add an insertion fix-it to the currently-active diagnostic.
+   InFlightDiagnostic &fixItInsert(SourceLoc L, StringRef Str) {
+      return fixItReplaceChars(L, L, "%0", {Str});
+   }
+
+   /// Add an insertion fix-it to the currently-active diagnostic.  The
+   /// text is inserted immediately *after* the token specified.
+   InFlightDiagnostic &fixItInsertAfter(SourceLoc L, StringRef Str) {
+      return fixItInsertAfter(L, "%0", {Str});
+   }
 
    /// Add a token-based removal fix-it to the currently-active
    /// diagnostic.
-   InFlightDiagnostic &fixItRemove(SourceRange range);
+   InFlightDiagnostic &fixItRemove(SourceRange R);
 
    /// Add a character-based removal fix-it to the currently-active
    /// diagnostic.
-   InFlightDiagnostic &fixItRemoveChars(SourceLoc start, SourceLoc end)
-   {
-      return fixItReplaceChars(start, end, {});
+   InFlightDiagnostic &fixItRemoveChars(SourceLoc Start, SourceLoc End) {
+      return fixItReplaceChars(Start, End, {});
    }
 
    /// Add two replacement fix-it exchanging source ranges to the
    /// currently-active diagnostic.
-   InFlightDiagnostic &fixItExchange(SourceRange range1, SourceRange range2);
+   InFlightDiagnostic &fixItExchange(SourceRange R1, SourceRange R2);
+
+private:
+   InFlightDiagnostic &fixItReplace(SourceRange R, StringRef FormatString,
+                                    ArrayRef<DiagnosticArgument> Args);
+
+   InFlightDiagnostic &fixItReplaceChars(SourceLoc Start, SourceLoc End,
+                                         StringRef FormatString,
+                                         ArrayRef<DiagnosticArgument> Args);
+
+   InFlightDiagnostic &fixItInsert(SourceLoc L, StringRef FormatString,
+                                   ArrayRef<DiagnosticArgument> Args) {
+      return fixItReplaceChars(L, L, FormatString, Args);
+   }
+
+   InFlightDiagnostic &fixItInsertAfter(SourceLoc L, StringRef FormatString,
+                                        ArrayRef<DiagnosticArgument> Args);
 };
 
 /// Class to track, map, and remap diagnostic severity and fatality
 ///
-class DiagnosticState
-{
+class DiagnosticState {
 public:
    /// Describes the current behavior to take with a diagnostic
-   enum class Behavior : uint8_t
-   {
+   enum class Behavior : uint8_t {
       Unspecified,
       Ignore,
       Note,
@@ -548,25 +556,25 @@ public:
 private:
    /// Whether we should continue to emit diagnostics, even after a
    /// fatal error
-   bool m_showDiagnosticsAfterFatalError = false;
+   bool showDiagnosticsAfterFatalError = false;
 
    /// Don't emit any warnings
-   bool m_suppressWarnings = false;
+   bool suppressWarnings = false;
 
    /// Emit all warnings as errors
-   bool m_warningsAsErrors = false;
+   bool warningsAsErrors = false;
 
    /// Whether a fatal error has occurred
-   bool m_fatalErrorOccurred = false;
+   bool fatalErrorOccurred = false;
 
    /// Whether any error diagnostics have been emitted.
-   bool m_anyErrorOccurred = false;
+   bool anyErrorOccurred = false;
 
    /// Track the previous emitted Behavior, useful for notes
-   Behavior m_previousBehavior = Behavior::Unspecified;
+   Behavior previousBehavior = Behavior::Unspecified;
 
    /// Track settable, per-diagnostic state that we store
-   std::vector<Behavior> m_perDiagnosticBehavior;
+   std::vector<Behavior> perDiagnosticBehavior;
 
 public:
    DiagnosticState();
@@ -575,58 +583,32 @@ public:
    /// state such as fatality into account.
    Behavior determineBehavior(DiagID id);
 
-   bool hadAnyError() const
-   {
-      return m_anyErrorOccurred;
-   }
+   bool hadAnyError() const { return anyErrorOccurred; }
+   bool hasFatalErrorOccurred() const { return fatalErrorOccurred; }
 
-   bool hasFatalErrorOccurred() const
-   {
-      return m_fatalErrorOccurred;
+   void setShowDiagnosticsAfterFatalError(bool val = true) {
+      showDiagnosticsAfterFatalError = val;
    }
-
-   void setShowDiagnosticsAfterFatalError(bool val = true)
-   {
-      m_showDiagnosticsAfterFatalError = val;
-   }
-
-   bool getShowDiagnosticsAfterFatalError()
-   {
-      return m_showDiagnosticsAfterFatalError;
+   bool getShowDiagnosticsAfterFatalError() {
+      return showDiagnosticsAfterFatalError;
    }
 
    /// Whether to skip emitting warnings
-   void setSuppressWarnings(bool val)
-   {
-      m_suppressWarnings = val;
-   }
-
-   bool getSuppressWarnings() const
-   {
-      return m_suppressWarnings;
-   }
+   void setSuppressWarnings(bool val) { suppressWarnings = val; }
+   bool getSuppressWarnings() const { return suppressWarnings; }
 
    /// Whether to treat warnings as errors
-   void setWarningsAsErrors(bool val)
-   {
-      m_warningsAsErrors = val;
-   }
+   void setWarningsAsErrors(bool val) { warningsAsErrors = val; }
+   bool getWarningsAsErrors() const { return warningsAsErrors; }
 
-   bool getWarningsAsErrors() const
-   {
-      return m_warningsAsErrors;
-   }
-
-   void resetHadAnyError()
-   {
-      m_anyErrorOccurred = false;
-      m_fatalErrorOccurred = false;
+   void resetHadAnyError() {
+      anyErrorOccurred = false;
+      fatalErrorOccurred = false;
    }
 
    /// Set per-diagnostic behavior
-   void setDiagnosticBehavior(DiagID id, Behavior behavior)
-   {
-      m_perDiagnosticBehavior[static_cast<unsigned>(id)] = behavior;
+   void setDiagnosticBehavior(DiagID id, Behavior behavior) {
+      perDiagnosticBehavior[(unsigned)id] = behavior;
    }
 
 private:
@@ -640,224 +622,234 @@ private:
 
 /// Class responsible for formatting diagnostics and presenting them
 /// to the user.
-class DiagnosticEngine
-{
+class DiagnosticEngine {
+public:
    /// The source manager used to interpret source locations and
    /// display diagnostics.
-   SourceManager &m_sourceMgr;
+   SourceManager &SourceMgr;
 
+private:
    /// The diagnostic consumer(s) that will be responsible for actually
    /// emitting diagnostics.
-   SmallVector<DiagnosticConsumer *, 2> m_consumers;
+   SmallVector<DiagnosticConsumer *, 2> Consumers;
 
-   /// Tracks diagnostic behaviors and m_state
-   DiagnosticState m_state;
+   /// Tracks diagnostic behaviors and state
+   DiagnosticState state;
 
    /// The currently active diagnostic, if there is one.
-   Optional<Diagnostic> m_activeDiagnostic;
+   Optional<Diagnostic> ActiveDiagnostic;
 
    /// All diagnostics that have are no longer active but have not yet
    /// been emitted due to an open transaction.
-   SmallVector<Diagnostic, 4> m_tentativeDiagnostics;
+   SmallVector<Diagnostic, 4> TentativeDiagnostics;
 
-   //   /// The set of declarations for which we have pretty-printed
-   //   /// results that we can point to on the command line.
-   //   llvm::DenseMap<const Decl *, SourceLoc> PrettyPrintedDeclarations;
+   /// The set of declarations for which we have pretty-printed
+   /// results that we can point to on the command line.
+   llvm::DenseMap<const Decl *, SourceLoc> PrettyPrintedDeclarations;
+
+   llvm::BumpPtrAllocator TransactionAllocator;
+   /// A set of all strings involved in current transactional chain.
+   /// This is required because diagnostics are not directly emitted
+   /// but rather stored until all transactions complete.
+   llvm::StringSet<llvm::BumpPtrAllocator &> TransactionStrings;
 
    /// The number of open diagnostic transactions. Diagnostics are only
    /// emitted once all transactions have closed.
-   unsigned m_transactionCount = 0;
+   unsigned TransactionCount = 0;
 
    /// For batch mode, use this to know where to output a diagnostic from a
    /// non-primary file. It's any location in the buffer of the current primary
    /// input being compiled.
    /// May be invalid.
-   SourceLoc m_bufferIndirectlyCausingDiagnostic;
+   SourceLoc bufferIndirectlyCausingDiagnostic;
+
+   /// Print diagnostic names after their messages
+   bool printDiagnosticNames = false;
+
+   /// Use descriptive diagnostic style when available.
+   bool useDescriptiveDiagnostics = false;
+
+   /// Path to diagnostic documentation directory.
+   std::string diagnosticDocumentationPath = "";
 
    friend class InFlightDiagnostic;
    friend class DiagnosticTransaction;
+   friend class CompoundDiagnosticTransaction;
 
 public:
-   explicit DiagnosticEngine(SourceManager &sourceMgr)
-      : m_sourceMgr(sourceMgr),
-        m_activeDiagnostic()
-   {}
+   explicit DiagnosticEngine(SourceManager &SourceMgr)
+      : SourceMgr(SourceMgr), ActiveDiagnostic(),
+        TransactionStrings(TransactionAllocator) {}
 
    /// hadAnyError - return true if any *error* diagnostics have been emitted.
-   bool hadAnyError() const
-   {
-      return m_state.hadAnyError();
+   bool hadAnyError() const { return state.hadAnyError(); }
+
+   bool hasFatalErrorOccurred() const {
+      return state.hasFatalErrorOccurred();
    }
 
-   bool hasFatalErrorOccurred() const
-   {
-      return m_state.hasFatalErrorOccurred();
+   void setShowDiagnosticsAfterFatalError(bool val = true) {
+      state.setShowDiagnosticsAfterFatalError(val);
    }
-
-   void setShowDiagnosticsAfterFatalError(bool val = true)
-   {
-      m_state.setShowDiagnosticsAfterFatalError(val);
-   }
-
-   bool getShowDiagnosticsAfterFatalError()
-   {
-      return m_state.getShowDiagnosticsAfterFatalError();
+   bool getShowDiagnosticsAfterFatalError() {
+      return state.getShowDiagnosticsAfterFatalError();
    }
 
    /// Whether to skip emitting warnings
-   void setSuppressWarnings(bool val)
-   {
-      m_state.setSuppressWarnings(val);
-   }
-
-   bool getSuppressWarnings() const
-   {
-      return m_state.getSuppressWarnings();
+   void setSuppressWarnings(bool val) { state.setSuppressWarnings(val); }
+   bool getSuppressWarnings() const {
+      return state.getSuppressWarnings();
    }
 
    /// Whether to treat warnings as errors
-   void setWarningsAsErrors(bool val)
-   {
-      m_state.setWarningsAsErrors(val);
+   void setWarningsAsErrors(bool val) { state.setWarningsAsErrors(val); }
+   bool getWarningsAsErrors() const {
+      return state.getWarningsAsErrors();
    }
 
-   bool getWarningsAsErrors() const
-   {
-      return m_state.getWarningsAsErrors();
+   /// Whether to print diagnostic names after their messages
+   void setPrintDiagnosticNames(bool val) {
+      printDiagnosticNames = val;
+   }
+   bool getPrintDiagnosticNames() const {
+      return printDiagnosticNames;
    }
 
-   void ignoreDiagnostic(DiagID id)
-   {
-      m_state.setDiagnosticBehavior(id, DiagnosticState::Behavior::Ignore);
+   void setUseDescriptiveDiagnostics(bool val) {
+      useDescriptiveDiagnostics = val;
+   }
+   bool getUseDescriptiveDiagnostics() const {
+      return useDescriptiveDiagnostics;
    }
 
-   void resetHadAnyError()
-   {
-      m_state.resetHadAnyError();
+   void setDiagnosticDocumentationPath(std::string path) {
+      diagnosticDocumentationPath = path;
+   }
+   StringRef getDiagnosticDocumentationPath() {
+      return diagnosticDocumentationPath;
+   }
+
+   void ignoreDiagnostic(DiagID id) {
+      state.setDiagnosticBehavior(id, DiagnosticState::Behavior::Ignore);
+   }
+
+   void resetHadAnyError() {
+      state.resetHadAnyError();
    }
 
    /// Add an additional DiagnosticConsumer to receive diagnostics.
-   void addConsumer(DiagnosticConsumer &consumer)
-   {
-      m_consumers.push_back(&consumer);
+   void addConsumer(DiagnosticConsumer &Consumer) {
+      Consumers.push_back(&Consumer);
    }
 
    /// Remove a specific DiagnosticConsumer.
-   void removeConsumer(DiagnosticConsumer &consumer)
-   {
-      m_consumers.erase(
-               std::remove(m_consumers.begin(), m_consumers.end(), &consumer));
+   void removeConsumer(DiagnosticConsumer &Consumer) {
+      Consumers.erase(
+         std::remove(Consumers.begin(), Consumers.end(), &Consumer));
    }
 
    /// Remove and return all \c DiagnosticConsumers.
-   std::vector<DiagnosticConsumer *> takeConsumers()
-   {
-      auto Result = std::vector<DiagnosticConsumer*>(m_consumers.begin(),
-                                                     m_consumers.end());
-      m_consumers.clear();
+   std::vector<DiagnosticConsumer *> takeConsumers() {
+      auto Result = std::vector<DiagnosticConsumer*>(Consumers.begin(),
+                                                     Consumers.end());
+      Consumers.clear();
       return Result;
    }
 
    /// Return all \c DiagnosticConsumers.
-   ArrayRef<DiagnosticConsumer *> getConsumers()
-   {
-      return m_consumers;
+   ArrayRef<DiagnosticConsumer *> getConsumers() const {
+      return Consumers;
    }
 
    /// Emit a diagnostic using a preformatted array of diagnostic
    /// arguments.
    ///
-   /// \param m_loc The location to which the diagnostic refers in the source
+   /// \param Loc The location to which the diagnostic refers in the source
    /// code.
    ///
-   /// \param id The diagnostic id.
+   /// \param ID The diagnostic ID.
    ///
-   /// \param m_args The preformatted set of diagnostic arguments. The caller
+   /// \param Args The preformatted set of diagnostic arguments. The caller
    /// must ensure that the diagnostic arguments have the appropriate type.
    ///
    /// \returns An in-flight diagnostic, to which additional information can
    /// be attached.
-   InFlightDiagnostic diagnose(SourceLoc loc, DiagID id,
-                               ArrayRef<DiagnosticArgument> args)
-   {
-      return diagnose(loc, Diagnostic(id, args));
+   InFlightDiagnostic diagnose(SourceLoc Loc, DiagID ID,
+                               ArrayRef<DiagnosticArgument> Args) {
+      return diagnose(Loc, Diagnostic(ID, Args));
    }
 
    /// Emit a diagnostic using a preformatted array of diagnostic
    /// arguments.
    ///
-   /// \param m_loc The declaration name location to which the
+   /// \param Loc The declaration name location to which the
    /// diagnostic refers in the source code.
    ///
-   /// \param id The diagnostic id.
+   /// \param ID The diagnostic ID.
    ///
-   /// \param m_args The preformatted set of diagnostic arguments. The caller
+   /// \param Args The preformatted set of diagnostic arguments. The caller
    /// must ensure that the diagnostic arguments have the appropriate type.
    ///
    /// \returns An in-flight diagnostic, to which additional information can
    /// be attached.
-   //   InFlightDiagnostic diagnose(DeclNameLoc loc, DiagID id,
-   //                               ArrayRef<DiagnosticArgument> args)
-   //   {
-   //      return diagnose(loc.getBaseNameLoc(), Diagnostic(id, args));
-   //   }
+   InFlightDiagnostic diagnose(DeclNameLoc Loc, DiagID ID,
+                               ArrayRef<DiagnosticArgument> Args) {
+      return diagnose(Loc.getBaseNameLoc(), Diagnostic(ID, Args));
+   }
 
    /// Emit an already-constructed diagnostic at the given location.
    ///
-   /// \param m_loc The location to which the diagnostic refers in the source
+   /// \param Loc The location to which the diagnostic refers in the source
    /// code.
    ///
    /// \param D The diagnostic.
    ///
    /// \returns An in-flight diagnostic, to which additional information can
    /// be attached.
-   InFlightDiagnostic diagnose(SourceLoc loc, const Diagnostic &diagnostic)
-   {
-      assert(!m_activeDiagnostic && "Already have an active diagnostic");
-      m_activeDiagnostic = diagnostic;
-      m_activeDiagnostic->setLoc(loc);
+   InFlightDiagnostic diagnose(SourceLoc Loc, const Diagnostic &D) {
+      assert(!ActiveDiagnostic && "Already have an active diagnostic");
+      ActiveDiagnostic = D;
+      ActiveDiagnostic->setLoc(Loc);
       return InFlightDiagnostic(*this);
    }
 
    /// Emit a diagnostic with the given set of diagnostic arguments.
    ///
-   /// \param m_loc The location to which the diagnostic refers in the source
+   /// \param Loc The location to which the diagnostic refers in the source
    /// code.
    ///
-   /// \param id The diagnostic to be emitted.
+   /// \param ID The diagnostic to be emitted.
    ///
-   /// \param m_args The diagnostic arguments, which will be converted to
-   /// the types expected by the diagnostic \p id.
+   /// \param Args The diagnostic arguments, which will be converted to
+   /// the types expected by the diagnostic \p ID.
    template<typename ...ArgTypes>
    InFlightDiagnostic
-   diagnose(SourceLoc loc, Diag<ArgTypes...> id,
-            typename internal::PassArgument<ArgTypes>::type... args)
-   {
-      return diagnose(loc, Diagnostic(id, std::move(args)...));
+   diagnose(SourceLoc Loc, Diag<ArgTypes...> ID,
+            typename detail::PassArgument<ArgTypes>::type... Args) {
+      return diagnose(Loc, Diagnostic(ID, std::move(Args)...));
    }
 
    /// Delete an API that may lead clients to avoid specifying source location.
    template<typename ...ArgTypes>
    InFlightDiagnostic
-   diagnose(Diag<ArgTypes...> id,
-            typename internal::PassArgument<ArgTypes>::type... args) = delete;
+   diagnose(Diag<ArgTypes...> ID,
+            typename detail::PassArgument<ArgTypes>::type... Args) = delete;
 
    /// Emit a diagnostic with the given set of diagnostic arguments.
    ///
-   /// \param m_loc The declaration name location to which the
+   /// \param Loc The declaration name location to which the
    /// diagnostic refers in the source code.
    ///
-   /// \param id The diagnostic to be emitted.
+   /// \param ID The diagnostic to be emitted.
    ///
-   /// \param m_args The diagnostic arguments, which will be converted to
-   /// the types expected by the diagnostic \p id.
-   //   template<typename ...ArgTypes>
-   //   InFlightDiagnostic
-   //   diagnose(DeclNameLoc m_loc, Diag<ArgTypes...> id,
-   //            typename internal::PassArgument<ArgTypes>::type... args)
-   //   {
-   //      return diagnose(m_loc.getBaseNameLoc(), Diagnostic(id, std::move(args)...));
-   //   }
+   /// \param Args The diagnostic arguments, which will be converted to
+   /// the types expected by the diagnostic \p ID.
+   template<typename ...ArgTypes>
+   InFlightDiagnostic
+   diagnose(DeclNameLoc Loc, Diag<ArgTypes...> ID,
+            typename detail::PassArgument<ArgTypes>::type... Args) {
+      return diagnose(Loc.getBaseNameLoc(), Diagnostic(ID, std::move(Args)...));
+   }
 
    /// Emit a diagnostic using a preformatted array of diagnostic
    /// arguments.
@@ -865,18 +857,17 @@ public:
    /// \param decl The declaration to which this diagnostic refers, which
    /// may or may not have associated source-location information.
    ///
-   /// \param id The diagnostic id.
+   /// \param id The diagnostic ID.
    ///
-   /// \param m_args The preformatted set of diagnostic arguments. The caller
+   /// \param args The preformatted set of diagnostic arguments. The caller
    /// must ensure that the diagnostic arguments have the appropriate type.
    ///
    /// \returns An in-flight diagnostic, to which additional information can
    /// be attached.
-   //   InFlightDiagnostic diagnose(const Decl *decl, DiagID id,
-   //                               ArrayRef<DiagnosticArgument> args)
-   //   {
-   //      return diagnose(decl, Diagnostic(id, args));
-   //   }
+   InFlightDiagnostic diagnose(const Decl *decl, DiagID id,
+                               ArrayRef<DiagnosticArgument> args) {
+      return diagnose(decl, Diagnostic(id, args));
+   }
 
    /// Emit an already-constructed diagnostic referencing the given
    /// declaration.
@@ -888,13 +879,12 @@ public:
    ///
    /// \returns An in-flight diagnostic, to which additional information can
    /// be attached.
-   //   InFlightDiagnostic diagnose(const Decl *decl, const Diagnostic &diag)
-   //   {
-   //      assert(!m_activeDiagnostic && "Already have an active diagnostic");
-   //      m_activeDiagnostic = diag;
-   //      m_activeDiagnostic->setDecl(decl);
-   //      return InFlightDiagnostic(*this);
-   //   }
+   InFlightDiagnostic diagnose(const Decl *decl, const Diagnostic &diag) {
+      assert(!ActiveDiagnostic && "Already have an active diagnostic");
+      ActiveDiagnostic = diag;
+      ActiveDiagnostic->setDecl(decl);
+      return InFlightDiagnostic(*this);
+   }
 
    /// Emit a diagnostic with the given set of diagnostic arguments.
    ///
@@ -903,15 +893,23 @@ public:
    ///
    /// \param id The diagnostic to be emitted.
    ///
-   /// \param m_args The diagnostic arguments, which will be converted to
-   /// the types expected by the diagnostic \p id.
-   //   template<typename ...ArgTypes>
-   //   InFlightDiagnostic
-   //   diagnose(const Decl *decl, Diag<ArgTypes...> id,
-   //            typename internal::PassArgument<ArgTypes>::type... args)
-   //   {
-   //      return diagnose(decl, Diagnostic(id, std::move(args)...));
-   //   }
+   /// \param args The diagnostic arguments, which will be converted to
+   /// the types expected by the diagnostic \p ID.
+   template<typename ...ArgTypes>
+   InFlightDiagnostic
+   diagnose(const Decl *decl, Diag<ArgTypes...> id,
+            typename detail::PassArgument<ArgTypes>::type... args) {
+      return diagnose(decl, Diagnostic(id, std::move(args)...));
+   }
+
+   /// Emit a parent diagnostic and attached notes.
+   ///
+   /// \param parentDiag An InFlightDiagnostic representing the parent diag.
+   ///
+   /// \param builder A closure which builds and emits notes to be attached to
+   /// the parent diag.
+   void diagnoseWithNotes(InFlightDiagnostic parentDiag,
+                          llvm::function_ref<void(void)> builder);
 
    /// \returns true if diagnostic is marked with PointsToFirstBadToken
    /// option.
@@ -924,19 +922,25 @@ public:
    /// Format the given diagnostic text and place the result in the given
    /// buffer.
    static void formatDiagnosticText(
-         llvm::raw_ostream &ostream, StringRef inText,
-         ArrayRef<DiagnosticArgument> formatArgs,
-         DiagnosticFormatOptions formatOpts = DiagnosticFormatOptions());
+      llvm::raw_ostream &Out, StringRef InText,
+      ArrayRef<DiagnosticArgument> FormatArgs,
+      DiagnosticFormatOptions FormatOpts = DiagnosticFormatOptions());
 
 private:
+   /// Called when tentative diagnostic is about to be flushed,
+   /// to apply any required transformations e.g. copy string arguments
+   /// to extend their lifetime.
+   void onTentativeDiagnosticFlush(Diagnostic &diagnostic);
+
    /// Flush the active diagnostic.
    void flushActiveDiagnostic();
 
    /// Retrieve the active diagnostic.
-   Diagnostic &getActiveDiagnostic()
-   {
-      return *m_activeDiagnostic;
-   }
+   Diagnostic &getActiveDiagnostic() { return *ActiveDiagnostic; }
+
+   /// Generate DiagnosticInfo for a Diagnostic to be passed to consumers.
+   Optional<DiagnosticInfo>
+   diagnosticInfoForDiagnostic(const Diagnostic &diagnostic);
 
    /// Send \c diag to all diagnostic consumers.
    void emitDiagnostic(const Diagnostic &diag);
@@ -946,7 +950,8 @@ private:
    void emitTentativeDiagnostics();
 
 public:
-   static const char *diagnosticStringFor(const DiagID id);
+   static const char *diagnosticStringFor(const DiagID id,
+                                          bool printDiagnosticName);
 
    /// If there is no clear .dia file for a diagnostic, put it in the one
    /// corresponding to the SourceLoc given here.
@@ -956,19 +961,17 @@ public:
    void setBufferIndirectlyCausingDiagnosticToInput(SourceLoc);
    void resetBufferIndirectlyCausingDiagnostic();
    SourceLoc getDefaultDiagnosticLoc() const {
-      return m_bufferIndirectlyCausingDiagnostic;
+      return bufferIndirectlyCausingDiagnostic;
    }
 };
 
-class BufferIndirectlyCausingDiagnosticRAII
-{
+class BufferIndirectlyCausingDiagnosticRAII {
 private:
-   DiagnosticEngine &m_diags;
+   DiagnosticEngine &Diags;
 public:
-   BufferIndirectlyCausingDiagnosticRAII(const SourceFile &sourceFile);
-   ~BufferIndirectlyCausingDiagnosticRAII()
-   {
-      m_diags.resetBufferIndirectlyCausingDiagnostic();
+   BufferIndirectlyCausingDiagnosticRAII(const SourceFile &SF);
+   ~BufferIndirectlyCausingDiagnosticRAII() {
+      Diags.resetBufferIndirectlyCausingDiagnostic();
    }
 };
 
@@ -978,70 +981,128 @@ public:
 /// the diagnostics are erased. Transactions may be nested but must be closed
 /// in LIFO order. An open transaction is implicitly committed upon
 /// destruction.
-class DiagnosticTransaction
-{
-   DiagnosticEngine &m_engine;
+class DiagnosticTransaction {
+protected:
+   DiagnosticEngine &Engine;
 
    /// How many tentative diagnostics there were when the transaction
    /// was opened.
-   unsigned m_prevDiagnostics;
+   unsigned PrevDiagnostics;
 
    /// How many other transactions were open when this transaction was
    /// opened.
-   unsigned m_depth;
+   unsigned Depth;
 
    /// Whether this transaction is currently open.
-   bool m_isOpen = true;
+   bool IsOpen = true;
 
 public:
+   DiagnosticTransaction(const DiagnosticTransaction &) = delete;
+   DiagnosticTransaction &operator=(const DiagnosticTransaction &) = delete;
+
    explicit DiagnosticTransaction(DiagnosticEngine &engine)
-      : m_engine(engine),
-        m_prevDiagnostics(m_engine.m_tentativeDiagnostics.size()),
-        m_depth(m_engine.m_transactionCount),
-        m_isOpen(true)
+      : Engine(engine),
+        PrevDiagnostics(Engine.TentativeDiagnostics.size()),
+        Depth(Engine.TransactionCount),
+        IsOpen(true)
    {
-      assert(!m_engine.m_activeDiagnostic);
-      m_engine.m_transactionCount++;
+      Engine.TransactionCount++;
    }
 
-   ~DiagnosticTransaction()
-   {
-      if (m_isOpen) {
+   ~DiagnosticTransaction() {
+      if (IsOpen) {
          commit();
+      }
+
+      if (Depth == 0) {
+         Engine.TransactionStrings.clear();
+         Engine.TransactionAllocator.Reset();
       }
    }
 
    /// Abort and close this transaction and erase all diagnostics
    /// record while it was open.
    void abort() {
-
       close();
-      m_engine.m_tentativeDiagnostics.erase(
-               m_engine.m_tentativeDiagnostics.begin() + m_prevDiagnostics,
-               m_engine.m_tentativeDiagnostics.end());
+      Engine.TentativeDiagnostics.erase(
+         Engine.TentativeDiagnostics.begin() + PrevDiagnostics,
+         Engine.TentativeDiagnostics.end());
    }
 
    /// Commit and close this transaction. If this is the top-level
    /// transaction, emit any diagnostics that were recorded while it was open.
-   void commit()
-   {
+   void commit() {
       close();
-      if (m_depth == 0) {
-         assert(m_prevDiagnostics == 0);
-         m_engine.emitTentativeDiagnostics();
+      if (Depth == 0) {
+         assert(PrevDiagnostics == 0);
+         Engine.emitTentativeDiagnostics();
       }
    }
 
 private:
-   void close()
-   {
-      assert(m_isOpen && "only open transactions may be closed");
-      m_isOpen = false;
-      m_engine.m_transactionCount--;
-      assert(m_depth == m_engine.m_transactionCount &&
+   void close() {
+      assert(IsOpen && "only open transactions may be closed");
+      IsOpen = false;
+      Engine.TransactionCount--;
+      assert(Depth == Engine.TransactionCount &&
              "transactions must be closed LIFO");
    }
 };
-} // polar::ast
 
-#endif // POLARPHP_AST_DIAGNOSTIC_ENGINE_H
+/// Represents a diagnostic transaction which constructs a compound diagnostic
+/// from any diagnostics emitted inside. A compound diagnostic consists of a
+/// parent error, warning, or remark followed by a variable number of child
+/// notes. The semantics are otherwise the same as a regular
+/// DiagnosticTransaction.
+class CompoundDiagnosticTransaction : public DiagnosticTransaction {
+public:
+   explicit CompoundDiagnosticTransaction(DiagnosticEngine &engine)
+      : DiagnosticTransaction(engine) {}
+
+   ~CompoundDiagnosticTransaction() {
+      if (IsOpen) {
+         commit();
+      }
+
+      if (Depth == 0) {
+         Engine.TransactionStrings.clear();
+         Engine.TransactionAllocator.Reset();
+      }
+   }
+
+   void commit() {
+      assert(PrevDiagnostics < Engine.TentativeDiagnostics.size() &&
+             "CompoundDiagnosticTransaction must contain at least one diag");
+
+      // The first diagnostic is assumed to be the parent. If this is not an
+      // error or warning, we'll assert later when trying to add children.
+      Diagnostic &parent = Engine.TentativeDiagnostics[PrevDiagnostics];
+
+      // Associate the children with the parent.
+      for (auto diag =
+         Engine.TentativeDiagnostics.begin() + PrevDiagnostics + 1;
+           diag != Engine.TentativeDiagnostics.end(); ++diag) {
+         diag->setIsChildNote(true);
+         parent.addChildNote(std::move(*diag));
+      }
+
+      // Erase the children, they'll be emitted alongside their parent.
+      Engine.TentativeDiagnostics.erase(Engine.TentativeDiagnostics.begin() +
+                                        PrevDiagnostics + 1,
+                                        Engine.TentativeDiagnostics.end());
+
+      DiagnosticTransaction::commit();
+   }
+};
+
+inline void
+DiagnosticEngine::diagnoseWithNotes(InFlightDiagnostic parentDiag,
+                                    llvm::function_ref<void(void)> builder) {
+   CompoundDiagnosticTransaction transaction(*this);
+   parentDiag.flush();
+   builder();
+}
+
+} // end namespace polar::ast
+
+#endif

@@ -7,22 +7,13 @@
 //
 // See https://swift.org/LICENSE.txt for license information
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
+//
 //===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/11/28.
-//
 
-#ifndef POLARPHP_AST_PRINT_OPTIONS_H
-#define POLARPHP_AST_PRINT_OPTIONS_H
+#ifndef POLARPHP_AST_PRINTOPTIONS_H
+#define POLARPHP_AST_PRINTOPTIONS_H
 
-#include "polarphp/basic/StlExtras.h"
+#include "polarphp/basic/STLExtras.h"
 #include "polarphp/ast/AttrKind.h"
 #include "polarphp/ast/Identifier.h"
 #include "polarphp/ast/TypeOrExtensionDecl.h"
@@ -32,7 +23,6 @@
 #include <vector>
 
 namespace polar::ast {
-
 class AstPrinter;
 class GenericEnvironment;
 class CanType;
@@ -286,17 +276,17 @@ struct PrintOptions {
    /// How to print opaque return types.
    enum class OpaqueReturnTypePrintingMode {
       /// 'some P1 & P2'.
-      WithOpaqueKeyword,
+         WithOpaqueKeyword,
       /// 'P1 & P2'.
-      WithoutOpaqueKeyword,
+         WithoutOpaqueKeyword,
       /// Stable parsable internal syntax.
-      StableReference,
+         StableReference,
       /// Description suitable for debugging.
-      Description
+         Description
    };
 
    OpaqueReturnTypePrintingMode OpaqueReturnTypePrinting =
-         OpaqueReturnTypePrintingMode::WithOpaqueKeyword;
+      OpaqueReturnTypePrintingMode::WithOpaqueKeyword;
 
    /// Whether to print decl attributes that are only used internally,
    /// such as _silgen_name, transparent, etc.
@@ -353,7 +343,7 @@ struct PrintOptions {
    bool PrintExtensionFromConformingProtocols = false;
 
    std::shared_ptr<ShouldPrintChecker> CurrentPrintabilityChecker =
-         std::make_shared<ShouldPrintChecker>();
+      std::make_shared<ShouldPrintChecker>();
 
    enum class ArgAndParamPrintingMode {
       ArgumentOnly,
@@ -369,11 +359,11 @@ struct PrintOptions {
    /// Whether to print the content of an extension decl inside the type decl where it
    /// extends from.
    std::function<bool(const ExtensionDecl *)> printExtensionContentAsMembers =
-         [] (const ExtensionDecl *) { return false; };
+      [] (const ExtensionDecl *) { return false; };
 
    /// How to print the keyword argument and parameter name in functions.
    ArgAndParamPrintingMode ArgAndParamPrinting =
-         ArgAndParamPrintingMode::MatchSource;
+      ArgAndParamPrintingMode::MatchSource;
 
    /// Whether to print documentation comments attached to declarations.
    /// Note that this may print documentation comments from related declarations
@@ -431,7 +421,7 @@ struct PrintOptions {
    /// its enclosing context, if it's being printed on its own (rather than as
    /// part of the context).
    QualifyNestedDeclarations ShouldQualifyNestedDeclarations =
-         QualifyNestedDeclarations::Never;
+      QualifyNestedDeclarations::Never;
 
    /// If this is not \c nullptr then function bodies (including accessors
    /// and constructors) will be printed by this function.
@@ -480,7 +470,7 @@ struct PrintOptions {
       result.AccessFilter = AccessLevel::Public;
       result.PrintIfConfig = false;
       result.ShouldQualifyNestedDeclarations =
-            QualifyNestedDeclarations::TypesOnly;
+         QualifyNestedDeclarations::TypesOnly;
       result.PrintDocumentationComments = false;
       return result;
    }
@@ -497,7 +487,7 @@ struct PrintOptions {
       result.EmptyLineBetweenMembers = true;
       result.CascadeDocComment = true;
       result.ShouldQualifyNestedDeclarations =
-            QualifyNestedDeclarations::Always;
+         QualifyNestedDeclarations::Always;
       result.PrintDocumentationComments = true;
       result.SkipUnderscoredKeywords = true;
       result.EnumRawValues = EnumRawValueMode::PrintObjCOnly;
@@ -562,7 +552,7 @@ struct PrintOptions {
       result.PreferTypeRepr = false;
       result.PrintIfConfig = false;
       result.OpaqueReturnTypePrinting =
-            OpaqueReturnTypePrintingMode::StableReference;
+         OpaqueReturnTypePrintingMode::StableReference;
       return result;
    }
 
@@ -604,7 +594,6 @@ struct PrintOptions {
       return PO;
    }
 };
-
 } // polar::ast
 
-#endif // POLARPHP_AST_PRINT_OPTIONS_H
+#endif // POLARPHP_AST_PRINTOPTIONS_H

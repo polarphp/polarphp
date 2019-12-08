@@ -10,44 +10,26 @@
 //
 //===----------------------------------------------------------------------===//
 //
-// This source file is part of the polarphp.org open source project
-//
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/04/26.
-//
-//===----------------------------------------------------------------------===//
-//
 // This file defines the interface to builtin functions.
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef POLARPHP_AST_BUILTINS_H
-#define POLARPHP_AST_BUILTINS_H
+#ifndef SWIFT_AST_BUILTINS_H
+#define SWIFT_AST_BUILTINS_H
 
+#include "polarphp/ast/Type.h"
+#include "polarphp/ast/Types.h"
 #include "polarphp/basic/LLVM.h"
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/IR/Attributes.h"
-#include "polarphp/ast/Type.h"
-#include "polarphp/ast/Types.h"
 #include "llvm/IR/Intrinsics.h"
 #include "llvm/Support/ErrorHandling.h"
 
 namespace llvm {
 enum class AtomicOrdering;
-} // llvm
+}
 
 namespace polar::ast {
-
-class AstContext;
-class Identifier;
-class ValueDecl;
-class Type;
 
 class AstContext;
 class Identifier;
@@ -153,7 +135,6 @@ llvm::AtomicOrdering decodeLLVMAtomicOrdering(StringRef O);
 /// Returns true if the builtin with ID \p ID has a defined static overload for
 /// the type \p Ty.
 bool canBuiltinBeOverloadedForType(BuiltinValueKind ID, Type Ty);
+}
 
-} // polar::ast
-
-#endif // POLARPHP_AST_BUILTINS_H
+#endif

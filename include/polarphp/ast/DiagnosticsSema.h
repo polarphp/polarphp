@@ -1,4 +1,4 @@
-//===--- DiagnosticsIRGen.h - Diagnostic Definitions ------------*- C++ -*-===//
+//===--- DiagnosticsSema.h - Diagnostic Definitions -------------*- C++ -*-===//
 //
 // This source file is part of the Swift.org open source project
 //
@@ -11,22 +11,34 @@
 //===----------------------------------------------------------------------===//
 //
 /// \file
-/// This file defines diagnostics for IR generation.
+/// This file defines diagnostics for semantic analysis.
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef POLARPHP_AST_DIAGNOSTICSIRGEN_H
-#define POLARPHP_AST_DIAGNOSTICSIRGEN_H
+#ifndef POLARPHP_AST_DIAGNOSTICSSEMA_H
+#define POLARPHP_AST_DIAGNOSTICSSEMA_H
 
 #include "polarphp/ast/DiagnosticsCommon.h"
 
 namespace polar::ast {
+class SwitchStmt;
 namespace diag {
+
+/// Describes the kind of requirement in a protocol.
+enum class RequirementKind : uint8_t {
+   Constructor,
+   Func,
+   Var,
+   Subscript
+};
+
 // Declare common diagnostics objects with their appropriate types.
 #define DIAG(KIND,ID,Options,Text,Signature) \
-  extern internal::DiagWithArguments<void Signature>::type ID;
-#include "polarphp/ast/DiagnosticsIRGenDefs.h"
-} // diag
+    extern internal::DiagWithArguments<void Signature>::type ID;
+#define FIXIT(ID,Text,Signature) \
+    extern internal::StructuredFixItWithArguments<void Signature>::type ID;
+#include "polarphp/ast/DiagnosticsSemaDefs.h"
+} //diag
 } // polar::ast
 
-#endif // POLARPHP_AST_DIAGNOSTICSIRGEN_H
+#endif // POLARPHP_AST_DIAGNOSTICSSEMA_H
