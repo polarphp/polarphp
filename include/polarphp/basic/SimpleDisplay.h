@@ -7,17 +7,7 @@
 //
 // See https://swift.org/LICENSE.txt for license information
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
-//===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/05/05.
 //===----------------------------------------------------------------------===//
 //
 //  This file defines the main customization point, simple_display, for
@@ -35,9 +25,7 @@
 #include <tuple>
 #include <type_traits>
 
-namespace polar::basic {
-
-using llvm::raw_ostream;
+namespace polar::ast {
 
 template<typename T>
 struct HasTrivialDisplay {
@@ -45,10 +33,10 @@ struct HasTrivialDisplay {
 };
 
 #define HAS_TRIVIAL_DISPLAY(Type)     \
-   template<>                          \
-   struct HasTrivialDisplay<Type> {    \
-   static const bool value = true;   \
-}
+  template<>                          \
+  struct HasTrivialDisplay<Type> {    \
+    static const bool value = true;   \
+  }
 
 HAS_TRIVIAL_DISPLAY(unsigned char);
 HAS_TRIVIAL_DISPLAY(signed char);
@@ -75,81 +63,79 @@ simple_display(llvm::raw_ostream &out, const T &value) {
 }
 
 template<unsigned I, typename ...Types,
-         typename std::enable_if<I == sizeof...(Types)>::type* = nullptr>
+   typename std::enable_if<I == sizeof...(Types)>::type* = nullptr>
 void simple_display_tuple(llvm::raw_ostream &out,
                           const std::tuple<Types...> &value);
 
 template<unsigned I, typename ...Types,
-         typename std::enable_if<I < sizeof...(Types)>::type* = nullptr>
-         void simple_display_tuple(llvm::raw_ostream &out,
-         const std::tuple<Types...> &value) {
-         // Start or separator.
-         if (I == 0) out << "(";
-         else out << ", ";
+   typename std::enable_if<I < sizeof...(Types)>::type* = nullptr>
+void simple_display_tuple(llvm::raw_ostream &out,
+                          const std::tuple<Types...> &value) {
+   // Start or separator.
+   if (I == 0) out << "(";
+   else out << ", ";
 
-         // Current element.
-         simple_display(out, std::get<I>(value));
+   // Current element.
+   simple_display(out, std::get<I>(value));
 
-         // Print the remaining elements.
-         simple_display_tuple<I+1>(out, value);
+   // Print the remaining elements.
+   simple_display_tuple<I+1>(out, value);
 }
 
-         template<unsigned I, typename ...Types,
-                  typename std::enable_if<I == sizeof...(Types)>::type*>
-         void simple_display_tuple(llvm::raw_ostream &out,
-         const std::tuple<Types...> &value) {
-         // Last element.
-         out << ")";
+template<unsigned I, typename ...Types,
+   typename std::enable_if<I == sizeof...(Types)>::type*>
+void simple_display_tuple(llvm::raw_ostream &out,
+                          const std::tuple<Types...> &value) {
+   // Last element.
+   out << ")";
 }
 
-         template<typename ...Types>
-         void simple_display(llvm::raw_ostream &out,
-         const std::tuple<Types...> &value) {
-         simple_display_tuple<0>(out, value);
+template<typename ...Types>
+void simple_display(llvm::raw_ostream &out,
+                    const std::tuple<Types...> &value) {
+   simple_display_tuple<0>(out, value);
 }
 
-         template<typename T>
-         void simple_display(llvm::raw_ostream &out,
-         const llvm::TinyPtrVector<T> &vector) {
-         out << "{";
-         bool first = true;
-         for (const T &value : vector) {
-         if (first) first = false;
-         else out << ", ";
+template<typename T>
+void simple_display(llvm::raw_ostream &out,
+                    const llvm::TinyPtrVector<T> &vector) {
+   out << "{";
+   bool first = true;
+   for (const T &value : vector) {
+      if (first) first = false;
+      else out << ", ";
 
-         simple_display(out, value);
-}
-         out << "}";
-}
-
-         template<typename T>
-         void simple_display(llvm::raw_ostream &out,
-         const llvm::ArrayRef<T> &array) {
-         out << "{";
-         bool first = true;
-         for (const T &value : array) {
-         if (first) first = false;
-         else out << ", ";
-
-         simple_display(out, value);
-}
-         out << "}";
+      simple_display(out, value);
+   }
+   out << "}";
 }
 
-         template<typename T>
-         void simple_display(llvm::raw_ostream &out,
-         const llvm::SmallVectorImpl<T> &vec) {
-         out << "{";
-         bool first = true;
-         for (const T &value : vec) {
-         if (first) first = false;
-         else out << ", ";
-
-         simple_display(out, value);
+template<typename T>
+void simple_display(llvm::raw_ostream &out,
+                    const llvm::ArrayRef<T> &array) {
+   out << "{";
+   bool first = true;
+   for (const T &value : array) {
+      if (first) first = false;
+      else out << ", ";
+      simple_display(out, value);
+   }
+   out << "}";
 }
-         out << "}";
+
+template<typename T>
+void simple_display(llvm::raw_ostream &out,
+                    const llvm::SmallVectorImpl<T> &vec) {
+   out << "{";
+   bool first = true;
+   for (const T &value : vec) {
+      if (first) first = false;
+      else out << ", ";
+      simple_display(out, value);
+   }
+   out << "}";
 }
 
-} // polar::basic
+} // polar::ast
 
-         #endif // POLAR_BASIC_SIMPLE_DISPLAY_H
+#endif // POLAR_BASIC_SIMPLE_DISPLAY_H

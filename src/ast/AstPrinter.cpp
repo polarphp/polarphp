@@ -994,13 +994,14 @@ void PrintAst::printAttributes(const Decl *D) {
       }
 
       // If the declaration is implicitly @objc, print the attribute now.
-      if (auto VD = dyn_cast<ValueDecl>(D)) {
-         if (VD->isObjC() && !isa<EnumElementDecl>(VD) &&
-             !VD->getAttrs().hasAttribute<ObjCAttr>()) {
-            Printer.printAttrName("@objc");
-            Printer << " ";
-         }
-      }
+      /// @todo
+//      if (auto VD = dyn_cast<ValueDecl>(D)) {
+//         if (VD->isObjC() && !isa<EnumElementDecl>(VD) &&
+//             !VD->getAttrs().hasAttribute<ObjCAttr>()) {
+//            Printer.printAttrName("@objc");
+//            Printer << " ";
+//         }
+//      }
    }
 
    D->getAttrs().print(Printer, Options, D);

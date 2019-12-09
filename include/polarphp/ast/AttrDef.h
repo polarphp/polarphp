@@ -127,11 +127,6 @@ CONTEXTUAL_SIMPLE_DECL_ATTR(final, Final,
                             DeclModifier |
                             ABIBreakingToAdd | ABIBreakingToRemove | APIBreakingToAdd | APIStableToRemove,
                             2)
-DECL_ATTR(objc, ObjC,
-          OnAbstractFunction | OnClass | OnInterface | OnExtension | OnVar |
-          OnSubscript | OnEnum | OnEnumElement |
-          ABIBreakingToAdd | ABIBreakingToRemove | APIStableToAdd | APIStableToRemove,
-          3)
 CONTEXTUAL_SIMPLE_DECL_ATTR(required, Required,
                             OnConstructor |
                             DeclModifier |

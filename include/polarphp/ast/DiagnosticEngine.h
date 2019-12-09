@@ -111,7 +111,6 @@ class DiagnosticArgument {
       unsigned UnsignedVal;
       StringRef StringVal;
       DeclName IdentifierVal;
-      ObjCSelector ObjCSelectorVal;
       ValueDecl *TheValueDecl;
       Type TypeVal;
       TypeRepr *TyR;

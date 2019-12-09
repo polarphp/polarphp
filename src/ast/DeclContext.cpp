@@ -488,8 +488,9 @@ bool DeclContext::mayContainMembersAccessedByDynamicLookup() const {
 
   // Members of @objc protocols (but not protocol extensions) can be
   // found by dynamic lookup.
-  if (auto *PD = dyn_cast<InterfaceDecl>(this))
-      return PD->getAttrs().hasAttribute<ObjCAttr>();
+  /// @todo
+//  if (auto *PD = dyn_cast<InterfaceDecl>(this))
+//      return PD->getAttrs().hasAttribute<ObjCAttr>();
 
   return false;
 }
