@@ -99,7 +99,7 @@ class alignas(8) TypeRepr {
                                                                     NumTypes : 32
                                                                     );
 
-                                              POLAR_INLINE_BITFIELD_FULL(SILBoxTypeRepr, TypeRepr, 32,
+                                              POLAR_INLINE_BITFIELD_FULL(PILBoxTypeRepr, TypeRepr, 32,
                                                                          NumGenericArgs : NumPadBits,
                                                                          NumFields : 32
                                                                          );
@@ -476,7 +476,7 @@ inline IdentTypeRepr::ComponentRange IdentTypeRepr::getComponentRange() {
 ///   (x: Foo, y: Bar) -> Baz
 /// \endcode
 class FunctionTypeRepr : public TypeRepr {
-   // These three are only used in SIL mode, which is the only time
+   // These three are only used in PIL mode, which is the only time
    // we can have polymorphic function values.
    GenericParamList *GenericParams;
    GenericEnvironment *GenericEnv;
@@ -1007,12 +1007,12 @@ private:
    friend class TypeRepr;
 };
 
-class SILBoxTypeReprField {
+class PILBoxTypeReprField {
    SourceLoc VarOrLetLoc;
    llvm::PointerIntPair<TypeRepr*, 1, bool> FieldTypeAndMutable;
 
 public:
-   SILBoxTypeReprField(SourceLoc loc, bool isMutable, TypeRepr *fieldType)
+   PILBoxTypeReprField(SourceLoc loc, bool isMutable, TypeRepr *fieldType)
       : VarOrLetLoc(loc), FieldTypeAndMutable(fieldType, isMutable) {
    }
 
@@ -1060,13 +1060,13 @@ private:
    friend class TypeRepr;
 };
 
-/// SIL-only TypeRepr for box types.
+/// PIL-only TypeRepr for box types.
 ///
 /// Boxes are either concrete: { var Int, let String }
 /// or generic:                <T: Runcible> { var T, let String } <Int>
-class SILBoxTypeRepr final : public TypeRepr,
-      private llvm::TrailingObjects<SILBoxTypeRepr,
-      SILBoxTypeReprField, TypeRepr *> {
+class PILBoxTypeRepr final : public TypeRepr,
+      private llvm::TrailingObjects<PILBoxTypeRepr,
+      PILBoxTypeReprField, TypeRepr *> {
    friend TrailingObjects;
    GenericParamList *GenericParams;
    GenericEnvironment *GenericEnv = nullptr;
@@ -1074,36 +1074,36 @@ class SILBoxTypeRepr final : public TypeRepr,
    SourceLoc LBraceLoc, RBraceLoc;
    SourceLoc ArgLAngleLoc, ArgRAngleLoc;
 
-   size_t numTrailingObjects(OverloadToken<SILBoxTypeReprField>) const {
-      return Bits.SILBoxTypeRepr.NumFields;
+   size_t numTrailingObjects(OverloadToken<PILBoxTypeReprField>) const {
+      return Bits.PILBoxTypeRepr.NumFields;
    }
    size_t numTrailingObjects(OverloadToken<TypeRepr*>) const {
-      return Bits.SILBoxTypeRepr.NumGenericArgs;
+      return Bits.PILBoxTypeRepr.NumGenericArgs;
    }
 
 public:
-   using Field = SILBoxTypeReprField;
+   using Field = PILBoxTypeReprField;
 
-   SILBoxTypeRepr(GenericParamList *GenericParams,
+   PILBoxTypeRepr(GenericParamList *GenericParams,
                   SourceLoc LBraceLoc, ArrayRef<Field> Fields,
                   SourceLoc RBraceLoc,
                   SourceLoc ArgLAngleLoc, ArrayRef<TypeRepr *> GenericArgs,
                   SourceLoc ArgRAngleLoc)
-      : TypeRepr(TypeReprKind::SILBox),
+      : TypeRepr(TypeReprKind::PILBox),
         GenericParams(GenericParams), LBraceLoc(LBraceLoc), RBraceLoc(RBraceLoc),
         ArgLAngleLoc(ArgLAngleLoc), ArgRAngleLoc(ArgRAngleLoc)
    {
-      Bits.SILBoxTypeRepr.NumFields = Fields.size();
-      Bits.SILBoxTypeRepr.NumGenericArgs = GenericArgs.size();
+      Bits.PILBoxTypeRepr.NumFields = Fields.size();
+      Bits.PILBoxTypeRepr.NumGenericArgs = GenericArgs.size();
 
       std::uninitialized_copy(Fields.begin(), Fields.end(),
-                              getTrailingObjects<SILBoxTypeReprField>());
+                              getTrailingObjects<PILBoxTypeReprField>());
 
       std::uninitialized_copy(GenericArgs.begin(), GenericArgs.end(),
                               getTrailingObjects<TypeRepr*>());
    }
 
-   static SILBoxTypeRepr *create(AstContext &C,
+   static PILBoxTypeRepr *create(AstContext &C,
                                  GenericParamList *GenericParams,
                                  SourceLoc LBraceLoc, ArrayRef<Field> Fields,
                                  SourceLoc RBraceLoc,
@@ -1117,11 +1117,11 @@ public:
 
    ArrayRef<Field> getFields() const {
       return {getTrailingObjects<Field>(),
-               Bits.SILBoxTypeRepr.NumFields};
+               Bits.PILBoxTypeRepr.NumFields};
    }
    ArrayRef<TypeRepr *> getGenericArguments() const {
       return {getTrailingObjects<TypeRepr*>(),
-               static_cast<size_t>(Bits.SILBoxTypeRepr.NumGenericArgs)};
+               static_cast<size_t>(Bits.PILBoxTypeRepr.NumGenericArgs)};
    }
 
    GenericParamList *getGenericParams() const {
@@ -1137,9 +1137,9 @@ public:
    SourceLoc getArgumentRAngleLoc() const { return ArgRAngleLoc; }
 
    static bool classof(const TypeRepr *T) {
-      return T->getKind() == TypeReprKind::SILBox;
+      return T->getKind() == TypeReprKind::PILBox;
    }
-   static bool classof(const SILBoxTypeRepr *T) { return true; }
+   static bool classof(const PILBoxTypeRepr *T) { return true; }
 
 private:
    SourceLoc getStartLocImpl() const;
@@ -1170,7 +1170,7 @@ inline bool TypeRepr::isSimple() const {
    case TypeReprKind::Tuple:
    case TypeReprKind::Fixed:
    case TypeReprKind::Array:
-   case TypeReprKind::SILBox:
+   case TypeReprKind::PILBox:
    case TypeReprKind::Shared:
    case TypeReprKind::Owned:
       return true;

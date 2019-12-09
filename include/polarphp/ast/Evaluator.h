@@ -23,9 +23,11 @@
 #include "polarphp/basic/Debug.h"
 #include "polarphp/basic/Defer.h"
 #include "polarphp/basic/Statistic.h"
+#include "polarphp/basic/TypeId.h"
 #include "llvm/ADT/DenseMap.h"
 #include "llvm/ADT/Optional.h"
 #include "llvm/ADT/SetVector.h"
+#include "llvm/ADT/ArrayRef.h"
 #include "llvm/Support/Error.h"
 #include "llvm/Support/PrettyStackTrace.h"
 #include <string>
@@ -49,6 +51,7 @@ using llvm::Optional;
 using llvm::None;
 using polar::basic::UnifiedStatsReporter;
 using polar::basic::FrontendStatsTracer;
+
 class DiagnosticEngine;
 class Evaluator;
 

@@ -17,7 +17,7 @@
 #define POLARPHP_NAME_LOOKUP_REQUESTS_H
 
 #include "polarphp/ast/SimpleRequest.h"
-#include "polarphp/ast/AstTypeIDs.h"
+#include "polarphp/ast/AstTypeIds.h"
 #include "polarphp/basic/Statistic.h"
 #include "llvm/ADT/Hashing.h"
 #include "llvm/ADT/TinyPtrVector.h"

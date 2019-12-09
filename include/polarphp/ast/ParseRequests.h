@@ -16,7 +16,7 @@
 #ifndef POLARPHP_AST_PARSE_REQUESTS_H
 #define POLARPHP_AST_PARSE_REQUESTS_H
 
-#include "polarphp/ast/AstTypeIDs.h"
+#include "polarphp/ast/AstTypeIds.h"
 #include "polarphp/ast/SimpleRequest.h"
 
 namespace polar::ast {

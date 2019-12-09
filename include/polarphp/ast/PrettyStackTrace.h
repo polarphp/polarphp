@@ -178,15 +178,6 @@ public:
    void print(llvm::raw_ostream &out) const override;
 };
 
-class PrettyStackTraceSelector : public llvm::PrettyStackTraceEntry {
-   ObjCSelector Selector;
-   const char *Action;
-public:
-   PrettyStackTraceSelector(const char *action, ObjCSelector S)
-      : Selector(S), Action(action) {}
-   void print(llvm::raw_ostream &OS) const override;
-};
-
 } // end namespace polar::ast
 
 #endif // POLARPHP_AST_PRETTYSTACKTRACE

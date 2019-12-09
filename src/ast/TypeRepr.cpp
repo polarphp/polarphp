@@ -31,9 +31,10 @@ namespace polar::ast {
 
 using llvm::dyn_cast_or_null;
 using llvm::dyn_cast;
+using polar::basic::interleave;
 
 #define TYPEREPR(Id, _) \
-  static_assert(IsTriviallyDestructible<Id##TypeRepr>::value, \
+  static_assert(std::is_trivially_destructible_v<Id##TypeRepr>, \
                 "TypeReprs are BumpPtrAllocated; the d'tor is never called");
 #include "polarphp/ast/TypeReprNodesDef.h"
 
@@ -105,7 +106,7 @@ void TypeRepr::print(raw_ostream &OS, const PrintOptions &Opts) const {
 
 void TypeRepr::print(AstPrinter &Printer, const PrintOptions &Opts) const {
   Printer.printTypePre(TypeLoc(const_cast<TypeRepr *>(this)));
-  SWIFT_DEFER {
+  POLAR_DEFER {
     Printer.printTypePost(TypeLoc(const_cast<TypeRepr *>(this)));
   };
 
@@ -223,8 +224,8 @@ TypeRepr *CloneVisitor::visitMetatypeTypeRepr(MetatypeTypeRepr *T) {
   return new (Ctx) MetatypeTypeRepr(visit(T->getBase()), T->getMetaLoc());
 }
 
-TypeRepr *CloneVisitor::visitProtocolTypeRepr(ProtocolTypeRepr *T) {
-  return new (Ctx) ProtocolTypeRepr(visit(T->getBase()), T->getProtocolLoc());
+TypeRepr *CloneVisitor::visitInterfaceTypeRepr(InterfaceTypeRepr *T) {
+  return new (Ctx) InterfaceTypeRepr(visit(T->getBase()), T->getInterfaceLoc());
 }
 
 TypeRepr *CloneVisitor::visitInOutTypeRepr(InOutTypeRepr *T) {
@@ -486,7 +487,7 @@ SourceLoc FunctionTypeRepr::getStartLocImpl() const {
 
 SourceLoc PILBoxTypeRepr::getStartLocImpl() const {
   if (GenericParams && GenericParams->getSourceRange().isValid())
-    return GenericParams->getSourceRange().Start;
+    return GenericParams->getSourceRange().start;
   return LBraceLoc;
 }
 SourceLoc PILBoxTypeRepr::getEndLocImpl() const {
@@ -501,7 +502,7 @@ SourceLoc PILBoxTypeRepr::getLocImpl() const {
 void TupleTypeRepr::printImpl(AstPrinter &Printer,
                               const PrintOptions &Opts) const {
   Printer.callPrintStructurePre(PrintStructureKind::TupleType);
-  SWIFT_DEFER { Printer.printStructurePost(PrintStructureKind::TupleType); };
+  POLAR_DEFER { Printer.printStructurePost(PrintStructureKind::TupleType); };
 
   Printer << "(";
 
@@ -559,10 +560,10 @@ void MetatypeTypeRepr::printImpl(AstPrinter &Printer,
   Printer << ".Type";
 }
 
-void ProtocolTypeRepr::printImpl(AstPrinter &Printer,
+void InterfaceTypeRepr::printImpl(AstPrinter &Printer,
                                  const PrintOptions &Opts) const {
   printTypeRepr(Base, Printer, Opts);
-  Printer << ".Protocol";
+  Printer << ".Interface";
 }
 
 void OpaqueReturnTypeRepr::printImpl(AstPrinter &Printer,

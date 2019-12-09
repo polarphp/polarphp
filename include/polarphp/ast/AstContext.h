@@ -422,7 +422,7 @@ public:
    }
 
    /// Retrive the syntax node memory manager for this context.
-   llvm::IntrusiveRefCntPtr<syntax::SyntaxArena> getSyntaxArena() const;
+   llvm::IntrusiveRefCntPtr<SyntaxArena> getSyntaxArena() const;
 
    /// Set a new stats reporter.
    void setStatsReporter(UnifiedStatsReporter *stats);

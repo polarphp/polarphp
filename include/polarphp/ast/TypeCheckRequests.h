@@ -16,7 +16,7 @@
 #ifndef POLARPHP_TYPE_CHECK_REQUESTS_H
 #define POLARPHP_TYPE_CHECK_REQUESTS_H
 
-#include "polarphp/ast/AstTypeIDs.h"
+#include "polarphp/ast/AstTypeIds.h"
 #include "polarphp/ast/GenericSignature.h"
 #include "polarphp/ast/Type.h"
 #include "polarphp/ast/Evaluator.h"

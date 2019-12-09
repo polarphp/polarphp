@@ -46,7 +46,7 @@ class Traversal : public TypeVisitor<Traversal, bool>
       return false;
 
    }
-   bool visitSILTokenType(SILTokenType *ty) { return false; }
+   bool visitPILTokenType(PILTokenType *ty) { return false; }
 
    bool visitParenType(ParenType *ty) {
       return doIt(ty->getUnderlyingType());
@@ -116,7 +116,7 @@ class Traversal : public TypeVisitor<Traversal, bool>
       return visitAnyFunctionType(ty);
    }
 
-   bool visitSILFunctionType(SILFunctionType *ty) {
+   bool visitPILFunctionType(PILFunctionType *ty) {
       // TODO: Should this be the only kind of walk we allow?
       if (auto subs = ty->getSubstitutions()) {
          for (auto paramTy : subs.getReplacementTypes()) {
@@ -147,7 +147,7 @@ class Traversal : public TypeVisitor<Traversal, bool>
       return doIt(ty->getKeyType()) || doIt(ty->getValueType());
    }
 
-   bool visitProtocolCompositionType(ProtocolCompositionType *ty) {
+   bool visitInterfaceCompositionType(InterfaceCompositionType *ty) {
       for (auto member : ty->getMembers())
          if (doIt(member))
             return true;
@@ -195,11 +195,11 @@ class Traversal : public TypeVisitor<Traversal, bool>
 
    bool visitTypeVariableType(TypeVariableType *ty) { return false; }
 
-   bool visitSILBlockStorageType(SILBlockStorageType *ty) {
+   bool visitPILBlockStorageType(PILBlockStorageType *ty) {
       return doIt(ty->getCaptureType());
    }
 
-   bool visitSILBoxType(SILBoxType *ty) {
+   bool visitPILBoxType(PILBoxType *ty) {
       for (Type type : ty->getSubstitutions().getReplacementTypes()) {
          if (type && doIt(type))
             return true;

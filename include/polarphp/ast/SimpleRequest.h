@@ -22,7 +22,6 @@
 #include "polarphp/ast/DiagnosticsCommon.h"
 #include "polarphp/basic/SimpleDisplay.h"
 #include "polarphp/basic/Statistic.h"
-#include "polarphp/basic/TypeId.h"
 #include "llvm/ADT/Hashing.h"
 #include "llvm/ADT/STLExtras.h"
 #include <tuple>
@@ -40,7 +39,7 @@ class Evaluator;
 enum class CacheKind
 {
    /// The result for a particular request should never be cached.
-   Uncached,
+      Uncached,
    /// The result for a particular request should be cached within the
    /// evaluator itself.
    Cached,

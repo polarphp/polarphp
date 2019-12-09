@@ -19,8 +19,8 @@
 
 #include "polarphp/basic/SourceLoc.h"
 #include "polarphp/basic/TypeId.h"
+#include "polarphp/basic/Hashing.h"
 #include "llvm/ADT/DenseMapInfo.h"
-#include "llvm/ADT/Hashing.h"
 #include "llvm/ADT/IntrusiveRefCntPtr.h"
 #include <string>
 
@@ -32,6 +32,7 @@ namespace polar::ast {
 
 using llvm::hash_code;
 using llvm::hash_value;
+using polar::basic::hash_value;
 using polar::basic::SourceLoc;
 
 class DiagnosticEngine;

@@ -33,7 +33,7 @@
 /// In case there's a bug in the ASTScope lookup system, suggest that the user
 /// try disabling it.
 /// \p message must be a string literal
-#define AST_SCOPE_ASSERT(predicate, message)                                     \
+#define ast_scope_assert(predicate, message)                                     \
   assert((predicate) && message                                                \
          " Try compiling with '-disable-astscope-lookup'.")
 
@@ -104,6 +104,7 @@ class GenericContext;
 class DeclName;
 class StmtConditionElement;
 
+namespace ast_scope {
 class AstScopeImpl;
 class GenericTypeOrExtensionScope;
 class IterableTypeScope;
@@ -114,6 +115,7 @@ struct AnnotatedInsertionPoint {
   AstScopeImpl *insertionPoint;
   const char *explanation;
 };
+
 
 void simple_display(llvm::raw_ostream &out, const AstScopeImpl *);
 void simple_display(llvm::raw_ostream &out, const ScopeCreator *);
@@ -203,7 +205,7 @@ public:
   void *operator new(size_t bytes, const AstContext &ctx,
                      unsigned alignment = alignof(AstScopeImpl));
   void *operator new(size_t Bytes, void *Mem) {
-    AST_SCOPE_ASSERT(Mem, "Allocation failed");
+    ast_scope_assert(Mem, "Allocation failed");
     return Mem;
   }
 
@@ -623,7 +625,7 @@ public:
   void *operator new(size_t bytes, const AstContext &ctx,
                      unsigned alignment = alignof(AstScopeImpl));
   void *operator new(size_t Bytes, void *Mem) {
-    AST_SCOPE_ASSERT(Mem, "Allocation failed");
+    ast_scope_assert(Mem, "Allocation failed");
     return Mem;
   }
 
@@ -1194,7 +1196,7 @@ public:
 
   AttachedPropertyWrapperScope(VarDecl *e)
       : decl(e), sourceRangeWhenCreated(getSourceRangeOfVarDecl(e)) {
-    AST_SCOPE_ASSERT(sourceRangeWhenCreated.isValid(),
+    ast_scope_assert(sourceRangeWhenCreated.isValid(),
                    "VarDecls must have ranges to be looked-up");
   }
   virtual ~AttachedPropertyWrapperScope() {}
@@ -1932,7 +1934,7 @@ protected:
   bool lookupLocalsOrMembers(ArrayRef<const AstScopeImpl *>,
                              DeclConsumer) const override;
 };
-
+} // namespace ast_scope
 } // polar::ast
 
 #endif // POLARPHP_AST_AST_SCOPE_H

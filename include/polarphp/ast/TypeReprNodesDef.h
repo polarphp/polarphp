@@ -59,8 +59,8 @@ ABSTRACT_TYPEREPR(Specifier, TypeRepr)
   TYPEREPR(Shared, SpecifierTypeRepr)
   TYPEREPR(Owned, SpecifierTypeRepr)
 TYPEREPR(Fixed, TypeRepr)
-TYPEREPR(SILBox, TypeRepr)
-LAST_TYPEREPR(SILBox)
+TYPEREPR(PILBox, TypeRepr)
+LAST_TYPEREPR(PILBox)
 
 #undef ABSTRACT_TYPEREPR
 #undef TYPEREPR

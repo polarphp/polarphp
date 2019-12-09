@@ -54,6 +54,8 @@ POLAR_TYPEID_NAMED(std::string, String)
 
 // C++ standard library types.
 POLAR_TYPEID_TEMPLATE1_NAMED(std::vector, Vector, typename T, T)
-// polar ADT types.
+// LLVM ADT types.
 POLAR_TYPEID_TEMPLATE1_NAMED(llvm::TinyPtrVector, TinyPtrVector, typename T, T)
+POLAR_TYPEID_TEMPLATE1_NAMED(llvm::ArrayRef, ArrayRef, typename T, T)
+
 
