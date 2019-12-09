@@ -325,7 +325,7 @@ public:
       if (bytes == 0)
          return nullptr;
 
-      if (LangOpts.useMalloc)
+      if (LangOpts.UseMalloc)
          return aligned_alloc(bytes, alignment);
 
       if (arena == AllocationArena::Permanent && Stats)
@@ -542,25 +542,6 @@ public:
 
    /// Retrieve a specific, known protocol.
    InterfaceDecl *getInterface(KnownInterfaceKind kind) const;
-
-   /// Determine whether the given nominal type is one of the standard
-   /// library or Cocoa framework types that is known to be bridged by another
-   /// module's overlay, for layering or implementation detail reasons.
-   bool isTypeBridgedInExternalModule(NominalTypeDecl *nominal) const;
-
-   /// True if the given type is an Objective-C class that serves as the bridged
-   /// object type for many Swift value types, meaning that the conversion from
-   /// an object to a value is a conditional cast.
-   bool isObjCClassWithMultipleSwiftBridgedTypes(Type t);
-
-   /// Get the Objective-C type that a Swift type bridges to, if any.
-   ///
-   /// \param dc The context in which bridging is occurring.
-   /// \param type The Swift for which we are querying bridging behavior.
-   /// \param bridgedValueType The specific value type that is bridged,
-   /// which will usually by the same as \c type.
-   Type getBridgedToObjC(const DeclContext *dc, Type type,
-                         Type *bridgedValueType = nullptr) const;
 
    /// Get the Clang type corresponding to a Swift function type.
    ///
@@ -907,14 +888,14 @@ public:
    /// This is usually the check you want; for example, when introducing
    /// a new language feature which is only visible in Swift 5, you would
    /// check for isPolarVersionAtLeast(5).
-   bool isPolarVersionAtLeast(unsigned major, unsigned minor = 0) const {
-      return LangOpts.isPolarVersionAtLeast(major, minor);
+   bool isPolarphpVersionAtLeast(unsigned major, unsigned minor = 0) const {
+      return LangOpts.isPolarphpVersionAtLeast(major, minor);
    }
 
    /// Check whether it's important to respect access control restrictions
    /// in current context.
    bool isAccessControlDisabled() const {
-      return !LangOpts.enableAccessControl;
+      return !LangOpts.EnableAccessControl;
    }
 
    /// Each kind and SourceFile has its own cache for a Type.

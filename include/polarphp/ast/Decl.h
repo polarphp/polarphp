@@ -44,6 +44,10 @@
 #include "llvm/Support/TrailingObjects.h"
 #include <type_traits>
 
+namespace polar::parser {
+class Parser;
+}
+
 namespace polar::ast {
 
 using polar::basic::count_bits_used;
@@ -53,6 +57,7 @@ using polar::basic::range;
 using polar::basic::OptionalEnum;
 using polar::basic::DowncastFilterRange;
 using polar::basic::NullablePtr;
+using polar::parser::Parser;
 
 enum class AccessSemantics : unsigned char;
 class AccessorDecl;

@@ -119,7 +119,7 @@ private:
   bool HasImplementationOnlyImports = false;
 
   /// The scope map that describes this source file.
-  std::unique_ptr<ASTScope> Scope;
+  std::unique_ptr<AstScope> Scope;
 
   /// The set of validated opaque return type decls in the source file.
   llvm::SmallVector<OpaqueTypeDecl *, 4> OpaqueReturnTypes;
@@ -325,7 +325,7 @@ public:
   StringRef getFilename() const;
 
   /// Retrieve the scope that describes this source file.
-  ASTScope &getScope();
+  AstScope &getScope();
 
   POLAR_DEBUG_DUMP;
   void dump(raw_ostream &os) const;
@@ -439,7 +439,7 @@ public:
 
   /// Do not call when inside an inactive clause (\c
   /// InInactiveClauseEnvironment)) because it will later on result in a lookup
-  /// to something that won't be in the ASTScope tree.
+  /// to something that won't be in the AstScope tree.
   void addUnvalidatedDeclWithOpaqueResultType(ValueDecl *vd) {
     UnvalidatedDeclsWithOpaqueReturnTypes.insert(vd);
   }

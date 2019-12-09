@@ -131,7 +131,7 @@ struct DenseMapInfo<UUID>
                0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFE}}};
    }
 
-   static unsigned getHashm_value(UUID uuid)
+   static unsigned getHashValue(UUID uuid)
    {
       union {
          UUID uu;
@@ -146,6 +146,6 @@ struct DenseMapInfo<UUID>
       return a == b;
    }
 };
-}
+} // polar::basic
 
 #endif // POLARPHP_BASIC_UUID_H

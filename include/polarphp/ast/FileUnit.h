@@ -14,11 +14,10 @@
 #define POLARPHP_AST_FILEUNIT_H
 
 #include "polarphp/ast/Module.h"
-#include "polarphp/ast/RawComment.h"
 
 namespace polar::ast {
 
-using llvm::Optional;
+class AstContext;
 
 static inline unsigned alignOfFileUnit();
 
@@ -106,18 +105,18 @@ public:
 
    /// Find all Objective-C methods with the given selector.
    virtual void lookupObjCMethods(
-         ObjCSelector selector,
-         SmallVectorImpl<AbstractFunctionDecl *> &results) const = 0;
+      ObjCSelector selector,
+      SmallVectorImpl<AbstractFunctionDecl *> &results) const = 0;
 
    /// Returns the comment attached to the given declaration.
    ///
    /// This function is an implementation detail for comment serialization.
    /// If you just want to get a comment attached to a decl, use
    /// \c Decl::getRawComment() or \c Decl::getBriefComment().
-   //  virtual Optional<CommentInfo>
-   //  getCommentForDecl(const Decl *D) const {
-   //    return None;
-   //  }
+   virtual Optional<CommentInfo>
+   getCommentForDecl(const Decl *D) const {
+      return None;
+   }
 
    virtual Optional<StringRef>
    getGroupNameForDecl(const Decl *D) const {
@@ -173,8 +172,8 @@ public:
    /// limiting deserialization work.
    virtual void
    getTopLevelDeclsWhereAttributesMatch(
-         SmallVectorImpl<Decl*> &Results,
-         llvm::function_ref<bool(DeclAttributes)> matchAttributes) const;
+      SmallVectorImpl<Decl*> &Results,
+      llvm::function_ref<bool(DeclAttributes)> matchAttributes) const;
 
    /// Finds all precedence group decls in this file.
    ///
@@ -213,7 +212,7 @@ public:
 
    /// \see ModuleDecl::getImportedModulesForLookup
    virtual void getImportedModulesForLookup(
-         SmallVectorImpl<ModuleDecl::ImportedModule> &imports) const {
+      SmallVectorImpl<ModuleDecl::ImportedModule> &imports) const {
       return getImportedModules(imports, ModuleDecl::ImportFilterKind::Public);
    }
 
@@ -262,11 +261,12 @@ public:
       return DC->getContextKind() == DeclContextKind::FileUnit;
    }
 
-private:
+/// @todo
+public:
    // Make placement new and vanilla new/delete illegal for FileUnits.
-   void *operator new(size_t Bytes) noexcept = delete;
-   void *operator new(size_t Bytes, void *Mem) noexcept = delete;
-   void operator delete(void *Data) noexcept = delete;
+   void *operator new(size_t Bytes) throw() = delete;
+   void *operator new(size_t Bytes, void *Mem) throw() = delete;
+   void operator delete(void *Data) throw() = delete;
 
 public:
    // Only allow allocation of FileUnits using the allocator in AstContext
@@ -289,7 +289,7 @@ private:
    std::unique_ptr<LookupCache> Cache;
    LookupCache &getCache() const;
 
-   friend AstContext;
+   friend class AstContext;
    ~BuiltinUnit() = default;
 
 public:
@@ -300,8 +300,8 @@ public:
 
    /// Find all Objective-C methods with the given selector.
    void lookupObjCMethods(
-         ObjCSelector selector,
-         SmallVectorImpl<AbstractFunctionDecl *> &results) const override;
+      ObjCSelector selector,
+      SmallVectorImpl<AbstractFunctionDecl *> &results) const override;
 
    Identifier
    getDiscriminatorForPrivateValue(const ValueDecl *D) const override {
@@ -367,14 +367,14 @@ public:
    /// \returns \c true if this module file supports retrieving all of the
    /// generic signatures, \c false otherwise.
    virtual bool getAllGenericSignatures(
-         SmallVectorImpl<GenericSignature> &genericSignatures) {
+      SmallVectorImpl<GenericSignature> &genericSignatures) {
       return false;
    }
 
    static bool classof(const FileUnit *file) {
       return file->getKind() == FileUnitKind::SerializedAST ||
-            file->getKind() == FileUnitKind::ClangModule ||
-            file->getKind() == FileUnitKind::DWARFModule;
+             file->getKind() == FileUnitKind::ClangModule ||
+             file->getKind() == FileUnitKind::DWARFModule;
    }
    static bool classof(const DeclContext *DC) {
       return isa<FileUnit>(DC) && classof(cast<FileUnit>(DC));
@@ -384,12 +384,12 @@ public:
 
 inline FileUnit &ModuleDecl::getMainFile(FileUnitKind expectedKind) const {
    assert(expectedKind != FileUnitKind::Source &&
-         "must use specific source kind; see getMainSourceFile");
+          "must use specific source kind; see getMainSourceFile");
    assert(!Files.empty() && "No files added yet");
    assert(Files.front()->getKind() == expectedKind);
    return *Files.front();
 }
 
-} // end namespace polar::ast
+} // end namespace swift
 
 #endif

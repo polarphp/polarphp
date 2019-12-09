@@ -9,117 +9,114 @@
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
 //===----------------------------------------------------------------------===//
-//
-// This source file is part of the polarphp.org open source project
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/11/27.
 
-#ifndef POLARPHP_AST_SEARCHPATH_OPTIONS_H
-#define POLARPHP_AST_SEARCHPATH_OPTIONS_H
+#ifndef POLARPHP_AST_SEARCHPATHOPTIONS_H
+#define POLARPHP_AST_SEARCHPATHOPTIONS_H
 
+#include "polarphp/basic/ArrayRefView.h"
 #include "llvm/ADT/Hashing.h"
-#include "llvm/ADT/StringRef.h"
+
 #include <string>
 #include <vector>
 
 namespace polar::ast {
 
-using llvm::StringRef;
-
 /// Options for controlling search path behavior.
-class SearchPathOptions
-{
+class SearchPathOptions {
 public:
-   /// path to the SDK which is being built against.
-   std::string sdkPath;
+   /// Path to the SDK which is being built against.
+   std::string SDKPath;
 
-   /// path(s) which should be searched for modules.
+   /// Path(s) which should be searched for modules.
    ///
    /// Do not add values to this directly. Instead, use
-   /// \c AstContext::addSearchPath.
-   std::vector<std::string> importSearchPaths;
+   /// \c ASTContext::addSearchPath.
+   std::vector<std::string> ImportSearchPaths;
 
-   /// path(s) to virtual filesystem overlay YAML files.
-   std::vector<std::string> vfsOverlayFiles;
+   /// Path(s) to virtual filesystem overlay YAML files.
+   std::vector<std::string> VFSOverlayFiles;
 
-   struct FrameworkSearchPath
-   {
-      std::string path;
-      bool isSystem = false;
+   struct FrameworkSearchPath {
+      std::string Path;
+      bool IsSystem = false;
       FrameworkSearchPath(StringRef path, bool isSystem)
-         : path(path),
-           isSystem(isSystem)
-      {}
+         : Path(path), IsSystem(isSystem) {}
 
-      friend bool operator ==(const FrameworkSearchPath &lhs,
-                              const FrameworkSearchPath &rhs)
-      {
-         return lhs.path == rhs.path && lhs.isSystem == rhs.isSystem;
+      friend bool operator ==(const FrameworkSearchPath &LHS,
+                              const FrameworkSearchPath &RHS) {
+         return LHS.Path == RHS.Path && LHS.IsSystem == RHS.IsSystem;
       }
-
-      friend bool operator !=(const FrameworkSearchPath &lhs,
-                              const FrameworkSearchPath &rhs)
-      {
-         return !(lhs == rhs);
+      friend bool operator !=(const FrameworkSearchPath &LHS,
+                              const FrameworkSearchPath &RHS) {
+         return !(LHS == RHS);
       }
    };
-   /// path(s) which should be searched for frameworks.
+   /// Path(s) which should be searched for frameworks.
    ///
    /// Do not add values to this directly. Instead, use
-   /// \c AstContext::addSearchPath.
-   std::vector<FrameworkSearchPath> frameworkSearchPaths;
+   /// \c ASTContext::addSearchPath.
+   std::vector<FrameworkSearchPath> FrameworkSearchPaths;
 
-   /// path(s) which should be searched for libraries.
+   /// Path(s) which should be searched for libraries.
    ///
    /// This is used in immediate modes. It is safe to add paths to this directly.
-   std::vector<std::string> librarySearchPaths;
+   std::vector<std::string> LibrarySearchPaths;
 
-   /// path to search for compiler-relative header files.
-   std::string runtimeResourcePath;
+   /// Path to search for compiler-relative header files.
+   std::string RuntimeResourcePath;
 
    /// Paths to search for compiler-relative stdlib dylibs, in order of
    /// preference.
-   std::vector<std::string> runtimeLibraryPaths;
+   std::vector<std::string> RuntimeLibraryPaths;
 
    /// Paths to search for stdlib modules. One of these will be compiler-relative.
-   std::vector<std::string> runtimeLibraryImportPaths;
+   std::vector<std::string> RuntimeLibraryImportPaths;
 
    /// Don't look in for compiler-provided modules.
-   bool skipRuntimeLibraryImportPaths = false;
+   bool SkipRuntimeLibraryImportPaths = false;
 
+   /// When set, don't validate module system dependencies.
+   ///
+   /// If a system header is modified and this is not set, the compiler will
+   /// rebuild PCMs and compiled swiftmodules that depend on them, just like it
+   /// would for a non-system header.
+   bool DisableModulesValidateSystemDependencies = false;
+
+private:
+   static StringRef
+   pathStringFromFrameworkSearchPath(const FrameworkSearchPath &next) {
+      return next.Path;
+   };
+
+public:
    /// Return a hash code of any components from these options that should
    /// contribute to a Swift Bridging PCH hash.
-   llvm::hash_code getPCHHashComponents() const
-   {
-      using llvm::hash_value;
+   llvm::hash_code getPCHHashComponents() const {
       using llvm::hash_combine;
-      auto code = hash_value(sdkPath);
-      for (auto importItem : importSearchPaths) {
-         code = hash_combine(code, importItem);
-      }
-      for (auto vfsFile : vfsOverlayFiles) {
-         code = hash_combine(code, vfsFile);
-      }
-      for (const auto &frameworkPath : frameworkSearchPaths) {
-         code = hash_combine(code, frameworkPath.path);
-      }
-      for (auto libraryPath : librarySearchPaths) {
-         code = hash_combine(code, libraryPath);
-      }
-      code = hash_combine(code, runtimeResourcePath);
-      for (auto runtimeLibraryImportPath : runtimeLibraryImportPaths) {
-         code = hash_combine(code, runtimeLibraryImportPath);
-      }
-      return code;
+      using llvm::hash_combine_range;
+
+      using FrameworkPathView = ArrayRefView<FrameworkSearchPath, StringRef,
+         pathStringFromFrameworkSearchPath>;
+      FrameworkPathView frameworkPathsOnly{FrameworkSearchPaths};
+
+      return hash_combine(SDKPath,
+                          hash_combine_range(ImportSearchPaths.begin(),
+                                             ImportSearchPaths.end()),
+                          hash_combine_range(VFSOverlayFiles.begin(),
+                                             VFSOverlayFiles.end()),
+         // FIXME: Should we include the system-ness of framework
+         // search paths too?
+                          hash_combine_range(frameworkPathsOnly.begin(),
+                                             frameworkPathsOnly.end()),
+                          hash_combine_range(LibrarySearchPaths.begin(),
+                                             LibrarySearchPaths.end()),
+                          RuntimeResourcePath,
+                          hash_combine_range(RuntimeLibraryImportPaths.begin(),
+                                             RuntimeLibraryImportPaths.end()),
+                          DisableModulesValidateSystemDependencies);
    }
 };
 
 } // polar::ast
 
-#endif // POLARPHP_AST_SEARCHPATH_OPTIONS_H
+#endif // POLARPHP_AST_SEARCHPATHOPTIONS_H

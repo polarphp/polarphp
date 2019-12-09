@@ -89,32 +89,32 @@ static bool isPlatformActiveFortarget(PlatformKind Platform,
 }
 
 bool isPlatformActive(PlatformKind Platform, LangOptions &LangOpts) {
-  llvm::Triple TT = LangOpts.target;
+  llvm::Triple TT = LangOpts.Target;
   return isPlatformActiveFortarget(Platform, TT,
-                                   LangOpts.enableAppExtensionRestrictions);
+                                   LangOpts.EnableAppExtensionRestrictions);
 }
 
 PlatformKind targetPlatform(LangOptions &LangOpts) {
-  if (LangOpts.target.isMacOSX()) {
-    return (LangOpts.enableAppExtensionRestrictions
+  if (LangOpts.Target.isMacOSX()) {
+    return (LangOpts.EnableAppExtensionRestrictions
                 ? PlatformKind::OSXApplicationExtension
                 : PlatformKind::OSX);
   }
 
-  if (LangOpts.target.isTvOS()) {
-    return (LangOpts.enableAppExtensionRestrictions
+  if (LangOpts.Target.isTvOS()) {
+    return (LangOpts.EnableAppExtensionRestrictions
             ? PlatformKind::tvOSApplicationExtension
             : PlatformKind::tvOS);
   }
 
-  if (LangOpts.target.isWatchOS()) {
-    return (LangOpts.enableAppExtensionRestrictions
+  if (LangOpts.Target.isWatchOS()) {
+    return (LangOpts.EnableAppExtensionRestrictions
             ? PlatformKind::watchOSApplicationExtension
             : PlatformKind::watchOS);
   }
 
-  if (LangOpts.target.isiOS()) {
-    return (LangOpts.enableAppExtensionRestrictions
+  if (LangOpts.Target.isiOS()) {
+    return (LangOpts.EnableAppExtensionRestrictions
                 ? PlatformKind::iOSApplicationExtension
                 : PlatformKind::iOS);
   }

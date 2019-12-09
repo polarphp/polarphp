@@ -76,7 +76,7 @@ class ValueDecl;
 class VarDecl;
 class VisibleDeclConsumer;
 class SyntaxParsingCache;
-class ASTScope;
+class AstScope;
 class SourceLookupCache;
 
 namespace syntax {

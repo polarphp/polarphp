@@ -16,7 +16,7 @@
 #include "polarphp/ast/ModuleLoader.h"
 
 namespace clang {
-class AstContext;
+class ASTContext;
 class CompilerInstance;
 class Preprocessor;
 class Sema;
@@ -49,7 +49,7 @@ protected:
 
 public:
    virtual clang::TargetInfo &getTargetInfo() const = 0;
-   virtual clang::AstContext &getClangAstContext() const = 0;
+   virtual clang::ASTContext &getClangAstContext() const = 0;
    virtual clang::Preprocessor &getClangPreprocessor() const = 0;
    virtual clang::Sema &getClangSema() const = 0;
    virtual const clang::CompilerInstance &getClangInstance() const = 0;

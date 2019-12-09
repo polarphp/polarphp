@@ -22,7 +22,7 @@ Parser::Parser(const LangOptions &langOpts, unsigned bufferId,
                SourceManager &sourceMgr, std::shared_ptr<DiagnosticEngine> diags)
    : Parser(sourceMgr, diags,
             std::unique_ptr<Lexer>(new Lexer(langOpts, sourceMgr, bufferId,
-                                             diags.get(), langOpts.attachCommentsToDecls ?
+                                             diags.get(), langOpts.AttachCommentsToDecls ?
                                                 CommentRetentionMode::AttachToNextToken : CommentRetentionMode::None,
                                              TriviaRetentionMode::WithTrivia)))
 {}

@@ -1163,8 +1163,8 @@ public:
    /// Return whether this type is or can be substituted for a bridgeable
    /// object type.
    TypeTraitResult canBeClass();
-
-private:
+/// @todo
+public:
    // Make vanilla new/delete illegal for Types.
    void *operator new(size_t Bytes) noexcept = delete;
    void operator delete(void *Data) noexcept = delete;
@@ -1547,7 +1547,7 @@ DEFINE_EMPTY_CAN_TYPE_WRAPPER(AnyBuiltinIntegerType, BuiltinType)
 /// to LLVM IR integer types.  They lack signedness and have an arbitrary
 /// bitwidth.
 class BuiltinIntegerType : public AnyBuiltinIntegerType {
-   friend class AstContext;
+   friend class polar::ast::AstContext;
 private:
    BuiltinIntegerWidth Width;
    BuiltinIntegerType(BuiltinIntegerWidth BitWidth, const AstContext &C)
@@ -1731,7 +1731,7 @@ class TypeAliasType final
    TypeAliasDecl *typealias;
 
    friend class AstContext;
-   friend TrailingObjects;
+   friend class TrailingObjects;
 
    TypeAliasType(TypeAliasDecl *typealias, Type parent,
                  SubstitutionMap substitutions, Type underlying,
