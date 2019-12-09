@@ -628,7 +628,7 @@ void AstContext::setStatsReporter(UnifiedStatsReporter *stats) {
    evaluator.setStatsReporter(stats);
 
    if (stats) {
-      stats->getFrontendCounters().NumASTBytesAllocated =
+      stats->getFrontendCounters().NumAstBytesAllocated =
          getAllocator().getBytesAllocated();
    }
 }

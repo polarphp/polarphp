@@ -329,7 +329,7 @@ public:
          return aligned_alloc(bytes, alignment);
 
       if (arena == AllocationArena::Permanent && Stats)
-         Stats->getFrontendCounters().NumASTBytesAllocated += bytes;
+         Stats->getFrontendCounters().NumAstBytesAllocated += bytes;
       return getAllocator(arena).Allocate(bytes, alignment);
    }
 

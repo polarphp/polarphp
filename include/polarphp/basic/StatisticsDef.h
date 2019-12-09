@@ -109,7 +109,7 @@ FRONTEND_STATISTIC(AST, NumLoadedModules)
 FRONTEND_STATISTIC(AST, NumTotalClangImportedEntities)
 
 /// Number of bytes allocated in the AST's local arenas.
-FRONTEND_STATISTIC(AST, NumASTBytesAllocated)
+FRONTEND_STATISTIC(AST, NumAstBytesAllocated)
 
 /// Number of file-level dependencies of this frontend job, as tracked in the
 /// AST context's dependency collector.
@@ -158,19 +158,19 @@ FRONTEND_STATISTIC(AST, NumModuleLookupValue)
 FRONTEND_STATISTIC(AST, NumModuleLookupClassMember)
 
 /// Number of body scopes for iterable types
-FRONTEND_STATISTIC(AST, NumIterableTypeBodyASTScopes)
+FRONTEND_STATISTIC(AST, NumIterableTypeBodyAstScopes)
 
 /// Number of expansions of body scopes for iterable types
-FRONTEND_STATISTIC(AST, NumIterableTypeBodyASTScopeExpansions)
+FRONTEND_STATISTIC(AST, NumIterableTypeBodyAstScopeExpansions)
 
 /// Number of brace statment scopes for iterable types
-FRONTEND_STATISTIC(AST, NumBraceStmtASTScopes)
+FRONTEND_STATISTIC(AST, NumBraceStmtAstScopes)
 
 /// Number of expansions of brace statement scopes for iterable types
-FRONTEND_STATISTIC(AST, NumBraceStmtASTScopeExpansions)
+FRONTEND_STATISTIC(AST, NumBraceStmtAstScopeExpansions)
 
 /// Number of ASTScope lookups
-FRONTEND_STATISTIC(AST, NumASTScopeLookups)
+FRONTEND_STATISTIC(AST, NumAstScopeLookups)
 
 /// Number of lookups of the cached import graph for a module or
 /// source file.

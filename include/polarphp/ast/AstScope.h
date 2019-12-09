@@ -37,7 +37,7 @@
   assert((predicate) && message                                                \
          " Try compiling with '-disable-astscope-lookup'.")
 
-#define AST_SCOPE_UNREACHABLE(message)                                          \
+#define ast_scope_unreachable(message)                                          \
   llvm_unreachable(message " Try compiling with '-disable-astscope-lookup'.")
 
 namespace polar::basic {
@@ -223,13 +223,13 @@ protected:
 
 public: // for addReusedBodyScopes
   void addChild(AstScopeImpl *child, AstContext &);
-  std::vector<AstScopeImpl *> rescueASTAncestorScopesForReuseFromMe();
+  std::vector<AstScopeImpl *> rescueAstAncestorScopesForReuseFromMe();
 
   /// When reexpanding, do we always create a new body?
-  virtual NullablePtr<AstScopeImpl> getParentOfASTAncestorScopesToBeRescued();
+  virtual NullablePtr<AstScopeImpl> getParentOfAstAncestorScopesToBeRescued();
   std::vector<AstScopeImpl *>
-  rescueASTAncestorScopesForReuseFromMeOrDescendants();
-  void replaceASTAncestorScopes(ArrayRef<AstScopeImpl *>);
+  rescueAstAncestorScopesForReuseFromMeOrDescendants();
+  void replaceAstAncestorScopes(ArrayRef<AstScopeImpl *>);
 
 private:
   void removeChildren();
@@ -380,8 +380,8 @@ public:
   bool getWasExpanded() const { return wasExpanded; }
 
 protected:
-  void resetASTAncestorScopeCount() { astAncestorScopeCount = 0; }
-  void increaseASTAncestorScopeCount(unsigned c) { astAncestorScopeCount += c; }
+  void resetAstAncestorScopeCount() { astAncestorScopeCount = 0; }
+  void increaseAstAncestorScopeCount(unsigned c) { astAncestorScopeCount += c; }
   void setWasExpanded() { wasExpanded = true; }
   virtual AstScopeImpl *expandSpecifically(ScopeCreator &) = 0;
   virtual void beCurrent();
@@ -594,7 +594,7 @@ public:
 
   const SourceFile *getSourceFile() const override;
   NullablePtr<const void> addressForPrinting() const override { return SF; }
-  bool crossCheckWithAST();
+  bool crossCheckWithAst();
 
 protected:
   AstScopeImpl *expandSpecifically(ScopeCreator &scopeCreator) override;
@@ -1115,7 +1115,7 @@ public:
   Decl *getDecl() const { return decl; }
   static bool isAMethod(const AbstractFunctionDecl *);
 
-  NullablePtr<AstScopeImpl> getParentOfASTAncestorScopesToBeRescued() override;
+  NullablePtr<AstScopeImpl> getParentOfAstAncestorScopesToBeRescued() override;
 
 protected:
   bool lookupLocalsOrMembers(ArrayRef<const AstScopeImpl *>,
@@ -1535,7 +1535,7 @@ public:
   Decl *getDecl() const { return decl; }
   NullablePtr<const void> getReferrent() const override;
 
-  NullablePtr<AstScopeImpl> getParentOfASTAncestorScopesToBeRescued() override;
+  NullablePtr<AstScopeImpl> getParentOfAstAncestorScopesToBeRescued() override;
 };
 
 /// The \c _@specialize attribute.

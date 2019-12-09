@@ -20,6 +20,7 @@
 #include "polarphp/ast/AstTypeIds.h"
 #include "polarphp/basic/Statistic.h"
 #include "llvm/ADT/Hashing.h"
+#include "polarphp/basic/Hashing.h"
 #include "llvm/ADT/TinyPtrVector.h"
 
 namespace polar::basic {
@@ -44,6 +45,7 @@ using polar::basic::SourceLoc;
 namespace ast_scope {
 class AstScopeImpl;
 class ScopeCreator;
+using polar::basic::hash_value;
 } // namespace ast_scope
 
 /// Display a nominal type or extension thereof.
@@ -290,8 +292,8 @@ public:
 };
 
 /// Expand the given ASTScope. Requestified to detect recursion.
-class ExpandASTScopeRequest
-    : public SimpleRequest<ExpandASTScopeRequest,
+class ExpandAstScopeRequest
+    : public SimpleRequest<ExpandAstScopeRequest,
                            ast_scope::AstScopeImpl *(ast_scope::AstScopeImpl *,
                                                      ast_scope::ScopeCreator *),
                            CacheKind::SeparatelyCached> {

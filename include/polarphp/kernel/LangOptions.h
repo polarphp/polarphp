@@ -194,27 +194,27 @@ public:
   /// This is a staging flag; eventually it will be removed.
   bool EnableDeserializationRecovery = true;
 
-  /// Should we use \c ASTScope-based resolution for unqualified name lookup?
+  /// Should we use \c AstScope-based resolution for unqualified name lookup?
   /// Default is in \c ParseLangArgs
   ///
   /// This is a staging flag; eventually it will be removed.
-  bool EnableASTScopeLookup = true;
+  bool EnableAstScopeLookup = true;
 
-  /// Someday, ASTScopeLookup will supplant lookup in the parser
+  /// Someday, AstScopeLookup will supplant lookup in the parser
   bool DisableParserLookup = false;
 
-  /// Should  we compare to ASTScope-based resolution for debugging?
+  /// Should  we compare to AstScope-based resolution for debugging?
   bool CrosscheckUnqualifiedLookup = false;
 
-  /// Should  we stress ASTScope-based resolution for debugging?
-  bool StressASTScopeLookup = false;
+  /// Should  we stress AstScope-based resolution for debugging?
+  bool StressAstScopeLookup = false;
 
   /// Since some tests fail if the warning is output, use a flag to decide
   /// whether it is. The warning is useful for testing.
-  bool WarnIfASTScopeLookup = false;
+  bool WarnIfAstScopeLookup = false;
 
-  /// Build the ASTScope tree lazily
-  bool LazyASTScopes = true;
+  /// Build the AstScope tree lazily
+  bool LazyAstScopes = true;
 
   /// Use Clang function types for computing canonical types.
   /// If this option is false, the clang function types will still be computed
@@ -263,7 +263,7 @@ public:
   bool CollectParsedToken = false;
 
   /// Whether to parse syntax tree. If the syntax tree is built, the generated
-  /// AST may not be correct when syntax nodes are reused as part of
+  /// Ast may not be correct when syntax nodes are reused as part of
   /// incrementals parsing.
   bool BuildSyntaxTree = false;
 

@@ -18,7 +18,7 @@
 POLAR_REQUEST(NameLookup, CustomAttrNominalRequest,
               NominalTypeDecl *(CustomAttr *, DeclContext *), Cached,
               NoLocationInfo)
-POLAR_REQUEST(NameLookup, ExpandASTScopeRequest,
+POLAR_REQUEST(NameLookup, ExpandAstScopeRequest,
               ast_scope::ASTScopeImpl* (ast_scope::ASTScopeImpl*, ast_scope::ScopeCreator*),
               SeparatelyCached,
               NoLocationInfo)

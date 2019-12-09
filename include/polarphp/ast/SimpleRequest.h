@@ -41,10 +41,10 @@ enum class CacheKind
       Uncached,
    /// The result for a particular request should be cached within the
    /// evaluator itself.
-   Cached,
+      Cached,
    /// The result of a particular request will be cached via some separate
    /// mechanism, such as a mutable data structure.
-   SeparatelyCached,
+      SeparatelyCached,
 };
 
 /// -------------------------------------------------------------------------
@@ -77,16 +77,16 @@ constexpr bool canExtractNearestSourceLoc()
 /// Extract source locations when possible, or return an invalid source
 /// location if not possible.
 template<typename T,
-         typename = typename std::enable_if<
-            canExtractNearestSourceLoc<T>()>::type>
+   typename = typename std::enable_if<
+      canExtractNearestSourceLoc<T>()>::type>
 SourceLoc maybeExtractNearestSourceLoc(const T& value) {
    return extractNearestSourceLoc(value);
 }
 
 template<typename T,
-         typename = void,
-         typename = typename std::enable_if<
-            !canExtractNearestSourceLoc<T>()>::type>
+   typename = void,
+   typename = typename std::enable_if<
+      !canExtractNearestSourceLoc<T>()>::type>
 SourceLoc maybeExtractNearestSourceLoc(const T& value)
 {
    return SourceLoc();
@@ -94,9 +94,9 @@ SourceLoc maybeExtractNearestSourceLoc(const T& value)
 
 /// Extract the nearest source location from a pointer union.
 template<typename T, typename U,
-         typename = typename std::enable_if<
-            canExtractNearestSourceLoc<T>() &&
-            canExtractNearestSourceLoc<U>()>::type>
+   typename = typename std::enable_if<
+      canExtractNearestSourceLoc<T>() &&
+      canExtractNearestSourceLoc<U>()>::type>
 SourceLoc extractNearestSourceLoc(const llvm::PointerUnion<T, U> &value) {
    if (auto first = value.template dyn_cast<T>()) {
       return extractNearestSourceLoc(first);
@@ -110,160 +110,160 @@ SourceLoc extractNearestSourceLoc(const llvm::PointerUnion<T, U> &value) {
 namespace internal {
 /// Basis case for extracting the nearest source location from a tuple.
 template<unsigned Index, typename ...Types,
-         typename = void,
-         typename = typename std::enable_if<
-            (Index >= sizeof...(Types))>::type>
+   typename = void,
+   typename = typename std::enable_if<
+      (Index >= sizeof...(Types))>::type>
 SourceLoc extractNearestSourceLocTuple(const std::tuple<Types...> &) {
    return SourceLoc();
 }
 
 /// Extract the first, nearest source location from a tuple.
 template<unsigned Index, typename ...Types,
-         typename = typename std::enable_if<(Index < sizeof...(Types))>::type>
-         SourceLoc extractNearestSourceLocTuple(const std::tuple<Types...> &value) {
-         SourceLoc loc = maybeExtractNearestSourceLoc(std::get<Index>(value));
-         if (loc.isValid())
-         return loc;
+   typename = typename std::enable_if<(Index < sizeof...(Types))>::type>
+SourceLoc extractNearestSourceLocTuple(const std::tuple<Types...> &value) {
+   SourceLoc loc = maybeExtractNearestSourceLoc(std::get<Index>(value));
+   if (loc.isValid())
+      return loc;
 
-         return extractNearestSourceLocTuple<Index + 1>(value);
+   return extractNearestSourceLocTuple<Index + 1>(value);
 }
 }
 
-         /// Extract the first, nearest source location from a tuple.
-         template<typename First, typename ...Rest,
-                  typename = typename std::enable_if<
-                     internal::anyTrue(canExtractNearestSourceLoc<First>(),
-                     canExtractNearestSourceLoc<Rest>()...)>::type>
-         SourceLoc extractNearestSourceLoc(const std::tuple<First, Rest...> &value) {
-         return internal::extractNearestSourceLocTuple<0>(value);
+/// Extract the first, nearest source location from a tuple.
+template<typename First, typename ...Rest,
+   typename = typename std::enable_if<
+      internal::anyTrue(canExtractNearestSourceLoc<First>(),
+                        canExtractNearestSourceLoc<Rest>()...)>::type>
+SourceLoc extractNearestSourceLoc(const std::tuple<First, Rest...> &value) {
+   return internal::extractNearestSourceLocTuple<0>(value);
 }
 
-         /// -------------------------------------------------------------------------
-         /// Simple Requests
-         /// -------------------------------------------------------------------------
+/// -------------------------------------------------------------------------
+/// Simple Requests
+/// -------------------------------------------------------------------------
 
-         /// CRTP base class that describes a request operation that takes values
-         /// with the given input types (\c Inputs...) and produces an output of
-         /// the given type.
-         ///
-         /// \tparam Derived The final, derived class type for the request.
-         /// \tparam Signature The signature of the request, described as a
-         /// function type whose inputs (\c Inputs) are the parameter types and
-         /// whose output (\c Output) is the result of evaluating this request.
-         /// \tparam Caching Describes how the output value is cached, if at all.
-         ///
-         /// The \c Derived class needs to implement several operations. The most
-         /// important one takes an evaluator and the input values, then computes the
-         /// final result, optionally bubbling up errors from recursive evaulations:
-         /// \code
-         ///   llvm::Expected<Output> evaluate(Evaluator &evaluator, Inputs...) const;
-         /// \endcode
-         ///
-         /// Cycle diagnostics can be handled in one of two ways. Either the \c Derived
-         /// class can implement the two cycle-diagnosing operations directly:
-         /// \code
-         ///   void diagnoseCycle(DiagnosticEngine &diags) const;
-         ///   void noteCycleStep(DiagnosticEngine &diags) const;
-         /// \endcode
-         ///
-         /// Or the implementation will use the default "circular reference" diagnostics
-         /// based on the "nearest" source location, which can be provided explicitly by
-         /// implementing the following in the subclass:
-         /// \code
-         ///   SourceLoc getNearestLoc() const;
-         /// \endcode
-         /// If not provided, a default implementation for \c getNearestLoc() will pick
-         /// the source location from the first input that provides one.
-         ///
-         /// Value caching is determined by the \c Caching parameter. When
-         /// \c Caching == CacheKind::SeparatelyCached, the \c Derived class is
-         /// responsible for implementing the two operations responsible to managing
-         /// the cache:
-         /// \code
-         ///   Optional<Output> getCachedResult() const;
-         ///   void cacheResult(Output value) const;
-         /// \endcode
-         template<typename Derived, typename Signature, CacheKind Caching>
-         class SimpleRequest;
+/// CRTP base class that describes a request operation that takes values
+/// with the given input types (\c Inputs...) and produces an output of
+/// the given type.
+///
+/// \tparam Derived The final, derived class type for the request.
+/// \tparam Signature The signature of the request, described as a
+/// function type whose inputs (\c Inputs) are the parameter types and
+/// whose output (\c Output) is the result of evaluating this request.
+/// \tparam Caching Describes how the output value is cached, if at all.
+///
+/// The \c Derived class needs to implement several operations. The most
+/// important one takes an evaluator and the input values, then computes the
+/// final result, optionally bubbling up errors from recursive evaulations:
+/// \code
+///   llvm::Expected<Output> evaluate(Evaluator &evaluator, Inputs...) const;
+/// \endcode
+///
+/// Cycle diagnostics can be handled in one of two ways. Either the \c Derived
+/// class can implement the two cycle-diagnosing operations directly:
+/// \code
+///   void diagnoseCycle(DiagnosticEngine &diags) const;
+///   void noteCycleStep(DiagnosticEngine &diags) const;
+/// \endcode
+///
+/// Or the implementation will use the default "circular reference" diagnostics
+/// based on the "nearest" source location, which can be provided explicitly by
+/// implementing the following in the subclass:
+/// \code
+///   SourceLoc getNearestLoc() const;
+/// \endcode
+/// If not provided, a default implementation for \c getNearestLoc() will pick
+/// the source location from the first input that provides one.
+///
+/// Value caching is determined by the \c Caching parameter. When
+/// \c Caching == CacheKind::SeparatelyCached, the \c Derived class is
+/// responsible for implementing the two operations responsible to managing
+/// the cache:
+/// \code
+///   Optional<Output> getCachedResult() const;
+///   void cacheResult(Output value) const;
+/// \endcode
+template<typename Derived, typename Signature, CacheKind Caching>
+class SimpleRequest;
 
-         template<typename Derived, CacheKind Caching, typename Output,
-                  typename ...Inputs>
-         class SimpleRequest<Derived, Output(Inputs...), Caching> {
-         std::tuple<Inputs...> storage;
+template<typename Derived, CacheKind Caching, typename Output,
+   typename ...Inputs>
+class SimpleRequest<Derived, Output(Inputs...), Caching> {
+   std::tuple<Inputs...> storage;
 
-         Derived &asDerived() {
-         return *static_cast<Derived *>(this);
-}
+   Derived &asDerived() {
+      return *static_cast<Derived *>(this);
+   }
 
-         const Derived &asDerived() const {
-         return *static_cast<const Derived *>(this);
-}
+   const Derived &asDerived() const {
+      return *static_cast<const Derived *>(this);
+   }
 
-         template<size_t ...Indices>
-         llvm::Expected<Output>
-         callDerived(Evaluator &evaluator, std::index_sequence<Indices...>) const {
-         static_assert(sizeof...(Indices) > 0, "Subclass must define evaluate()");
-return asDerived().evaluate(evaluator, std::get<Indices>(storage)...);
-}
+   template<size_t ...Indices>
+   llvm::Expected<Output>
+   callDerived(Evaluator &evaluator, std::index_sequence<Indices...>) const {
+      static_assert(sizeof...(Indices) > 0, "Subclass must define evaluate()");
+      return asDerived().evaluate(evaluator, std::get<Indices>(storage)...);
+   }
 
 protected:
 /// Retrieve the storage value directly.
-const std::tuple<Inputs...> &getStorage() const { return storage; }
+   const std::tuple<Inputs...> &getStorage() const { return storage; }
 
 public:
-static const bool isEverCached = (Caching != CacheKind::Uncached);
-static const bool hasExternalCache = (Caching == CacheKind::SeparatelyCached);
+   static const bool isEverCached = (Caching != CacheKind::Uncached);
+   static const bool hasExternalCache = (Caching == CacheKind::SeparatelyCached);
 
-using OutputType = Output;
+   using OutputType = Output;
 
-explicit SimpleRequest(const Inputs& ...inputs)
-   : storage(inputs...) { }
+   explicit SimpleRequest(const Inputs& ...inputs)
+      : storage(inputs...) { }
 
 /// Request evaluation function that will be registered with the evaluator.
-static llvm::Expected<OutputType>
-evaluateRequest(const Derived &request, Evaluator &evaluator) {
-   return request.callDerived(evaluator,
-                              std::index_sequence_for<Inputs...>());
-}
+   static llvm::Expected<OutputType>
+   evaluateRequest(const Derived &request, Evaluator &evaluator) {
+      return request.callDerived(evaluator,
+                                 std::index_sequence_for<Inputs...>());
+   }
 
 /// Retrieve the nearest source location to which this request applies.
-SourceLoc getNearestLoc() const {
-   return extractNearestSourceLoc(storage);
-}
+   SourceLoc getNearestLoc() const {
+      return extractNearestSourceLoc(storage);
+   }
 
-void diagnoseCycle(DiagnosticEngine &diags) const {
-   diags.diagnose(asDerived().getNearestLoc(), diag::circular_reference);
-}
+   void diagnoseCycle(DiagnosticEngine &diags) const {
+      diags.diagnose(asDerived().getNearestLoc(), diag::circular_reference);
+   }
 
-void noteCycleStep(DiagnosticEngine &diags) const {
-   diags.diagnose(asDerived().getNearestLoc(),
-                  diag::circular_reference_through);
-}
+   void noteCycleStep(DiagnosticEngine &diags) const {
+      diags.diagnose(asDerived().getNearestLoc(),
+                     diag::circular_reference_through);
+   }
 
-friend bool operator==(const SimpleRequest &lhs, const SimpleRequest &rhs) {
-   return lhs.storage == rhs.storage;
-}
+   friend bool operator==(const SimpleRequest &lhs, const SimpleRequest &rhs) {
+      return lhs.storage == rhs.storage;
+   }
 
-friend bool operator!=(const SimpleRequest &lhs, const SimpleRequest &rhs) {
-   return !(lhs == rhs);
-}
+   friend bool operator!=(const SimpleRequest &lhs, const SimpleRequest &rhs) {
+      return !(lhs == rhs);
+   }
 
-friend llvm::hash_code hash_value(const SimpleRequest &request) {
-   using llvm::hash_combine;
+   friend llvm::hash_code hash_value(const SimpleRequest &request) {
+      using llvm::hash_combine;
 
-   return hash_combine(TypeId<Derived>::value, request.storage);
-}
+      return hash_combine(TypeId<Derived>::value, request.storage);
+   }
 
-friend void simple_display(llvm::raw_ostream &out,
-                           const Derived &request) {
-   out << TypeId<Derived>::getName();
-   simple_display(out, request.storage);
-}
+   friend void simple_display(llvm::raw_ostream &out,
+                              const Derived &request) {
+      out << TypeId<Derived>::getName();
+      simple_display(out, request.storage);
+   }
 
-friend FrontendStatsTracer
-make_tracer(UnifiedStatsReporter *Reporter, const Derived &request) {
-   return make_tracer(Reporter, TypeId<Derived>::getName(), request.storage);
-}
+   friend FrontendStatsTracer
+   make_tracer(UnifiedStatsReporter *Reporter, const Derived &request) {
+      return make_tracer(Reporter, TypeId<Derived>::getName(), request.storage);
+   }
 };
 } // polar::ast
 

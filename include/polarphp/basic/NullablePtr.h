@@ -32,70 +32,61 @@
 #include <type_traits>
 
 namespace polar::basic {
-
 /// NullablePtr pointer wrapper - NullablePtr is used for APIs where a
 /// potentially-null pointer gets passed around that must be explicitly handled
 /// in lots of places.  By putting a wrapper around the null pointer, it makes
 /// it more likely that the null pointer case will be handled correctly.
 template<class T>
-class NullablePtr
-{
-   T *m_ptr;
-   struct PlaceHolder
-   {};
+class NullablePtr {
+  T *Ptr;
+  struct PlaceHolder {};
 
 public:
-   NullablePtr(T *ptr = 0)
-      : m_ptr(ptr)
-   {}
+  NullablePtr(T *P = 0) : Ptr(P) {}
 
-   template<typename OtherT>
-   NullablePtr(NullablePtr<OtherT> other,
-               typename std::enable_if<
-               std::is_convertible<OtherT, T>::value,
-               PlaceHolder
-               >::type = PlaceHolder())
-      : m_ptr(other.getPtrOrNull())
-   {}
+  template<typename OtherT>
+  NullablePtr(NullablePtr<OtherT> Other,
+              typename std::enable_if<
+                std::is_convertible<OtherT, T>::value,
+                PlaceHolder
+              >::type = PlaceHolder()) : Ptr(Other.getPtrOrNull()) {}
 
-   bool isNull() const
-   {
-      return m_ptr == 0;
-   }
+  bool isNull() const { return Ptr == 0; }
+  bool isNonNull() const { return Ptr != 0; }
 
-   bool isNonNull() const
-   {
-      return m_ptr != 0;
-   }
+  /// get - Return the pointer if it is non-null.
+  const T *get() const {
+    assert(Ptr && "Pointer wasn't checked for null!");
+    return Ptr;
+  }
 
-   /// get - Return the pointer if it is non-null.
-   const T *get() const
-   {
-      assert(m_ptr && "Pointer wasn't checked for null!");
-      return m_ptr;
-   }
+  /// get - Return the pointer if it is non-null.
+  T *get() {
+    assert(Ptr && "Pointer wasn't checked for null!");
+    return Ptr;
+  }
 
-   /// get - Return the pointer if it is non-null.
-   T *get()
-   {
-      assert(m_ptr && "Pointer wasn't checked for null!");
-      return m_ptr;
-   }
+  T *getPtrOrNull() { return getPtrOr(nullptr); }
+  const T *getPtrOrNull() const { return getPtrOr(nullptr); }
 
-   T *getPtrOrNull()
-   {
-      return m_ptr;
-   }
+  T *getPtrOr(T *defaultValue) { return Ptr ? Ptr : defaultValue; }
+  const T *getPtrOr(const T *defaultValue) const {
+    return Ptr ? Ptr : defaultValue;
+  }
 
-   const T *getPtrOrNull() const
-   {
-      return m_ptr;
-   }
+  explicit operator bool() const { return Ptr; }
 
-   explicit operator bool() const
-   {
-      return m_ptr;
-   }
+  bool operator==(const NullablePtr<T> &other) const {
+    return other.Ptr == Ptr;
+  }
+
+  bool operator!=(const NullablePtr<T> &other) const {
+    return !(*this == other);
+  }
+
+  bool operator==(const T *other) const { return other == Ptr; }
+
+  bool operator!=(const T *other) const { return !(*this == other); }
 };
 
 } // polar::basic
