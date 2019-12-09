@@ -578,7 +578,7 @@ public:
 
    /// Get the runtime availability of features introduced in the Swift 5.1
    /// compiler for the target platform.
-   AvailabilityContext getSwift51Availability();
+   AvailabilityContext getPolarphp51Availability();
 
    /// Get the runtime availability of
    /// swift_getTypeByMangledNameInContextInMetadataState.

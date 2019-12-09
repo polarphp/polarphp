@@ -182,7 +182,7 @@ private:
 
   // When ignoring ASTNodes in a scope, they still must count towards a scope's
   // source range. So include their ranges here
-  SourceRange sourceRangeOfIgnoredASTNodes;
+  SourceRange sourceRangeOfIgnoredAstNodes;
 
 #pragma mark - constructor / destructor
 public:
@@ -278,7 +278,7 @@ public:
 private:
   SourceRange computeSourceRangeOfScope(bool omitAssertions = false) const;
   SourceRange
-  computeSourceRangeOfScopeWithChildASTNodes(bool omitAssertions = false) const;
+  computeSourceRangeOfScopeWithChildAstNodes(bool omitAssertions = false) const;
   bool ensureNoAncestorsSourceRangeIsCached() const;
 
 #pragma mark - source range adjustments
@@ -317,13 +317,13 @@ public: // public for debugging
 protected:
   SourceManager &getSourceManager() const;
   bool hasValidSourceRange() const;
-  bool hasValidSourceRangeOfIgnoredASTNodes() const;
+  bool hasValidSourceRangeOfIgnoredAstNodes() const;
   bool precedesInSource(const AstScopeImpl *) const;
   bool verifyThatChildrenAreContainedWithin(SourceRange) const;
   bool verifyThatThisNodeComeAfterItsPriorSibling() const;
 
   virtual SourceRange
-  getSourceRangeOfEnclosedParamsOfASTNode(bool omitAssertions) const;
+  getSourceRangeOfEnclosedParamsOfAstNode(bool omitAssertions) const;
 
 private:
   bool checkSourceRangeAfterExpansion(const AstContext &) const;
@@ -1039,7 +1039,7 @@ public:
 
 protected:
   SourceRange
-  getSourceRangeOfEnclosedParamsOfASTNode(bool omitAssertions) const override;
+  getSourceRangeOfEnclosedParamsOfAstNode(bool omitAssertions) const override;
 
 private:
   static SourceLoc getParmsSourceLocOfAFD(AbstractFunctionDecl *);
@@ -1602,7 +1602,7 @@ public:
 
 protected:
   SourceRange
-  getSourceRangeOfEnclosedParamsOfASTNode(bool omitAssertions) const override;
+  getSourceRangeOfEnclosedParamsOfAstNode(bool omitAssertions) const override;
 
   NullablePtr<const GenericParamList> genericParams() const override;
   NullablePtr<AbstractStorageDecl>
@@ -1662,7 +1662,7 @@ public:
 
 protected:
   SourceRange
-  getSourceRangeOfEnclosedParamsOfASTNode(bool omitAssertions) const override;
+  getSourceRangeOfEnclosedParamsOfAstNode(bool omitAssertions) const override;
 
 private:
   void expandAScopeThatDoesNotCreateANewInsertionPoint(ScopeCreator &);

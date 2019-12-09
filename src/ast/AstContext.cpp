@@ -550,7 +550,7 @@ AstContext::AstContext(LangOptions &langOpts, TypeCheckerOptions &typeckOpts,
      evaluator(Diags, langOpts.DebugDumpCycles),
      TheBuiltinModule(createBuiltinModule(*this)),
      StdlibModuleName(getIdentifier(STDLIB_NAME)),
-     SwiftShimsModuleName(getIdentifier(POLARPHP_SHIMS_NAME)),
+     SwiftShimsModuleName(getIdentifier(POLAR_SHIMS_NAME)),
      TypeCheckerDebug(new StderrTypeCheckerDebugConsumer()),
      TheErrorType(
         new(*this, AllocationArena::Permanent)
