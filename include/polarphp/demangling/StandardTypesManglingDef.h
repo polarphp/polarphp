@@ -9,25 +9,22 @@
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
 //===----------------------------------------------------------------------===//
-//
-// This source file is part of the polarphp.org open source project
-//
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/11/28.
 
 /// STANDARD_TYPE(KIND, MANGLING, TYPENAME)
 ///   The 1-character MANGLING for a known TYPENAME of KIND.
 
-STANDARD_TYPE(Structure, A, AutoreleasingUnsafeMutablePointer)
+/// OBJC_INTEROP_STANDARD_TYPE(KIND, MANGLING, TYPENAME)
+///   The 1-character MANGLING for a known TYPENAME of KIND, for a type that's
+///   only available with ObjC interop enabled.
+
+#ifndef OBJC_INTEROP_STANDARD_TYPE
+#define OBJC_INTEROP_STANDARD_TYPE(KIND, MANGLING, TYPENAME) \
+  STANDARD_TYPE(KIND, MANGLING, TYPENAME)
+#endif
+
+OBJC_INTEROP_STANDARD_TYPE(Structure, A, AutoreleasingUnsafeMutablePointer)
 STANDARD_TYPE(Structure, a, Array)
 STANDARD_TYPE(Structure, b, Bool)
-STANDARD_TYPE(Structure, c, UnicodeScalar)
 STANDARD_TYPE(Structure, D, Dictionary)
 STANDARD_TYPE(Structure, d, Double)
 STANDARD_TYPE(Structure, f, Float)
@@ -52,28 +49,29 @@ STANDARD_TYPE(Structure, w, UnsafeMutableRawBufferPointer)
 
 STANDARD_TYPE(Enum, q, Optional)
 
-STANDARD_TYPE(Protocol, B, BinaryFloatingPoint)
-STANDARD_TYPE(Protocol, E, Encodable)
-STANDARD_TYPE(Protocol, e, Decodable)
-STANDARD_TYPE(Protocol, F, FloatingPoint)
-STANDARD_TYPE(Protocol, G, RandomNumberGenerator)
-STANDARD_TYPE(Protocol, H, Hashable)
-STANDARD_TYPE(Protocol, j, Numeric)
-STANDARD_TYPE(Protocol, K, BidirectionalCollection)
-STANDARD_TYPE(Protocol, k, RandomAccessCollection)
-STANDARD_TYPE(Protocol, L, Comparable)
-STANDARD_TYPE(Protocol, l, Collection)
-STANDARD_TYPE(Protocol, M, MutableCollection)
-STANDARD_TYPE(Protocol, m, RangeReplaceableCollection)
-STANDARD_TYPE(Protocol, Q, Equatable)
-STANDARD_TYPE(Protocol, T, Sequence)
-STANDARD_TYPE(Protocol, t, IteratorProtocol)
-STANDARD_TYPE(Protocol, U, UnsignedInteger)
-STANDARD_TYPE(Protocol, X, RangeExpression)
-STANDARD_TYPE(Protocol, x, Strideable)
-STANDARD_TYPE(Protocol, Y, RawRepresentable)
-STANDARD_TYPE(Protocol, y, StringProtocol)
-STANDARD_TYPE(Protocol, Z, SignedInteger)
-STANDARD_TYPE(Protocol, z, BinaryInteger)
+STANDARD_TYPE(Interface, B, BinaryFloatingPoint)
+STANDARD_TYPE(Interface, E, Encodable)
+STANDARD_TYPE(Interface, e, Decodable)
+STANDARD_TYPE(Interface, F, FloatingPoint)
+STANDARD_TYPE(Interface, G, RandomNumberGenerator)
+STANDARD_TYPE(Interface, H, Hashable)
+STANDARD_TYPE(Interface, j, Numeric)
+STANDARD_TYPE(Interface, K, BidirectionalCollection)
+STANDARD_TYPE(Interface, k, RandomAccessCollection)
+STANDARD_TYPE(Interface, L, Comparable)
+STANDARD_TYPE(Interface, l, Collection)
+STANDARD_TYPE(Interface, M, MutableCollection)
+STANDARD_TYPE(Interface, m, RangeReplaceableCollection)
+STANDARD_TYPE(Interface, Q, Equatable)
+STANDARD_TYPE(Interface, T, Sequence)
+STANDARD_TYPE(Interface, t, IteratorInterface)
+STANDARD_TYPE(Interface, U, UnsignedInteger)
+STANDARD_TYPE(Interface, X, RangeExpression)
+STANDARD_TYPE(Interface, x, Strideable)
+STANDARD_TYPE(Interface, Y, RawRepresentable)
+STANDARD_TYPE(Interface, y, StringInterface)
+STANDARD_TYPE(Interface, Z, SignedInteger)
+STANDARD_TYPE(Interface, z, BinaryInteger)
 
 #undef STANDARD_TYPE
+#undef OBJC_INTEROP_STANDARD_TYPE
