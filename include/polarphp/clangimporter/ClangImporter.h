@@ -28,7 +28,7 @@ namespace llvm {
 }
 
 namespace clang {
-  class ASTContext;
+  class AstContext;
   class CodeGenOptions;
   class Decl;
   class DependencyCollector;
@@ -58,14 +58,17 @@ class ModuleDecl;
 class NominalTypeDecl;
 class StructDecl;
 class TypeDecl;
+class Identifier;
 class VisibleDeclConsumer;
 enum class SelectorSplitKind;
 }
 
 namespace polar::clangimporter {
 
+
 class ClangImporterOptions;
 
+using polar::ast::ClangTypeKind;
 using polar::ast::AstContext;
 using polar::ast::CompilerInvocation;
 using polar::ast::ClangModuleUnit;
@@ -81,6 +84,13 @@ using polar::ast::StructDecl;
 using polar::ast::TypeDecl;
 using polar::ast::VisibleDeclConsumer;
 using polar::ast::SelectorSplitKind;
+using polar::ast::DependencyTracker;
+using polar::ast::ClangModuleLoader;
+using polar::ast::Identifier;
+using polar::ast::SourceLoc;
+using polar::ast::DeclName;
+using polar::ast::ClassDecl;
+using polar::ast::AbstractFunctionDecl;
 
 /// Kinds of optional types.
 enum OptionalTypeKind : unsigned {
@@ -128,7 +138,7 @@ public:
 private:
   Implementation &Impl;
 
-  ClangImporter(ASTContext &ctx, const ClangImporterOptions &clangImporterOpts,
+  ClangImporter(AstContext &ctx, const ClangImporterOptions &clangImporterOpts,
                 DependencyTracker *tracker,
                 DWARFImporterDelegate *dwarfImporterDelegate);
 
@@ -145,10 +155,10 @@ private:
 
 public:
   /// Create a new Clang importer that can import a suitable Clang
-  /// module into the given ASTContext.
+  /// module into the given AstContext.
   ///
-  /// \param ctx The ASTContext into which the module will be imported.
-  /// The ASTContext's SearchPathOptions will be used for the Clang importer.
+  /// \param ctx The AstContext into which the module will be imported.
+  /// The AstContext's SearchPathOptions will be used for the Clang importer.
   ///
   /// \param importerOpts The options to use for the Clang importer.
   ///
@@ -163,7 +173,7 @@ public:
   /// \returns a new Clang module importer, or null (with a diagnostic) if
   /// an error occurred.
   static std::unique_ptr<ClangImporter>
-  create(ASTContext &ctx, const ClangImporterOptions &importerOpts,
+  create(AstContext &ctx, const ClangImporterOptions &importerOpts,
          std::string swiftPCHHash = "", DependencyTracker *tracker = nullptr,
          DWARFImporterDelegate *dwarfImporterDelegate = nullptr);
 
@@ -288,13 +298,6 @@ public:
   virtual void loadExtensions(NominalTypeDecl *nominal,
                               unsigned previousGeneration) override;
 
-  virtual void loadObjCMethods(
-                 ClassDecl *classDecl,
-                 ObjCSelector selector,
-                 bool isInstanceMethod,
-                 unsigned previousGeneration,
-                 llvm::TinyPtrVector<AbstractFunctionDecl *> &methods) override;
-
   /// Adds a new search path to the Clang CompilerInstance, as if specified with
   /// -I or -F.
   ///
@@ -383,7 +386,7 @@ public:
   void verifyAllModules() override;
 
   clang::TargetInfo &getTargetInfo() const override;
-  clang::ASTContext &getClangASTContext() const override;
+  clang::ASTContext &getClangAstContext() const override;
   clang::Preprocessor &getClangPreprocessor() const override;
   clang::Sema &getClangSema() const override;
   const clang::CompilerInstance &getClangInstance() const override;
@@ -438,7 +441,7 @@ public:
                  StringRef SwiftPCHHash, bool &isExplicit);
 };
 
-ImportDecl *createImportDecl(ASTContext &Ctx, DeclContext *DC, ClangNode ClangN,
+ImportDecl *createImportDecl(AstContext &Ctx, DeclContext *DC, ClangNode ClangN,
                              ArrayRef<clang::Module *> Exported);
 
 } // end namespace polar::clangimporter

@@ -9,28 +9,21 @@
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
 //===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/04/27.
-
 #ifndef POLARPHP_MARKUP_AST_H
 #define POLARPHP_MARKUP_AST_H
 
 #include "polarphp/markup/LineList.h"
-#include "llvm/ADTSetVector.h"
+#include "llvm/ADT/Optional.h"
+#include "llvm/ADT/SetVector.h"
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/TrailingObjects.h"
 
-#include <optional>
-
 namespace polar::markup {
+
+using llvm::Optional;
+using llvm::ArrayRef;
+using llvm::StringRef;
 
 class MarkupContext;
 class MarkupAstNode;
@@ -41,38 +34,30 @@ class TagField;
 class ThrowsField;
 class LocalizationKeyField;
 
-using polar::basic::SmallSetVector;
-using polar::basic::ArrayRef;
-using polar::utils::TrailingObjects;
-using polar::utils::raw_ostream;
-
 /// The basic structure of a doc comment attached to a Swift
 /// declaration.
-struct CommentParts
-{
-   std::optional<const Paragraph *> brief;
-   ArrayRef<const MarkupAstNode *> bodyNodes;
-   ArrayRef<ParamField *> paramFields;
-   std::optional<const ReturnsField *> returnsField;
-   std::optional<const ThrowsField *> throwsField;
-   SmallSetVector<StringRef, 8> Tags;
-   std::optional<const LocalizationKeyField *> localizationKeyField;
+struct CommentParts {
+  Optional<const Paragraph *> brief;
+  ArrayRef<const MarkupAstNode *> bodyNodes;
+  ArrayRef<ParamField *> paramFields;
+  Optional<const ReturnsField *> returnsField;
+  Optional<const ThrowsField *> throwsField;
+  llvm::SmallSetVector<StringRef, 8> tags;
+  Optional<const LocalizationKeyField *> localizationKeyField;
 
-   bool isEmpty() const
-   {
-      return !brief.has_value() &&
-            !returnsField.has_value() &&
-            !throwsField.has_value() &&
-            bodyNodes.empty() &&
-            paramFields.empty();
-   }
+  bool isEmpty() const {
+    return !brief.hasValue() &&
+           !returnsField.hasValue() &&
+           !throwsField.hasValue() &&
+           bodyNodes.empty() &&
+           paramFields.empty();
+  }
 
-   bool hasFunctionDocumentation() const
-   {
-      return !paramFields.empty() ||
-            returnsField.has_value() ||
-            throwsField.has_value();
-   }
+  bool hasFunctionDocumentation() const {
+    return !paramFields.empty() ||
+             returnsField.hasValue() ||
+             throwsField.hasValue();
+  }
 };
 
 #define MARKUP_AST_NODE(Id, Parent) class Id;
@@ -80,834 +65,699 @@ struct CommentParts
 #define MARKUP_AST_NODE_RANGE(Id, FirstId, LastId)
 #include "polarphp/markup/AstNodesDefs.h"
 
-enum class AstNodeKind : uint8_t
-{
+enum class AstNodeKind : uint8_t {
 #define MARKUP_AST_NODE(Id, Parent) Id,
 #define ABSTRACT_MARKUP_AST_NODE(Id, Parent)
 #define MARKUP_AST_NODE_RANGE(Id, FirstId, LastId) \
-   First_##Id = FirstId, Last_##Id = LastId,
+  First_##Id = FirstId, Last_##Id = LastId,
 #include "polarphp/markup/AstNodesDefs.h"
 };
 
-class alignas(void *) MarkupAstNode
-{
-   protected:
-   AstNodeKind m_kind;
+class alignas(void *) MarkupAstNode {
+  MarkupAstNode(const MarkupAstNode &) = delete;
+  void operator=(const MarkupAstNode &) = delete;
 
-   public:
+protected:
+  AstNodeKind Kind;
 
-   MarkupAstNode(AstNodeKind kind)
-      : m_kind(kind)
-   {}
+public:
 
-   AstNodeKind getKind() const
-   {
-      return m_kind;
-   }
+  MarkupAstNode(AstNodeKind Kind) : Kind(Kind) {}
 
-   void *operator new(size_t bytes, MarkupContext &mcontext,
-                      unsigned alignment = alignof(MarkupAstNode));
-   void *operator new(size_t bytes, void *mem)
-   {
-      assert(mem);
-      return mem;
-   }
+  AstNodeKind getKind() const { return Kind; }
 
-   ArrayRef<MarkupAstNode *> getChildren();
-   ArrayRef<const MarkupAstNode *> getChildren() const;
-   void *operator new(size_t bytes) = delete;
-   void operator delete(void *Data) = delete;
+  void *operator new(size_t Bytes, MarkupContext &MC,
+                     unsigned alignment = alignof(MarkupAstNode));
+  void *operator new(size_t Bytes, void *Mem) {
+    assert(Mem);
+    return Mem;
+  }
 
-   private:
-   MarkupAstNode(const MarkupAstNode &) = delete;
-   void operator=(const MarkupAstNode &) = delete;
+  ArrayRef<MarkupAstNode *> getChildren();
+  ArrayRef<const MarkupAstNode *> getChildren() const;
+  void *operator new(size_t Bytes) = delete;
+  void operator delete(void *Data) = delete;
 };
 
 #pragma mark Markdown Nodes
 
 class Document final : public MarkupAstNode,
-      private TrailingObjects<Document, MarkupAstNode *>
-{
+    private llvm::TrailingObjects<Document, MarkupAstNode *> {
+  friend TrailingObjects;
+
+  size_t NumChildren;
+
+  Document(ArrayRef<MarkupAstNode*> Children);
+
 public:
-   static Document *create(MarkupContext &mcontext,
-                           ArrayRef<MarkupAstNode *> children);
+  static Document *create(MarkupContext &MC,
+                          ArrayRef<MarkupAstNode *> Children);
 
-   ArrayRef<MarkupAstNode *> getChildren()
-   {
-      return {getTrailingObjects<MarkupAstNode *>(), m_numChildren};
-   }
+  ArrayRef<MarkupAstNode *> getChildren() {
+    return {getTrailingObjects<MarkupAstNode *>(), NumChildren};
+  }
 
-   ArrayRef<const MarkupAstNode *> getChildren() const
-   {
-      return {getTrailingObjects<MarkupAstNode *>(), m_numChildren};
-   }
+  ArrayRef<const MarkupAstNode *> getChildren() const {
+    return {getTrailingObjects<MarkupAstNode *>(), NumChildren};
+  }
 
-   static bool classOf(const MarkupAstNode *node)
-   {
-      return node->getKind() == AstNodeKind::Document;
-   }
-
-private:
-   friend class TrailingObjects;
-   size_t m_numChildren;
-   Document(ArrayRef<MarkupAstNode*> children);
+  static bool classof(const MarkupAstNode *N) {
+    return N->getKind() == AstNodeKind::Document;
+  }
 };
 
 class BlockQuote final : public MarkupAstNode,
-      private TrailingObjects<BlockQuote, MarkupAstNode *>
-{
+    private llvm::TrailingObjects<BlockQuote, MarkupAstNode *> {
+  friend TrailingObjects;
+
+  size_t NumChildren;
+
+  BlockQuote(ArrayRef<MarkupAstNode *> Children);
+
 public:
-   static BlockQuote *create(MarkupContext &mcontext, ArrayRef<MarkupAstNode *> children);
-   ArrayRef<MarkupAstNode *> getChildren()
-   {
-      return {getTrailingObjects<MarkupAstNode *>(), m_numChildren};
-   }
+  static BlockQuote *create(MarkupContext &MC, ArrayRef<MarkupAstNode *> Children);
 
-   ArrayRef<const MarkupAstNode *> getChildren() const
-   {
-      return {getTrailingObjects<MarkupAstNode *>(), m_numChildren};
-   }
+  ArrayRef<MarkupAstNode *> getChildren() {
+    return {getTrailingObjects<MarkupAstNode *>(), NumChildren};
+  }
 
-   static bool classOf(const MarkupAstNode *node)
-   {
-      return node->getKind() == AstNodeKind::BlockQuote;
-   }
+  ArrayRef<const MarkupAstNode *> getChildren() const {
+    return {getTrailingObjects<MarkupAstNode *>(), NumChildren};
+  }
 
-private:
-   friend class TrailingObjects;
-   size_t m_numChildren;
-   BlockQuote(ArrayRef<MarkupAstNode *> children);
+  static bool classof(const MarkupAstNode *N) {
+    return N->getKind() == AstNodeKind::BlockQuote;
+  }
 };
 
 class List final : public MarkupAstNode,
-      private TrailingObjects<List, MarkupAstNode *>
-{
+    private llvm::TrailingObjects<List, MarkupAstNode *> {
+  friend TrailingObjects;
+
+  size_t NumChildren;
+  bool Ordered;
+
+  List(ArrayRef<MarkupAstNode *> Children, bool IsOrdered);
+
 public:
-   static List *create(MarkupContext &mcontext, ArrayRef<MarkupAstNode *> items,
-                       bool isOrdered);
+  static List *create(MarkupContext &MC, ArrayRef<MarkupAstNode *> Items,
+                      bool IsOrdered);
 
-   ArrayRef<MarkupAstNode *> getChildren()
-   {
-      return {getTrailingObjects<MarkupAstNode *>(), m_numChildren};
-   }
+  ArrayRef<MarkupAstNode *> getChildren() {
+    return {getTrailingObjects<MarkupAstNode *>(), NumChildren};
+  }
 
-   ArrayRef<const MarkupAstNode *> getChildren() const
-   {
-      return {getTrailingObjects<MarkupAstNode *>(), m_numChildren};
-   }
+  ArrayRef<const MarkupAstNode *> getChildren() const {
+    return {getTrailingObjects<MarkupAstNode *>(), NumChildren};
+  }
 
-   void setChildren(ArrayRef<MarkupAstNode *> newChildren)
-   {
-      assert(newChildren.size() <= m_numChildren);
-      std::copy(newChildren.begin(), newChildren.end(),
-                getTrailingObjects<MarkupAstNode *>());
-      m_numChildren = newChildren.size();
-   }
+  void setChildren(ArrayRef<MarkupAstNode *> NewChildren) {
+    assert(NewChildren.size() <= NumChildren);
+    std::copy(NewChildren.begin(), NewChildren.end(),
+              getTrailingObjects<MarkupAstNode *>());
+    NumChildren = NewChildren.size();
+  }
 
-   bool isOrdered() const
-   {
-      return m_ordered;
-   }
+  bool isOrdered() const {
+    return Ordered;
+  }
 
-   static bool classOf(const MarkupAstNode *node) {
-      return node->getKind() == AstNodeKind::List;
-   }
-
-private:
-   friend class TrailingObjects;
-   size_t m_numChildren;
-   bool m_ordered;
-   List(ArrayRef<MarkupAstNode *> children, bool isOrdered);
+  static bool classof(const MarkupAstNode *N) {
+    return N->getKind() == AstNodeKind::List;
+  }
 };
 
 class Item final : public MarkupAstNode,
-      private TrailingObjects<Item, MarkupAstNode *>
-{
-   friend class TrailingObjects;
+    private llvm::TrailingObjects<Item, MarkupAstNode *> {
+  friend TrailingObjects;
 
-   size_t m_numChildren;
+  size_t NumChildren;
 
-   Item(ArrayRef<MarkupAstNode *> children);
+  Item(ArrayRef<MarkupAstNode *> Children);
 
 public:
-   static Item *create(MarkupContext &mcontext, ArrayRef<MarkupAstNode *> children);
+  static Item *create(MarkupContext &MC, ArrayRef<MarkupAstNode *> Children);
 
-   ArrayRef<MarkupAstNode *> getChildren()
-   {
-      return {getTrailingObjects<MarkupAstNode *>(), m_numChildren};
-   }
+  ArrayRef<MarkupAstNode *> getChildren() {
+    return {getTrailingObjects<MarkupAstNode *>(), NumChildren};
+  }
 
-   ArrayRef<const MarkupAstNode *> getChildren() const
-   {
-      return {getTrailingObjects<MarkupAstNode *>(), m_numChildren};
-   }
+  ArrayRef<const MarkupAstNode *> getChildren() const {
+    return {getTrailingObjects<MarkupAstNode *>(), NumChildren};
+  }
 
-   static bool classOf(const MarkupAstNode *node)
-   {
-      return node->getKind() == AstNodeKind::Item;
-   }
+  static bool classof(const MarkupAstNode *N) {
+    return N->getKind() == AstNodeKind::Item;
+  }
 };
 
-class CodeBlock final : public MarkupAstNode
-{
-public:
-   static CodeBlock *create(MarkupContext &mcontext, StringRef m_literalContent,
-                            StringRef m_language);
+class CodeBlock final : public MarkupAstNode {
+  StringRef LiteralContent;
+  StringRef Language;
 
-   StringRef getLiteralContent() const
-   {
-      return m_literalContent;
-   }
-
-   StringRef getLanguage() const
-   {
-      return m_language;
-   }
-
-   ArrayRef<const MarkupAstNode *> getChildren() const
-   {
-      return {};
-   }
-
-   ArrayRef<MarkupAstNode *> getChildren()
-   {
-      return {};
-   }
-
-   static bool classOf(const MarkupAstNode *node)
-   {
-      return node->getKind() == AstNodeKind::CodeBlock;
-   }
-
-private:
-   StringRef m_literalContent;
-   StringRef m_language;
-   CodeBlock(StringRef literalContent, StringRef language)
+  CodeBlock(StringRef LiteralContent, StringRef Language)
       : MarkupAstNode(AstNodeKind::CodeBlock),
-        m_literalContent(literalContent),
-        m_language(language)
-   {}
+        LiteralContent(LiteralContent),
+        Language(Language) {}
+
+public:
+  static CodeBlock *create(MarkupContext &MC, StringRef LiteralContent,
+                           StringRef Language);
+
+  StringRef getLiteralContent() const { return LiteralContent; };
+  StringRef getLanguage() const { return Language; };
+
+  ArrayRef<const MarkupAstNode *> getChildren() const {
+    return {};
+  }
+
+  ArrayRef<MarkupAstNode *> getChildren() {
+    return {};
+  }
+
+  static bool classof(const MarkupAstNode *N) {
+    return N->getKind() == AstNodeKind::CodeBlock;
+  }
 };
 
-class HTML final : public MarkupAstNode
-{
-   StringRef m_literalContent;
-   HTML(StringRef literalContent)
+class HTML final : public MarkupAstNode {
+  StringRef LiteralContent;
+  HTML(StringRef LiteralContent)
       : MarkupAstNode(AstNodeKind::HTML),
-        m_literalContent(literalContent)
-   {}
+        LiteralContent(LiteralContent) {}
 public:
-   static HTML *create(MarkupContext &mcontext, StringRef literalContent);
-   StringRef getLiteralContent() const
-   {
-      return m_literalContent;
-   }
+  static HTML *create(MarkupContext &MC, StringRef LiteralContent);
+  StringRef getLiteralContent() const { return LiteralContent; };
 
-   static bool classOf(const MarkupAstNode *node)
-   {
-      return node->getKind() == AstNodeKind::HTML;
-   }
+  static bool classof(const MarkupAstNode *N) {
+    return N->getKind() == AstNodeKind::HTML;
+  }
 };
 
 class Paragraph final : public MarkupAstNode,
-      private TrailingObjects<Paragraph, MarkupAstNode *>
-{
+    private llvm::TrailingObjects<Paragraph, MarkupAstNode *> {
+  friend TrailingObjects;
+
+  size_t NumChildren;
+
+  Paragraph(ArrayRef<MarkupAstNode *> Children);
+
 public:
-   static Paragraph *create(MarkupContext &mcontext,
-                            ArrayRef<MarkupAstNode *> children);
+  static Paragraph *create(MarkupContext &MC,
+                           ArrayRef<MarkupAstNode *> Children);
 
-   ArrayRef<MarkupAstNode *> getChildren()
-   {
-      return {getTrailingObjects<MarkupAstNode *>(), m_numChildren};
-   }
+  ArrayRef<MarkupAstNode *> getChildren() {
+    return {getTrailingObjects<MarkupAstNode *>(), NumChildren};
+  }
 
-   ArrayRef<const MarkupAstNode *> getChildren() const
-   {
-      return {getTrailingObjects<MarkupAstNode *>(), m_numChildren};
-   }
+  ArrayRef<const MarkupAstNode *> getChildren() const {
+    return {getTrailingObjects<MarkupAstNode *>(), NumChildren};
+  }
 
-   static bool classOf(const MarkupAstNode *node)
-   {
-      return node->getKind() == AstNodeKind::Paragraph;
-   }
-
-private:
-   friend class TrailingObjects;
-   size_t m_numChildren;
-   Paragraph(ArrayRef<MarkupAstNode *> children);
+  static bool classof(const MarkupAstNode *N) {
+    return N->getKind() == AstNodeKind::Paragraph;
+  }
 };
 
 class Header final : public MarkupAstNode,
-      private TrailingObjects<Header, MarkupAstNode *>
-{
+    private llvm::TrailingObjects<Header, MarkupAstNode *> {
+  friend TrailingObjects;
+
+  size_t NumChildren;
+  unsigned Level;
+
+  Header(unsigned Level, ArrayRef<MarkupAstNode *> Children);
+
 public:
-   static Header *create(MarkupContext &mcontext, unsigned m_level,
-                         ArrayRef<MarkupAstNode *> children);
+  static Header *create(MarkupContext &MC, unsigned Level,
+                        ArrayRef<MarkupAstNode *> Children);
 
-   ArrayRef<MarkupAstNode *> getChildren()
-   {
-      return {getTrailingObjects<MarkupAstNode *>(), m_numChildren};
-   }
+  ArrayRef<MarkupAstNode *> getChildren() {
+    return {getTrailingObjects<MarkupAstNode *>(), NumChildren};
+  }
 
-   ArrayRef<const MarkupAstNode *> getChildren() const
-   {
-      return {getTrailingObjects<MarkupAstNode *>(), m_numChildren};
-   }
+  ArrayRef<const MarkupAstNode *> getChildren() const {
+    return {getTrailingObjects<MarkupAstNode *>(), NumChildren};
+  }
 
-   unsigned getLevel() const
-   {
-      return m_level;
-   }
-
-   static bool classOf(const MarkupAstNode *node)
-   {
-      return node->getKind() == AstNodeKind::Header;
-   }
-private:
-   friend class TrailingObjects;
-   size_t m_numChildren;
-   unsigned m_level;
-   Header(unsigned level, ArrayRef<MarkupAstNode *> children);
+  unsigned getLevel() const {
+    return Level;
+  }
+  static bool classof(const MarkupAstNode *N) {
+    return N->getKind() == AstNodeKind::Header;
+  }
 };
 
-class HRule final : public MarkupAstNode
-{
-   HRule() : MarkupAstNode(AstNodeKind::HRule)
-   {}
+class HRule final : public MarkupAstNode {
+  HRule() : MarkupAstNode(AstNodeKind::HRule) {}
 public:
-   static HRule *create(MarkupContext &mcontext);
+  static HRule *create(MarkupContext &MC);
 
-   ArrayRef<const MarkupAstNode *> getChildren() const
-   {
-      return {};
-   }
+  ArrayRef<const MarkupAstNode *> getChildren() const {
+    return {};
+  }
 
-   ArrayRef<MarkupAstNode *> getChildren()
-   {
-      return {};
-   }
+  ArrayRef<MarkupAstNode *> getChildren() {
+    return {};
+  }
 
-   static bool classOf(const MarkupAstNode *node)
-   {
-      return node->getKind() == AstNodeKind::HRule;
-   }
+  static bool classof(const MarkupAstNode *N) {
+    return N->getKind() == AstNodeKind::HRule;
+  }
 };
 
-class InlineContent : public MarkupAstNode
-{
+class InlineContent : public MarkupAstNode {
 public:
-   InlineContent(AstNodeKind kind) : MarkupAstNode(kind)
-   {}
+  InlineContent(AstNodeKind Kind) : MarkupAstNode(Kind) {}
 
-   ArrayRef<const MarkupAstNode *> getChildren() const
-   {
-      return {};
-   }
+  ArrayRef<const MarkupAstNode *> getChildren() const {
+    return {};
+  }
 
-   ArrayRef<MarkupAstNode *> getChildren()
-   {
-      return {};
-   }
+  ArrayRef<MarkupAstNode *> getChildren() {
+    return {};
+  }
 
-   static bool classOf(const MarkupAstNode *node)
-   {
-      return node->getKind() >= AstNodeKind::First_Inline &&
-            node->getKind() <= AstNodeKind::Last_Inline;
-   }
+  static bool classof(const MarkupAstNode *N) {
+    return N->getKind() >= AstNodeKind::First_Inline &&
+           N->getKind() <= AstNodeKind::Last_Inline;
+  }
 };
 
-class Text final : public InlineContent
-{
+class Text final : public InlineContent {
+  StringRef LiteralContent;
+  Text(StringRef LiteralContent)
+    : InlineContent(AstNodeKind::Text),
+      LiteralContent(LiteralContent) {}
 public:
-   static Text *create(MarkupContext &mcontext, StringRef iteralContent);
-   StringRef getLiteralContent() const
-   {
-      return m_literalContent;
-   }
+  static Text *create(MarkupContext &MC, StringRef LiteralContent);
+  StringRef getLiteralContent() const { return LiteralContent; };
+  void setLiteralContent(StringRef LC) {
+    LiteralContent = LC;
+  }
 
-   void setLiteralContent(StringRef content)
-   {
-      m_literalContent = content;
-   }
+  ArrayRef<const MarkupAstNode *> getChildren() const {
+    return {};
+  }
 
-   ArrayRef<const MarkupAstNode *> getChildren() const
-   {
-      return {};
-   }
+  ArrayRef<MarkupAstNode *> getChildren() {
+    return {};
+  }
 
-   ArrayRef<MarkupAstNode *> getChildren()
-   {
-      return {};
-   }
+  StringRef str() const {
+    return LiteralContent;
+  }
 
-   StringRef str() const
-   {
-      return m_literalContent;
-   }
-
-   static bool classOf(const MarkupAstNode *node)
-   {
-      return node->getKind() == AstNodeKind::Text;
-   }
-
-private:
-   StringRef m_literalContent;
-   Text(StringRef m_literalContent)
-      : InlineContent(AstNodeKind::Text),
-        m_literalContent(m_literalContent)
-   {}
+  static bool classof(const MarkupAstNode *N) {
+    return N->getKind() == AstNodeKind::Text;
+  }
 };
 
-class SoftBreak final : public InlineContent
-{
-   SoftBreak() : InlineContent(AstNodeKind::SoftBreak)
-   {}
+class SoftBreak final : public InlineContent {
+  SoftBreak() : InlineContent(AstNodeKind::SoftBreak) {}
 public:
-   static SoftBreak *create(MarkupContext &mcontext);
-   ArrayRef<const MarkupAstNode *> getChildren() const
-   {
-      return {};
-   }
+  static SoftBreak *create(MarkupContext &MC);
 
-   ArrayRef<MarkupAstNode *> getChildren()
-   {
-      return {};
-   }
+  ArrayRef<const MarkupAstNode *> getChildren() const {
+    return {};
+  }
 
-   StringRef str() const
-   {
-      return "\n";
-   }
+  ArrayRef<MarkupAstNode *> getChildren() {
+    return {};
+  }
 
-   static bool classOf(const MarkupAstNode *node)
-   {
-      return node->getKind() == AstNodeKind::SoftBreak;
-   }
+  StringRef str() const {
+    return "\n";
+  }
+
+  static bool classof(const MarkupAstNode *N) {
+    return N->getKind() == AstNodeKind::SoftBreak;
+  }
 };
 
-class LineBreak final : public InlineContent
-{
-   LineBreak()
-      : InlineContent(AstNodeKind::LineBreak)
-   {}
+class LineBreak final : public InlineContent {
+  LineBreak() : InlineContent(AstNodeKind::LineBreak) {}
 public:
-   static LineBreak *create(MarkupContext &mcontext);
+  static LineBreak *create(MarkupContext &MC);
 
-   ArrayRef<const MarkupAstNode *> getChildren() const
-   {
-      return {};
-   }
+  ArrayRef<const MarkupAstNode *> getChildren() const {
+    return {};
+  }
 
-   ArrayRef<MarkupAstNode *> getChildren()
-   {
-      return {};
-   }
+  ArrayRef<MarkupAstNode *> getChildren() {
+    return {};
+  }
 
-   StringRef str() const
-   {
-      return "\n";
-   }
+  StringRef str() const {
+    return "\n";
+  }
 
-   static bool classOf(const MarkupAstNode *node)
-   {
-      return node->getKind() == AstNodeKind::LineBreak;
-   }
+  static bool classof(const MarkupAstNode *N) {
+    return N->getKind() == AstNodeKind::LineBreak;
+  }
 };
 
-class Code final : public InlineContent
-{
-public:
-   static Code *create(MarkupContext &mcontext, StringRef literalContent);
+class Code final : public InlineContent {
+  StringRef LiteralContent;
 
-   StringRef getLiteralContent() const
-   {
-      return m_literalContent;
-   }
-
-   ArrayRef<const MarkupAstNode *> getChildren() const
-   {
-      return {};
-   }
-
-   ArrayRef<MarkupAstNode *> getChildren()
-   {
-      return {};
-   }
-
-   StringRef str() const
-   {
-      return m_literalContent;
-   }
-
-   static bool classOf(const MarkupAstNode *node)
-   {
-      return node->getKind() == AstNodeKind::Code;
-   }
-private:
-   StringRef m_literalContent;
-   Code(StringRef literalContent)
+  Code(StringRef LiteralContent)
       : InlineContent(AstNodeKind::Code),
-        m_literalContent(literalContent)
-   {}
+        LiteralContent(LiteralContent) {}
+public:
+  static Code *create(MarkupContext &MC, StringRef LiteralContent);
+
+  StringRef getLiteralContent() const { return LiteralContent; };
+
+  ArrayRef<const MarkupAstNode *> getChildren() const {
+    return {};
+  }
+
+  ArrayRef<MarkupAstNode *> getChildren() {
+    return {};
+  }
+
+  StringRef str() const {
+    return LiteralContent;
+  }
+
+  static bool classof(const MarkupAstNode *N) {
+    return N->getKind() == AstNodeKind::Code;
+  }
 };
 
-class InlineHTML final : public InlineContent
-{
+class InlineHTML final : public InlineContent {
+  StringRef LiteralContent;
+  InlineHTML(StringRef LiteralContent)
+    : InlineContent(AstNodeKind::InlineHTML),
+      LiteralContent(LiteralContent) {}
 public:
-   static InlineHTML *create(MarkupContext &mcontext, StringRef m_literalContent);
+  static InlineHTML *create(MarkupContext &MC, StringRef LiteralContent);
 
-   StringRef getLiteralContent() const
-   {
-      return m_literalContent;
-   }
+  StringRef getLiteralContent() const { return LiteralContent; };
 
-   ArrayRef<const MarkupAstNode *> getChildren() const
-   {
-      return {};
-   }
+  ArrayRef<const MarkupAstNode *> getChildren() const {
+    return {};
+  }
 
-   ArrayRef<MarkupAstNode *> getChildren()
-   {
-      return {};
-   }
+  ArrayRef<MarkupAstNode *> getChildren() {
+    return {};
+  }
 
-   StringRef str() const
-   {
-      return m_literalContent;
-   }
+  StringRef str() const {
+    return LiteralContent;
+  }
 
-   static bool classOf(const MarkupAstNode *node)
-   {
-      return node->getKind() == AstNodeKind::InlineHTML;
-   }
-private:
-   StringRef m_literalContent;
-   InlineHTML(StringRef literalContent)
-      : InlineContent(AstNodeKind::InlineHTML),
-        m_literalContent(literalContent)
-   {}
+  static bool classof(const MarkupAstNode *N) {
+    return N->getKind() == AstNodeKind::InlineHTML;
+  }
 };
 
 class Emphasis final : public InlineContent,
-      private TrailingObjects<Emphasis, MarkupAstNode *>
-{
+    private llvm::TrailingObjects<Emphasis, MarkupAstNode *> {
+  friend TrailingObjects;
+
+  size_t NumChildren;
+
+  Emphasis(ArrayRef<MarkupAstNode *> Children);
 public:
-   static Emphasis *create(MarkupContext &mcontext,
-                           ArrayRef<MarkupAstNode *> children);
+  static Emphasis *create(MarkupContext &MC,
+                          ArrayRef<MarkupAstNode *> Children);
 
-   ArrayRef<MarkupAstNode *> getChildren()
-   {
-      return {getTrailingObjects<MarkupAstNode *>(), m_numChildren};
-   }
+  ArrayRef<MarkupAstNode *> getChildren() {
+    return {getTrailingObjects<MarkupAstNode *>(), NumChildren};
+  }
 
-   ArrayRef<const MarkupAstNode *> getChildren() const
-   {
-      return {getTrailingObjects<MarkupAstNode *>(), m_numChildren};
-   }
+  ArrayRef<const MarkupAstNode *> getChildren() const {
+    return {getTrailingObjects<MarkupAstNode *>(), NumChildren};
+  }
 
-   static bool classOf(const MarkupAstNode *node)
-   {
-      return node->getKind() == AstNodeKind::Emphasis;
-   }
-private:
-   friend class TrailingObjects;
-   size_t m_numChildren;
-   Emphasis(ArrayRef<MarkupAstNode *> children);
+  static bool classof(const MarkupAstNode *N) {
+    return N->getKind() == AstNodeKind::Emphasis;
+  }
 };
 
 class Strong final : public InlineContent,
-      private TrailingObjects<Strong, MarkupAstNode *>
-{
+    private llvm::TrailingObjects<Strong, MarkupAstNode *> {
+  friend TrailingObjects;
+
+  size_t NumChildren;
+
+  Strong(ArrayRef<MarkupAstNode *> Children);
 public:
-   static Strong *create(MarkupContext &mcontext,
-                         ArrayRef<MarkupAstNode *> children);
+  static Strong *create(MarkupContext &MC,
+                        ArrayRef<MarkupAstNode *> Children);
 
-   ArrayRef<MarkupAstNode *> getChildren()
-   {
-      return {getTrailingObjects<MarkupAstNode *>(), m_numChildren};
-   }
+  ArrayRef<MarkupAstNode *> getChildren() {
+    return {getTrailingObjects<MarkupAstNode *>(), NumChildren};
+  }
 
-   ArrayRef<const MarkupAstNode *> getChildren() const
-   {
-      return {getTrailingObjects<MarkupAstNode *>(), m_numChildren};
-   }
+  ArrayRef<const MarkupAstNode *> getChildren() const {
+    return {getTrailingObjects<MarkupAstNode *>(), NumChildren};
+  }
 
-   static bool classOf(const MarkupAstNode *node)
-   {
-      return node->getKind() == AstNodeKind::Strong;
-   }
-private:
-   friend class TrailingObjects;
-   size_t m_numChildren;
-   Strong(ArrayRef<MarkupAstNode *> children);
+  static bool classof(const MarkupAstNode *N) {
+    return N->getKind() == AstNodeKind::Strong;
+  }
 };
 
 class Link final : public InlineContent,
-      private TrailingObjects<Link, MarkupAstNode *>
-{
+    private llvm::TrailingObjects<Link, MarkupAstNode *> {
+  friend TrailingObjects;
+
+  size_t NumChildren;
+
+  StringRef Destination;
+
+  Link(StringRef Destination, ArrayRef<MarkupAstNode *> Children);
+
 public:
-   static Link *create(MarkupContext &mcontext,
-                       StringRef destination,
-                       ArrayRef<MarkupAstNode *> children);
+  static Link *create(MarkupContext &MC,
+                      StringRef Destination,
+                      ArrayRef<MarkupAstNode *> Children);
 
-   StringRef getDestination() const
-   {
-      return m_destination;
-   }
+  StringRef getDestination() const { return Destination; }
 
-   ArrayRef<MarkupAstNode *> getChildren()
-   {
-      return {getTrailingObjects<MarkupAstNode *>(), m_numChildren};
-   }
+  ArrayRef<MarkupAstNode *> getChildren() {
+    return {getTrailingObjects<MarkupAstNode *>(), NumChildren};
+  }
 
-   ArrayRef<const MarkupAstNode *> getChildren() const
-   {
-      return {getTrailingObjects<MarkupAstNode *>(), m_numChildren};
-   }
+  ArrayRef<const MarkupAstNode *> getChildren() const {
+    return {getTrailingObjects<MarkupAstNode *>(), NumChildren};
+  }
 
-   static bool classOf(const MarkupAstNode *node)
-   {
-      return node->getKind() == AstNodeKind::Link;
-   }
-private:
-   friend class TrailingObjects;
-   size_t m_numChildren;
-   StringRef m_destination;
-   Link(StringRef destination, ArrayRef<MarkupAstNode *> children);
+  static bool classof(const MarkupAstNode *N) {
+    return N->getKind() == AstNodeKind::Link;
+  }
 };
 
 class Image final : public InlineContent,
-      private TrailingObjects<Image, MarkupAstNode *>
-{
+    private llvm::TrailingObjects<Image, MarkupAstNode *> {
+  friend TrailingObjects;
+
+  size_t NumChildren;
+
+  // FIXME: Hyperlink destinations can't be wrapped - use a Line
+  StringRef Destination;
+  Optional<StringRef> Title;
+
+  Image(StringRef Destination, Optional<StringRef> Title,
+        ArrayRef<MarkupAstNode *> Children);
+
 public:
-   static Image *create(MarkupContext &mcontext,
-                        StringRef destination,
-                        std::optional<StringRef> title,
-                        ArrayRef<MarkupAstNode *> children);
+  static Image *create(MarkupContext &MC,
+                      StringRef Destination,
+                      Optional<StringRef> Title,
+                      ArrayRef<MarkupAstNode *> Children);
 
-   StringRef getDestination() const
-   {
-      return m_destination;
-   }
+  StringRef getDestination() const { return Destination; }
 
-   bool hasTitle() const
-   {
-      return m_title.has_value();
-   }
+  bool hasTitle() const {
+    return Title.hasValue();
+  }
 
-   StringRef getTitle() const
-   {
-      return StringRef(m_title.value());
-   }
+  StringRef getTitle() const {
+    return StringRef(Title.getValue());
+  }
 
-   ArrayRef<MarkupAstNode *> getChildren()
-   {
-      return {getTrailingObjects<MarkupAstNode *>(), m_numChildren};
-   }
+  ArrayRef<MarkupAstNode *> getChildren() {
+    return {getTrailingObjects<MarkupAstNode *>(), NumChildren};
+  }
 
-   ArrayRef<const MarkupAstNode *> getChildren() const
-   {
-      return {getTrailingObjects<MarkupAstNode *>(), m_numChildren};
-   }
+  ArrayRef<const MarkupAstNode *> getChildren() const {
+    return {getTrailingObjects<MarkupAstNode *>(), NumChildren};
+  }
 
-   static bool classOf(const MarkupAstNode *node)
-   {
-      return node->getKind() == AstNodeKind::Image;
-   }
-private:
-   friend class TrailingObjects;
-   size_t m_numChildren;
-   // FIXME: Hyperlink destinations can't be wrapped - use a Line
-   StringRef m_destination;
-   std::optional<StringRef> m_title;
-
-   Image(StringRef m_destination, std::optional<StringRef> title,
-         ArrayRef<MarkupAstNode *> children);
+  static bool classof(const MarkupAstNode *N) {
+    return N->getKind() == AstNodeKind::Image;
+  }
 };
 
 #pragma mark Private Extensions
 
-class PrivateExtension : public MarkupAstNode
-{
+class PrivateExtension : public MarkupAstNode {
 protected:
-   PrivateExtension(AstNodeKind kind)
-      : MarkupAstNode(kind) {}
+  PrivateExtension(AstNodeKind Kind)
+      : MarkupAstNode(Kind) {}
 public:
 
-   ArrayRef<const MarkupAstNode *> getChildren() const
-   {
-      return {};
-   }
+  ArrayRef<const MarkupAstNode *> getChildren() const {
+    return {};
+  }
 
-   ArrayRef<MarkupAstNode *> getChildren()
-   {
-      return {};
-   }
+  ArrayRef<MarkupAstNode *> getChildren() {
+    return {};
+  }
 
-   static bool classOf(const MarkupAstNode *node)
-   {
-      return node->getKind() >= AstNodeKind::First_Private &&
-            node->getKind() <= AstNodeKind::Last_Private;
-   }
+  static bool classof(const MarkupAstNode *N) {
+    return N->getKind() >= AstNodeKind::First_Private &&
+      N->getKind() <= AstNodeKind::Last_Private;
+  }
 };
 
 class ParamField final : public PrivateExtension,
-      private TrailingObjects<ParamField, MarkupAstNode *>
-{
+    private llvm::TrailingObjects<ParamField, MarkupAstNode *> {
+  friend TrailingObjects;
+
+  size_t NumChildren;
+
+  StringRef Name;
+
+  // Parameter fields can contain a substructure describing a
+  // function or closure parameter.
+  llvm::Optional<CommentParts> Parts;
+
+  ParamField(StringRef Name, ArrayRef<MarkupAstNode *> Children);
+
 public:
-   static ParamField *create(MarkupContext &mcontext, StringRef name,
-                             ArrayRef<MarkupAstNode *> children);
 
-   StringRef getName() const
-   {
-      return m_name;
-   }
+  static ParamField *create(MarkupContext &MC, StringRef Name,
+                            ArrayRef<MarkupAstNode *> Children);
 
-   std::optional<CommentParts> getParts() const
-   {
-      return m_parts;
-   }
+  StringRef getName() const {
+    return Name;
+  }
 
-   void setParts(CommentParts parts)
-   {
-      m_parts = parts;
-   }
+  llvm::Optional<CommentParts> getParts() const {
+    return Parts;
+  }
 
-   bool isClosureParameter() const
-   {
-      if (!m_parts.has_value()) {
-         return false;
-      }
-      return m_parts.value().hasFunctionDocumentation();
-   }
+  void setParts(CommentParts P) {
+    Parts = P;
+  }
 
-   ArrayRef<MarkupAstNode *> getChildren()
-   {
-      return {getTrailingObjects<MarkupAstNode *>(), m_numChildren};
-   }
+  bool isClosureParameter() const {
+    if (!Parts.hasValue())
+      return false;
 
-   ArrayRef<const MarkupAstNode *> getChildren() const
-   {
-      return {getTrailingObjects<MarkupAstNode *>(), m_numChildren};
-   }
+    return Parts.getValue().hasFunctionDocumentation();
+  }
 
-   static bool classOf(const MarkupAstNode *node)
-   {
-      return node->getKind() == AstNodeKind::ParamField;
-   }
-private:
-   friend class TrailingObjects;
-   size_t m_numChildren;
-   StringRef m_name;
-   // Parameter fields can contain a substructure describing a
-   // function or closure parameter.
-   std::optional<CommentParts> m_parts;
-   ParamField(StringRef name, ArrayRef<MarkupAstNode *> children);
+  ArrayRef<MarkupAstNode *> getChildren() {
+    return {getTrailingObjects<MarkupAstNode *>(), NumChildren};
+  }
+
+  ArrayRef<const MarkupAstNode *> getChildren() const {
+    return {getTrailingObjects<MarkupAstNode *>(), NumChildren};
+  }
+
+  static bool classof(const MarkupAstNode *N) {
+    return N->getKind() == AstNodeKind::ParamField;
+  }
 };
 
 #define MARKUP_SIMPLE_FIELD(Id, Keyword, XMLKind) \
-   class Id final : public PrivateExtension, \
-   private TrailingObjects<Id, MarkupAstNode *> { \
-   friend class TrailingObjects; \
-   \
-   size_t m_numChildren; \
-   \
-   Id(ArrayRef<MarkupAstNode *> children);\
-   \
-   public: \
-   static Id *create(MarkupContext &mcontext, ArrayRef<MarkupAstNode *> children); \
-   \
-   ArrayRef<MarkupAstNode *> getChildren() { \
-   return {getTrailingObjects<MarkupAstNode *>(), m_numChildren}; \
-} \
-   \
-   ArrayRef<const MarkupAstNode *> getChildren() const { \
-   return {getTrailingObjects<MarkupAstNode *>(), m_numChildren}; \
-} \
-   \
-   static bool classOf(const MarkupAstNode *node) { \
-   return node->getKind() == AstNodeKind::Id; \
-} \
+class Id final : public PrivateExtension, \
+    private llvm::TrailingObjects<Id, MarkupAstNode *> { \
+  friend TrailingObjects; \
+\
+  size_t NumChildren; \
+\
+  Id(ArrayRef<MarkupAstNode *> Children);\
+\
+public: \
+  static Id *create(MarkupContext &MC, ArrayRef<MarkupAstNode *> Children); \
+\
+  ArrayRef<MarkupAstNode *> getChildren() { \
+    return {getTrailingObjects<MarkupAstNode *>(), NumChildren}; \
+  } \
+\
+  ArrayRef<const MarkupAstNode *> getChildren() const { \
+    return {getTrailingObjects<MarkupAstNode *>(), NumChildren}; \
+  } \
+\
+  static bool classof(const MarkupAstNode *N) { \
+    return N->getKind() == AstNodeKind::Id; \
+  } \
 };
 #include "polarphp/markup/SimpleFieldsDefs.h"
 
-class MarkupAstWalker
-{
+class MarkupAstWalker {
 public:
-   void walk(const MarkupAstNode *node)
-   {
-      enter(node);
+  void walk(const MarkupAstNode *Node) {
+    enter(Node);
 
-      switch(node->getKind()) {
+    switch(Node->getKind()) {
 #define MARKUP_AST_NODE(Id, Parent)                                         \
-      case AstNodeKind::Id:                                                   \
-   visit##Id(static_cast<const Id*>(node));                              \
-   break;
+    case AstNodeKind::Id:                                                   \
+      visit##Id(static_cast<const Id*>(Node));                              \
+      break;
 #define ABSTRACT_MARKUP_AST_NODE(Id, Parent)
 #define MARKUP_AST_NODE_RANGE(Id, FirstId, LastId)
 #include "polarphp/markup/AstNodesDefs.h"
-      }
+    }
 
-      if (shouldVisitChildrenOf(node)) {
-         for (auto child : node->getChildren()) {
-            walk(child);
-         }
+    if (shouldVisitChildrenOf(Node))
+      for (auto Child : Node->getChildren())
+        walk(Child);
 
-      }
-      exit(node);
-   }
+    exit(Node);
+  }
 
-   virtual bool shouldVisitChildrenOf(const MarkupAstNode *node)
-   {
-      return true;
-   }
+  virtual bool shouldVisitChildrenOf(const MarkupAstNode *Node) {
+    return true;
+  }
 
-   virtual void enter(const MarkupAstNode *node)
-   {}
-
-   virtual void exit(const MarkupAstNode *node)
-   {}
+  virtual void enter(const MarkupAstNode *Node) {}
+  virtual void exit(const MarkupAstNode *Node) {}
 
 #define MARKUP_AST_NODE(Id, Parent) \
-   virtual void visit##Id(const Id *node) {}
+  virtual void visit##Id(const Id *Node) {}
 #define ABSTRACT_MARKUP_AST_NODE(Id, Parent)
 #define MARKUP_AST_NODE_RANGE(Id, FirstId, LastId)
 #include "polarphp/markup/AstNodesDefs.h"
 
-   virtual ~MarkupAstWalker() = default;
+  virtual ~MarkupAstWalker() = default;
 };
 
-MarkupAstNode *create_simple_field(MarkupContext &mcontext, StringRef tag,
-                                   ArrayRef<MarkupAstNode *> children);
+MarkupAstNode *createSimpleField(MarkupContext &MC, StringRef Tag,
+                                 ArrayRef<MarkupAstNode *> Children);
 
-bool is_a_field_tag(StringRef Tag);
+bool isAFieldTag(StringRef Tag);
 
-void dump(const MarkupAstNode *node, raw_ostream &OS, unsigned indent = 0);
-void print_inlines_under(const MarkupAstNode *node, raw_ostream &OS,
-                         bool printDecorators = false);
+void dump(const MarkupAstNode *Node, llvm::raw_ostream &OS, unsigned indent = 0);
+void printInlinesUnder(const MarkupAstNode *Node, llvm::raw_ostream &OS,
+                       bool PrintDecorators = false);
 
 
 template <typename ImplClass, typename RetTy = void, typename... Args>
-class MarkupAstVisitor
-{
+class MarkupASTVisitor {
 public:
-   RetTy visit(const MarkupAstNode *node, Args... args)
-   {
-//      switch (node->getKind()) {
-//#define MARKUP_AST_NODE(Id, Parent) \
-//      case AstNodeKind::Id: \
-//   return static_cast<ImplClass*>(this) \
-//   ->visit##Id(cast<const Id>(node), \
-//   ::std::forward<Args>(args)...);
-//#define ABSTRACT_MARKUP_AST_NODE(Id, Parent)
-//#define MARKUP_AST_NODE_RANGE(Id, FirstId, LastId)
-//#include "polarphp/markup/AstNodesDefs.h"
-//      }
-   }
-   virtual ~MarkupAstVisitor() {}
+  RetTy visit(const MarkupAstNode *Node, Args... args) {
+    switch (Node->getKind()) {
+#define MARKUP_AST_NODE(Id, Parent) \
+    case AstNodeKind::Id: \
+      return static_cast<ImplClass*>(this) \
+        ->visit##Id(cast<const Id>(Node), \
+                    ::std::forward<Args>(args)...);
+#define ABSTRACT_MARKUP_AST_NODE(Id, Parent)
+#define MARKUP_AST_NODE_RANGE(Id, FirstId, LastId)
+#include "polarphp/markup/AstNodesDefs.h"
+    }
+  }
+
+  virtual ~MarkupASTVisitor() {}
 };
 
-
-} // polar::markup
+} // namespace polar::markup
 
 #endif // POLARPHP_MARKUP_AST_H

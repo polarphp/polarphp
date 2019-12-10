@@ -188,7 +188,6 @@ private:
 };
 
 class DeclName;
-class ObjCSelector;
 
 } // end namespace polar::ast
 

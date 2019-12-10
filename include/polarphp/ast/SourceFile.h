@@ -154,15 +154,15 @@ public:
   /// if its the main file or a REPL instance, so keep track of the last
   /// checked synthesized declaration to avoid duplicating work.
   unsigned LastCheckedSynthesizedDecl = 0;
-
-  /// A mapping from Objective-C selectors to the methods that have
-  /// those selectors.
-  llvm::DenseMap<ObjCSelector, llvm::TinyPtrVector<AbstractFunctionDecl *>>
-    ObjCMethods;
-
-  /// List of Objective-C methods, which is used for checking unintended
-  /// Objective-C overrides.
-  std::vector<AbstractFunctionDecl *> ObjCMethodList;
+   /// @todo
+//  /// A mapping from Objective-C selectors to the methods that have
+//  /// those selectors.
+//  llvm::DenseMap<ObjCSelector, llvm::TinyPtrVector<AbstractFunctionDecl *>>
+//    ObjCMethods;
+//
+//  /// List of Objective-C methods, which is used for checking unintended
+//  /// Objective-C overrides.
+//  std::vector<AbstractFunctionDecl *> ObjCMethodList;
 
   /// An unsatisfied, optional @objc requirement in a protocol conformance.
   using ObjCUnsatisfiedOptReq = std::pair<DeclContext *, AbstractFunctionDecl *>;
@@ -170,11 +170,6 @@ public:
   /// List of optional @objc protocol requirements that have gone
   /// unsatisfied, which might conflict with other Objective-C methods.
   std::vector<ObjCUnsatisfiedOptReq> ObjCUnsatisfiedOptReqs;
-
-  using ObjCMethodConflict = std::tuple<ClassDecl *, ObjCSelector, bool>;
-
-  /// List of Objective-C member conflicts we have found during type checking.
-  std::vector<ObjCMethodConflict> ObjCMethodConflicts;
 
   template <typename T>
   using OperatorMap = llvm::DenseMap<Identifier,llvm::PointerIntPair<T,1,bool>>;
@@ -254,10 +249,6 @@ public:
   virtual void
   lookupClassMember(ModuleDecl::AccessPathTy accessPath, DeclName name,
                     SmallVectorImpl<ValueDecl*> &results) const override;
-
-  void lookupObjCMethods(
-         ObjCSelector selector,
-         SmallVectorImpl<AbstractFunctionDecl *> &results) const override;
 
   virtual void getTopLevelDecls(SmallVectorImpl<Decl*> &results) const override;
 
@@ -449,9 +440,9 @@ public:
 private:
 
   /// If not None, the underlying vector should contain tokens of this source file.
-  Optional<std::vector<Token>> AllCorrectedTokens;
-
-  std::unique_ptr<SourceFileSyntaxInfo> SyntaxInfo;
+//  Optional<std::vector<Token>> AllCorrectedTokens;
+/// @todo
+//  std::unique_ptr<SourceFileSyntaxInfo> SyntaxInfo;
 };
 
 inline SourceFile &

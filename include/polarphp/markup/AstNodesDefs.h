@@ -8,16 +8,6 @@
 // See https://swift.org/LICENSE.txt for license information
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
-// This source file is part of the polarphp.org open source project
-//
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/04/27.
 //===----------------------------------------------------------------------===//
 //
 // This file defines Swift Markup AST nodes.
@@ -29,22 +19,6 @@
 /// ABSTRACT_REST_AST_NODE(Id, Parent)
 ///
 /// MARKUP_AST_NODE_RANGE(Id, FirstId, LastId)
-///
-#ifndef MARKUP_AST_NODE
-# define MARKUP_AST_NODE(Id, Parent)
-#endif
-
-#ifndef ABSTRACT_REST_AST_NODE
-# define ABSTRACT_REST_AST_NODE(Id, Parent)
-#endif
-
-#ifndef MARKUP_AST_NODE_RANGE
-# define MARKUP_AST_NODE_RANGE(Id, FirstId, LastId)
-#endif
-
-#ifndef ABSTRACT_MARKUP_AST_NODE
-# define ABSTRACT_MARKUP_AST_NODE(Id, FirstId)
-#endif
 
 MARKUP_AST_NODE(Document, MarkupASTNode)
 MARKUP_AST_NODE(BlockQuote, MarkupASTNode)

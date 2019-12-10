@@ -104,9 +104,9 @@ public:
                                   SmallVectorImpl<ValueDecl*> &results) const {}
 
    /// Find all Objective-C methods with the given selector.
-   virtual void lookupObjCMethods(
-      ObjCSelector selector,
-      SmallVectorImpl<AbstractFunctionDecl *> &results) const = 0;
+//   virtual void lookupObjCMethods(
+//      ObjCSelector selector,
+//      SmallVectorImpl<AbstractFunctionDecl *> &results) const = 0;
 
    /// Returns the comment attached to the given declaration.
    ///
@@ -299,9 +299,9 @@ public:
                             SmallVectorImpl<ValueDecl*> &result) const override;
 
    /// Find all Objective-C methods with the given selector.
-   void lookupObjCMethods(
-      ObjCSelector selector,
-      SmallVectorImpl<AbstractFunctionDecl *> &results) const override;
+//   void lookupObjCMethods(
+//      ObjCSelector selector,
+//      SmallVectorImpl<AbstractFunctionDecl *> &results) const override;
 
    Identifier
    getDiscriminatorForPrivateValue(const ValueDecl *D) const override {

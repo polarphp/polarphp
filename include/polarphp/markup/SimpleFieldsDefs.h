@@ -7,17 +7,7 @@
 //
 // See https://swift.org/LICENSE.txt for license information
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
-//===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/04/27.
 //===----------------------------------------------------------------------===//
 //
 // This file defines simple top-level field extensions for doc comments.
@@ -30,10 +20,6 @@
 //===----------------------------------------------------------------------===//
 
 // MARKUP_SIMPLE_FIELD(Id, Keyword, XMLKind)
-
-#ifndef MARKUP_SIMPLE_FIELD
-# define MARKUP_SIMPLE_FIELD(Id, Keyword, XMLKind)
-#endif
 
 MARKUP_SIMPLE_FIELD(AttentionField, attention, Attention)
 MARKUP_SIMPLE_FIELD(AuthorField, author, Author)

@@ -9,21 +9,12 @@
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
 //===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
-//
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/04/27.
+
 
 #ifndef POLARPHP_MARKUP_SOURCELOC_H
 #define POLARPHP_MARKUP_SOURCELOC_H
 
-#include "llvm/ADTStringRef.h"
+#include "llvm/ADT/StringRef.h"
 #include <algorithm>
 #include <cassert>
 #include <utility>
@@ -31,170 +22,132 @@
 
 namespace polar::markup {
 
-using polar::basic::StringRef;
+using llvm::StringRef;
 
-class SourceLoc
-{
-public:
-   SourceLoc()
-      : m_value(scm_invalidValue)
-   {}
-
-   SourceLoc(const SourceLoc &) = default;
-
-   bool isValid() const
-   {
-      return !isInvalid();
-   }
-
-   bool isInvalid() const
-   {
-      return m_value == m_invalidValue;
-   }
-
-   bool operator==(SourceLoc other) const
-   {
-      return m_value == other.m_value;
-   }
-
-   bool operator!=(SourceLoc other) const
-   {
-      return !(*this == other);
-   }
-
-   /// Return a source location advanced a specified number of bytes.
-   SourceLoc getAdvancedLoc(int byteOffset) const
-   {
-      assert(isValid() && "Can't advance an invalid location");
-      SourceLoc result = *this;
-      result.m_value += byteOffset;
-      return result;
-   }
-private:
+class SourceLoc {
    friend class SourceManagerBase;
+
    template<typename ExternalSourceLocTy>
    friend class SourceManager;
-   unsigned m_value;
-   static const unsigned scm_invalidValue = 0;
+
+   unsigned Value;
+
+   static const unsigned InvalidValue = 0;
+
+public:
+   SourceLoc() : Value(InvalidValue) {}
+   SourceLoc(const SourceLoc &) = default;
+
+   bool isValid() const { return !isInvalid(); }
+   bool isInvalid() const { return Value == InvalidValue; }
+
+   bool operator==(SourceLoc RHS) const { return Value == RHS.Value; }
+   bool operator!=(SourceLoc RHS) const { return !(*this == RHS); }
+
+   /// Return a source location advanced a specified number of bytes.
+   SourceLoc getAdvancedLoc(int ByteOffset) const {
+      assert(isValid() && "Can't advance an invalid location");
+      SourceLoc Result = *this;
+      Result.Value += ByteOffset;
+      return Result;
+   }
 };
 
-class SourceRange
-{
+class SourceRange {
 public:
-   /// The source range is a half-open byte range [m_start; m_end).
-   SourceLoc m_start;
-   SourceLoc m_end;
+   /// The source range is a half-open byte range [Start; End).
+   SourceLoc Start, End;
 
    SourceRange() {}
-   SourceRange(SourceLoc loc)
-      : m_start(loc),
-        m_end(loc)
-   {}
-
-   SourceRange(SourceLoc start, SourceLoc end)
-      : m_start(start),
-        m_end(end)
-   {
-      assert(m_start.isValid() == m_end.isValid() &&
-             "m_start and end should either both be valid or both be invalid!");
+   SourceRange(SourceLoc Loc) : Start(Loc), End(Loc) { }
+   SourceRange(SourceLoc Start, SourceLoc End) : Start(Start), End(End) {
+      assert(Start.isValid() == End.isValid() &&
+             "Start and end should either both be valid or both be invalid!");
    }
 
-   bool isValid() const
-   {
-      return m_start.isValid();
-   }
-
-   bool isInvalid() const
-   {
-      return m_start.isInvalid();
-   }
+   bool isValid() const { return Start.isValid(); }
+   bool isInvalid() const { return Start.isInvalid(); }
 };
 
-class SourceManagerBase
-{
+class SourceManagerBase {
 protected:
-   SourceLoc m_nextUnassignedLoc;
+   SourceLoc NextUnassignedLoc;
 
    /// All source pieces, in order of increasing source location.
-   std::vector<SourceRange> m_registeredRanges;
+   std::vector<SourceRange> RegisteredRanges;
 
 public:
-   SourceManagerBase()
-      : m_nextUnassignedLoc()
-   {
-      m_nextUnassignedLoc.m_value = 1;
+   SourceManagerBase() : NextUnassignedLoc() {
+      NextUnassignedLoc.Value = 1;
    }
-
    SourceManagerBase(const SourceManagerBase &) = delete;
+
    void operator=(const SourceManagerBase &) = delete;
-   bool isBeforeInBuffer(SourceLoc lhs, SourceLoc rhs) const
-   {
+
+   bool isBeforeInBuffer(SourceLoc LHS, SourceLoc RHS) const {
       // When we support multiple buffers, assert that locations come from the
       // same buffer.
-      return lhs.m_value < rhs.m_value;
+      return LHS.Value < RHS.Value;
    }
 
-   /// Returns true if range \c R contains the location \c loc.
-   bool containsLoc(SourceRange range, SourceLoc loc) const
-   {
-      return loc == range.m_start ||
-            (isBeforeInBuffer(range.m_start, loc) && isBeforeInBuffer(loc, range.m_end));
+   /// Returns true if range \c R contains the location \c Loc.
+   bool containsLoc(SourceRange R, SourceLoc Loc) const {
+      return Loc == R.Start ||
+             (isBeforeInBuffer(R.Start, Loc) && isBeforeInBuffer(Loc, R.End));
    }
 };
 
 template <typename ExternalSourceLocTy>
-class SourceManager : public SourceManagerBase
-{
+class SourceManager : public SourceManagerBase {
+   std::vector<ExternalSourceLocTy> ExternalLocs;
+
 public:
    SourceManager() = default;
    SourceManager(const SourceManager &) = delete;
 
    void operator=(const SourceManager &) = delete;
 
-   SourceRange registerLine(StringRef line, ExternalSourceLocTy externalLoc);
+   SourceRange registerLine(StringRef Line, ExternalSourceLocTy ExternalLoc);
 
    /// Returns the external source range and a byte offset inside it.
    std::pair<ExternalSourceLocTy, unsigned>
-   toExternalSourceLoc(SourceLoc loc) const;
-private:
-   std::vector<ExternalSourceLocTy> m_externalLocs;
+   toExternalSourceLoc(SourceLoc Loc) const;
 };
 
 template <typename ExternalSourceLocTy>
 SourceRange SourceManager<ExternalSourceLocTy>::registerLine(
-      StringRef line, ExternalSourceLocTy externalLoc)
-{
-   if (line.size() > 4095) {
+   StringRef Line, ExternalSourceLocTy ExternalLoc) {
+   if (Line.size() > 4095)
       return SourceRange();
-   }
-   SourceLoc m_start = m_nextUnassignedLoc;
-   SourceLoc m_end = m_start.getAdvancedLoc(line.size());
-   m_registeredRanges.push_back(SourceRange(m_start, m_end));
-   m_externalLocs.push_back(externalLoc);
-   m_nextUnassignedLoc = m_end.getAdvancedLoc(2);
+
+   SourceLoc Start = NextUnassignedLoc;
+   SourceLoc End = Start.getAdvancedLoc(Line.size());
+   RegisteredRanges.push_back(SourceRange(Start, End));
+   ExternalLocs.push_back(ExternalLoc);
+   NextUnassignedLoc = End.getAdvancedLoc(2);
 #ifndef NDEBUG
    // To make debugging easier, make each line start at offset that is equal to
    // 1 mod 1000.
-   m_nextUnassignedLoc.m_value = ((m_nextUnassignedLoc.m_value + 999) / 1000) * 1000 + 1;
+   NextUnassignedLoc.Value = ((NextUnassignedLoc.Value + 999) / 1000) * 1000 + 1;
 #endif
-   return SourceRange(m_start, m_end);
+   return SourceRange(Start, End);
 }
 
 template <typename ExternalSourceLocTy>
 std::pair<ExternalSourceLocTy, unsigned>
-SourceManager<ExternalSourceLocTy>::toExternalSourceLoc(SourceLoc loc) const
-{
-   auto iter = std::lower_bound(m_registeredRanges.begin(), m_registeredRanges.end(),
-                             loc, [this](const SourceRange &lhs, SourceLoc loc) {
-      return this->isBeforeInBuffer(lhs.m_start, loc);
-   });
-   assert(iter != m_registeredRanges.end() && "unknown source location");
-   const auto &InternalRange = *iter;
-   assert(containsLoc(InternalRange, loc) && "unknown source location");
-   const auto &externalLoc = m_externalLocs[iter - m_registeredRanges.begin()];
-   return { externalLoc, loc.m_value - InternalRange.m_start.m_value };
+SourceManager<ExternalSourceLocTy>::toExternalSourceLoc(SourceLoc Loc) const {
+   auto I = std::lower_bound(RegisteredRanges.begin(), RegisteredRanges.end(),
+                             Loc, [this](const SourceRange &LHS, SourceLoc Loc) {
+         return this->isBeforeInBuffer(LHS.Start, Loc);
+      });
+   assert(I != RegisteredRanges.end() && "unknown source location");
+   const auto &InternalRange = *I;
+   assert(containsLoc(InternalRange, Loc) && "unknown source location");
+   const auto &ExternalLoc = ExternalLocs[I - RegisteredRanges.begin()];
+   return { ExternalLoc, Loc.Value - InternalRange.Start.Value };
 }
 
-} // polar::markup
+} // namespace polar::markup
 
 #endif // POLARPHP_MARKUP_SOURCELOC_H
+

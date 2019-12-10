@@ -9,104 +9,77 @@
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
 //===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
-//
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/04/27.
 
 #ifndef POLARPHP_MARKUP_LINELIST_H
 #define POLARPHP_MARKUP_LINELIST_H
 
-#include "llvm/ADTArrayRef.h"
-#include "llvm/ADTStringRef.h"
-#include "polarphp/parser/SourceLoc.h"
+#include "llvm/ADT/ArrayRef.h"
+#include "llvm/ADT/StringRef.h"
+#include "polarphp/basic/SourceLoc.h"
 
 namespace polar::markup {
 
-using polar::basic::StringRef;
-using polar::basic::MutableArrayRef;
-using polar::basic::ArrayRef;
-using polar::parser::SourceRange;
+using llvm::StringRef;
+using llvm::MutableArrayRef;
+using llvm::ArrayRef;
+using polar::basic::SourceLoc;
+using polar::basic::SourceRange;
 
 class MarkupContext;
 
 /// Returns the amount of indentation on the line and
 /// the length of the line's length.
-size_t measure_indentation(StringRef text);
+size_t measureIndentation(StringRef Text);
 
 /// Represents a substring of a single line of source text.
-struct Line
-{
-   StringRef m_text;
-   SourceRange m_range;
-   size_t m_firstNonspaceOffset;
+struct Line {
+  StringRef Text;
+  SourceRange Range;
+  size_t FirstNonspaceOffset;
 public:
-   Line(StringRef text, SourceRange range)
-      : m_text(text),
-        m_range(range),
-        m_firstNonspaceOffset(measure_indentation(text))
-   {}
+  Line(StringRef Text, SourceRange Range) : Text(Text), Range(Range),
+      FirstNonspaceOffset(measureIndentation(Text)) {}
 
-   void dropFront(size_t amount)
-   {
-      m_text = m_text.dropFront(amount);
-   }
-
-   void drop_front(size_t amount)
-   {
-      dropFront(amount);
-   }
+  void drop_front(size_t Amount) {
+    Text = Text.drop_front(Amount);
+  }
 };
 
 /// A possibly non-contiguous view into a source buffer.
-class LineList
-{
-   MutableArrayRef<Line> m_lines;
+class LineList {
+  MutableArrayRef<Line> Lines;
 public:
-   LineList(MutableArrayRef<Line> lines)
-      : m_lines(lines)
-   {}
+  LineList(MutableArrayRef<Line> Lines) : Lines(Lines) {}
+  LineList() = default;
 
-   LineList() = default;
+  std::string str() const;
 
-   std::string str() const;
+  ArrayRef<Line> getLines() const {
+    return Lines;
+  }
 
-   ArrayRef<Line> getLines() const
-   {
-      return m_lines;
-   }
-
-   /// Creates a LineList from a box selection of text.
-   ///
-   /// \param mcontext MarkupContext used for allocations
-   /// \param startLine 0-based start line
-   /// \param endLine 0-based end line (1 off the end)
-   /// \param startColumn 0-based start column
-   /// \param endColumn 0-based end column (1 off the end)
-   /// \returns a new LineList with the selected start and end lines/columns.
-   LineList subListWithRange(MarkupContext &mcontext, size_t startLine, size_t endLine,
-                             size_t startColumn, size_t endColumn) const;
+  /// Creates a LineList from a box selection of text.
+  ///
+  /// \param MC MarkupContext used for allocations
+  /// \param StartLine 0-based start line
+  /// \param EndLine 0-based end line (1 off the end)
+  /// \param StartColumn 0-based start column
+  /// \param EndColumn 0-based end column (1 off the end)
+  /// \returns a new LineList with the selected start and end lines/columns.
+  LineList subListWithRange(MarkupContext &MC, size_t StartLine, size_t EndLine,
+                            size_t StartColumn, size_t EndColumn) const;
 };
 
-class LineListBuilder
-{
-   std::vector<Line> m_lines;
-   MarkupContext &m_context;
+class LineListBuilder {
+  std::vector<Line> Lines;
+  MarkupContext &Context;
 public:
-   LineListBuilder(MarkupContext &context)
-      : m_context(context)
-   {}
+  LineListBuilder(MarkupContext &Context) : Context(Context) {}
 
-   void addLine(StringRef text, SourceRange range);
-   LineList takeLineList() const;
+  void addLine(StringRef Text, SourceRange Range);
+  LineList takeLineList() const;
 };
 
-} // polar::markup
+} // namespace polar::markup
 
 #endif // POLARPHP_MARKUP_LINELIST_H

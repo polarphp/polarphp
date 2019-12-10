@@ -203,9 +203,9 @@ struct llvm::yaml::MappingTraits<
    }
 };
 
-LLVM_YAML_IS_SEQUENCE_VECTOR(polar::ast::incremental_ranges::SerializableSourceRange);
-LLVM_YAML_IS_STRING_MAP(polar::ast::incremental_ranges::Ranges);
-LLVM_YAML_IS_STRING_MAP(polar::ast::incremental_ranges::RangesByFilename);
+LLVM_YAML_IS_SEQUENCE_VECTOR(polar::ast::incremental_ranges::SerializableSourceRange)
+LLVM_YAML_IS_STRING_MAP(polar::ast::incremental_ranges::Ranges)
+LLVM_YAML_IS_STRING_MAP(polar::ast::incremental_ranges::RangesByFilename)
 
 //==============================================================================
 // MARK: PolarphpRangesEmitter

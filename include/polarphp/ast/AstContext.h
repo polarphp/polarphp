@@ -662,11 +662,11 @@ public:
    /// \param methods The list of @objc methods in this class that have this
    /// selector and are instance/class methods as requested. This list will be
    /// extended with any methods found in subsequent generations.
-   void loadObjCMethods(ClassDecl *classDecl,
-                        ObjCSelector selector,
-                        bool isInstanceMethod,
-                        unsigned previousGeneration,
-                        llvm::TinyPtrVector<AbstractFunctionDecl *> &methods);
+//   void loadObjCMethods(ClassDecl *classDecl,
+//                        ObjCSelector selector,
+//                        bool isInstanceMethod,
+//                        unsigned previousGeneration,
+//                        llvm::TinyPtrVector<AbstractFunctionDecl *> &methods);
 
    /// Retrieve the Clang module loader for this AstContext.
    ///

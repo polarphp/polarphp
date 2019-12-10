@@ -432,9 +432,9 @@ public:
                      Identifier privateDiscriminator) const;
 
    /// Find all Objective-C methods with the given selector.
-   void lookupObjCMethods(
-         ObjCSelector selector,
-         SmallVectorImpl<AbstractFunctionDecl *> &results) const;
+//   void lookupObjCMethods(
+//         ObjCSelector selector,
+//         SmallVectorImpl<AbstractFunctionDecl *> &results) const;
 
    /// \sa getImportedModules
    enum class ImportFilterKind {

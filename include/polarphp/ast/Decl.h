@@ -2468,6 +2468,7 @@ public:
    /// names.
    DeclBaseName getBaseName() const { return Name.getBaseName(); }
 
+   /// @todo
    /// Retrieve the name to use for this declaration when interoperating
    /// with the Objective-C runtime.
    ///
@@ -2475,12 +2476,12 @@ public:
    /// entities (classes, Interfaces, properties), this operation will
    /// return a zero-parameter selector with the appropriate name in its
    /// first slot.
-   Optional<ObjCSelector> getObjCRuntimeName(
-      bool skipIsObjCResolution = false) const;
+//   Optional<ObjCSelector> getObjCRuntimeName(
+//      bool skipIsObjCResolution = false) const;
 
    /// Determine whether the given declaration can infer @objc, or the
    /// Objective-C name, if used to satisfy the given requirement.
-   bool canInferObjCFromRequirement(ValueDecl *requirement);
+//   bool canInferObjCFromRequirement(ValueDecl *requirement);
 
    SourceLoc getNameLoc() const { return NameLoc; }
 
@@ -4022,11 +4023,11 @@ public:
    ///
    /// \param isInstance Whether we are looking for an instance method
    /// (vs. a class method).
-   MutableArrayRef<AbstractFunctionDecl *> lookupDirect(ObjCSelector selector,
-                                                        bool isInstance);
+//   MutableArrayRef<AbstractFunctionDecl *> lookupDirect(ObjCSelector selector,
+//                                                        bool isInstance);
 
    /// Record the presence of an @objc method with the given selector.
-   void recordObjCMethod(AbstractFunctionDecl *method, ObjCSelector selector);
+//   void recordObjCMethod(AbstractFunctionDecl *method, ObjCSelector selector);
 
    /// Get all the members of this class, synthesizing any implicit members
    /// that appear in the vtable if needed.
@@ -4726,13 +4727,13 @@ public:
 
    /// Given that this is an Objective-C property or subscript declaration,
    /// produce its getter selector.
-   ObjCSelector
-   getObjCGetterSelector(Identifier preferredName = Identifier()) const;
+//   ObjCSelector
+//   getObjCGetterSelector(Identifier preferredName = Identifier()) const;
 
    /// Given that this is an Objective-C property or subscript declaration,
    /// produce its setter selector.
-   ObjCSelector
-   getObjCSetterSelector(Identifier preferredName = Identifier()) const;
+//   ObjCSelector
+//   getObjCSetterSelector(Identifier preferredName = Identifier()) const;
 
    AbstractStorageDecl *getOverriddenDecl() const {
       return cast_or_null<AbstractStorageDecl>(ValueDecl::getOverriddenDecl());
@@ -5140,17 +5141,17 @@ public:
    void setOriginalWrappedProperty(VarDecl *originalProperty);
 
    /// Return the Objective-C runtime name for this property.
-   Identifier getObjCPropertyName() const;
+//   Identifier getObjCPropertyName() const;
 
    /// Retrieve the default Objective-C selector for the getter of a
    /// property of the given name.
-   static ObjCSelector getDefaultObjCGetterSelector(AstContext &ctx,
-                                                    Identifier propertyName);
+//   static ObjCSelector getDefaultObjCGetterSelector(AstContext &ctx,
+//                                                    Identifier propertyName);
 
    /// Retrieve the default Objective-C selector for the setter of a
    /// property of the given name.
-   static ObjCSelector getDefaultObjCSetterSelector(AstContext &ctx,
-                                                    Identifier propertyName);
+//   static ObjCSelector getDefaultObjCSetterSelector(AstContext &ctx,
+//                                                    Identifier propertyName);
 
    /// If this is a simple 'let' constant, emit a note with a fixit indicating
    /// that it can be rewritten to a 'var'.  This is used in situations where the
@@ -5939,12 +5940,12 @@ public:
    void setCaptureInfo(CaptureInfo captures) { Captures = captures; }
 
    /// Retrieve the Objective-C selector that names this method.
-   ObjCSelector getObjCSelector(DeclName preferredName = DeclName(),
-                                bool skipIsObjCResolution = false) const;
+//   ObjCSelector getObjCSelector(DeclName preferredName = DeclName(),
+//                                bool skipIsObjCResolution = false) const;
 
    /// Determine whether the given method would produce an Objective-C
    /// instance method.
-   bool isObjCInstanceMethod() const;
+//   bool isObjCInstanceMethod() const;
 
    /// Determine whether the name of an argument is an API name by default
    /// depending on the function context.
@@ -6767,7 +6768,7 @@ public:
    SourceRange getSourceRange() const;
 
    /// Retrieve the Objective-C selector for destructors.
-   ObjCSelector getObjCSelector() const;
+//   ObjCSelector getObjCSelector() const;
 
    static bool classof(const Decl *D) {
       return D->getKind() == DeclKind::Destructor;
