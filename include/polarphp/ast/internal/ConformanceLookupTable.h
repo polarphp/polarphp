@@ -17,8 +17,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef POLARPHP_Ast_INTERNAL_CONFORMANCE_LOOKUP_TABLE_H
-#define POLARPHP_Ast_INTERNAL_CONFORMANCE_LOOKUP_TABLE_H
+#ifndef POLARPHP_AST_INTERNAL_CONFORMANCE_LOOKUP_TABLE_H
+#define POLARPHP_AST_INTERNAL_CONFORMANCE_LOOKUP_TABLE_H
 
 #include "polarphp/ast/DeclContext.h"
 #include "polarphp/ast/TypeLoc.h"
@@ -41,450 +41,450 @@ class ModuleDecl;
 /// access directly. Rather, one should use the protocol- and
 /// conformance-centric entry points in \c NominalTypeDecl and \c DeclContext.
 class ConformanceLookupTable {
-  /// Describes the stage at which a particular nominal type or
-  /// extension's conformances has been processed.
-  enum class ConformanceStage : uint8_t {
-    /// The explicit conformances have been recorded in the lookup table.
-    RecordedExplicit,
+   /// Describes the stage at which a particular nominal type or
+   /// extension's conformances has been processed.
+   enum class ConformanceStage : uint8_t {
+      /// The explicit conformances have been recorded in the lookup table.
+         RecordedExplicit,
 
-    /// Conformances from the superclass have been inherited.
-    Inherited,
+      /// Conformances from the superclass have been inherited.
+         Inherited,
 
-    /// The explicit conformances have been expanded out to include
-    /// the conformances they imply.
-    ExpandedImplied,
+      /// The explicit conformances have been expanded out to include
+      /// the conformances they imply.
+         ExpandedImplied,
 
-    /// The complete set of conformances have been fully resolved to
-    /// assign conformances, diagnose conflicts, etc.
-    Resolved,
-  };
+      /// The complete set of conformances have been fully resolved to
+      /// assign conformances, diagnose conflicts, etc.
+         Resolved,
+   };
 
-  /// The number of conformance stages.
-  static const unsigned NumConformanceStages = 4;
+   /// The number of conformance stages.
+   static const unsigned NumConformanceStages = 4;
 
-  /// An entry in the last-processed list, which contains a pointer to
-  /// the last extension that was processed at a particular stage (or
-  /// nullptr if no extensions have been processed) and indicates
-  /// whether the nominal type declaration itself has been processed
-  /// at that stage.
-  typedef llvm::PointerIntPair<ExtensionDecl *, 1, bool> LastProcessedEntry;
+   /// An entry in the last-processed list, which contains a pointer to
+   /// the last extension that was processed at a particular stage (or
+   /// nullptr if no extensions have been processed) and indicates
+   /// whether the nominal type declaration itself has been processed
+   /// at that stage.
+   typedef llvm::PointerIntPair<ExtensionDecl *, 1, bool> LastProcessedEntry;
 
-  /// Array indicating how far we have gotten in processing each
-  /// nominal type and list of extensions for each stage of
-  /// conformance checking.
-  ///
-  /// Uses std::unordered_map instead of DenseMap so that stable interior
-  /// references can be taken.
-  std::unordered_map<NominalTypeDecl *,
-                     std::array<LastProcessedEntry, NumConformanceStages>>
-  LastProcessed;
+   /// Array indicating how far we have gotten in processing each
+   /// nominal type and list of extensions for each stage of
+   /// conformance checking.
+   ///
+   /// Uses std::unordered_map instead of DenseMap so that stable interior
+   /// references can be taken.
+   std::unordered_map<NominalTypeDecl *,
+      std::array<LastProcessedEntry, NumConformanceStages>>
+      LastProcessed;
 
-  struct ConformanceEntry;
+   struct ConformanceEntry;
 
-  /// Describes the "source" of a conformance, indicating where the
-  /// conformance came from.
-  class ConformanceSource {
-    llvm::PointerIntPair<void *, 2, ConformanceEntryKind> Storage;
+   /// Describes the "source" of a conformance, indicating where the
+   /// conformance came from.
+   class ConformanceSource {
+      llvm::PointerIntPair<void *, 2, ConformanceEntryKind> Storage;
 
-    ConformanceSource(void *ptr, ConformanceEntryKind kind)
-      : Storage(ptr, kind) { }
+      ConformanceSource(void *ptr, ConformanceEntryKind kind)
+         : Storage(ptr, kind) { }
 
-  public:
-    /// Create an inherited conformance.
-    ///
-    /// The given class will have an inherited conformance for the
-    /// requested protocol.
-    static ConformanceSource forInherited(ClassDecl *classDecl) {
-      return ConformanceSource(classDecl, ConformanceEntryKind::Inherited);
-    }
-
-    /// Create an explicit conformance.
-    ///
-    /// The given declaration context (nominal type declaration or
-    /// extension thereof) explicitly specifies conformance to the
-    /// protocol.
-    static ConformanceSource forExplicit(DeclContext *dc) {
-      return ConformanceSource(dc, ConformanceEntryKind::Explicit);
-    }
-
-    /// Create an implied conformance.
-    ///
-    /// Conformance to the protocol is implied by the given
-    /// conformance entry. The chain of conformance entries will
-    /// eventually terminate in a non-implied conformance.
-    static ConformanceSource forImplied(ConformanceEntry *entry) {
-      return ConformanceSource(entry, ConformanceEntryKind::Implied);
-    }
-
-    /// Create a synthesized conformance.
-    ///
-    /// The given nominal type declaration will get a synthesized
-    /// conformance to the requested protocol.
-    static ConformanceSource forSynthesized(NominalTypeDecl *typeDecl) {
-      return ConformanceSource(typeDecl, ConformanceEntryKind::Synthesized);
-    }
-
-    /// Retrieve the kind of conformance formed from this source.
-    ConformanceEntryKind getKind() const { return Storage.getInt(); }
-
-    /// Retrieve kind of the conformance for ranking purposes.
-    ///
-    /// The only difference between the ranking kind and the kind is
-    /// that implied conformances originating from a synthesized
-    /// conformance are considered to be synthesized (which has a
-    /// lower ranking).
-    ConformanceEntryKind getRankingKind() const {
-      switch (auto kind = getKind()) {
-      case ConformanceEntryKind::Explicit:
-      case ConformanceEntryKind::Inherited:
-      case ConformanceEntryKind::Synthesized:
-        return kind;
-
-      case ConformanceEntryKind::Implied:
-        return (getImpliedSource()->getDeclaredConformance()->getKind()
-                  == ConformanceEntryKind::Synthesized)
-                 ? ConformanceEntryKind::Synthesized
-                 : ConformanceEntryKind::Implied;
+   public:
+      /// Create an inherited conformance.
+      ///
+      /// The given class will have an inherited conformance for the
+      /// requested protocol.
+      static ConformanceSource forInherited(ClassDecl *classDecl) {
+         return ConformanceSource(classDecl, ConformanceEntryKind::Inherited);
       }
 
-      llvm_unreachable("Unhandled ConformanceEntryKind in switch.");
-    }
-
-    /// For an inherited conformance, retrieve the class declaration
-    /// for the inheriting class.
-    ClassDecl *getInheritingClass() const {
-      assert(getKind() == ConformanceEntryKind::Inherited);
-      return static_cast<ClassDecl *>(Storage.getPointer());
-    }
-
-    /// For an explicit conformance, retrieve the declaration context
-    /// that specifies the conformance.
-    DeclContext *getExplicitDeclContext() const {
-      assert(getKind() == ConformanceEntryKind::Explicit);
-      return static_cast<DeclContext *>(Storage.getPointer());
-    }
-
-    /// For a synthesized conformance, retrieve the nominal type decl
-    /// that will receive the conformance.
-    ConformanceEntry *getImpliedSource() const {
-      assert(getKind() == ConformanceEntryKind::Implied);
-      return static_cast<ConformanceEntry *>(Storage.getPointer());
-    }
-
-    /// For a synthesized conformance, retrieve the nominal type decl
-    /// that will receive the conformance.
-    NominalTypeDecl *getSynthesizedDecl() const {
-      assert(getKind() == ConformanceEntryKind::Synthesized);
-      return static_cast<NominalTypeDecl *>(Storage.getPointer());
-    }
-
-    /// Get the declaration context that this conformance will be
-    /// associated with.
-    DeclContext *getDeclContext() const;
-  };
-
-  /// An entry in the conformance table.
-  struct ConformanceEntry {
-    /// The source location within the current context where the
-    /// protocol conformance was specified.
-    SourceLoc Loc;
-
-    /// If this conformance entry has been superseded, the conformance
-    /// that superseded it.
-    ConformanceEntry *SupersededBy = nullptr;
-
-    /// The source of this conformance entry , which is either a
-    /// DeclContext (for an explicitly-specified conformance) or a
-    /// link to the conformance that implied this conformance.
-    ConformanceSource Source;
-
-    /// Either the protocol to be resolved or the resolved protocol conformance.
-    llvm::PointerUnion<InterfaceDecl *, InterfaceConformance *> Conformance;
-
-    ConformanceEntry(SourceLoc loc, InterfaceDecl *protocol,
-                     ConformanceSource source)
-      : Loc(loc), Source(source), Conformance(protocol) { }
-
-    /// Retrieve the location at which this conformance was declared
-    /// or synthesized.
-    SourceLoc getLoc() const { return Loc; }
-
-    /// Whether this conformance is already "fixed" and cannot be superseded.
-    bool isFixed() const {
-      // If a conformance has been assigned, it cannot be superseded.
-      if (getConformance())
-        return true;
-
-      // Otherwise, only inherited conformances are fixed.
-      switch (getKind()) {
-      case ConformanceEntryKind::Explicit:
-      case ConformanceEntryKind::Implied:
-      case ConformanceEntryKind::Synthesized:
-        return false;
-
-      case ConformanceEntryKind::Inherited:
-        return true;
+      /// Create an explicit conformance.
+      ///
+      /// The given declaration context (nominal type declaration or
+      /// extension thereof) explicitly specifies conformance to the
+      /// protocol.
+      static ConformanceSource forExplicit(DeclContext *dc) {
+         return ConformanceSource(dc, ConformanceEntryKind::Explicit);
       }
 
-      llvm_unreachable("Unhandled ConformanceEntryKind in switch.");
-    }
+      /// Create an implied conformance.
+      ///
+      /// Conformance to the protocol is implied by the given
+      /// conformance entry. The chain of conformance entries will
+      /// eventually terminate in a non-implied conformance.
+      static ConformanceSource forImplied(ConformanceEntry *entry) {
+         return ConformanceSource(entry, ConformanceEntryKind::Implied);
+      }
 
-    /// Whether this protocol conformance was superseded by another
-    /// conformance.
-    bool isSuperseded() const { return SupersededBy != nullptr; }
+      /// Create a synthesized conformance.
+      ///
+      /// The given nominal type declaration will get a synthesized
+      /// conformance to the requested protocol.
+      static ConformanceSource forSynthesized(NominalTypeDecl *typeDecl) {
+         return ConformanceSource(typeDecl, ConformanceEntryKind::Synthesized);
+      }
 
-    /// Retrieve the conformance entry that superseded this one.
-    ConformanceEntry *getSupersededBy() const { return SupersededBy; }
+      /// Retrieve the kind of conformance formed from this source.
+      ConformanceEntryKind getKind() const { return Storage.getInt(); }
 
-    /// Note that this conformance entry was superseded by the given
-    /// entry.
-    void markSupersededBy(ConformanceLookupTable &table,
-                          ConformanceEntry *entry,
-                          bool diagnose);
+      /// Retrieve kind of the conformance for ranking purposes.
+      ///
+      /// The only difference between the ranking kind and the kind is
+      /// that implied conformances originating from a synthesized
+      /// conformance are considered to be synthesized (which has a
+      /// lower ranking).
+      ConformanceEntryKind getRankingKind() const {
+         switch (auto kind = getKind()) {
+            case ConformanceEntryKind::Explicit:
+            case ConformanceEntryKind::Inherited:
+            case ConformanceEntryKind::Synthesized:
+               return kind;
 
-    /// Determine the kind of conformance.
-    ConformanceEntryKind getKind() const {
-      return Source.getKind();
-    }
+            case ConformanceEntryKind::Implied:
+               return (getImpliedSource()->getDeclaredConformance()->getKind()
+                       == ConformanceEntryKind::Synthesized)
+                      ? ConformanceEntryKind::Synthesized
+                      : ConformanceEntryKind::Implied;
+         }
 
-    /// Determine the kind of conformance for ranking purposes.
-    ConformanceEntryKind getRankingKind() const {
-      return Source.getRankingKind();
-    }
+         llvm_unreachable("Unhandled ConformanceEntryKind in switch.");
+      }
 
-    /// Retrieve the declaration context associated with this conformance.
-    DeclContext *getDeclContext() const {
-      return Source.getDeclContext();
-    }
+      /// For an inherited conformance, retrieve the class declaration
+      /// for the inheriting class.
+      ClassDecl *getInheritingClass() const {
+         assert(getKind() == ConformanceEntryKind::Inherited);
+         return static_cast<ClassDecl *>(Storage.getPointer());
+      }
 
-    /// Retrieve the protocol to which this conformance entry refers.
-    InterfaceDecl *getInterface() const;
+      /// For an explicit conformance, retrieve the declaration context
+      /// that specifies the conformance.
+      DeclContext *getExplicitDeclContext() const {
+         assert(getKind() == ConformanceEntryKind::Explicit);
+         return static_cast<DeclContext *>(Storage.getPointer());
+      }
 
-    /// Retrieve the conformance for this entry, if it has one.
-    InterfaceConformance *getConformance() const {
-      return Conformance.dyn_cast<InterfaceConformance *>();
-    }
+      /// For a synthesized conformance, retrieve the nominal type decl
+      /// that will receive the conformance.
+      ConformanceEntry *getImpliedSource() const {
+         assert(getKind() == ConformanceEntryKind::Implied);
+         return static_cast<ConformanceEntry *>(Storage.getPointer());
+      }
 
-    /// Retrieve the conformance entry where the conformance was
-    /// declared.
-    const ConformanceEntry *getDeclaredConformance() const {
-      if (Source.getKind() == ConformanceEntryKind::Implied)
-        return Source.getImpliedSource()->getDeclaredConformance();
+      /// For a synthesized conformance, retrieve the nominal type decl
+      /// that will receive the conformance.
+      NominalTypeDecl *getSynthesizedDecl() const {
+         assert(getKind() == ConformanceEntryKind::Synthesized);
+         return static_cast<NominalTypeDecl *>(Storage.getPointer());
+      }
 
-      return this;
-    }
+      /// Get the declaration context that this conformance will be
+      /// associated with.
+      DeclContext *getDeclContext() const;
+   };
 
-    /// Retrieve the source location of the place where the
-    /// conformance was introduced, e.g., an explicit conformance or
-    /// the point at which a subclass inherits a conformance from its
-    /// superclass.
-    SourceLoc getDeclaredLoc() const {
-      if (Source.getKind() == ConformanceEntryKind::Implied)
-        return Source.getImpliedSource()->getDeclaredLoc();
+   /// An entry in the conformance table.
+   struct ConformanceEntry {
+      /// The source location within the current context where the
+      /// protocol conformance was specified.
+      SourceLoc Loc;
 
-      return Loc;
-    }
+      /// If this conformance entry has been superseded, the conformance
+      /// that superseded it.
+      ConformanceEntry *SupersededBy = nullptr;
 
-    // Only allow allocation of conformance entries using the
-    // allocator in AstContext.
-    void *operator new(size_t Bytes, AstContext &C,
-                       unsigned Alignment = alignof(ConformanceEntry));
+      /// The source of this conformance entry , which is either a
+      /// DeclContext (for an explicitly-specified conformance) or a
+      /// link to the conformance that implied this conformance.
+      ConformanceSource Source;
 
-    SWIFT_DEBUG_DUMP;
-    void dump(raw_ostream &os, unsigned indent = 0) const;
-  };
+      /// Either the protocol to be resolved or the resolved protocol conformance.
+      llvm::PointerUnion<InterfaceDecl *, InterfaceConformance *> Conformance;
 
-  /// The set of conformance entries for a given protocol.
-  typedef llvm::TinyPtrVector<ConformanceEntry *> ConformanceEntries;
+      ConformanceEntry(SourceLoc loc, InterfaceDecl *protocol,
+                       ConformanceSource source)
+         : Loc(loc), Source(source), Conformance(protocol) { }
 
-  /// The type of the internal conformance table.
-  typedef llvm::MapVector<InterfaceDecl *, ConformanceEntries> ConformanceTable;
+      /// Retrieve the location at which this conformance was declared
+      /// or synthesized.
+      SourceLoc getLoc() const { return Loc; }
 
-  /// The conformance table.
-  ConformanceTable Conformances;
+      /// Whether this conformance is already "fixed" and cannot be superseded.
+      bool isFixed() const {
+         // If a conformance has been assigned, it cannot be superseded.
+         if (getConformance())
+            return true;
 
-  typedef llvm::SmallVector<InterfaceDecl *, 2> InterfaceList;
+         // Otherwise, only inherited conformances are fixed.
+         switch (getKind()) {
+            case ConformanceEntryKind::Explicit:
+            case ConformanceEntryKind::Implied:
+            case ConformanceEntryKind::Synthesized:
+               return false;
 
-  /// List of all of the protocols to which a given context declares
-  /// conformance, both explicitly and implicitly.
-  llvm::MapVector<DeclContext *, SmallVector<ConformanceEntry *, 4>>
-    AllConformances;
+            case ConformanceEntryKind::Inherited:
+               return true;
+         }
 
-  /// The complete set of diagnostics about erroneously superseded
-  /// protocol conformances.
-  llvm::SmallDenseMap<DeclContext *, std::vector<ConformanceEntry *> >
-    AllSupersededDiagnostics;
+         llvm_unreachable("Unhandled ConformanceEntryKind in switch.");
+      }
 
-  /// Associates a conforming decl to its protocol conformance decls.
-  llvm::DenseMap<const ValueDecl *, llvm::TinyPtrVector<ValueDecl *>>
-    ConformingDeclMap;
+      /// Whether this protocol conformance was superseded by another
+      /// conformance.
+      bool isSuperseded() const { return SupersededBy != nullptr; }
 
-  /// Indicates whether we are visiting the superclass.
-  bool VisitingSuperclass = false;
+      /// Retrieve the conformance entry that superseded this one.
+      ConformanceEntry *getSupersededBy() const { return SupersededBy; }
 
-  /// Add a protocol.
-  bool addInterface(InterfaceDecl *protocol, SourceLoc loc,
-                   ConformanceSource source);
+      /// Note that this conformance entry was superseded by the given
+      /// entry.
+      void markSupersededBy(ConformanceLookupTable &table,
+                            ConformanceEntry *entry,
+                            bool diagnose);
 
-  /// Add the protocols from the given list.
-  void addInheritedInterfaces(
-                         llvm::PointerUnion<TypeDecl *, ExtensionDecl *> decl,
-                         ConformanceSource source);
+      /// Determine the kind of conformance.
+      ConformanceEntryKind getKind() const {
+         return Source.getKind();
+      }
 
-  /// Expand the implied conformances for the given DeclContext.
-  void expandImpliedConformances(NominalTypeDecl *nominal, DeclContext *dc);
+      /// Determine the kind of conformance for ranking purposes.
+      ConformanceEntryKind getRankingKind() const {
+         return Source.getRankingKind();
+      }
 
-  /// A three-way ordering
-  enum class Ordering {
-    Before,
-    Equivalent,
-    After,
-  };
+      /// Retrieve the declaration context associated with this conformance.
+      DeclContext *getDeclContext() const {
+         return Source.getDeclContext();
+      }
 
-  /// Determine whether the first conformance entry supersedes the
-  /// second when determining where to place the conformance.
-  ///
-  /// \param diagnoseSuperseded When one entry is better than another,
-  /// whether to diagnose the problem as an error.
-  Ordering compareConformances(ConformanceEntry *lhs, ConformanceEntry *rhs,
-                               bool &diagnoseSuperseded);
+      /// Retrieve the protocol to which this conformance entry refers.
+      InterfaceDecl *getInterface() const;
 
-  /// Resolve the set of conformances that will be generated for the
-  /// given protocol.
-  ///
-  /// \returns true if any conformance entries were superseded by this
-  /// operation.
-  bool resolveConformances(InterfaceDecl *protocol);
+      /// Retrieve the conformance for this entry, if it has one.
+      InterfaceConformance *getConformance() const {
+         return Conformance.dyn_cast<InterfaceConformance *>();
+      }
 
-  /// Retrieve the declaration context that provides the
-  /// (non-inherited) conformance described by the given conformance
-  /// entry.
-  DeclContext *getConformingContext(NominalTypeDecl *nominal,
-                                    ConformanceEntry *entry);
+      /// Retrieve the conformance entry where the conformance was
+      /// declared.
+      const ConformanceEntry *getDeclaredConformance() const {
+         if (Source.getKind() == ConformanceEntryKind::Implied)
+            return Source.getImpliedSource()->getDeclaredConformance();
 
-  /// Resolve the given conformance entry to an actual protocol conformance.
-  InterfaceConformance *getConformance(NominalTypeDecl *nominal,
-                                      ConformanceEntry *entry);
+         return this;
+      }
 
-  /// Enumerate each of the unhandled contexts (nominal type
-  /// declaration or extension) within the given stage.
-  ///
-  /// \param stage The stage to process. Note that it is up to the
-  /// caller to ensure that prior stages have already been handled.
-  ///
-  /// \param nominalFunc Function object to be invoked when the
-  /// nominal type declaration itself needs to be processed. It takes
-  /// the nominal type declaration and its result is ignored.
-  ///
-  /// \param extensionFunc Function object to be invoked with a given
-  /// extension needs to be processed. It takes the extension as an
-  /// argument and its result is ignored.
-  template<typename NominalFunc, typename ExtensionFunc>
-  void forEachInStage(ConformanceStage stage,
-                      NominalTypeDecl *nominal,
-                      NominalFunc nominalFunc,
-                      ExtensionFunc extensionFunc);
+      /// Retrieve the source location of the place where the
+      /// conformance was introduced, e.g., an explicit conformance or
+      /// the point at which a subclass inherits a conformance from its
+      /// superclass.
+      SourceLoc getDeclaredLoc() const {
+         if (Source.getKind() == ConformanceEntryKind::Implied)
+            return Source.getImpliedSource()->getDeclaredLoc();
 
-  /// Inherit the conformances from the given superclass into the
-  /// given nominal type.
-  ///
-  /// \param classDecl The class into which the conformances will be
-  /// inherited.
-  ///
-  /// \param superclassDecl The superclass from which the conformances
-  /// will be inherited.
-  ///
-  /// \param superclassExt If non-null, the superclass extension from
-  /// which conformances will be inherited. If null, the conformances
-  /// on the superclass declaration itself will be inherited.
-  void inheritConformances(ClassDecl *classDecl,
-                           ClassDecl *superclassDecl,
-                           ExtensionDecl *superclassExt);
+         return Loc;
+      }
 
-  /// Update a lookup table with conformances from newly-added extensions.
-  void updateLookupTable(NominalTypeDecl *nominal, ConformanceStage stage);
+      // Only allow allocation of conformance entries using the
+      // allocator in AstContext.
+      void *operator new(size_t Bytes, AstContext &C,
+                         unsigned Alignment = alignof(ConformanceEntry));
 
-  /// Load all of the protocol conformances for the given (serialized)
-  /// declaration context.
-  void loadAllConformances(DeclContext *dc,
-                           ArrayRef<InterfaceConformance *> conformances);
+      POLAR_DEBUG_DUMP;
+      void dump(raw_ostream &os, unsigned indent = 0) const;
+   };
+
+   /// The set of conformance entries for a given protocol.
+   typedef llvm::TinyPtrVector<ConformanceEntry *> ConformanceEntries;
+
+   /// The type of the internal conformance table.
+   typedef llvm::MapVector<InterfaceDecl *, ConformanceEntries> ConformanceTable;
+
+   /// The conformance table.
+   ConformanceTable Conformances;
+
+   typedef llvm::SmallVector<InterfaceDecl *, 2> InterfaceList;
+
+   /// List of all of the protocols to which a given context declares
+   /// conformance, both explicitly and implicitly.
+   llvm::MapVector<DeclContext *, SmallVector<ConformanceEntry *, 4>>
+      AllConformances;
+
+   /// The complete set of diagnostics about erroneously superseded
+   /// protocol conformances.
+   llvm::SmallDenseMap<DeclContext *, std::vector<ConformanceEntry *> >
+      AllSupersededDiagnostics;
+
+   /// Associates a conforming decl to its protocol conformance decls.
+   llvm::DenseMap<const ValueDecl *, llvm::TinyPtrVector<ValueDecl *>>
+      ConformingDeclMap;
+
+   /// Indicates whether we are visiting the superclass.
+   bool VisitingSuperclass = false;
+
+   /// Add a protocol.
+   bool addInterface(InterfaceDecl *protocol, SourceLoc loc,
+                     ConformanceSource source);
+
+   /// Add the protocols from the given list.
+   void addInheritedInterfaces(
+      llvm::PointerUnion<TypeDecl *, ExtensionDecl *> decl,
+      ConformanceSource source);
+
+   /// Expand the implied conformances for the given DeclContext.
+   void expandImpliedConformances(NominalTypeDecl *nominal, DeclContext *dc);
+
+   /// A three-way ordering
+   enum class Ordering {
+      Before,
+      Equivalent,
+      After,
+   };
+
+   /// Determine whether the first conformance entry supersedes the
+   /// second when determining where to place the conformance.
+   ///
+   /// \param diagnoseSuperseded When one entry is better than another,
+   /// whether to diagnose the problem as an error.
+   Ordering compareConformances(ConformanceEntry *lhs, ConformanceEntry *rhs,
+                                bool &diagnoseSuperseded);
+
+   /// Resolve the set of conformances that will be generated for the
+   /// given protocol.
+   ///
+   /// \returns true if any conformance entries were superseded by this
+   /// operation.
+   bool resolveConformances(InterfaceDecl *protocol);
+
+   /// Retrieve the declaration context that provides the
+   /// (non-inherited) conformance described by the given conformance
+   /// entry.
+   DeclContext *getConformingContext(NominalTypeDecl *nominal,
+                                     ConformanceEntry *entry);
+
+   /// Resolve the given conformance entry to an actual protocol conformance.
+   InterfaceConformance *getConformance(NominalTypeDecl *nominal,
+                                        ConformanceEntry *entry);
+
+   /// Enumerate each of the unhandled contexts (nominal type
+   /// declaration or extension) within the given stage.
+   ///
+   /// \param stage The stage to process. Note that it is up to the
+   /// caller to ensure that prior stages have already been handled.
+   ///
+   /// \param nominalFunc Function object to be invoked when the
+   /// nominal type declaration itself needs to be processed. It takes
+   /// the nominal type declaration and its result is ignored.
+   ///
+   /// \param extensionFunc Function object to be invoked with a given
+   /// extension needs to be processed. It takes the extension as an
+   /// argument and its result is ignored.
+   template<typename NominalFunc, typename ExtensionFunc>
+   void forEachInStage(ConformanceStage stage,
+                       NominalTypeDecl *nominal,
+                       NominalFunc nominalFunc,
+                       ExtensionFunc extensionFunc);
+
+   /// Inherit the conformances from the given superclass into the
+   /// given nominal type.
+   ///
+   /// \param classDecl The class into which the conformances will be
+   /// inherited.
+   ///
+   /// \param superclassDecl The superclass from which the conformances
+   /// will be inherited.
+   ///
+   /// \param superclassExt If non-null, the superclass extension from
+   /// which conformances will be inherited. If null, the conformances
+   /// on the superclass declaration itself will be inherited.
+   void inheritConformances(ClassDecl *classDecl,
+                            ClassDecl *superclassDecl,
+                            ExtensionDecl *superclassExt);
+
+   /// Update a lookup table with conformances from newly-added extensions.
+   void updateLookupTable(NominalTypeDecl *nominal, ConformanceStage stage);
+
+   /// Load all of the protocol conformances for the given (serialized)
+   /// declaration context.
+   void loadAllConformances(DeclContext *dc,
+                            ArrayRef<InterfaceConformance *> conformances);
 
 public:
-  /// Create a new conformance lookup table.
-  ConformanceLookupTable(AstContext &ctx);
+   /// Create a new conformance lookup table.
+   ConformanceLookupTable(AstContext &ctx);
 
-  /// Destroy the conformance table.
-  void destroy();
+   /// Destroy the conformance table.
+   void destroy();
 
-  /// Add a synthesized conformance to the lookup table.
-  void addSynthesizedConformance(NominalTypeDecl *nominal,
-                                 InterfaceDecl *protocol);
+   /// Add a synthesized conformance to the lookup table.
+   void addSynthesizedConformance(NominalTypeDecl *nominal,
+                                  InterfaceDecl *protocol);
 
-  /// Register an externally-supplied protocol conformance.
-  void registerInterfaceConformance(InterfaceConformance *conformance,
-                                   bool synthesized = false);
+   /// Register an externally-supplied protocol conformance.
+   void registerInterfaceConformance(InterfaceConformance *conformance,
+                                     bool synthesized = false);
 
-  /// Look for conformances to the given protocol.
-  ///
-  /// \param conformances Will be populated with the set of protocol
-  /// conformances found for this protocol and nominal type.
-  ///
-  /// \returns true if any conformances were found.
-  bool lookupConformance(ModuleDecl *module,
-                         NominalTypeDecl *nominal,
-                         InterfaceDecl *protocol,
-                         SmallVectorImpl<InterfaceConformance *> &conformances);
+   /// Look for conformances to the given protocol.
+   ///
+   /// \param conformances Will be populated with the set of protocol
+   /// conformances found for this protocol and nominal type.
+   ///
+   /// \returns true if any conformances were found.
+   bool lookupConformance(ModuleDecl *module,
+                          NominalTypeDecl *nominal,
+                          InterfaceDecl *protocol,
+                          SmallVectorImpl<InterfaceConformance *> &conformances);
 
-  /// Look for all of the conformances within the given declaration context.
-  void lookupConformances(NominalTypeDecl *nominal,
-                          DeclContext *dc,
-                          ConformanceLookupKind lookupKind,
-                          SmallVectorImpl<InterfaceDecl *> *protocols,
-                          SmallVectorImpl<InterfaceConformance *> *conformances,
-                          SmallVectorImpl<ConformanceDiagnostic> *diagnostics);
+   /// Look for all of the conformances within the given declaration context.
+   void lookupConformances(NominalTypeDecl *nominal,
+                           DeclContext *dc,
+                           ConformanceLookupKind lookupKind,
+                           SmallVectorImpl<InterfaceDecl *> *protocols,
+                           SmallVectorImpl<InterfaceConformance *> *conformances,
+                           SmallVectorImpl<ConformanceDiagnostic> *diagnostics);
 
-  /// Retrieve the complete set of protocols to which this nominal
-  /// type conforms.
-  void getAllInterfaces(NominalTypeDecl *nominal,
-                       SmallVectorImpl<InterfaceDecl *> &scratch);
+   /// Retrieve the complete set of protocols to which this nominal
+   /// type conforms.
+   void getAllInterfaces(NominalTypeDecl *nominal,
+                         SmallVectorImpl<InterfaceDecl *> &scratch);
 
-  /// Retrieve the complete set of protocol conformances for this
-  /// nominal type.
-  void getAllConformances(NominalTypeDecl *nominal,
-                          bool sorted,
-                          SmallVectorImpl<InterfaceConformance *> &scratch);
+   /// Retrieve the complete set of protocol conformances for this
+   /// nominal type.
+   void getAllConformances(NominalTypeDecl *nominal,
+                           bool sorted,
+                           SmallVectorImpl<InterfaceConformance *> &scratch);
 
-  /// Retrieve the protocols that would be implicitly synthesized.
-  /// FIXME: This is a hack, because it's the wrong question to ask. It
-  /// skips over the possibility that there is an explicit conformance
-  /// somewhere.
-  void getImplicitInterfaces(NominalTypeDecl *nominal,
-                            SmallVectorImpl<InterfaceDecl *> &protocols);
+   /// Retrieve the protocols that would be implicitly synthesized.
+   /// FIXME: This is a hack, because it's the wrong question to ask. It
+   /// skips over the possibility that there is an explicit conformance
+   /// somewhere.
+   void getImplicitInterfaces(NominalTypeDecl *nominal,
+                              SmallVectorImpl<InterfaceDecl *> &protocols);
 
-  /// Returns the protocol requirements that \c Member conforms to.
-  ArrayRef<ValueDecl *>
-  getSatisfiedInterfaceRequirementsForMember(const ValueDecl *member,
-                                            NominalTypeDecl *nominal,
-                                            bool sorted);
+   /// Returns the protocol requirements that \c Member conforms to.
+   ArrayRef<ValueDecl *>
+   getSatisfiedInterfaceRequirementsForMember(const ValueDecl *member,
+                                              NominalTypeDecl *nominal,
+                                              bool sorted);
 
-  // Only allow allocation of conformance lookup tables using the
-  // allocator in AstContext or by doing a placement new.
-  void *operator new(size_t Bytes, AstContext &C,
-                     unsigned Alignment = alignof(ConformanceLookupTable));
+   // Only allow allocation of conformance lookup tables using the
+   // allocator in AstContext or by doing a placement new.
+   void *operator new(size_t Bytes, AstContext &C,
+                      unsigned Alignment = alignof(ConformanceLookupTable));
 
-  void *operator new(size_t Bytes, void *Mem) {
-    assert(Mem);
-    return Mem;
-  }
+   void *operator new(size_t Bytes, void *Mem) {
+      assert(Mem);
+      return Mem;
+   }
 
-  POLAR_DEBUG_DUMP;
-  void dump(raw_ostream &os) const;
+   POLAR_DEBUG_DUMP;
+   void dump(raw_ostream &os) const;
 
-  /// Compare two protocol conformances to place them in some canonical order.
-  static int compareInterfaceConformances(InterfaceConformance * const *lhsPtr,
-                                         InterfaceConformance * const *rhsPtr);
+   /// Compare two protocol conformances to place them in some canonical order.
+   static int compareInterfaceConformances(InterfaceConformance * const *lhsPtr,
+                                           InterfaceConformance * const *rhsPtr);
 };
 
-}
+} // polar::ast
 
-#endif /* POLARPHP_Ast_INTERNAL_CONFORMANCE_LOOKUP_TABLE_H */
+#endif /* POLARPHP_AST_INTERNAL_CONFORMANCE_LOOKUP_TABLE_H */

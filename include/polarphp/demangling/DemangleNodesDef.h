@@ -217,7 +217,7 @@ NODE(TypeMetadataLazyCache)
 NODE(UncurriedFunctionType)
 NODE(UnknownIndex)
 #define REF_STORAGE(Name, ...) NODE(Name)
-#include "swift/AST/ReferenceStorage.def"
+#include "polarphp/ast/ReferenceStorageDef.h"
 CONTEXT_NODE(UnsafeAddressor)
 CONTEXT_NODE(UnsafeMutableAddressor)
 NODE(ValueWitness)

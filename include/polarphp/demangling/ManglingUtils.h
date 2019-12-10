@@ -117,7 +117,7 @@ void mangleIdentifier(Mangler &M, StringRef ident) {
     // If the identifier contains non-ASCII character, we mangle
     // with an initial '00' and Punycode the identifier string.
     std::string punycodeBuf;
-    Punycode::encodePunycodeUTF8(ident, punycodeBuf,
+    punycode::encodePunycodeUTF8(ident, punycodeBuf,
                                  /*mapNonSymbolChars*/ true);
     StringRef pcIdent = punycodeBuf;
     M.Buffer << "00" << pcIdent.size();
