@@ -124,9 +124,9 @@ constexpr static BuiltinNameStringLiteral BUILTIN_TYPE_NAME_UNKNOWNOBJECT = {
 /// The name of the Builtin type for Vector
 constexpr static BuiltinNameStringLiteral BUILTIN_TYPE_NAME_VEC = {
     "Builtin.Vec"};
-/// The name of the Builtin type for SILToken
-constexpr static BuiltinNameStringLiteral BUILTIN_TYPE_NAME_SILTOKEN = {
-    "Builtin.SILToken"};
+/// The name of the Builtin type for PILToken
+constexpr static BuiltinNameStringLiteral BUILTIN_TYPE_NAME_PILTOKEN = {
+    "Builtin.PILToken"};
 /// The name of the Builtin type for Word
 constexpr static BuiltinNameStringLiteral BUILTIN_TYPE_NAME_WORD = {
     "Builtin.Word"};

@@ -24,9 +24,9 @@
 
 namespace polar::mangle {
 
-using polar::demangling::WordReplacement;
-using polar::demangling::SubstitutionWord;
-using polar::demangling::SubstitutionMerging;
+using polar::mangling::WordReplacement;
+using polar::mangling::SubstitutionWord;
+using polar::mangling::SubstitutionMerging;
 
 void printManglingStats();
 

@@ -506,12 +506,12 @@ protected:
    NodePointer popFunctionParamLabels(NodePointer FuncType);
    NodePointer popTuple();
    NodePointer popTypeList();
-   NodePointer popProtocol();
+   NodePointer popInterface();
    NodePointer demangleBoundGenericType();
    NodePointer demangleBoundGenericArgs(NodePointer nominalType,
                                         const Vector<NodePointer> &TypeLists,
                                         size_t TypeListIdx);
-   NodePointer popAnyProtocolConformanceList();
+   NodePointer popAnyInterfaceConformanceList();
    NodePointer demangleRetroactiveConformance();
    NodePointer demangleInitializer();
    NodePointer demangleImplParamConvention();
@@ -528,15 +528,15 @@ protected:
    NodePointer popAssocTypePath();
    NodePointer getDependentGenericParamType(int depth, int index);
    NodePointer demangleGenericParamIndex();
-   NodePointer popProtocolConformance();
-   NodePointer demangleRetroactiveProtocolConformanceRef();
-   NodePointer popAnyProtocolConformance();
-   NodePointer demangleConcreteProtocolConformance();
-   NodePointer popDependentProtocolConformance();
-   NodePointer demangleDependentProtocolConformanceRoot();
-   NodePointer demangleDependentProtocolConformanceInherited();
+   NodePointer popInterfaceConformance();
+   NodePointer demangleRetroactiveInterfaceConformanceRef();
+   NodePointer popAnyInterfaceConformance();
+   NodePointer demangleConcreteInterfaceConformance();
+   NodePointer popDependentInterfaceConformance();
+   NodePointer demangleDependentInterfaceConformanceRoot();
+   NodePointer demangleDependentInterfaceConformanceInherited();
    NodePointer popDependentAssociatedConformance();
-   NodePointer demangleDependentProtocolConformanceAssociated();
+   NodePointer demangleDependentInterfaceConformanceAssociated();
    NodePointer demangleThunkOrSpecialization();
    NodePointer demangleGenericSpecialization(Node::Kind SpecKind);
    NodePointer demangleFunctionSpecialization();
@@ -554,8 +554,8 @@ protected:
    NodePointer demangleEntity(Node::Kind Kind);
    NodePointer demangleVariable();
    NodePointer demangleSubscript();
-   NodePointer demangleProtocolList();
-   NodePointer demangleProtocolListType();
+   NodePointer demangleInterfaceList();
+   NodePointer demangleInterfaceListType();
    NodePointer demangleGenericSignature(bool hasParamCounts);
    NodePointer demangleGenericRequirement();
    NodePointer demangleGenericType();
