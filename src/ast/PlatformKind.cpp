@@ -21,7 +21,6 @@
 
 namespace polar::ast {
 
-
 StringRef platformString(PlatformKind platform) {
   switch (platform) {
   case PlatformKind::none:

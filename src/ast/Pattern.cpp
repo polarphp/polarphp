@@ -515,4 +515,4 @@ const UnifiedStatsReporter::TraceFormatter *
 FrontendStatsTracer::getTraceFormatter<const Pattern *>() {
    return &TF;
 }
-} // polar::ast
+} // polar::basic
