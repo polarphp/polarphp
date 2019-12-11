@@ -293,10 +293,10 @@ ImportCache::getAllAccessPathsNotShadowedBy(const ModuleDecl *mod,
    auto result = allocateArray(ctx, accessPaths);
    ShadowCache[key] = result;
    return result;
-};
+}
 
 ArrayRef<ModuleDecl::ImportedModule>
-getAllImports(const DeclContext *dc) {
+namelookup::getAllImports(const DeclContext *dc) {
    return dc->getAstContext().getImportCache().getImportSet(dc)
       .getAllImports();
 }

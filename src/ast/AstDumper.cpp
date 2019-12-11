@@ -2855,8 +2855,8 @@ public:
 
    void visitKeyPathExpr(KeyPathExpr *E) {
       printCommon(E, "keypath_expr");
-      if (E->isObjC())
-         OS << " objc";
+//      if (E->isObjC())
+//         OS << " objc";
 
       OS << '\n';
       Indent += 2;
@@ -2937,15 +2937,13 @@ public:
          OS << '\n';
          printRecLabeled(stringLiteral, "objc_string_literal");
       }
-      if (!E->isObjC()) {
-         if (auto root = E->getParsedRoot()) {
-            OS << "\n";
-            printRecLabeled(root, "parsed_root");
-         }
-         if (auto path = E->getParsedPath()) {
-            OS << "\n";
-            printRecLabeled(path, "parsed_path");
-         }
+      if (auto root = E->getParsedRoot()) {
+         OS << "\n";
+         printRecLabeled(root, "parsed_root");
+      }
+      if (auto path = E->getParsedPath()) {
+         OS << "\n";
+         printRecLabeled(path, "parsed_path");
       }
       PrintWithColorRAII(OS, ParenthesisColor) << ')';
    }

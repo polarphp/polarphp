@@ -1032,11 +1032,14 @@ class Traversal : public AstVisitor<Traversal, Expr*, Stmt*,
       return E;
     }
 
-    if (!E->isObjC()) {
-      auto rootType = E->getRootType();
-      if (rootType && doIt(rootType))
+     auto rootType = E->getRootType();
+     if (rootType && doIt(rootType))
         return nullptr;
-    }
+//    if (!E->isObjC()) {
+//      auto rootType = E->getRootType();
+//      if (rootType && doIt(rootType))
+//        return nullptr;
+//    }
 
     SmallVector<KeyPathExpr::Component, 4> updatedComponents;
     bool didChangeComponents = false;

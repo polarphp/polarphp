@@ -186,23 +186,6 @@ void EnumRawTypeRequest::cacheResult(Type value) const {
 }
 
 //----------------------------------------------------------------------------//
-// isObjC computation.
-//----------------------------------------------------------------------------//
-
-Optional<bool> IsObjCRequest::getCachedResult() const {
-   auto decl = std::get<0>(getStorage());
-   if (decl->LazySemanticInfo.isObjCComputed)
-      return decl->LazySemanticInfo.isObjC;
-
-   return None;
-}
-
-void IsObjCRequest::cacheResult(bool value) const {
-   auto decl = std::get<0>(getStorage());
-   decl->setIsObjC(value);
-}
-
-//----------------------------------------------------------------------------//
 // requiresClass computation.
 //----------------------------------------------------------------------------//
 

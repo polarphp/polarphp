@@ -606,8 +606,8 @@ void NormalInterfaceConformance::setSignatureConformances(
    unsigned idx = 0;
    for (const auto &req : getInterface()->getRequirementSignature()) {
       if (req.getKind() == RequirementKind::Conformance) {
-         assert(!conformances[idx].isConcrete() ||
-                !conformances[idx].getConcrete()->getType()->hasArchetype() &&
+         assert((!conformances[idx].isConcrete() ||
+                         !conformances[idx].getConcrete()->getType()->hasArchetype()) &&
                 "Should have interface types here");
          assert(idx < conformances.size());
          assert(conformances[idx].isInvalid() ||
@@ -1517,6 +1517,11 @@ struct InterfaceConformanceTraceFormatter
    }
 };
 
+void simple_display(llvm::raw_ostream &out,
+                           const InterfaceConformance *conf) {
+   conf->printName(out);
+}
+
 } // polar::ast
 
 namespace polar::basic {
@@ -1529,10 +1534,5 @@ template<>
 const UnifiedStatsReporter::TraceFormatter *
 FrontendStatsTracer::getTraceFormatter<const InterfaceConformance *>() {
    return &TF;
-}
-
-void simple_display(llvm::raw_ostream &out,
-                           const InterfaceConformance *conf) {
-   conf->printName(out);
 }
 } // polar::basic

@@ -65,12 +65,13 @@ list(APPEND POLAR_HEADERS
 
 polar_add_library(PolarParser SHARED
    ${POLAR_PARSER_SOURCES}
-   LINK_LIBS PolarUtils PolarGlobal PolarKernel PolarSyntax clangAST clangBasic)
+   LINK_LIBS PolarUtils PolarGlobal PolarKernel PolarSyntax
+   clangAST clangBasic clangSema clangIndex)
 
 # for YYParserDefs.h
 target_include_directories(PolarParser PRIVATE ${POLAR_MAIN_INCLUDE_DIR}/polarphp/parser/internal)
 set_target_properties(PolarParser
    PROPERTIES
-   INTERFACE_LINK_LIBRARIES "PolarSyntax;PolarUtils;clangAST;clangBasic")
+   INTERFACE_LINK_LIBRARIES "PolarSyntax;PolarUtils;clangAST;clangBasic;clangSema;clangIndex")
 
 set(POLAR_HEADERS ${POLAR_HEADERS} PARENT_SCOPE)

@@ -426,8 +426,9 @@ clang::QualType ClangTypeConverter::visitClassType(ClassType *type) {
 
    // TODO: [non-objc-class-clang-type-conversion]
    // See the corresponding note in GenClangType.cpp
-   if (!swiftDecl->isObjC())
-      return getClangIdType(clangCtx);
+//   if (!swiftDecl->isObjC())
+//      return getClangIdType(clangCtx);
+   return getClangIdType(clangCtx);
 
    assert(!cast_or_null<clang::ObjCInterfaceDecl>(swiftDecl->getClangDecl())
           && "We shouldn't be creating duplicate decls; see `convert`");
@@ -444,9 +445,9 @@ clang::QualType ClangTypeConverter::visitClassType(ClassType *type) {
    // Attach an objc_runtime_name attribute with the Objective-C name to use
    // for this class.
    SmallString<64> runtimeNameBuffer;
-   CDecl->addAttr(clang::ObjCRuntimeNameAttr::CreateImplicit(
-      CDecl->getASTContext(),
-      swiftDecl->getObjCRuntimeName(runtimeNameBuffer)));
+//   CDecl->addAttr(clang::ObjCRuntimeNameAttr::CreateImplicit(
+//      CDecl->getASTContext(),
+//      swiftDecl->getObjCRuntimeName(runtimeNameBuffer)));
 
    auto clangType = clangCtx.getObjCInterfaceType(CDecl);
    return clangCtx.getObjCObjectPointerType(clangType);

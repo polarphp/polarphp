@@ -2934,10 +2934,10 @@ void PrintAst::printEnumElement(EnumElementDecl *elt) {
    switch (Options.EnumRawValues) {
       case PrintOptions::EnumRawValueMode::Skip:
          return;
-      case PrintOptions::EnumRawValueMode::PrintObjCOnly:
-         if (!elt->isObjC())
-            return;
-         break;
+//      case PrintOptions::EnumRawValueMode::PrintObjCOnly:
+//         if (!elt->isObjC())
+//            return;
+//         break;
       case PrintOptions::EnumRawValueMode::Print:
          break;
    }
