@@ -1744,30 +1744,31 @@ bool DeclContext::lookupAnyObject(DeclName member, NLOptions options,
    // For each declaration whose context is not something we've
    // already visited above, add it to the list of declarations.
    llvm::SmallPtrSet<ValueDecl *, 4> knownDecls;
-   for (auto decl : allDecls) {
-      // If the declaration is not @objc, it cannot be called dynamically.
-      if (!decl->isObjC())
-         continue;
-
-      // If the declaration has an override, name lookup will also have
-      // found the overridden method. Skip this declaration, because we
-      // prefer the overridden method.
-      if (decl->getOverriddenDecl())
-         continue;
-
-      auto dc = decl->getDeclContext();
-      auto nominal = dc->getSelfNominalTypeDecl();
-      assert(nominal && "Couldn't find nominal type?");
-      (void) nominal;
-
-      // If we didn't see this declaration before, and it's an acceptable
-      // result, add it to the list.
-      // declaration to the list.
-      if (knownDecls.insert(decl).second &&
-          isAcceptableLookupResult(this, options, decl,
-             /*onlyCompleteObjectInits=*/false))
-         decls.push_back(decl);
-   }
+   /// @todo
+//   for (auto decl : allDecls) {
+//      // If the declaration is not @objc, it cannot be called dynamically.
+//      if (!decl->isObjC())
+//         continue;
+//
+//      // If the declaration has an override, name lookup will also have
+//      // found the overridden method. Skip this declaration, because we
+//      // prefer the overridden method.
+//      if (decl->getOverriddenDecl())
+//         continue;
+//
+//      auto dc = decl->getDeclContext();
+//      auto nominal = dc->getSelfNominalTypeDecl();
+//      assert(nominal && "Couldn't find nominal type?");
+//      (void) nominal;
+//
+//      // If we didn't see this declaration before, and it's an acceptable
+//      // result, add it to the list.
+//      // declaration to the list.
+//      if (knownDecls.insert(decl).second &&
+//          isAcceptableLookupResult(this, options, decl,
+//             /*onlyCompleteObjectInits=*/false))
+//         decls.push_back(decl);
+//   }
 
    pruneLookupResultSet(this, options, decls);
    if (auto *debugClient = this->getParentModule()->getDebugClient()) {

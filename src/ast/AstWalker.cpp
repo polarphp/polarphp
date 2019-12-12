@@ -1016,7 +1016,7 @@ class Traversal : public AstVisitor<Traversal, Expr*, Stmt*,
     auto components = E->getComponents();
     if (components.empty()) {
       // No components means a parsed-only/pre-resolution Swift key path.
-      assert(!E->isObjC());
+//      assert(!E->isObjC());
       if (auto parsedRoot = E->getParsedRoot()) {
         Expr *newRoot = doIt(parsedRoot);
         if (!newRoot)

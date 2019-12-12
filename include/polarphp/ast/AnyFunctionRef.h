@@ -174,17 +174,18 @@ public:
       return false;
    }
 
-   bool isObjC() const
-   {
-      if (auto afd = m_theFunction.dyn_cast<AbstractFunctionDecl *>()) {
-         return afd->isObjC();
-      }
-      if (m_theFunction.dyn_cast<AbstractClosureExpr *>()) {
-         // Closures are never @objc.
-         return false;
-      }
-      llvm_unreachable("unexpected AnyFunctionRef representation");
-   }
+// @todo
+//   bool isObjC() const
+//   {
+//      if (auto afd = m_theFunction.dyn_cast<AbstractFunctionDecl *>()) {
+//         return afd->isObjC();
+//      }
+//      if (m_theFunction.dyn_cast<AbstractClosureExpr *>()) {
+//         // Closures are never @objc.
+//         return false;
+//      }
+//      llvm_unreachable("unexpected AnyFunctionRef representation");
+//   }
 
    SourceLoc getLoc() const
    {

@@ -31,13 +31,15 @@
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/raw_ostream.h"
 
-using namespace polar::ast;
+namespace polar::ast {
 
 using polar::basic::interleave;
+using llvm::dyn_cast_or_null;
 
 #define DECL_ATTR(_, Id, ...) \
   static_assert(std::is_trivially_destructible_v<Id##Attr>, \
                 "Attrs are BumpPtrAllocated; the destructor is never called");
+
 #include "polarphp/ast/AttrDef.h"
 static_assert(std::is_trivially_destructible_v<DeclAttributes>,
               "DeclAttributes are BumpPtrAllocated; the d'tor is never called");
@@ -74,13 +76,18 @@ void *AttributeBase::operator new(size_t Bytes, AstContext &C,
    return C.Allocate(Bytes, Alignment);
 }
 
-StringRef get_access_level_spelling(AccessLevel value) {
+StringRef getAccessLevelSpelling(AccessLevel value) {
    switch (value) {
-      case AccessLevel::Private: return "private";
-      case AccessLevel::FilePrivate: return "fileprivate";
-      case AccessLevel::Internal: return "internal";
-      case AccessLevel::Public: return "public";
-      case AccessLevel::Open: return "open";
+      case AccessLevel::Private:
+         return "private";
+      case AccessLevel::FilePrivate:
+         return "fileprivate";
+      case AccessLevel::Internal:
+         return "internal";
+      case AccessLevel::Public:
+         return "public";
+      case AccessLevel::Open:
+         return "open";
    }
 
    llvm_unreachable("Unhandled AccessLevel in switch.");
@@ -92,18 +99,23 @@ StringRef get_access_level_spelling(AccessLevel value) {
 TypeAttrKind TypeAttributes::getAttrKindFromString(StringRef Str) {
    return llvm::StringSwitch<TypeAttrKind>(Str)
 #define TYPE_ATTR(X) .Case(#X, TAK_##X)
+
 #include "polarphp/ast/AttrDef.h"
+
       .Default(TAK_Count);
 }
 
 /// Return the name (like "autoclosure") for an attribute ID.
 const char *TypeAttributes::getAttrName(TypeAttrKind kind) {
    switch (kind) {
-      default: llvm_unreachable("Invalid attribute ID");
+      default:
+         llvm_unreachable("Invalid attribute ID");
 #define TYPE_ATTR(X) case TAK_##X: return #X;
+
 #include "polarphp/ast/AttrDef.h"
    }
 }
+
 
 /// Given a name like "inline", return the decl attribute ID that corresponds
 /// to it.  Note that this is a many-to-one mapping, and that the identifier
@@ -117,7 +129,9 @@ DeclAttrKind DeclAttribute::getAttrKindFromString(StringRef Str) {
    return llvm::StringSwitch<DeclAttrKind>(Str)
 #define DECL_ATTR(X, CLASS, ...) .Case(#X, DAK_##CLASS)
 #define DECL_ATTR_ALIAS(X, CLASS) .Case(#X, DAK_##CLASS)
+
 #include "polarphp/ast/AttrDef.h"
+
       .Default(DAK_Count);
 }
 
@@ -130,6 +144,7 @@ bool DeclAttribute::canAttributeAppearOnDeclKind(DeclAttrKind DAK, DeclKind DK) 
    auto Options = getOptions(DAK);
    switch (DK) {
 #define DECL(Id, Parent) case DeclKind::Id: return (Options & On##Id) != 0;
+
 #include "polarphp/ast/DeclNodesDef.h"
    }
    llvm_unreachable("bad DeclKind");
@@ -557,7 +572,7 @@ void DeclAttributes::print(AstPrinter &Printer, const PrintOptions &Options,
    AttributeVector modifiers;
 
    CustomAttr *FuncBuilderAttr = nullptr;
-   if (auto *VD = llvm::dyn_cast_or_null<ValueDecl>(D)) {
+   if (auto *VD = dyn_cast_or_null<ValueDecl>(D)) {
       FuncBuilderAttr = VD->getAttachedFunctionBuilder();
    }
    for (auto DA : llvm::reverse(FlattenedAttrs)) {
@@ -646,7 +661,9 @@ bool DeclAttribute::printImpl(AstPrinter &Printer, const PrintOptions &Options,
    switch (getKind()) {
       // Handle all of the SIMPLE_DECL_ATTRs.
 #define SIMPLE_DECL_ATTR(X, CLASS, ...) case DAK_##CLASS:
+
 #include "polarphp/ast/AttrDef.h"
+
       case DAK_Inline:
       case DAK_AccessControl:
       case DAK_ReferenceOwnership:
@@ -668,7 +685,7 @@ bool DeclAttribute::printImpl(AstPrinter &Printer, const PrintOptions &Options,
    }
 
    Printer.callPrintStructurePre(PrintStructureKind::BuiltinAttribute);
-   POLAR_DEFER {
+   POLAR_DEFER{
       Printer.printStructurePost(PrintStructureKind::BuiltinAttribute);
    };
 
@@ -731,9 +748,8 @@ bool DeclAttribute::printImpl(AstPrinter &Printer, const PrintOptions &Options,
          if (!Attr->Message.empty()) {
             Printer << ", message: ";
             Printer.printEscapedStringLiteral(Attr->Message);
-         }
-         else if (Attr->getPlatformAgnosticAvailability()
-                  == PlatformAgnosticAvailabilityKind::UnavailableInSwift)
+         } else if (Attr->getPlatformAgnosticAvailability()
+                    == PlatformAgnosticAvailabilityKind::UnavailableInSwift)
             Printer << ", message: \"Not available in Swift\"";
 
          Printer << ")";
@@ -763,7 +779,7 @@ bool DeclAttribute::printImpl(AstPrinter &Printer, const PrintOptions &Options,
          auto exported = attr->isExported() ? "true" : "false";
          auto kind = attr->isPartialSpecialization() ? "partial" : "full";
 
-         Printer << "exported: "<<  exported << ", ";
+         Printer << "exported: " << exported << ", ";
          Printer << "kind: " << kind << ", ";
          SmallVector<Requirement, 4> requirementsScratch;
          ArrayRef<Requirement> requirements;
@@ -771,7 +787,7 @@ bool DeclAttribute::printImpl(AstPrinter &Printer, const PrintOptions &Options,
             requirements = sig->getRequirements();
 
          std::function<Type(Type)> GetInterfaceType;
-         auto *FnDecl = llvm::dyn_cast_or_null<AbstractFunctionDecl>(D);
+         auto *FnDecl = dyn_cast_or_null<AbstractFunctionDecl>(D);
          if (!FnDecl || !FnDecl->getGenericEnvironment())
             GetInterfaceType = [](Type Ty) -> Type { return Ty; };
          else {
@@ -866,7 +882,9 @@ bool DeclAttribute::printImpl(AstPrinter &Printer, const PrintOptions &Options,
          llvm_unreachable("exceed declaration attribute kinds");
 
 #define SIMPLE_DECL_ATTR(X, CLASS, ...) case DAK_##CLASS:
+
 #include "polarphp/ast/AttrDef.h"
+
          llvm_unreachable("handled above");
 
       default:
@@ -900,6 +918,7 @@ uint64_t DeclAttribute::getOptions(DeclAttrKind DK) {
          llvm_unreachable("getOptions needs a valid attribute");
 #define DECL_ATTR(_, CLASS, OPTIONS, ...)\
   case DAK_##CLASS: return OPTIONS;
+
 #include "polarphp/ast/AttrDef.h"
    }
    llvm_unreachable("bad DeclAttrKind");
@@ -912,7 +931,9 @@ StringRef DeclAttribute::getAttrName() const {
 #define SIMPLE_DECL_ATTR(NAME, CLASS, ...) \
   case DAK_##CLASS: \
     return #NAME;
+
 #include "polarphp/ast/AttrDef.h"
+
       case DAK_SILGenName:
          return "_silgen_name";
       case DAK_Alignment:
@@ -1006,7 +1027,7 @@ PrivateImportAttr *PrivateImportAttr::create(AstContext &Ctxt, SourceLoc AtLoc,
                                              SourceLoc LParenLoc,
                                              StringRef sourceFile,
                                              SourceLoc RParenLoc) {
-   return new (Ctxt)
+   return new(Ctxt)
       PrivateImportAttr(AtLoc, SourceRange(PrivateLoc, RParenLoc), sourceFile,
                         SourceRange(LParenLoc, RParenLoc));
 }
@@ -1029,7 +1050,7 @@ DynamicReplacementAttr::create(AstContext &Ctx, SourceLoc AtLoc,
                                DeclName ReplacedFunction, SourceLoc RParenLoc) {
    void *mem = Ctx.Allocate(totalSizeToAlloc<SourceLoc>(2),
                             alignof(DynamicReplacementAttr));
-   return new (mem) DynamicReplacementAttr(
+   return new(mem) DynamicReplacementAttr(
       AtLoc, SourceRange(DynReplLoc, RParenLoc), ReplacedFunction,
       SourceRange(LParenLoc, RParenLoc));
 }
@@ -1037,13 +1058,13 @@ DynamicReplacementAttr::create(AstContext &Ctx, SourceLoc AtLoc,
 DynamicReplacementAttr *
 DynamicReplacementAttr::create(AstContext &Ctx, DeclName name,
                                AbstractFunctionDecl *f) {
-   return new (Ctx) DynamicReplacementAttr(name, f);
+   return new(Ctx) DynamicReplacementAttr(name, f);
 }
 
 DynamicReplacementAttr *
 DynamicReplacementAttr::create(AstContext &Ctx, DeclName name,
                                LazyMemberLoader *Resolver, uint64_t Data) {
-   return new (Ctx) DynamicReplacementAttr(name, Resolver, Data);
+   return new(Ctx) DynamicReplacementAttr(name, Resolver, Data);
 }
 
 SourceLoc DynamicReplacementAttr::getLParenLoc() const {
@@ -1065,7 +1086,7 @@ AvailableAttr::createPlatformAgnostic(AstContext &C,
    if (Kind == PlatformAgnosticAvailabilityKind::SwiftVersionSpecific) {
       assert(!Obsoleted.empty());
    }
-   return new (C) AvailableAttr(
+   return new(C) AvailableAttr(
       SourceLoc(), SourceRange(), PlatformKind::none, Message, Rename,
       NoVersion, SourceRange(),
       NoVersion, SourceRange(),
@@ -1079,8 +1100,7 @@ bool AvailableAttr::isActivePlatform(const AstContext &ctx) const {
 
 bool AvailableAttr::isLanguageVersionSpecific() const {
    if (PlatformAgnostic ==
-       PlatformAgnosticAvailabilityKind::SwiftVersionSpecific)
-   {
+       PlatformAgnosticAvailabilityKind::SwiftVersionSpecific) {
       assert(Platform == PlatformKind::none &&
              (Introduced.hasValue() ||
               Deprecated.hasValue() ||
@@ -1092,8 +1112,7 @@ bool AvailableAttr::isLanguageVersionSpecific() const {
 
 bool AvailableAttr::isPackageDescriptionVersionSpecific() const {
    if (PlatformAgnostic ==
-       PlatformAgnosticAvailabilityKind::PackageDescriptionVersionSpecific)
-   {
+       PlatformAgnosticAvailabilityKind::PackageDescriptionVersionSpecific) {
       assert(Platform == PlatformKind::none &&
              (Introduced.hasValue() ||
               Deprecated.hasValue() ||
@@ -1217,8 +1236,8 @@ SpecializeAttr *SpecializeAttr::create(AstContext &Ctx, SourceLoc atLoc,
                                        bool exported,
                                        SpecializationKind kind,
                                        GenericSignature specializedSignature) {
-   return new (Ctx) SpecializeAttr(atLoc, range, clause, exported, kind,
-                                   specializedSignature);
+   return new(Ctx) SpecializeAttr(atLoc, range, clause, exported, kind,
+                                  specializedSignature);
 }
 
 DifferentiableAttr::DifferentiableAttr(AstContext &context, bool implicit,
@@ -1258,9 +1277,9 @@ DifferentiableAttr::create(AstContext &context, bool implicit,
                            TrailingWhereClause *clause) {
    unsigned size = totalSizeToAlloc<ParsedAutoDiffParameter>(parameters.size());
    void *mem = context.Allocate(size, alignof(DifferentiableAttr));
-   return new (mem) DifferentiableAttr(context, implicit, atLoc, baseRange,
-                                       linear, parameters, std::move(jvp),
-                                       std::move(vjp), clause);
+   return new(mem) DifferentiableAttr(context, implicit, atLoc, baseRange,
+                                      linear, parameters, std::move(jvp),
+                                      std::move(vjp), clause);
 }
 
 DifferentiableAttr *
@@ -1272,9 +1291,9 @@ DifferentiableAttr::create(AstContext &context, bool implicit,
                            GenericSignature derivativeGenSig) {
    void *mem = context.Allocate(sizeof(DifferentiableAttr),
                                 alignof(DifferentiableAttr));
-   return new (mem) DifferentiableAttr(context, implicit, atLoc, baseRange,
-                                       linear, indices, std::move(jvp),
-                                       std::move(vjp), derivativeGenSig);
+   return new(mem) DifferentiableAttr(context, implicit, atLoc, baseRange,
+                                      linear, indices, std::move(jvp),
+                                      std::move(vjp), derivativeGenSig);
 }
 
 void DifferentiableAttr::setJVPFunction(FuncDecl *decl) {
@@ -1323,8 +1342,8 @@ ImplementsAttr *ImplementsAttr::create(AstContext &Ctx, SourceLoc atLoc,
                                        DeclName MemberName,
                                        DeclNameLoc MemberNameLoc) {
    void *mem = Ctx.Allocate(sizeof(ImplementsAttr), alignof(ImplementsAttr));
-   return new (mem) ImplementsAttr(atLoc, range, InterfaceType,
-                                   MemberName, MemberNameLoc);
+   return new(mem) ImplementsAttr(atLoc, range, InterfaceType,
+                                  MemberName, MemberNameLoc);
 }
 
 TypeLoc ImplementsAttr::getInterfaceType() const {
@@ -1374,11 +1393,13 @@ CustomAttr *CustomAttr::create(AstContext &ctx, SourceLoc atLoc, TypeLoc type,
    size_t size = totalSizeToAlloc(argLabels, argLabelLocs,
       /*hasTrailingClosure=*/false);
    void *mem = ctx.Allocate(size, alignof(CustomAttr));
-   return new (mem) CustomAttr(atLoc, range, type, initContext, arg, argLabels,
-                               argLabelLocs, implicit);
+   return new(mem) CustomAttr(atLoc, range, type, initContext, arg, argLabels,
+                              argLabelLocs, implicit);
 }
 
 void simple_display(llvm::raw_ostream &out, const DeclAttribute *attr) {
    if (attr)
       attr->print(out);
 }
+
+} // polar::ast

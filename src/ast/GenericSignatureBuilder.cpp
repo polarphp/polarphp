@@ -3929,10 +3929,10 @@ ConstraintResult GenericSignatureBuilder::expandConformanceRequirement(
                                                                nullptr);
                                                 return false;
                                              });
-
+   /// @todo
    // Remaining logic is not relevant in ObjC protocol cases.
-   if (proto->isObjC())
-      return ConstraintResult::Resolved;
+//   if (proto->isObjC())
+//      return ConstraintResult::Resolved;
 
    // Collect all of the inherited associated types and typealiases in the
    // inherited protocols (recursively).
@@ -4299,11 +4299,17 @@ bool GenericSignatureBuilder::updateSuperclass(
       auto layoutReqSource =
          source.getSource(*this,
                           type.getDependentType(*this))->viaDerived(*this);
+      /// @todo
+//      addLayoutRequirementDirect(type,
+//                                 LayoutConstraint::getLayoutConstraint(
+//                                    superclass->getClassOrBoundGenericClass()->isObjC()
+//                                    ? LayoutConstraintKind::Class
+//                                    : LayoutConstraintKind::NativeClass,
+//                                    getAstContext()),
+//                                 layoutReqSource);
       addLayoutRequirementDirect(type,
                                  LayoutConstraint::getLayoutConstraint(
-                                    superclass->getClassOrBoundGenericClass()->isObjC()
-                                    ? LayoutConstraintKind::Class
-                                    : LayoutConstraintKind::NativeClass,
+                                    LayoutConstraintKind::NativeClass,
                                     getAstContext()),
                                  layoutReqSource);
       return true;

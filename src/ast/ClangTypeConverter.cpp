@@ -558,13 +558,13 @@ clang::QualType ClangTypeConverter::visitEnumType(EnumType *type) {
    // know what to do below, but we can just convert to 'void'.
    if (type->isUninhabited())
       return convert(Context.TheEmptyTupleType);
-
-   if (!type->getDecl()->isObjC())
-      // Can't translate something not marked with @objc
-      return clang::QualType();
+///@todo
+//   if (!type->getDecl()->isObjC())
+   // Can't translate something not marked with @objc
+   return clang::QualType();
 
    // @objc enums lower to their raw types.
-   return convert(type->getDecl()->getRawType());
+//   return convert(type->getDecl()->getRawType());
 }
 
 clang::QualType ClangTypeConverter::visitFunctionType(FunctionType *type) {

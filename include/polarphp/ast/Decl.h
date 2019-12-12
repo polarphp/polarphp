@@ -2649,10 +2649,10 @@ public:
    /// This can be true even if there is no 'objc' attribute on the declaration.
    /// In that case it was inferred by the type checker and set with a call to
    /// markAsObjC().
-   bool isObjC() const;
+//   bool isObjC() const;
 
    /// Note whether this declaration is known to be exposed to Objective-C.
-   void setIsObjC(bool Value);
+//   void setIsObjC(bool Value);
 
    /// Is this declaration 'final'?
    bool isFinal() const;
@@ -2660,12 +2660,12 @@ public:
    /// Is this declaration marked with 'dynamic'?
    bool isDynamic() const;
 
-   bool isObjCDynamic() const {
-      return isObjC() && isDynamic();
-   }
+//   bool isObjCDynamic() const {
+//      return isObjC() && isDynamic();
+//   }
 
    bool isNativeDynamic() const {
-      return !isObjC() && isDynamic();
+      return /*!isObjC() && */isDynamic();
    }
 
    /// Set whether this type is 'dynamic' or not.
@@ -4056,9 +4056,9 @@ public:
    /// Returns true if the decl uses the Objective-C generics model.
    ///
    /// This is true of imported Objective-C classes.
-   bool usesObjCGenericsModel() const {
-      return hasClangNode() && isGenericContext() && isObjC();
-   }
+//   bool usesObjCGenericsModel() const {
+//      return hasClangNode() && isGenericContext() && isObjC();
+//   }
 
    /// True if the class is known to be implemented in Swift.
    bool hasKnownSwiftImplementation() const {

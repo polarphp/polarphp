@@ -5318,34 +5318,28 @@ public:
    }
 
    Expr *getParsedRoot() const {
-      assert(!isObjC() && "cannot get parsed root of ObjC keypath");
       return ParsedRoot;
    }
    void setParsedRoot(Expr *root) {
-      assert(!isObjC() && "cannot get parsed root of ObjC keypath");
       ParsedRoot = root;
    }
 
    Expr *getParsedPath() const {
-      assert(!isObjC() && "cannot get parsed path of ObjC keypath");
       return ParsedPath;
    }
    void setParsedPath(Expr *path) {
-      assert(!isObjC() && "cannot set parsed path of ObjC keypath");
       ParsedPath = path;
    }
 
    TypeRepr *getRootType() const {
-      assert(!isObjC() && "cannot get root type of ObjC keypath");
       return RootType;
    }
    void setRootType(TypeRepr *rootType) {
-      assert(!isObjC() && "cannot set root type of ObjC keypath");
       RootType = rootType;
    }
 
-   /// True if this is an ObjC key path expression.
-   bool isObjC() const { return Bits.KeyPathExpr.IsObjC; }
+//   /// True if this is an ObjC key path expression.
+//   bool isObjC() const { return Bits.KeyPathExpr.IsObjC; }
 
    static bool classof(const Expr *E) {
       return E->getKind() == ExprKind::KeyPath;

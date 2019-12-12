@@ -1889,14 +1889,16 @@ SourceRange IfConfigDecl::getSourceRange() const {
 }
 
 static bool isPolymorphic(const AbstractStorageDecl *storage) {
-   if (storage->isObjCDynamic())
-      return true;
+///@todo
+//   if (storage->isObjCDynamic())
+//      return true;
 
 
    // Imported declarations behave like they are dynamic, even if they're
    // not marked as such explicitly.
-   if (storage->isObjC() && storage->hasClangNode())
-      return true;
+   /// @todo
+//   if (storage->isObjC() && storage->hasClangNode())
+//      return true;
 
    if (auto *classDecl = dyn_cast<ClassDecl>(storage->getDeclContext())) {
       if (storage->isFinal() || classDecl->isFinal())
@@ -3454,8 +3456,9 @@ bool NominalTypeDecl::isFormallyResilient() const {
       return false;
 
    // @objc enums and Interfaces always have a fixed layout.
-   if ((isa<EnumDecl>(this) || isa<InterfaceDecl>(this)) && isObjC())
-      return false;
+   /// @todo
+//   if ((isa<EnumDecl>(this) || isa<InterfaceDecl>(this)) && isObjC())
+//      return false;
 
    // Otherwise, the declaration behaves as if it was accessed via indirect
    // "resilient" interfaces, even if the module is not built with resilience.
@@ -4420,8 +4423,9 @@ bool EnumDecl::isEffectivelyExhaustive(ModuleDecl *M,
    // Generated Swift code commits to handling garbage values of @objc enums,
    // whether imported or not, to deal with C's loose rules around enums.
    // This covers both frozen and non-frozen @objc enums.
-   if (isObjC())
-      return false;
+   /// @todo
+//   if (isObjC())
+//      return false;
 
    // Otherwise, the only non-exhaustive cases are those that don't have a fixed
    // layout.
@@ -4493,8 +4497,9 @@ InterfaceDecl::getAssociatedTypeMembers() const {
       return result;
 
    // Deserialized @objc Interfaces never have associated types.
-   if (!getParentSourceFile() && isObjC())
-      return result;
+   // @todo
+//   if (!getParentSourceFile() && isObjC())
+//      return result;
 
    // Find the associated type declarations.
    for (auto member : getMembers()) {
@@ -7608,25 +7613,27 @@ bool FuncDecl::isPotentialIBActionTarget() const {
           !isa<AccessorDecl>(this);
 }
 
-// @todo
-//Type TypeBase::getPolarphpNewtypeUnderlyingType() {
-//   auto structDecl = getStructOrBoundGenericStruct();
-//   if (!structDecl)
-//      return {};
-//
-//   // Make sure the clang node has swift_newtype attribute
-//   auto clangNode = structDecl->getClangDecl();
+Type TypeBase::getPolarphpNewtypeUnderlyingType() {
+   auto structDecl = getStructOrBoundGenericStruct();
+   if (!structDecl)
+      return {};
+
+   // Make sure the clang node has swift_newtype attribute
+   auto clangNode = structDecl->getClangDecl();
+   /// @todo
+   if (!clangNode)
+      return {};
 //   if (!clangNode || !clangNode->hasAttr<clang::SwiftNewtypeAttr>())
 //      return {};
-//
-//   // Underlying type is the type of rawValue
-//   for (auto member : structDecl->getMembers())
-//      if (auto varDecl = dyn_cast<VarDecl>(member))
-//         if (varDecl->getName() == getAstContext().Id_rawValue)
-//            return varDecl->getType();
-//
-//   return {};
-//}
+
+   // Underlying type is the type of rawValue
+   for (auto member : structDecl->getMembers())
+      if (auto varDecl = dyn_cast<VarDecl>(member))
+         if (varDecl->getName() == getAstContext().Id_rawValue)
+            return varDecl->getType();
+
+   return {};
+}
 
 Type ClassDecl::getSuperclass() const {
    AstContext &ctx = getAstContext();

@@ -143,8 +143,11 @@ bool TypeBase::isUninhabited() {
       if (auto enumDecl = dyn_cast<EnumDecl>(nominalDecl))
          // Objective-C enums may be allowed to hold any value representable by
          // the underlying type, but only if they come from clang.
-         if (enumDecl->getAllElements().empty() &&
-             !(enumDecl->isObjC() && enumDecl->hasClangNode()))
+         // @todo
+//         if (enumDecl->getAllElements().empty() &&
+//             !(enumDecl->isObjC() && enumDecl->hasClangNode()))
+//            return true;
+         if (enumDecl->getAllElements().empty())
             return true;
    return false;
 }
@@ -272,7 +275,9 @@ ExistentialLayout::ExistentialLayout(InterfaceType *type) {
    auto *protoDecl = type->getDecl();
 
    hasExplicitAnyObject = false;
-   containsNonObjCInterface = !protoDecl->isObjC();
+//   containsNonObjCInterface = !protoDecl->isObjC();
+/// @todo
+   containsNonObjCInterface = true;
 
    singleInterface = type;
 }
@@ -292,7 +297,9 @@ ExistentialLayout::ExistentialLayout(InterfaceCompositionType *type) {
 
    for (auto member : members) {
       auto *protoDecl = member->castTo<InterfaceType>()->getDecl();
-      containsNonObjCInterface |= !protoDecl->isObjC();
+      /// @todo
+      containsNonObjCInterface |= true;
+//      containsNonObjCInterface |= !protoDecl->isObjC();
    }
 
    singleInterface = nullptr;
@@ -2058,8 +2065,9 @@ getObjCObjectRepresentable(Type type, const DeclContext *dc) {
 
    // @objc classes.
    if (auto classDecl = type->getClassOrBoundGenericClass()) {
-      if (classDecl->isObjC())
-         return ForeignRepresentableKind::Object;
+   /// @todo
+//      if (classDecl->isObjC())
+//         return ForeignRepresentableKind::Object;
    }
 
    // Objective-C existential types are trivially representable if
@@ -2234,7 +2242,9 @@ getForeignRepresentable(Type type, ForeignLanguage language,
 
    // If the type was imported from Clang, check whether it is
    // representable in the requested language.
-   if (nominal->hasClangNode() || nominal->isObjC()) {
+   /// @todo
+//   if (nominal->hasClangNode() || nominal->isObjC()) {
+   if (nominal->hasClangNode()) {
       switch (language) {
          case ForeignLanguage::C:
             // Imported classes and protocols are not representable in C.

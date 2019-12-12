@@ -43,13 +43,14 @@
 #include <functional>
 #include <type_traits>
 
-using namespace polar::ast;
+namespace polar::ast {
 using namespace llvm;
 
 namespace {
 
 template<typename T>
-struct AstNodeBase {};
+struct AstNodeBase {
+};
 
 #define EXPR(ID, PARENT) \
     template<> \
@@ -57,6 +58,7 @@ struct AstNodeBase {};
       typedef PARENT BaseTy; \
     };
 #define ABSTRACT_EXPR(ID, PARENT) EXPR(ID, PARENT)
+
 #include "polarphp/ast/ExprNodesDef.h"
 
 #define STMT(ID, PARENT) \
@@ -81,7 +83,7 @@ struct AstNodeBase {};
     };
 #include "polarphp/ast/PatternNodesDef.h"
 
-template <typename Ty>
+template<typename Ty>
 struct is_apply_expr
    : public std::integral_constant<
       bool,
@@ -90,28 +92,30 @@ struct is_apply_expr
       std::is_same<Ty, PostfixUnaryExpr>::value ||
       std::is_same<Ty, BinaryExpr>::value ||
       std::is_same<Ty, DotSyntaxCallExpr>::value ||
-      std::is_same<Ty, ConstructorRefCallExpr>::value> {};
+      std::is_same<Ty, ConstructorRefCallExpr>::value> {
+};
 
-template <typename Ty>
+template<typename Ty>
 struct is_subscript_expr
    : public std::integral_constant<
       bool, std::is_same<Ty, SubscriptExpr>::value ||
-            std::is_same<Ty, DynamicSubscriptExpr>::value> {};
+            std::is_same<Ty, DynamicSubscriptExpr>::value> {
+};
 
-template <typename Ty>
+template<typename Ty>
 struct is_autoclosure_expr
    : public std::integral_constant<bool,
       std::is_same<Ty, AutoClosureExpr>::value> {
 };
 
-template <typename Ty>
+template<typename Ty>
 struct is_apply_subscript_or_autoclosure_expr
    : public std::integral_constant<bool, is_apply_expr<Ty>::value ||
                                          is_subscript_expr<Ty>::value ||
                                          is_autoclosure_expr<Ty>::value> {
 };
 
-template <typename Verifier, typename Kind>
+template<typename Verifier, typename Kind>
 std::pair<bool, Expr *> dispatchVisitPreExprHelper(
    Verifier &V,
    typename std::enable_if<
@@ -127,7 +131,7 @@ std::pair<bool, Expr *> dispatchVisitPreExprHelper(
    return {false, node};
 }
 
-template <typename Verifier, typename Kind>
+template<typename Verifier, typename Kind>
 std::pair<bool, Expr *> dispatchVisitPreExprHelper(
    Verifier &V,
    typename std::enable_if<
@@ -143,7 +147,7 @@ std::pair<bool, Expr *> dispatchVisitPreExprHelper(
    return {false, node};
 }
 
-template <typename Verifier, typename Kind>
+template<typename Verifier, typename Kind>
 std::pair<bool, Expr *> dispatchVisitPreExprHelper(
    Verifier &V,
    typename std::enable_if<
@@ -159,7 +163,7 @@ std::pair<bool, Expr *> dispatchVisitPreExprHelper(
    return {false, node};
 }
 
-template <typename Verifier, typename Kind>
+template<typename Verifier, typename Kind>
 std::pair<bool, Expr *> dispatchVisitPreExprHelper(
    Verifier &V, typename std::enable_if<
    !is_apply_subscript_or_autoclosure_expr<
@@ -175,7 +179,8 @@ std::pair<bool, Expr *> dispatchVisitPreExprHelper(
 namespace {
 // Retrieve the "overridden" declaration of this declaration, but only if
 // it's already been computed.
-template <typename T> T *getOverriddenDeclIfAvailable(T *decl) {
+template<typename T>
+T *getOverriddenDeclIfAvailable(T *decl) {
    if (!decl->overriddenDeclsComputed())
       return nullptr;
 
@@ -245,6 +250,7 @@ class Verifier : public AstWalker {
 public:
    Verifier(ModuleDecl *M, DeclContext *DC)
       : Verifier(PointerUnion<ModuleDecl *, SourceFile *>(M), DC) {}
+
    Verifier(SourceFile &SF, DeclContext *DC) : Verifier(&SF, DC) {}
 
    static Verifier forDecl(const Decl *D) {
@@ -267,7 +273,9 @@ public:
                 M.get<SourceFile*>()->ASTStage < SourceFile::TypeChecked) && \
                #ID "in wrong phase");\
         DISPATCH(ID);
+
 #include "polarphp/ast/ExprNodesDef.h"
+
 #undef DISPATCH
       }
       llvm_unreachable("not all cases handled!");
@@ -285,7 +293,9 @@ public:
                 M.get<SourceFile*>()->ASTStage < SourceFile::TypeChecked) && \
                #ID "in wrong phase");\
         DISPATCH(ID);
+
 #include "polarphp/ast/ExprNodesDef.h"
+
 #undef DISPATCH
       }
       llvm_unreachable("not all cases handled!");
@@ -297,7 +307,9 @@ public:
 #define STMT(ID, PARENT) \
       case StmtKind::ID: \
         DISPATCH(ID);
+
 #include "polarphp/ast/StmtNodesDef.h"
+
 #undef DISPATCH
       }
       llvm_unreachable("not all cases handled!");
@@ -309,20 +321,24 @@ public:
 #define STMT(ID, PARENT) \
       case StmtKind::ID: \
         DISPATCH(ID);
+
 #include "polarphp/ast/StmtNodesDef.h"
+
 #undef DISPATCH
       }
       llvm_unreachable("not all cases handled!");
    }
 
-   std::pair<bool, Pattern*> walkToPatternPre(Pattern *P) override {
+   std::pair<bool, Pattern *> walkToPatternPre(Pattern *P) override {
       switch (P->getKind()) {
 #define DISPATCH(ID) \
         return dispatchVisitPrePattern(static_cast<ID##Pattern*>(P))
 #define PATTERN(ID, PARENT) \
       case PatternKind::ID: \
         DISPATCH(ID);
+
 #include "polarphp/ast/PatternNodesDef.h"
+
 #undef DISPATCH
       }
       llvm_unreachable("not all cases handled!");
@@ -335,7 +351,9 @@ public:
 #define PATTERN(ID, PARENT) \
       case PatternKind::ID: \
         DISPATCH(ID);
+
 #include "polarphp/ast/PatternNodesDef.h"
+
 #undef DISPATCH
       }
       llvm_unreachable("not all cases handled!");
@@ -347,7 +365,9 @@ public:
 #define DECL(ID, PARENT) \
       case DeclKind::ID: \
         DISPATCH(ID);
+
 #include "polarphp/ast/DeclNodesDef.h"
+
 #undef DISPATCH
       }
       llvm_unreachable("not all cases handled!");
@@ -359,7 +379,9 @@ public:
 #define DECL(ID, PARENT) \
       case DeclKind::ID: \
         DISPATCH(ID);
+
 #include "polarphp/ast/DeclNodesDef.h"
+
 #undef DISPATCH
       }
 
@@ -369,7 +391,8 @@ public:
    /// Helper template for dispatching pre-visitation.
    /// If we're visiting in pre-order, don't validate the node yet;
    /// just check whether we should stop further descent.
-   template <class T> bool dispatchVisitPre(T node) {
+   template<class T>
+   bool dispatchVisitPre(T node) {
       if (shouldVerify(node))
          return true;
       cleanup(node);
@@ -380,33 +403,36 @@ public:
    ///
    /// If we're visiting in pre-order, don't validate the node yet;
    /// just check whether we should stop further descent.
-   template <class T> std::pair<bool, Expr *> dispatchVisitPreExpr(T node) {
+   template<class T>
+   std::pair<bool, Expr *> dispatchVisitPreExpr(T node) {
       return dispatchVisitPreExprHelper<Verifier, T>(*this, node);
    }
 
    /// Helper template for dispatching pre-visitation.
    /// If we're visiting in pre-order, don't validate the node yet;
    /// just check whether we should stop further descent.
-   template <class T> std::pair<bool, Stmt *> dispatchVisitPreStmt(T node) {
+   template<class T>
+   std::pair<bool, Stmt *> dispatchVisitPreStmt(T node) {
       if (shouldVerify(node))
-         return { true, node };
+         return {true, node};
       cleanup(node);
-      return { false, node };
+      return {false, node};
    }
 
    /// Helper template for dispatching pre-visitation.
    /// If we're visiting in pre-order, don't validate the node yet;
    /// just check whether we should stop further descent.
-   template <class T>
+   template<class T>
    std::pair<bool, Pattern *> dispatchVisitPrePattern(T node) {
       if (shouldVerify(node))
-         return { true, node };
+         return {true, node};
       cleanup(node);
-      return { false, node };
+      return {false, node};
    }
 
    /// Helper template for dispatching post-visitation.
-   template <class T> T dispatchVisitPost(T node) {
+   template<class T>
+   T dispatchVisitPost(T node) {
       // Verify source ranges if the AST node was parsed from source.
       auto *SF = M.dyn_cast<SourceFile *>();
       if (SF) {
@@ -443,8 +469,11 @@ public:
 
    // Default cases for whether we should verify within the given subtree.
    bool shouldVerify(Expr *E) { return true; }
+
    bool shouldVerify(Stmt *S) { return true; }
+
    bool shouldVerify(Pattern *S) { return true; }
+
    bool shouldVerify(Decl *S) { return true; }
 
    bool shouldVerify(TypeAliasDecl *typealias) {
@@ -469,8 +498,11 @@ public:
       }
       return true;
    }
+
    bool shouldVerifyChecked(Stmt *S) { return true; }
+
    bool shouldVerifyChecked(Pattern *S) { return S->hasType(); }
+
    bool shouldVerifyChecked(Decl *S) { return true; }
 
    // Only verify functions if they have bodies we can safely walk.
@@ -498,15 +530,21 @@ public:
    }
 
    // Default cases for cleaning up as we exit a node.
-   void cleanup(Expr *E) { }
-   void cleanup(Stmt *S) { }
-   void cleanup(Pattern *P) { }
-   void cleanup(Decl *D) { }
+   void cleanup(Expr *E) {}
+
+   void cleanup(Stmt *S) {}
+
+   void cleanup(Pattern *P) {}
+
+   void cleanup(Decl *D) {}
 
    // Base cases for the various stages of verification.
    void verifyParsed(Expr *E) {}
+
    void verifyParsed(Stmt *S) {}
+
    void verifyParsed(Pattern *P) {}
+
    void verifyParsed(Decl *D) {
       PrettyStackTraceDecl debugStack("verifying ", D);
       if (!D->getDeclContext()) {
@@ -522,14 +560,18 @@ public:
          }
       }
    }
+
    template<typename T>
    void verifyParsedBase(T ASTNode) {
       verifyParsed(cast<typename AstNodeBase<T>::BaseTy>(ASTNode));
    }
 
    void verifyBound(Expr *E) {}
+
    void verifyBound(Stmt *S) {}
+
    void verifyBound(Pattern *P) {}
+
    void verifyBound(Decl *D) {}
 
    /// @{
@@ -539,11 +581,14 @@ public:
       if (E->getType())
          verifyChecked(E->getType());
    }
+
    void verifyCheckedAlways(Stmt *S) {}
+
    void verifyCheckedAlways(Pattern *P) {
       if (P->hasType() && !P->getDelayedInterfaceType())
          verifyChecked(P->getType());
    }
+
    void verifyCheckedAlways(Decl *D) {
    }
 
@@ -571,8 +616,11 @@ public:
          return;
       }
    }
+
    void verifyChecked(Stmt *S) {}
-   void verifyChecked(Pattern *P) { }
+
+   void verifyChecked(Pattern *P) {}
+
    void verifyChecked(Decl *D) {}
 
    void verifyChecked(Type type) {
@@ -703,17 +751,20 @@ public:
       Scopes.push_back(scope);
       Generics.push_back(scope);
    }
+
    void pushScope(BraceStmt *scope) {
       Scopes.push_back(scope);
    }
+
    void popScope(DeclContext *scope) {
-      assert(Scopes.back().get<DeclContext*>() == scope);
-      assert(Generics.back().get<DeclContext*>() == scope);
+      assert(Scopes.back().get<DeclContext *>() == scope);
+      assert(Generics.back().get<DeclContext *>() == scope);
       Scopes.pop_back();
       Generics.pop_back();
    }
+
    void popScope(BraceStmt *scope) {
-      assert(Scopes.back().get<BraceStmt*>() == scope);
+      assert(Scopes.back().get<BraceStmt *>() == scope);
       Scopes.pop_back();
    }
 
@@ -721,6 +772,7 @@ public:
       pushScope(functionScope);
       Functions.push_back(functionScope);
    }
+
    void popFunction(DeclContext *functionScope) {
       assert(Functions.back() == functionScope);
       Functions.pop_back();
@@ -749,12 +801,19 @@ public:
     }
 
    FUNCTION_LIKE(AbstractClosureExpr)
+
    FUNCTION_LIKE(ConstructorDecl)
+
    FUNCTION_LIKE(DestructorDecl)
+
    FUNCTION_LIKE(FuncDecl)
+
    FUNCTION_LIKE(EnumElementDecl)
+
    FUNCTION_LIKE(SubscriptDecl)
+
    TYPE_LIKE(NominalTypeDecl)
+
    TYPE_LIKE(ExtensionDecl)
 
 #undef TYPE_LIKE
@@ -822,7 +881,7 @@ public:
 
       assert(!OpaqueValues.count(expr->getOpaqueValue()));
       OpaqueValues[expr->getOpaqueValue()] = 0;
-      assert(OpenedExistentialArchetypes.count(expr->getOpenedArchetype())==0);
+      assert(OpenedExistentialArchetypes.count(expr->getOpenedArchetype()) == 0);
       OpenedExistentialArchetypes.insert(expr->getOpenedArchetype());
       return true;
    }
@@ -835,7 +894,7 @@ public:
 
       assert(OpaqueValues.count(expr->getOpaqueValue()));
       OpaqueValues.erase(expr->getOpaqueValue());
-      assert(OpenedExistentialArchetypes.count(expr->getOpenedArchetype())==1);
+      assert(OpenedExistentialArchetypes.count(expr->getOpenedArchetype()) == 1);
       OpenedExistentialArchetypes.erase(expr->getOpenedArchetype());
    }
 
@@ -881,6 +940,7 @@ public:
       OptionalEvaluations.push_back(expr);
       return true;
    }
+
    void cleanup(OptionalEvaluationExpr *expr) {
       assert(OptionalEvaluations.back() == expr);
       OptionalEvaluations.pop_back();
@@ -897,6 +957,7 @@ public:
          OpaqueValues[valueConversion.OrigValue] = 0;
       return true;
    }
+
    void cleanup(CollectionUpcastConversionExpr *expr) {
       if (auto keyConversion = expr->getKeyConversion())
          OpaqueValues.erase(keyConversion.OrigValue);
@@ -1023,10 +1084,11 @@ public:
 
       verifyCheckedBase(S);
    }
+
    void verifyChecked(DeferStmt *S) {
       auto FT = S->getTempDecl()->getInterfaceType()->castTo<AnyFunctionType>();
       assert(FT->isNoEscape() && "Defer statements must not escape");
-      (void)FT;
+      (void) FT;
       verifyCheckedBase(S);
    }
 
@@ -1052,7 +1114,8 @@ public:
 
    void checkConditionElement(const StmtConditionElement &elt) {
       switch (elt.getKind()) {
-         case StmtConditionElement::CK_Availability: break;
+         case StmtConditionElement::CK_Availability:
+            break;
          case StmtConditionElement::CK_Boolean: {
             auto *E = elt.getBoolean();
             if (shouldVerifyChecked(E))
@@ -1196,7 +1259,7 @@ public:
    void verifyChecked(AbstractClosureExpr *E) {
       PrettyStackTraceExpr debugStack(Ctx, "verifying closure", E);
 
-      assert(Scopes.back().get<DeclContext*>() == E);
+      assert(Scopes.back().get<DeclContext *>() == E);
       assert(E->getParent()->isLocalContext() &&
              "closure expression was not in local context!");
 
@@ -1204,7 +1267,7 @@ public:
       auto &discriminatorSet = getClosureDiscriminators(E);
       unsigned discriminator = E->getDiscriminator();
       if (discriminator >= discriminatorSet.size()) {
-         discriminatorSet.resize(discriminator+1);
+         discriminatorSet.resize(discriminator + 1);
          discriminatorSet.set(discriminator);
       } else if (discriminatorSet.test(discriminator)) {
          Out << "a closure must have a unique discriminator in its context\n";
@@ -1219,10 +1282,10 @@ public:
       // then the closure should be parented by an Initializer.  Otherwise,
       // it should be parented by the innermost function.
       auto enclosingScope = Scopes[Scopes.size() - 2];
-      auto enclosingDC = enclosingScope.dyn_cast<DeclContext*>();
+      auto enclosingDC = enclosingScope.dyn_cast<DeclContext *>();
       if (enclosingDC && !isa<AbstractClosureExpr>(enclosingDC)
           && !(isa<SourceFile>(enclosingDC)
-               && cast<SourceFile>(enclosingDC)->Kind == SourceFileKind::REPL)){
+               && cast<SourceFile>(enclosingDC)->Kind == SourceFileKind::REPL)) {
          auto parentDC = E->getParent();
          if (!isa<Initializer>(parentDC)) {
             Out << "a closure in non-local context should be parented "
@@ -2015,8 +2078,7 @@ public:
       if (Ctx.LangOpts.isPolarphpVersionAtLeast(5)) {
          checkSameType(E->getType(), E->getSubExpr()->getType(),
                        "OptionalTryExpr and sub-expression");
-      }
-      else {
+      } else {
          Type unwrappedType = E->getType()->getOptionalObjectType();
          if (!unwrappedType) {
             Out << "OptionalTryExpr result type is not optional\n";
@@ -2573,7 +2635,7 @@ public:
       }
    }
 
-   void verifyChecked(SubstitutionMap substitutions){
+   void verifyChecked(SubstitutionMap substitutions) {
       // FIXME: Check replacement types without forcing anything.
    }
 
@@ -2668,8 +2730,7 @@ public:
          if (auto req = dyn_cast<ValueDecl>(member)) {
             if (!normal->hasWitness(req)) {
                if ((req->getAttrs().isUnavailable(Ctx) ||
-                    req->getAttrs().hasAttribute<OptionalAttr>()) &&
-                   proto->isObjC()) {
+                    req->getAttrs().hasAttribute<OptionalAttr>()) /*&& proto->isObjC()*/) {
                   continue;
                }
 
@@ -2701,7 +2762,7 @@ public:
       }
 
       // Make sure we have the right signature conformances.
-      if (!normal->isInvalid()){
+      if (!normal->isInvalid()) {
          auto conformances = normal->getSignatureConformances();
          unsigned idx = 0;
          for (const auto &req : proto->getRequirementSignature()) {
@@ -2719,7 +2780,7 @@ public:
             if (reqProto != conformances[idx].getRequirement()) {
                Out << "error: wrong protocol in signature conformances: have "
                    << conformances[idx].getRequirement()->getName().str()
-                   << ", expected " << reqProto->getName().str()<< "\n";
+                   << ", expected " << reqProto->getName().str() << "\n";
                normal->dump(Out);
                abort();
             }
@@ -2839,7 +2900,7 @@ public:
       // All of the parameter names should match.
       if (!isa<DestructorDecl>(AFD)) { // Destructor has no non-self params.
          auto paramNames = AFD->getFullName().getArgumentNames();
-         bool checkParamNames = (bool)AFD->getFullName();
+         bool checkParamNames = (bool) AFD->getFullName();
          auto *firstParams = AFD->getParameters();
 
          if (checkParamNames &&
@@ -2875,11 +2936,11 @@ public:
 
    void verifyChecked(InterfaceDecl *PD) {
       PrettyStackTraceDecl debugStack("verifying InterfaceDecl", PD);
-
-      if (PD->isObjC() && !PD->requiresClass()) {
-         Out << "@objc protocols should be class protocols as well";
-         abort();
-      }
+      /// @todo
+//      if (PD->isObjC() && !PD->requiresClass()) {
+//         Out << "@objc protocols should be class protocols as well";
+//         abort();
+//      }
       verifyCheckedBase(PD);
    }
 
@@ -3000,17 +3061,18 @@ public:
       }
 
       // Throwing @objc methods must have a foreign error convention.
-      if (AFD->isObjC() &&
-          static_cast<bool>(AFD->getForeignErrorConvention())
-          != AFD->hasThrows()) {
-         if (AFD->hasThrows())
-            Out << "@objc method throws but does not have a foreign error "
-                << "convention";
-         else
-            Out << "@objc method has a foreign error convention but does not "
-                << "throw";
-         abort();
-      }
+      /// @todo
+//      if (AFD->isObjC() &&
+//          static_cast<bool>(AFD->getForeignErrorConvention())
+//          != AFD->hasThrows()) {
+//         if (AFD->hasThrows())
+//            Out << "@objc method throws but does not have a foreign error "
+//                << "convention";
+//         else
+//            Out << "@objc method has a foreign error convention but does not "
+//                << "throw";
+//         abort();
+//      }
 
       // If a decl has the Throws bit set, the ThrowsLoc should be valid,
       // and vice versa, unless the decl was imported, de-serialized, or
@@ -3036,7 +3098,7 @@ public:
       }
 
       if (AFD->getForeignErrorConvention()
-          && !AFD->isObjC() && !AFD->getAttrs().hasAttribute<CDeclAttr>()) {
+         /* && !AFD->isObjC()*/ && !AFD->getAttrs().hasAttribute<CDeclAttr>()) {
          Out << "foreign error convention on non-@objc, non-@_cdecl function\n";
          AFD->dump(Out);
          abort();
@@ -3145,10 +3207,11 @@ public:
             abort();
          }
          if (FD->isDynamic()) {
-            if (FD->isObjC() != storageDecl->isObjC()) {
-               Out << "Property and accessor do not match for '@objc'\n";
-               abort();
-            }
+            /// @todo
+//            if (FD->isObjC() != storageDecl->isObjC()) {
+//               Out << "Property and accessor do not match for '@objc'\n";
+//               abort();
+//            }
          }
       }
 
@@ -3404,7 +3467,7 @@ fail:
       // FIXME: Re-visit this to always do the check.
       if (!E->isImplicit())
          checkSourceRanges(E->getSourceRange(), Parent,
-                           [&]{ E->dump(Out); } );
+                           [&] { E->dump(Out); });
    }
 
    void checkSourceRanges(Stmt *S) {
@@ -3428,7 +3491,7 @@ fail:
          abort();
       }
       checkSourceRanges(S->getSourceRange(), Parent,
-                        [&]{ S->dump(Out); });
+                        [&] { S->dump(Out); });
    }
 
    void checkSourceRanges(IfConfigDecl *ICD) {
@@ -3514,7 +3577,7 @@ fail:
          abort();
       }
       checkSourceRanges(P->getSourceRange(), Parent,
-                        [&]{ P->print(Out); });
+                        [&] { P->print(Out); });
    }
 
    void assertValidRegion(Decl *D) {
@@ -3616,9 +3679,13 @@ fail:
    }
 
    void checkErrors(Expr *E) {}
+
    void checkErrors(Stmt *S) {}
+
    void checkErrors(Pattern *P) {}
+
    void checkErrors(Decl *D) {}
+
    void checkErrors(ValueDecl *D) {}
 };
 } // end anonymous namespace
@@ -3653,3 +3720,5 @@ void verify(Decl *D) {
    D->walk(V);
 #endif
 }
+
+} // polar::ast

@@ -85,7 +85,7 @@ void ModuleLoader::anchor() {}
 
 void ClangModuleLoader::anchor() {}
 
-llvm::StringRef getInterfaceName(KnownInterfaceKind kind) {
+llvm::StringRef get_interface_name(KnownInterfaceKind kind) {
    switch (kind) {
 #define INTERFACE_WITH_NAME(Id, Name) \
   case KnownInterfaceKind::Id: \
@@ -123,7 +123,7 @@ struct OverrideSignatureKey {
 
 namespace llvm {
 
-using namespace polar::ast;
+using polar::ast::OverrideSignatureKey;
 
 template<>
 struct DenseMapInfo<OverrideSignatureKey> {
@@ -875,7 +875,7 @@ InterfaceDecl *AstContext::getInterface(KnownInterfaceKind kind) const {
 
    if (!M)
       return nullptr;
-   M->lookupValue(getIdentifier(getInterfaceName(kind)),
+   M->lookupValue(getIdentifier(get_interface_name(kind)),
                   NLKind::UnqualifiedLookup, results);
 
    for (auto result : results) {

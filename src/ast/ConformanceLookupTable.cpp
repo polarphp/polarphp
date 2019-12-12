@@ -493,7 +493,7 @@ void ConformanceLookupTable::expandImpliedConformances(NominalTypeDecl *nominal,
       // known protocol _BridgedNSError.
       if (conformingInterface->isSpecificInterface(
          KnownInterfaceKind::Error) &&
-          isa<EnumDecl>(nominal) && nominal->isObjC() &&
+          isa<EnumDecl>(nominal) && /* nominal->isObjC() && */
           cast<EnumDecl>(nominal)->hasCases() &&
           cast<EnumDecl>(nominal)->hasOnlyCasesWithoutAssociatedValues()) {
          AstContext &ctx = nominal->getAstContext();
