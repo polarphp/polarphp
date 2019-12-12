@@ -15,7 +15,7 @@ polar_collect_files(
    OUTPUT_VAR POLAR_LLPARSER_SOURCES)
 polar_merge_list(POLAR_LLPARSER_SOURCES POLAR_HEADERS)
 
-polar_add_library(PolarLLParser SHARED
+polar_add_library(PolarLLParser
    ${POLAR_LLPARSER_SOURCES}
-   LINK_LIBS PolarUtils PolarGlobal PolarKernel
+   LINK_LIBS PolarBasic PolarUtils PolarGlobal PolarKernel
    clangAST clangBasic clangSema clangIndex)

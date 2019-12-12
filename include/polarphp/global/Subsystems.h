@@ -47,8 +47,9 @@ class UnifiedStatsReporter;
 class SourceManager;
 }
 
-namespace polar::parser {
+namespace polar::llparser {
 class Parser;
+class Token;
 }
 
 namespace polar::ast {
@@ -75,8 +76,6 @@ class PILModule;
 class PILParserTUState;
 class SyntaxParseActions;
 class SyntaxParsingCache;
-class Token;
-class TopLevelContext;
 class TypeChecker;
 struct TypeLoc;
 enum class SourceFileKind;
@@ -85,7 +84,8 @@ using polar::kernel::TypeCheckerOptions;
 using polar::basic::PrimarySpecificPaths;
 using polar::basic::UnifiedStatsReporter;
 using polar::basic::SourceManager;
-using polar::parser::Parser;
+using polar::llparser::Parser;
+using polar::llparser::Token;
 
 namespace Lowering {
 class TypeConverter;
@@ -354,8 +354,8 @@ public:
    ParserUnit(SourceManager &SM, SourceFileKind SFKind, unsigned BufferID,
               const LangOptions &LangOpts, const TypeCheckerOptions &TyOpts,
               StringRef ModuleName,
-              std::shared_ptr<SyntaxParseActions> spActions = nullptr,
-              SyntaxParsingCache *SyntaxCache = nullptr);
+              std::shared_ptr<SyntaxParseActions> spActions = nullptr
+              /* SyntaxParsingCache *SyntaxCache = nullptr*/);
    ParserUnit(SourceManager &SM, SourceFileKind SFKind, unsigned BufferID);
    ParserUnit(SourceManager &SM, SourceFileKind SFKind, unsigned BufferID,
               unsigned Offset, unsigned EndOffset);

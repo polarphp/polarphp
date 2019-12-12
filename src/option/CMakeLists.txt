@@ -16,7 +16,7 @@ polar_collect_files(
 
 polar_merge_list(POLARPHP_OPTION_SOURCES POLAR_HEADERS)
 
-polar_add_library(PolarOption STATIC
+polar_add_library(PolarOption
    ${POLARPHP_OPTION_SOURCES}
    LINK_LIBS PolarBasic LLVMOption
    DEPENDS PolarphpOptions)

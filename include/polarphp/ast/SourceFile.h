@@ -16,9 +16,14 @@
 #include "polarphp/ast/FileUnit.h"
 #include "polarphp/basic/Debug.h"
 
+namespace polar::llparser {
+class Token;
+}
+
 namespace polar::ast {
 
 using llvm::Optional;
+using polar::llparser::Token;
 
 /// A file containing Swift source code.
 ///
@@ -344,7 +349,7 @@ public:
 
     case SourceFileKind::Library:
     case SourceFileKind::Interface:
-    case SourceFileKind::SIL:
+    case SourceFileKind::PIL:
       return false;
     }
     llvm_unreachable("bad SourceFileKind");
@@ -440,7 +445,7 @@ public:
 private:
 
   /// If not None, the underlying vector should contain tokens of this source file.
-//  Optional<std::vector<Token>> AllCorrectedTokens;
+  Optional<std::vector<Token>> AllCorrectedTokens;
 /// @todo
 //  std::unique_ptr<SourceFileSyntaxInfo> SyntaxInfo;
 };

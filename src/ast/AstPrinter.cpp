@@ -348,7 +348,7 @@ AstPrinter &AstPrinter::operator<<(DeclName name) {
 //operator<<(llvm::raw_ostream &OS, tok keyword) {
 //   switch (keyword) {
 //#define KEYWORD(KW) case tok::kw_##KW: OS << #KW; break;
-//#define POUND_KEYWORD(KW) case tok::pound_##KW: OS << "#"#KW; break;
+//#define POUND_KEYWORD(KW) case tok::pound_##KW: OS << "#"#KW; break;CodeCompletionCallbacks.h
 //#define PUNCTUATOR(PUN, TEXT) case tok::PUN: OS << TEXT; break;
 //
 //#include "swift/Syntax/TokenKinds.def"

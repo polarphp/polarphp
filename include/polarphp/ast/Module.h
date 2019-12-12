@@ -42,6 +42,10 @@ namespace clang {
 class Module;
 }
 
+namespace polar::llparser {
+class Token;
+}
+
 namespace polar::ast {
 enum class ArtificialMainKind : uint8_t;
 class AstContext;
@@ -68,7 +72,6 @@ class InterfaceConformance;
 class InterfaceDecl;
 struct PrintOptions;
 class ReferencedNameTracker;
-class Token;
 class TupleType;
 class Type;
 class TypeRefinementContext;
@@ -78,17 +81,19 @@ class VisibleDeclConsumer;
 class SyntaxParsingCache;
 class AstScope;
 class SourceLookupCache;
+using polar::llparser::Token;
 
 namespace syntax {
 class SourceFileSyntax;
 }
+
 namespace ast_scope {
 class AstSourceFileScope;
 }
 
 /// Discriminator for file-units.
 enum class FileUnitKind {
-   /// For a .swift source file.
+   /// For a .polarphp source file.
    Source,
    /// For the compiler Builtin module.
    Builtin,
@@ -101,11 +106,11 @@ enum class FileUnitKind {
 };
 
 enum class SourceFileKind {
-   Library,  ///< A normal .swift file.
-   Main,     ///< A .swift file that can have top-level code.
+   Library,  ///< A normal .polarphp file.
+   Main,     ///< A .polarphp file that can have top-level code.
    REPL,     ///< A virtual file that holds the user's input in the REPL.
-   SIL,      ///< Came from a .sil file.
-   Interface ///< Came from a .swiftinterface file, representing another module.
+   PIL,      ///< Came from a .sil file.
+   Interface ///< Came from a .polarphpinterface file, representing another module.
 };
 
 /// Discriminator for resilience strategy.

@@ -1656,20 +1656,20 @@ SourceFile::SourceFile(ModuleDecl &M, SourceFileKind K,
       (void) problem;
    }
    if (KeepParsedTokens) {
-//      AllCorrectedTokens = std::vector<Token>();
+      AllCorrectedTokens = std::vector<Token>();
    }
 }
 
 /// @todo
 std::vector<Token> &SourceFile::getTokenVector() {
-//   assert(shouldCollectToken() && "Disabled");
-//   return *AllCorrectedTokens;
+   assert(shouldCollectToken() && "Disabled");
+   return *AllCorrectedTokens;
 }
 
 /// @todo
 ArrayRef<Token> SourceFile::getAllTokens() const {
-//   assert(shouldCollectToken() && "Disabled");
-//   return *AllCorrectedTokens;
+   assert(shouldCollectToken() && "Disabled");
+   return *AllCorrectedTokens;
 }
 
 bool SourceFile::shouldCollectToken() const {
@@ -1678,9 +1678,9 @@ bool SourceFile::shouldCollectToken() const {
       case SourceFileKind::Main:
       case SourceFileKind::Interface:
          /// @todo
-//         return (bool) AllCorrectedTokens;
+         return (bool) AllCorrectedTokens;
       case SourceFileKind::REPL:
-      case SourceFileKind::SIL:
+      case SourceFileKind::PIL:
          return false;
    }
    llvm_unreachable("unhandled kind");

@@ -25,7 +25,6 @@
 #include "polarphp/ast/Types.h"
 #include "polarphp/global/Subsystems.h"
 
-
 namespace polar::ast {
 
 using polar::basic::indices;
@@ -1263,7 +1262,7 @@ void TypeCheckSourceFileRequest::cacheResult(bool result) const {
 #ifndef NDEBUG
       if (!Ctx.TypeCheckerOpts.DelayWholeModuleChecking &&
           SF->Kind != SourceFileKind::REPL &&
-          SF->Kind != SourceFileKind::SIL &&
+          SF->Kind != SourceFileKind::PIL &&
           !Ctx.LangOpts.DebuggerSupport) {
          Ctx.verifyAllLoadedModules();
       }

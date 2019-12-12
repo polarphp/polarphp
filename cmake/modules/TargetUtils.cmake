@@ -35,7 +35,7 @@ function(polar_update_compile_flags name)
       set_property(TARGET ${name} APPEND_STRING PROPERTY
          COMPILE_FLAGS "${target_compile_flags}")
    endif()
-#   set_property(TARGET ${name} APPEND PROPERTY COMPILE_DEFINITIONS "${POLAR_COMPILE_DEFINITIONS}")
+   #   set_property(TARGET ${name} APPEND PROPERTY COMPILE_DEFINITIONS "${POLAR_COMPILE_DEFINITIONS}")
 endfunction()
 
 function(polar_add_symbol_exports target_name export_file)
@@ -469,7 +469,7 @@ macro(polar_add_library name)
       ""
       ""
       ${ARGN})
-   if(BUILD_SHARED_LIBS OR ARG_SHARED)
+   if(ARG_SHARED)
       polar_add_library_internal(${name} SHARED ${ARG_UNPARSED_ARGUMENTS})
    else()
       polar_add_library_internal(${name} STATIC ${ARG_UNPARSED_ARGUMENTS})
@@ -488,7 +488,7 @@ macro(polar_add_library name)
       set_property(GLOBAL APPEND PROPERTY POLAR_EXPORTS_BUILDTREE_ONLY ${name})
    else()
       if (NOT POLAR_INSTALL_TOOLCHAIN_ONLY OR ${name} STREQUAL "LTO" OR
-            (POLAR_LINK_POLAR_DYLIB AND ${name} STREQUAL "zendVM"))
+      (POLAR_LINK_POLAR_DYLIB AND ${name} STREQUAL "zendVM"))
          set(install_dir lib${POLAR_LIBDIR_SUFFIX})
          if(ARG_SHARED OR BUILD_SHARED_LIBS)
             if(WIN32 OR CYGWIN OR MINGW)
@@ -502,19 +502,20 @@ macro(polar_add_library name)
          endif()
 
          if(${name} IN_LIST POLAR_DISTRIBUTION_COMPONENTS OR
-               NOT POLAR_DISTRIBUTION_COMPONENTS)
+            NOT POLAR_DISTRIBUTION_COMPONENTS)
             set(export_to_polarexports EXPORT PolarExports)
             set_property(GLOBAL PROPERTY POLAR_HAS_EXPORTS True)
          endif()
-
-         install(TARGETS ${name}
-            ${export_to_polarexports}
-            ${install_type} DESTINATION ${install_dir}
-            COMPONENT ${name})
-         if (NOT CMAKE_CONFIGURATION_TYPES)
-            polar_add_install_targets(install-${name}
-               DEPENDS ${name}
+         if (ARG_SHARD)
+            install(TARGETS ${name}
+               ${export_to_polarexports}
+               ${install_type} DESTINATION ${install_dir}
                COMPONENT ${name})
+            if (NOT CMAKE_CONFIGURATION_TYPES)
+               polar_add_install_targets(install-${name}
+                  DEPENDS ${name}
+                  COMPONENT ${name})
+            endif()
          endif()
       endif()
       set_property(GLOBAL APPEND PROPERTY POLAR_EXPORTS ${name})
@@ -540,7 +541,7 @@ macro(polar_add_loadable_module name)
             endif()
 
             if(${name} IN_LIST POLAR_DISTRIBUTION_COMPONENTS OR
-                  NOT POLAR_DISTRIBUTION_COMPONENTS)
+               NOT POLAR_DISTRIBUTION_COMPONENTS)
                set(export_to_polarexports EXPORT PolarExports)
                set_property(GLOBAL PROPERTY POLAR_HAS_EXPORTS True)
             endif()
@@ -754,7 +755,7 @@ function(polar_externalize_debuginfo name)
 
    if(APPLE)
       if(CMAKE_CXX_FLAGS MATCHES "-flto"
-            OR CMAKE_CXX_FLAGS_${uppercase_CMAKE_BUILD_TYPE} MATCHES "-flto")
+         OR CMAKE_CXX_FLAGS_${uppercase_CMAKE_BUILD_TYPE} MATCHES "-flto")
 
          set(lto_object ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${name}-lto.o)
          set_property(TARGET ${name} APPEND_STRING PROPERTY
