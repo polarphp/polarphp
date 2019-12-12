@@ -8,11 +8,11 @@
 # See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 #
 # Created by polarboy on 2019/05/17.
-
-polar_add_unittest(PolarCompilerTests SyntaxTest
-   ../TestEntry.cpp
-   TriviaTest.cpp
-   AbsolutePositionTest.cpp
-   SyntaxJsonSerializationTest.cpp)
-polar_detect_compiler_root_dir(compilerRootDir)
-target_link_libraries(SyntaxTest PRIVATE PolarSyntax)
+#
+#polar_add_unittest(PolarCompilerTests SyntaxTest
+#   ../TestEntry.cpp
+#   TriviaTest.cpp
+#   AbsolutePositionTest.cpp
+#   SyntaxJsonSerializationTest.cpp)
+#polar_detect_compiler_root_dir(compilerRootDir)
+#target_link_libraries(SyntaxTest PRIVATE PolarSyntax)

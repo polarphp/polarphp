@@ -374,13 +374,13 @@ AstPrinter &AstPrinter::operator<<(DeclName name) {
 
 StringRef getCodePlaceholder() { return "<#code#>"; }
 
-AstPrinter &operator<<(AstPrinter &printer, tok keyword) {
-   SmallString<16> Buffer;
-   llvm::raw_svector_ostream OS(Buffer);
-   OS << keyword;
-   printer.printKeyword(Buffer.str(), PrintOptions());
-   return printer;
-}
+//AstPrinter &operator<<(AstPrinter &printer, tok keyword) {
+//   SmallString<16> Buffer;
+//   llvm::raw_svector_ostream OS(Buffer);
+//   OS << keyword;
+//   printer.printKeyword(Buffer.str(), PrintOptions());
+//   return printer;
+//}
 
 /// Determine whether to escape the given keyword in the given context.
 static bool escapeKeywordInContext(StringRef keyword, PrintNameContext context) {

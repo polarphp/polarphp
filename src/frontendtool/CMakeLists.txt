@@ -20,4 +20,4 @@ polar_merge_list(POLAR_FRONTEND_TOOL_SOURCES POLAR_HEADERS)
 
 polar_add_library(PolarFrontendTool SHARED
    ${POLAR_FRONTEND_TOOL_SOURCES}
-   LINK_LIBS PolarUtils PolarKernel PolarSyntax)
+   LINK_LIBS PolarUtils PolarKernel)

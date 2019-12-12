@@ -58,12 +58,12 @@ template<> struct TypeIdZoneTypes<Zone::POLAR_TYPEID_ZONE> {
 // Second pass: create specializations of TypeId for these types.
 #define POLAR_TYPEID_NAMED(Type, Name)                       \
 template<> struct TypeId<Type> {                             \
-  static const uint8_t zoneID =                              \
+  static constexpr uint8_t zoneID =                          \
     static_cast<uint8_t>(Zone::POLAR_TYPEID_ZONE);           \
-  static const uint8_t localID =                             \
+  static constexpr uint8_t localID =                             \
     TypeIdZoneTypes<Zone::POLAR_TYPEID_ZONE>::Name;          \
                                                              \
-  static const uint64_t value = formTypeID(zoneID, localID); \
+  static constexpr uint64_t value = formTypeID(zoneID, localID); \
                                                              \
   static llvm::StringRef getName() { return #Name; }         \
 };
@@ -71,12 +71,12 @@ template<> struct TypeId<Type> {                             \
 #define POLAR_TYPEID_TEMPLATE1_NAMED(Template, Name, Param1, Arg1)    \
 template<Param1> struct TypeId<Template<Arg1>> {                      \
 private:                                                              \
-  static const uint64_t templateID =                                  \
+  static constexpr uint64_t templateID =                                  \
     formTypeID(static_cast<uint8_t>(Zone::POLAR_TYPEID_ZONE),         \
                TypeIdZoneTypes<Zone::POLAR_TYPEID_ZONE>::Name);       \
                                                                       \
 public:                                                               \
-  static const uint64_t value =                                       \
+  static constexpr uint64_t value =                                       \
     (TypeId<Arg1>::value << 16) | templateID;                         \
                                                                       \
   static std::string getName() {                                      \

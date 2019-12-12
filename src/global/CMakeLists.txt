@@ -16,7 +16,7 @@ polar_collect_files(
 
 polar_merge_list(POLARPHP_GLOBAL_SOURCES POLAR_HEADERS)
 
-add_library(PolarGlobal OBJECT ${POLARPHP_GLOBAL_SOURCES})
+add_library(PolarGlobal STATIC ${POLARPHP_GLOBAL_SOURCES})
 set_target_properties(
    PolarGlobal
    PROPERTIES

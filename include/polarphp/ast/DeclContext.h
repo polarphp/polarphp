@@ -861,7 +861,7 @@ SourceLoc extractNearestSourceLoc(const DeclContext *dc);
 /// Extract the source location from the given declaration context.
 SourceLoc extractNearestSourceLoc(const IterableDeclContext *idc);
 
-} // end namespace swift
+} // end namespace polar::ast
 
 namespace llvm {
 template<class FromTy>

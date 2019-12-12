@@ -10,7 +10,7 @@
 # Created by polarboy on 2018/08/26.
 
 set(POLAR_SOURCE_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-
+add_subdirectory(ast)
 add_subdirectory(bytecode)
 add_subdirectory(codegen)
 add_subdirectory(global)
@@ -30,6 +30,6 @@ add_subdirectory(frontend)
 add_subdirectory(frontendtool)
 add_subdirectory(serialization)
 add_subdirectory(reflection)
-add_subdirectory(syntax)
-add_subdirectory(parser)
+#add_subdirectory(syntax)
+#add_subdirectory(parser)
 

@@ -17,10 +17,10 @@ if (POLAR_DEV_BUILD_DEVTOOLS_TESTS)
 endif()
 
 if (POLAR_DEV_BUILD_POLARPHP_TESTS)
-   polar_add_lit_testsuite(check-parser "polarphp parser tests"
-      ${CMAKE_CURRENT_SOURCE_DIR}/parser
-      DEPENDS PolarSyntax PolarParser
-      ARGS -j ${POLAR_PROCESSOR_COUNT}
-      )
+#   polar_add_lit_testsuite(check-parser "polarphp parser tests"
+#      ${CMAKE_CURRENT_SOURCE_DIR}/parser
+#      DEPENDS PolarSyntax PolarParser
+#      ARGS -j ${POLAR_PROCESSOR_COUNT}
+#      )
 endif()
 

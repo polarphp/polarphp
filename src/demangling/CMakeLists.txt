@@ -18,6 +18,6 @@ polar_collect_files(
 
 polar_merge_list(POLAR_DEMANGLING_SOURCES POLAR_HEADERS)
 
-polar_add_library(PolarDemangling SHARED
+polar_add_library(PolarDemangling STATIC
    ${POLAR_DEMANGLING_SOURCES}
    LINK_LIBS PolarUtils PolarKernel)
