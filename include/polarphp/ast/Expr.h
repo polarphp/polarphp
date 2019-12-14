@@ -1209,9 +1209,8 @@ class ObjectLiteralExpr final
 public:
    /// The kind of object literal.
    enum LiteralKind : unsigned {
-      /// @todo
-//#define POUND_OBJECT_LITERAL(Name, Desc, Proto) Name,
-//#include "polarphp/syntax/TokenKinds.def"
+#define POUND_OBJECT_LITERAL(Name, Desc, Proto) Name,
+#include "polarphp/llparser/TokenKindsDef.h"
    };
 
 private:

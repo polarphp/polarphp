@@ -700,9 +700,9 @@ bool DeclAttribute::printImpl(AstPrinter &Printer, const PrintOptions &Options,
          Printer << "(" << cast<AlignmentAttr>(this)->getValue() << ")";
          break;
 
-      case DAK_SILGenName:
-         Printer.printAttrName("@_silgen_name");
-         Printer << "(\"" << cast<SILGenNameAttr>(this)->Name << "\")";
+      case DAK_PILGenName:
+         Printer.printAttrName("@_pilgen_name");
+         Printer << "(\"" << cast<PILGenNameAttr>(this)->Name << "\")";
          break;
 
       case DAK_OriginallyDefinedIn: {
@@ -934,7 +934,7 @@ StringRef DeclAttribute::getAttrName() const {
 
 #include "polarphp/ast/AttrDef.h"
 
-      case DAK_SILGenName:
+      case DAK_PILGenName:
          return "_silgen_name";
       case DAK_Alignment:
          return "_alignment";

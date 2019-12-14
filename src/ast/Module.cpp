@@ -39,7 +39,7 @@
 #include "polarphp/basic/SourceMgr.h"
 #include "polarphp/basic/Statistic.h"
 #include "polarphp/demangling/ManglingMacros.h"
-#include "polarphp/parser/Token.h"
+#include "polarphp/llparser/Token.h"
 #include "polarphp/global/NameStrings.h"
 //#include "polarphp/syntax/SyntaxNodes.h"
 #include "clang/Basic/Module.h"
@@ -418,7 +418,7 @@ void ModuleDecl::addFile(FileUnit &newFile) {
    assert(Files.empty() ||
           !isa<SourceFile>(newFile) ||
           cast<SourceFile>(newFile).Kind == SourceFileKind::Library ||
-          cast<SourceFile>(newFile).Kind == SourceFileKind::SIL);
+          cast<SourceFile>(newFile).Kind == SourceFileKind::PIL);
    Files.push_back(&newFile);
    clearLookupCache();
 }
@@ -456,7 +456,7 @@ static bool isParsedModule(const ModuleDecl *mod) {
    auto files = mod->getFiles();
    return (files.size() > 0 &&
            isa<SourceFile>(files[0]) &&
-           cast<SourceFile>(files[0])->Kind != SourceFileKind::SIL);
+           cast<SourceFile>(files[0])->Kind != SourceFileKind::PIL);
 }
 
 void ModuleDecl::lookupValue(DeclName Name, NLKind LookupKind,
@@ -1150,7 +1150,7 @@ void ModuleDecl::getImportedModules(SmallVectorImpl<ImportedModule> &modules,
 void
 SourceFile::getImportedModules(SmallVectorImpl<ModuleDecl::ImportedModule> &modules,
                                ModuleDecl::ImportFilter filter) const {
-   assert(ASTStage >= Parsed || Kind == SourceFileKind::SIL);
+   assert(ASTStage >= Parsed || Kind == SourceFileKind::PIL);
    assert(filter && "no imports requested?");
    for (auto desc : Imports) {
       ModuleDecl::ImportFilterKind requiredKind;
@@ -1613,7 +1613,7 @@ SourceFile::getCachedVisibleDecls() const {
 static void performAutoImport(
    SourceFile &SF,
    SourceFile::ImplicitModuleImportKind implicitModuleImportKind) {
-   if (SF.Kind == SourceFileKind::SIL)
+   if (SF.Kind == SourceFileKind::PIL)
       assert(implicitModuleImportKind ==
              SourceFile::ImplicitModuleImportKind::None);
 
@@ -1697,7 +1697,7 @@ bool SourceFile::canBeParsedInFull() const {
       case SourceFileKind::Interface:
          return true;
       case SourceFileKind::REPL:
-      case SourceFileKind::SIL:
+      case SourceFileKind::PIL:
          return false;
    }
    llvm_unreachable("unhandled kind");

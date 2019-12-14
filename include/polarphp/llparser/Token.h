@@ -26,6 +26,8 @@
 
 namespace polar::llparser {
 
+using polar::basic::SourceLoc;
+
 using polar::basic::CharSourceRange;
 
 /// Token - This structure provides full information about a lexed token.

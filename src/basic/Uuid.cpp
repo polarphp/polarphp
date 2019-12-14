@@ -40,46 +40,42 @@
 #include <uuid/uuid.h>
 #endif
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
-UUID::UUID(FromRandom_t)
-{
+UUID::UUID(FromRandom_t) {
 #if defined(_WIN32)
   ::UUID uuid;
   ::CoCreateGuid(&uuid);
 
-  memcpy(m_value, &uuid, Size);
+  memcpy(Value, &uuid, Size);
 #else
-  uuid_generate_random(m_value);
+  uuid_generate_random(Value);
 #endif
 }
 
-UUID::UUID(FromTime_t)
-{
+UUID::UUID(FromTime_t) {
 #if defined(_WIN32)
   ::UUID uuid;
   ::CoCreateGuid(&uuid);
 
-  memcpy(m_value, &uuid, Size);
+  memcpy(Value, &uuid, Size);
 #else
-  uuid_generate_time(m_value);
+  uuid_generate_time(Value);
 #endif
 }
 
-UUID::UUID()
-{
+UUID::UUID() {
 #if defined(_WIN32)
-  ::UUID uuid = *((::UUID *)&m_value);
+  ::UUID uuid = *((::UUID *)&Value);
   UuidCreateNil(&uuid);
-  memcpy(m_value, &uuid, Size);
+
+  memcpy(Value, &uuid, Size);
 #else
-  uuid_clear(m_value);
+  uuid_clear(Value);
 #endif
 }
 
-std::optional<UUID> UUID::fromString(const char *s)
-{
+Optional<UUID> UUID::fromString(const char *s) {
 #if defined(_WIN32)
   RPC_CSTR t = const_cast<RPC_CSTR>(reinterpret_cast<const unsigned char*>(s));
 
@@ -90,22 +86,21 @@ std::optional<UUID> UUID::fromString(const char *s)
   }
 
   UUID result = UUID();
-  memcpy(result.m_value, &uuid, Size);
+  memcpy(result.Value, &uuid, Size);
   return result;
 #else
   UUID result;
-  if (uuid_parse(s, result.m_value))
-    return std::nullopt;
+  if (uuid_parse(s, result.Value))
+    return None;
   return result;
 #endif
 }
 
-void UUID::toString(SmallVectorImpl<char> &out) const
-{
+void UUID::toString(llvm::SmallVectorImpl<char> &out) const {
   out.resize(UUID::StringBufferSize);
 #if defined(_WIN32)
   ::UUID uuid;
-  memcpy(&uuid, m_value, Size);
+  memcpy(&uuid, Value, Size);
 
   RPC_CSTR str;
   UuidToStringA(&uuid, &str);
@@ -114,26 +109,25 @@ void UUID::toString(SmallVectorImpl<char> &out) const
   memcpy(out.data(), signedStr, StringBufferSize);
   std::transform(std::begin(out), std::end(out), std::begin(out), toupper);
 #else
-  uuid_unparse_upper(m_value, out.data());
+  uuid_unparse_upper(Value, out.data());
 #endif
   // Pop off the null terminator.
   assert(out.back() == '\0' && "did not null-terminate?!");
   out.pop_back();
 }
 
-int UUID::compare(UUID y) const
-{
+int UUID::compare(UUID y) const {
 #if defined(_WIN32)
   RPC_STATUS s;
   ::UUID uuid1;
-  memcpy(&uuid1, m_value, Size);
+  memcpy(&uuid1, Value, Size);
 
   ::UUID uuid2;
-  memcpy(&uuid2, y.m_value, Size);
+  memcpy(&uuid2, y.Value, Size);
 
   return UuidCompare(&uuid1, &uuid2, &s);
 #else
-  return uuid_compare(m_value, y.m_value);
+  return uuid_compare(Value, y.Value);
 #endif
 }
 
@@ -145,5 +139,4 @@ raw_ostream &operator<<(raw_ostream &os, UUID uuid)
   return os;
 }
 
-} // basic
-} // polar
+} // polar::basic

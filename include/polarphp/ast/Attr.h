@@ -152,14 +152,14 @@ public:
    }
    ReferenceOwnership getOwnership() const {
 #define REF_STORAGE(Name, name, ...) \
-   if (has(TAK_sil_##name)) return ReferenceOwnership::Name;
+   if (has(TAK_pil_##name)) return ReferenceOwnership::Name;
 #include "polarphp/ast/ReferenceStorageDef.h"
       return ReferenceOwnership::Strong;
    }
 
    void clearOwnership() {
 #define REF_STORAGE(Name, name, ...) \
-   clearAttribute(TAK_sil_##name);
+   clearAttribute(TAK_pil_##name);
 #include "polarphp/ast/ReferenceStorageDef.h"
    }
 
@@ -369,8 +369,8 @@ public:
       /// True if this shouldn't be serialized.
       NotSerialized = 1ull << (unsigned(DeclKindIndex::Last_Decl) + 4),
 
-      /// True if this attribute is only valid when parsing a .sil file.
-      SILOnly = 1ull << (unsigned(DeclKindIndex::Last_Decl) + 5),
+      /// True if this attribute is only valid when parsing a .pil file.
+      PILOnly = 1ull << (unsigned(DeclKindIndex::Last_Decl) + 5),
 
       /// The attribute should be reported by parser as unknown.
       RejectByParser = 1ull << (unsigned(DeclKindIndex::Last_Decl) + 6),
@@ -476,7 +476,7 @@ public:
    }
 
    static bool isSilOnly(DeclAttrKind DK) {
-      return getOptions(DK) & SILOnly;
+      return getOptions(DK) & PILOnly;
    }
 
    static bool isUserInaccessible(DeclAttrKind DK) {
@@ -572,21 +572,21 @@ public:
    typedef SimpleDeclAttr<DAK_##CLASS> CLASS##Attr;
 #include "polarphp/ast/AttrDef.h"
 
-/// Defines the @_silgen_name attribute.
-class SILGenNameAttr : public DeclAttribute {
+/// Defines the @_pilgen_name attribute.
+class PILGenNameAttr : public DeclAttribute {
 public:
-   SILGenNameAttr(StringRef Name, SourceLoc AtLoc, SourceRange Range, bool Implicit)
-      : DeclAttribute(DAK_SILGenName, AtLoc, Range, Implicit),
+   PILGenNameAttr(StringRef Name, SourceLoc AtLoc, SourceRange Range, bool Implicit)
+      : DeclAttribute(DAK_PILGenName, AtLoc, Range, Implicit),
         Name(Name) {}
 
-   SILGenNameAttr(StringRef Name, bool Implicit)
-      : SILGenNameAttr(Name, SourceLoc(), SourceRange(), /*Implicit=*/true) {}
+   PILGenNameAttr(StringRef Name, bool Implicit)
+      : PILGenNameAttr(Name, SourceLoc(), SourceRange(), /*Implicit=*/true) {}
 
    /// The symbol name.
    const StringRef Name;
 
    static bool classof(const DeclAttribute *DA) {
-      return DA->getKind() == DAK_SILGenName;
+      return DA->getKind() == DAK_PILGenName;
    }
 };
 

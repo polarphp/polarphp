@@ -53,7 +53,6 @@ class Token;
 }
 
 namespace polar::ast {
-
 class GenericSignatureBuilder;
 class AstContext;
 class CodeCompletionCallbacksFactory;
@@ -79,8 +78,8 @@ class SyntaxParsingCache;
 class TypeChecker;
 struct TypeLoc;
 enum class SourceFileKind;
-using polar::kernel::LangOptions;
 using polar::kernel::TypeCheckerOptions;
+using polar::kernel::LangOptions;
 using polar::basic::PrimarySpecificPaths;
 using polar::basic::UnifiedStatsReporter;
 using polar::basic::SourceManager;
@@ -99,6 +98,7 @@ public:
    std::unique_ptr<PILParserTUState> Impl;
 
    explicit PILParserState(PILModule *M);
+
    ~PILParserState();
 };
 
@@ -115,6 +115,7 @@ bool shouldVerify(const Decl *D, const AstContext &Context);
 /// "Well-formed" here means following the invariants of the AST, not that the
 /// code written by the user makes sense.
 void verify(SourceFile &SF);
+
 void verify(Decl *D);
 
 /// @}
@@ -153,6 +154,15 @@ bool parseIntoSourceFileFull(SourceFile &SF, unsigned BufferID,
 void performCodeCompletionSecondPass(PersistentParserState &PersistentState,
                                      CodeCompletionCallbacksFactory &Factory);
 
+}
+
+namespace polar::llparser {
+
+using polar::kernel::LangOptions;
+using polar::basic::SourceManager;
+using polar::ast::DiagnosticEngine;
+using llvm::ArrayRef;
+
 /// Lex and return a vector of tokens for the given buffer.
 std::vector<Token> tokenize(const LangOptions &LangOpts,
                             const SourceManager &SM, unsigned BufferID,
@@ -161,6 +171,9 @@ std::vector<Token> tokenize(const LangOptions &LangOpts,
                             bool KeepComments = true,
                             bool TokenizeInterpolatedString = true,
                             ArrayRef<Token> SplitTokens = ArrayRef<Token>());
+}
+
+namespace polar::ast {
 
 /// Once parsing is complete, this walks the AST to resolve imports, record
 /// operators, and do other top-level validation.

@@ -33,9 +33,13 @@
 #include "polarphp/ast/Identifier.h"
 #include "polarphp/ast/Type.h"
 
+namespace polar::pil {
+class PILType;
+}
+
 namespace polar::ast {
 
-class PILType;
+using polar::pil::PILType;
 
 /// A field of a PIL aggregate layout.
 class PILField final {

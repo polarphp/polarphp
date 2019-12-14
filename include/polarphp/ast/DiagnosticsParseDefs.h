@@ -469,233 +469,233 @@ ERROR(expected_precedencegroup_relation,none,
       "expected name of related precedence group after '%0'",
       (StringRef))
 
-// SIL
+// PIL
 ERROR(inout_not_attribute, none,
       "@inout is no longer an attribute", ())
-ERROR(only_allowed_in_sil,none,
-      "'%0' only allowed in SIL modules", (StringRef))
-ERROR(expected_sil_type,none,
-      "expected type in SIL code", ())
-ERROR(expected_sil_colon_value_ref,none,
-      "expected ':' before type in SIL value reference", ())
-ERROR(expected_sil_value_name,none,
-      "expected SIL value name", ())
-ERROR(expected_sil_type_kind,none,
-      "expected SIL type to %0", (StringRef))
-ERROR(expected_sil_constant,none,
-      "expected constant in SIL code", ())
+ERROR(only_allowed_in_pil,none,
+      "'%0' only allowed in PIL modules", (StringRef))
+ERROR(expected_pil_type,none,
+      "expected type in PIL code", ())
+ERROR(expected_pil_colon_value_ref,none,
+      "expected ':' before type in PIL value reference", ())
+ERROR(expected_pil_value_name,none,
+      "expected PIL value name", ())
+ERROR(expected_pil_type_kind,none,
+      "expected PIL type to %0", (StringRef))
+ERROR(expected_pil_constant,none,
+      "expected constant in PIL code", ())
 ERROR(referenced_value_no_accessor,none,
       "referenced declaration has no %select{getter|setter}0", (unsigned))
-ERROR(expected_sil_value_ownership_kind,none,
-      "expected value ownership kind in SIL code", ())
-ERROR(silfunc_and_silarg_have_incompatible_sil_value_ownership,none,
-      "SILFunction and SILArgument have mismatching ValueOwnershipKinds. "
-      "Function type specifies: '@%0'. SIL argument specifies: '@%1'.",
+ERROR(expected_pil_value_ownership_kind,none,
+      "expected value ownership kind in PIL code", ())
+ERROR(silfunc_and_pilarg_have_incompatible_pil_value_ownership,none,
+      "PILFunction and PILArgument have mismatching ValueOwnershipKinds. "
+      "Function type specifies: '@%0'. PIL argument specifies: '@%1'.",
       (StringRef, StringRef))
-ERROR(expected_sil_colon,none,
+ERROR(expected_pil_colon,none,
       "expected ':' before %0", (StringRef))
-ERROR(expected_sil_tuple_index,none,
+ERROR(expected_pil_tuple_index,none,
       "expected tuple element index", ())
 
-// SIL Values
-ERROR(sil_value_redefinition,none,
+// PIL Values
+ERROR(pil_value_redefinition,none,
       "redefinition of value '%0'", (StringRef))
-ERROR(sil_value_use_type_mismatch,none,
+ERROR(pil_value_use_type_mismatch,none,
       "value '%0' defined with mismatching type %1 (expected %2)", (StringRef, Type, Type))
-ERROR(sil_value_def_type_mismatch,none,
+ERROR(pil_value_def_type_mismatch,none,
       "value '%0' used with mismatching type %1 (expected %2)", (StringRef, Type, Type))
-ERROR(sil_use_of_undefined_value,none,
+ERROR(pil_use_of_undefined_value,none,
       "use of undefined value '%0'", (StringRef))
-NOTE(sil_prior_reference,none,
+NOTE(pil_prior_reference,none,
      "prior reference was here", ())
 
-// SIL Locations
-ERROR(expected_colon_in_sil_location,none,
-      "expected ':' in SIL location", ())
-ERROR(sil_invalid_line_in_sil_location,none,
+// PIL Locations
+ERROR(expected_colon_in_pil_location,none,
+      "expected ':' in PIL location", ())
+ERROR(pil_invalid_line_in_pil_location,none,
       "line number must be a positive integer", ())
-ERROR(sil_invalid_column_in_sil_location,none,
+ERROR(pil_invalid_column_in_pil_location,none,
       "column number must be a positive integer", ())
-ERROR(sil_invalid_scope_slot,none,
+ERROR(pil_invalid_scope_slot,none,
       "scope number must be a positive integer ", ())
-ERROR(sil_scope_undeclared,none,
+ERROR(pil_scope_undeclared,none,
       "scope number %0 needs to be declared before first use", (unsigned))
-ERROR(sil_scope_redefined,none,
+ERROR(pil_scope_redefined,none,
       "scope number %0 is already defined", (unsigned))
 
-// SIL Instructions
-ERROR(expected_sil_instr_start_of_line,none,
-      "SIL instructions must be at the start of a line", ())
-ERROR(expected_equal_in_sil_instr,none,
-      "expected '=' in SIL instruction", ())
-ERROR(wrong_result_count_in_sil_instr,none,
-      "wrong number of results for SIL instruction, expected %0", (unsigned))
-ERROR(expected_sil_instr_opcode,none,
-      "expected SIL instruction opcode", ())
-ERROR(expected_tok_in_sil_instr,none,
-      "expected '%0' in SIL instruction", (StringRef))
-ERROR(sil_property_generic_signature_mismatch,none,
-      "sil_property generic signature must match original declaration", ())
-ERROR(sil_string_no_encoding,none,
+// PIL Instructions
+ERROR(expected_pil_instr_start_of_line,none,
+      "PIL instructions must be at the start of a line", ())
+ERROR(expected_equal_in_pil_instr,none,
+      "expected '=' in PIL instruction", ())
+ERROR(wrong_result_count_in_pil_instr,none,
+      "wrong number of results for PIL instruction, expected %0", (unsigned))
+ERROR(expected_pil_instr_opcode,none,
+      "expected PIL instruction opcode", ())
+ERROR(expected_tok_in_pil_instr,none,
+      "expected '%0' in PIL instruction", (StringRef))
+ERROR(pil_property_generic_signature_mismatch,none,
+      "pil_property generic signature must match original declaration", ())
+ERROR(pil_string_no_encoding,none,
       "string_literal instruction requires an encoding", ())
-ERROR(sil_string_invalid_encoding,none,
+ERROR(pil_string_invalid_encoding,none,
       "unknown string literal encoding '%0'", (StringRef))
 ERROR(expected_tuple_type_in_tuple,none,
       "tuple instruction requires a tuple type", ())
-ERROR(sil_tuple_inst_wrong_value_count,none,
+ERROR(pil_tuple_inst_wrong_value_count,none,
       "tuple instruction requires %0 values", (unsigned))
-ERROR(sil_tuple_inst_wrong_field,none,
+ERROR(pil_tuple_inst_wrong_field,none,
       "tuple instruction requires a field number", ())
-ERROR(sil_struct_inst_wrong_field,none,
+ERROR(pil_struct_inst_wrong_field,none,
       "struct instruction requires a field name", ())
-ERROR(sil_ref_inst_wrong_field,none,
+ERROR(pil_ref_inst_wrong_field,none,
       "ref_element_addr instruction requires a field name", ())
-ERROR(sil_invalid_instr_operands,none,
+ERROR(pil_invalid_instr_operands,none,
       "invalid instruction operands", ())
-ERROR(sil_operand_not_address,none,
+ERROR(pil_operand_not_address,none,
       "%0 operand of '%1' must have address type", (StringRef, StringRef))
-ERROR(sil_operand_not_ref_storage_address,none,
+ERROR(pil_operand_not_ref_storage_address,none,
       "%0 operand of '%1' must have address of %2 type",
       (StringRef, StringRef, ReferenceOwnership))
-ERROR(sil_integer_literal_not_integer_type,none,
+ERROR(pil_integer_literal_not_integer_type,none,
       "integer_literal instruction requires a 'Builtin.Int<n>' type", ())
-ERROR(sil_integer_literal_not_well_formed,none,
+ERROR(pil_integer_literal_not_well_formed,none,
       "integer_literal value not well-formed for type %0", (Type))
-ERROR(sil_float_literal_not_float_type,none,
+ERROR(pil_float_literal_not_float_type,none,
       "float_literal instruction requires a 'Builtin.FP<n>' type", ())
-ERROR(sil_substitutions_on_non_polymorphic_type,none,
+ERROR(pil_substitutions_on_non_polymorphic_type,none,
       "apply of non-polymorphic function cannot have substitutions", ())
-ERROR(sil_witness_method_not_protocol,none,
+ERROR(pil_witness_method_not_protocol,none,
       "witness_method is not a protocol method", ())
-ERROR(sil_witness_method_type_does_not_conform,none,
+ERROR(pil_witness_method_type_does_not_conform,none,
       "witness_method type does not conform to protocol", ())
-ERROR(sil_member_decl_not_found,none, "member not found", ())
-ERROR(sil_named_member_decl_not_found,none,
+ERROR(pil_member_decl_not_found,none, "member not found", ())
+ERROR(pil_named_member_decl_not_found,none,
       "member %0 not found in type %1", (DeclName, Type))
-ERROR(sil_member_lookup_bad_type,none,
+ERROR(pil_member_lookup_bad_type,none,
       "cannot lookup member %0 in non-nominal, non-module type %1",
       (DeclName, Type))
-ERROR(sil_member_decl_type_mismatch,none,
+ERROR(pil_member_decl_type_mismatch,none,
       "member defined with mismatching type %0 (expected %1)", (Type, Type))
-ERROR(sil_substitution_mismatch,none,
+ERROR(pil_substitution_mismatch,none,
       "substitution replacement type %0 does not conform to protocol %1",
       (Type, Type))
-ERROR(sil_not_class,none,
+ERROR(pil_not_class,none,
       "substitution replacement type %0 is not a class type",
       (Type))
-ERROR(sil_missing_substitutions,none,
+ERROR(pil_missing_substitutions,none,
       "missing substitutions", ())
-ERROR(sil_too_many_substitutions,none,
+ERROR(pil_too_many_substitutions,none,
       "too many substitutions", ())
-ERROR(sil_dbg_unknown_key,none,
+ERROR(pil_dbg_unknown_key,none,
       "unknown key '%0' in debug variable declaration", (StringRef))
-ERROR(sil_objc_with_tail_elements,none,
+ERROR(pil_objc_with_tail_elements,none,
       "alloc_ref [objc] cannot have tail allocated elements", ())
-ERROR(sil_expected_access_kind,none,
+ERROR(pil_expected_access_kind,none,
       "%0 instruction must have explicit access kind", (StringRef))
-ERROR(sil_expected_access_enforcement,none,
+ERROR(pil_expected_access_enforcement,none,
       "%0 instruction must have explicit access enforcement", (StringRef))
 
-ERROR(sil_keypath_expected_component_kind,none,
+ERROR(pil_keypath_expected_component_kind,none,
       "expected keypath component kind", ())
-ERROR(sil_keypath_unknown_component_kind,none,
+ERROR(pil_keypath_unknown_component_kind,none,
       "unknown keypath component kind %0", (Identifier))
-ERROR(sil_keypath_computed_property_missing_part,none,
+ERROR(pil_keypath_computed_property_missing_part,none,
       "keypath %select{gettable|settable}0_property component needs an "
       "%select{id and getter|id, getter, and setter}0", (bool))
-ERROR(sil_keypath_no_root,none,
+ERROR(pil_keypath_no_root,none,
       "keypath must have a root component declared",())
-ERROR(sil_keypath_index_not_hashable,none,
+ERROR(pil_keypath_index_not_hashable,none,
       "key path index type %0 does not conform to Hashable", (Type))
-ERROR(sil_keypath_index_operand_type_conflict,none,
+ERROR(pil_keypath_index_operand_type_conflict,none,
       "conflicting types for key path operand %0: %1 vs. %2",
       (unsigned, Type, Type))
-ERROR(sil_keypath_no_use_of_operand_in_pattern,none,
+ERROR(pil_keypath_no_use_of_operand_in_pattern,none,
       "operand %0 is not referenced by any component in the pattern",
       (unsigned))
 
-// SIL Basic Blocks
-ERROR(expected_sil_block_name,none,
+// PIL Basic Blocks
+ERROR(expected_pil_block_name,none,
       "expected basic block name or '}'", ())
-ERROR(expected_sil_block_colon,none,
+ERROR(expected_pil_block_colon,none,
       "expected ':' after basic block name", ())
-ERROR(sil_undefined_basicblock_use,none,
+ERROR(pil_undefined_basicblock_use,none,
       "use of undefined basic block %0", (Identifier))
-ERROR(sil_basicblock_redefinition,none,
+ERROR(pil_basicblock_redefinition,none,
       "redefinition of basic block %0", (Identifier))
-ERROR(sil_basicblock_arg_rparen,none,
+ERROR(pil_basicblock_arg_rparen,none,
       "expected ')' in basic block argument list", ())
 
-// SIL Functions
-ERROR(expected_sil_function_name,none,
-      "expected SIL function name", ())
-ERROR(expected_sil_rbrace,none,
+// PIL Functions
+ERROR(expected_pil_function_name,none,
+      "expected PIL function name", ())
+ERROR(expected_pil_rbrace,none,
       "expected '}' at the end of a sil body", ())
-ERROR(expected_sil_function_type, none,
-      "sil function expected to have SIL function type", ())
-ERROR(sil_dynamically_replaced_func_not_found,none,
+ERROR(expected_pil_function_type, none,
+      "sil function expected to have PIL function type", ())
+ERROR(pil_dynamically_replaced_func_not_found,none,
       "dynamically replaced function not found %0", (Identifier))
-ERROR(sil_availability_expected_version,none,
+ERROR(pil_availability_expected_version,none,
       "expected version number in 'available' attribute", ())
 
-// SIL Stage
-ERROR(expected_sil_stage_name, none,
-      "expected 'raw' or 'canonical' after 'sil_stage'", ())
-ERROR(multiple_sil_stage_decls, none,
-      "sil_stage declared multiple times", ())
+// PIL Stage
+ERROR(expected_pil_stage_name, none,
+      "expected 'raw' or 'canonical' after 'pil_stage'", ())
+ERROR(multiple_pil_stage_decls, none,
+      "pil_stage declared multiple times", ())
 
-// SIL VTable
-ERROR(expected_sil_vtable_colon,none,
+// PIL VTable
+ERROR(expected_pil_vtable_colon,none,
       "expected ':' in a vtable entry", ())
-ERROR(sil_vtable_func_not_found,none,
+ERROR(pil_vtable_func_not_found,none,
       "sil function not found %0", (Identifier))
-ERROR(sil_vtable_class_not_found,none,
+ERROR(pil_vtable_class_not_found,none,
       "sil class not found %0", (Identifier))
-ERROR(sil_vtable_bad_entry_kind,none,
+ERROR(pil_vtable_bad_entry_kind,none,
       "expected 'inherited' or 'override'", ())
-ERROR(sil_vtable_expect_rsquare,none,
+ERROR(pil_vtable_expect_rsquare,none,
       "expected ']' after vtable entry kind", ())
 
-// SIL Global
-ERROR(sil_global_variable_not_found,none,
+// PIL Global
+ERROR(pil_global_variable_not_found,none,
       "sil global not found %0", (Identifier))
 
-// SIL Witness Table
-ERROR(expected_sil_witness_colon,none,
+// PIL Witness Table
+ERROR(expected_pil_witness_colon,none,
       "expected ':' in a witness table", ())
-ERROR(expected_sil_witness_lparen,none,
+ERROR(expected_pil_witness_lparen,none,
       "expected '(' in a witness table", ())
-ERROR(expected_sil_witness_rparen,none,
+ERROR(expected_pil_witness_rparen,none,
       "expected ')' in a witness table", ())
-ERROR(sil_witness_func_not_found,none,
+ERROR(pil_witness_func_not_found,none,
       "sil function not found %0", (Identifier))
-ERROR(sil_witness_protocol_not_found,none,
+ERROR(pil_witness_protocol_not_found,none,
       "sil protocol not found %0", (Identifier))
-ERROR(sil_witness_assoc_not_found,none,
+ERROR(pil_witness_assoc_not_found,none,
       "sil associated type decl not found %0", (Identifier))
-ERROR(sil_witness_assoc_conf_not_found,none,
+ERROR(pil_witness_assoc_conf_not_found,none,
       "sil associated type path for conformance not found %0", (StringRef))
-ERROR(sil_witness_protocol_conformance_not_found,none,
+ERROR(pil_witness_protocol_conformance_not_found,none,
       "sil protocol conformance not found", ())
 
-// SIL Coverage Map
-ERROR(sil_coverage_invalid_hash, none,
+// PIL Coverage Map
+ERROR(pil_coverage_invalid_hash, none,
       "expected coverage hash", ())
-ERROR(sil_coverage_expected_lbrace, none,
+ERROR(pil_coverage_expected_lbrace, none,
       "expected '{' in coverage map", ())
-ERROR(sil_coverage_expected_loc, none,
+ERROR(pil_coverage_expected_loc, none,
       "expected line:column pair", ())
-ERROR(sil_coverage_expected_arrow, none,
+ERROR(pil_coverage_expected_arrow, none,
       "expected '->' after start location", ())
-ERROR(sil_coverage_expected_colon, none,
+ERROR(pil_coverage_expected_colon, none,
       "expected ':' after source range", ())
-ERROR(sil_coverage_invalid_counter, none,
+ERROR(pil_coverage_invalid_counter, none,
       "expected counter expression, id, or 'zero'", ())
-ERROR(sil_coverage_expected_rparen, none,
+ERROR(pil_coverage_expected_rparen, none,
       "expected ')' to end counter expression", ())
-ERROR(sil_coverage_expected_quote, none,
+ERROR(pil_coverage_expected_quote, none,
       "expected quotes surrounding PGO function name", ())
-ERROR(sil_coverage_invalid_operator, none,
+ERROR(pil_coverage_invalid_operator, none,
       "expected '+' or '-'", ())
 
 //------------------------------------------------------------------------------
@@ -795,13 +795,13 @@ ERROR(deprecated_protocol_composition_single,none,
 ERROR(deprecated_any_composition,none,
       "'protocol<>' syntax has been removed; use 'Any' instead", ())
 
-// SIL box Types
-ERROR(sil_box_expected_var_or_let,none,
-      "expected 'var' or 'let' to introduce SIL box field type", ())
-ERROR(sil_box_expected_r_brace,none,
-      "expected '}' to complete SIL box field type list", ())
-ERROR(sil_box_expected_r_angle,none,
-      "expected '>' to complete SIL box generic argument list", ())
+// PIL box Types
+ERROR(pil_box_expected_var_or_let,none,
+      "expected 'var' or 'let' to introduce PIL box field type", ())
+ERROR(pil_box_expected_r_brace,none,
+      "expected '}' to complete PIL box field type list", ())
+ERROR(pil_box_expected_r_angle,none,
+      "expected '>' to complete PIL box generic argument list", ())
 
 // Opaque types
 ERROR(opaque_mid_composition,none,
@@ -901,7 +901,7 @@ ERROR(unlabeled_parameter_following_variadic_parameter,none,
 ERROR(enum_element_empty_arglist,none,
       "enum element with associated values must have at least one "
       "associated value", ())
-WARNING(enum_element_empty_arglist_swift4,none,
+WARNING(enum_element_empty_arglist_polarphp4,none,
         "enum element with associated values must have at least one "
         "associated value; this will be an error in the future "
         "version of Swift", ())
@@ -953,7 +953,7 @@ ERROR(expected_expr_return,PointsToFirstBadToken,
 WARNING(unindented_code_after_return,none,
         "expression following 'return' is treated as an argument of "
         "the 'return'", ())
-NOTE(indent_expression_to_silence,none,
+NOTE(indent_expression_to_pilence,none,
      "indent the expression to silence this warning", ())
 
 // Throw Statement

@@ -18,7 +18,7 @@ polar_collect_files(
 
 polar_merge_list(POLAR_PIL_LANG_SOURCES POLAR_HEADERS)
 
-polar_add_library(PolarPIL SHARED
+polar_add_library(PolarPIL STATIC
    ${POLAR_PIL_LANG_SOURCES}
    LINK_LIBS PolarUtils PolarKernel)
 

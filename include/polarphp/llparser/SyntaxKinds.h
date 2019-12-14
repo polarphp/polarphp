@@ -201,7 +201,7 @@ enum class SyntaxKind {
    PoundFunctionExpr,
    PoundDsohandleExpr,
    SymbolicReferenceExpr,
-   PrefixOperatorExpr
+   PrefixOperatorExpr,
    BinaryOperatorExpr,
    ArrowExpr,
    FloatLiteralExpr,
@@ -231,7 +231,7 @@ enum class SyntaxKind {
    EditorPlaceholderExpr,
    ObjectLiteralExpr,
    FirstExpr = UnknownExpr,
-   LastExpr = ObjectLiteralExpr;
+   LastExpr = ObjectLiteralExpr,
 
    UnknownPattern, // Pattern Syntax Kind
    EnumCasePattern,

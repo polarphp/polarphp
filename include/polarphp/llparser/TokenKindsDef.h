@@ -115,7 +115,7 @@
 #endif
 
 /// PUNCTUATOR(name, str)
-///   Expands for every Swift punctuator.
+///   Expands for every polarphp punctuator.
 ///   \param name  The symbolic name of the punctuator, such as
 ///                'l_paren' or 'arrow'.
 ///   \param str   A string literal containing the spelling of the punctuator,
@@ -231,7 +231,7 @@ PUNCTUATOR(question_postfix, "?")
 PUNCTUATOR(question_infix, "?")
 PUNCTUATOR(string_quote, "\"")
 PUNCTUATOR(single_quote, "\'")
-PUNCTUATOR(MultilineStringQuote, "\"\"\"")
+PUNCTUATOR(multiline_string_quote, "\"\"\"")
 
 // Keywords prefixed with a '#'.
 

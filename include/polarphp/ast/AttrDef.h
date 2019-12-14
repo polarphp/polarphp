@@ -53,11 +53,11 @@ TYPE_ATTR(noescape)
 TYPE_ATTR(escaping)
 TYPE_ATTR(differentiable)
 
-// SIL-specific attributes
+// PIL-specific attributes
 TYPE_ATTR(block_storage)
 TYPE_ATTR(box)
 TYPE_ATTR(dynamic_self)
-#define REF_STORAGE(Name, name, ...) TYPE_ATTR(sil_##name)
+#define REF_STORAGE(Name, name, ...) TYPE_ATTR(pil_##name)
 #include "polarphp/ast/ReferenceStorageDef.h"
 TYPE_ATTR(error)
 TYPE_ATTR(out)
@@ -79,7 +79,7 @@ TYPE_ATTR(yields)
 TYPE_ATTR(yield_once)
 TYPE_ATTR(yield_many)
 
-// SIL metatype attributes.
+// PIL metatype attributes.
 TYPE_ATTR(thin)
 TYPE_ATTR(thick)
 
@@ -111,7 +111,7 @@ TYPE_ATTR(_opaqueReturnTypeOf)
 // - Please sort attributes by serialization number.
 // - Please create a "NOTE" comment if a unique number is skipped.
 
-DECL_ATTR(_silgen_name, SILGenName,
+DECL_ATTR(_pilgen_name, PILGenName,
           OnAbstractFunction |
           LongAttribute | UserInaccessible | ABIStableToAdd | ABIStableToRemove |
           APIStableToAdd | APIStableToRemove,
