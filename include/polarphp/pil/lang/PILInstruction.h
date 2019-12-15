@@ -20,7 +20,7 @@
 #include "polarphp/ast/Builtins.h"
 #include "polarphp/ast/Decl.h"
 #include "polarphp/ast/GenericSignature.h"
-#include "polarphp/ast/ProtocolConformanceRef.h"
+#include "polarphp/ast/InterfaceConformanceRef.h"
 #include "polarphp/ast/SubstitutionMap.h"
 #include "polarphp/ast/TypeAlignments.h"
 #include "polarphp/basic/Compiler.h"

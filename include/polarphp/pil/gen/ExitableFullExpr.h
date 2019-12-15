@@ -1,0 +1,60 @@
+//===--- ExitableFullExpr.h - An exitable full-expression -------*- C++ -*-===//
+//
+// This source file is part of the Swift.org open source project
+//
+// Copyright (c) 2014 - 2017 Apple Inc. and the Swift project authors
+// Licensed under Apache License v2.0 with Runtime Library Exception
+//
+// See https://swift.org/LICENSE.txt for license information
+// See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
+//
+//===----------------------------------------------------------------------===//
+//
+// This file defines ExitableFullExpr, a cleanup scope RAII object
+// that conveniently creates a continuation block.
+//
+//===----------------------------------------------------------------------===//
+
+#ifndef POLARPHP_EXITABLE_FULL_EXPR_H
+#define POLARPHP_EXITABLE_FULL_EXPR_H
+
+#include "polarphp/pil/gen/JumpDest.h"
+#include "polarphp/pil/gen/Scope.h"
+
+namespace polar::pil::lowering {
+
+/// A cleanup scope RAII object, like FullExpr, that comes with a
+/// JumpDest for a continuation block.
+///
+/// You *must* call exit() at some point.
+///
+/// This scope is also exposed to the debug info.
+class LLVM_LIBRARY_VISIBILITY ExitableFullExpr {
+   SILGenFunction &SGF;
+   FullExpr Scope;
+   JumpDest ExitDest;
+public:
+   explicit ExitableFullExpr(SILGenFunction &SGF, CleanupLocation loc)
+      : SGF(SGF), Scope(SGF.Cleanups, loc),
+        ExitDest(SGF.B.splitBlockForFallthrough(),
+                 SGF.Cleanups.getCleanupsDepth(), loc) {
+      SGF.enterDebugScope(loc);
+   }
+   ~ExitableFullExpr() {
+      SGF.leaveDebugScope();
+   }
+
+
+   JumpDest getExitDest() const { return ExitDest; }
+
+   SILBasicBlock *exit() {
+      assert(!SGF.B.hasValidInsertionPoint());
+      Scope.pop();
+      SGF.B.setInsertionPoint(ExitDest.getBlock());
+      return ExitDest.getBlock();
+   }
+};
+
+} // end namespace polar::pil::lowering
+
+#endif
