@@ -42,7 +42,7 @@
 #include <string>
 #include <utility>
 
-namespace polar::basic {
+namespace polar {
 
 using llvm::SmallVector;
 using llvm::StringRef;
@@ -80,6 +80,6 @@ private:
    SmallVector<std::pair<std::string, std::string>, 2> m_pathMappings;
 };
 
-} // polar::basic
+} // polar
 
 #endif // POLARPHP_BASIC_PATH_REMAPPER_H

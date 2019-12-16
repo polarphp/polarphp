@@ -61,14 +61,12 @@
 #include "polarphp/ast/internal/InlinableText.h"
 #include <algorithm>
 
-namespace polar::ast {
+namespace polar {
 
 using namespace llvm;
 using llvm::dyn_cast_or_null;
 using llvm::dyn_cast;
 using llvm::cast_or_null;
-
-using polar::basic::indices;
 
 #define DEBUG_TYPE "Serialization"
 
@@ -3838,7 +3836,7 @@ static AssociatedTypeDecl *get_associated_type_anchor(
 
    return bestAnchor;
 }
-};
+}
 
 AssociatedTypeDecl *AssociatedTypeDecl::getAssociatedTypeAnchor() const {
    llvm::SmallSet<const AssociatedTypeDecl *, 8> searched;
@@ -7714,10 +7712,10 @@ struct DeclTraceFormatter : public UnifiedStatsReporter::TraceFormatter {
    }
 };
 
-} // polar::ast
+} // polar
 
-namespace polar::basic {
-using polar::ast::DeclTraceFormatter;
+namespace polar {
+using polar::DeclTraceFormatter;
 static DeclTraceFormatter TF;
 
 template<>
@@ -7725,9 +7723,9 @@ const UnifiedStatsReporter::TraceFormatter *
 FrontendStatsTracer::getTraceFormatter<const Decl *>() {
    return &TF;
 }
-} // polar::basic
+} // polar
 
-namespace polar::ast{
+namespace polar{
 
 TypeOrExtensionDecl::TypeOrExtensionDecl(NominalTypeDecl *D) : Decl(D) {}
 
@@ -7849,4 +7847,4 @@ void ParseAbstractFunctionBodyRequest::cacheResult(BraceStmt *value) const {
 
 }
 
-} // polar::ast
+} // polar

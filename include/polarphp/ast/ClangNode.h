@@ -24,7 +24,7 @@ class SourceLocation;
 class SourceRange;
 }
 
-namespace polar::ast {
+namespace polar {
 
 namespace internal {
 /// A wrapper to avoid having to import Clang headers. We can't just
@@ -106,12 +106,12 @@ public:
    }
 };
 
-} // end namespace polar::ast
+} // end namespace polar
 
 namespace llvm {
 template <typename T>
-struct PointerLikeTypeTraits<polar::ast::internal::ClangNodeBox<T>> {
-   using Box = ::polar::ast::internal::ClangNodeBox<T>;
+struct PointerLikeTypeTraits<polar::internal::ClangNodeBox<T>> {
+   using Box = ::polar::internal::ClangNodeBox<T>;
 
    static inline void *getAsVoidPointer(Box P) {
       return const_cast<void *>(static_cast<const void *>(P.value));

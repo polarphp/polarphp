@@ -38,7 +38,7 @@
 
 STATISTIC(NumConformanceLookupTables, "# of conformance lookup tables built");
 
-namespace polar::ast {
+namespace polar {
 
 Witness::Witness(ValueDecl *decl, SubstitutionMap substitutions,
                  GenericEnvironment *syntheticEnv,
@@ -1522,11 +1522,11 @@ void simple_display(llvm::raw_ostream &out,
    conf->printName(out);
 }
 
-} // polar::ast
+} // polar
 
-namespace polar::basic {
+namespace polar {
 
-using namespace polar::ast;
+using namespace polar;
 
 static InterfaceConformanceTraceFormatter TF;
 
@@ -1535,4 +1535,4 @@ const UnifiedStatsReporter::TraceFormatter *
 FrontendStatsTracer::getTraceFormatter<const InterfaceConformance *>() {
    return &TF;
 }
-} // polar::basic
+} // polar

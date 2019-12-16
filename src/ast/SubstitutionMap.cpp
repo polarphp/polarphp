@@ -33,7 +33,7 @@
 #include "polarphp/ast/Types.h"
 #include "llvm/Support/Debug.h"
 
-namespace polar::ast {
+namespace polar {
 
 SubstitutionMap::Storage::Storage(
    GenericSignature genericSig,
@@ -723,4 +723,4 @@ SubstitutionMap SubstitutionMap::mapIntoTypeExpansionContext(
    return this->subst(replacer, replacer, SubstFlags::SubstituteOpaqueArchetypes);
 }
 
-} // polar::ast
+} // polar

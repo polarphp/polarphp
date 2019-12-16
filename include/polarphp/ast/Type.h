@@ -32,7 +32,7 @@
 #include <functional>
 #include <string>
 
-namespace polar::ast {
+namespace polar {
 
 class AstPrinter;
 class ArchetypeType;
@@ -56,8 +56,8 @@ class TypeWalker;
 struct ExistentialLayout;
 enum class ResilienceExpansion : unsigned;
 
-using polar::basic::OptionSet;
-using polar::basic::ArrayRefView;
+using polar::OptionSet;
+using polar::ArrayRefView;
 
 /// Type substitution mapping from substitutable types to their
 /// replacements.
@@ -604,71 +604,71 @@ inline T *staticCastHelper(const Type &Ty) {
 template <typename T>
 using TypeArrayView = ArrayRefView<Type, T*, staticCastHelper,
                                    /*AllowOrigAccess*/true>;
-} // end namespace polar::ast
+} // end namespace polar
 
 namespace llvm {
   static inline raw_ostream &
-  operator<<(raw_ostream &OS, polar::ast::Type Ty) {
+  operator<<(raw_ostream &OS, polar::Type Ty) {
     Ty.print(OS);
     return OS;
   }
 
   // A Type casts like a TypeBase*.
-  template<> struct simplify_type<const ::polar::ast::Type> {
-    typedef ::polar::ast::TypeBase *SimpleType;
-    static SimpleType getSimplifiedValue(const ::polar::ast::Type &Val) {
+  template<> struct simplify_type<const ::polar::Type> {
+    typedef ::polar::TypeBase *SimpleType;
+    static SimpleType getSimplifiedValue(const ::polar::Type &Val) {
       return Val.getPointer();
     }
   };
-  template<> struct simplify_type< ::polar::ast::Type>
-    : public simplify_type<const ::polar::ast::Type> {};
+  template<> struct simplify_type< ::polar::Type>
+    : public simplify_type<const ::polar::Type> {};
 
   // Type hashes just like pointers.
-  template<> struct DenseMapInfo<polar::ast::Type> {
-    static polar::ast::Type getEmptyKey() {
-      return llvm::DenseMapInfo<polar::ast::TypeBase*>::getEmptyKey();
+  template<> struct DenseMapInfo<polar::Type> {
+    static polar::Type getEmptyKey() {
+      return llvm::DenseMapInfo<polar::TypeBase*>::getEmptyKey();
     }
-    static polar::ast::Type getTombstoneKey() {
-      return llvm::DenseMapInfo<polar::ast::TypeBase*>::getTombstoneKey();
+    static polar::Type getTombstoneKey() {
+      return llvm::DenseMapInfo<polar::TypeBase*>::getTombstoneKey();
     }
-    static unsigned getHashValue(polar::ast::Type Val) {
-      return DenseMapInfo<polar::ast::TypeBase*>::getHashValue(Val.getPointer());
+    static unsigned getHashValue(polar::Type Val) {
+      return DenseMapInfo<polar::TypeBase*>::getHashValue(Val.getPointer());
     }
-    static bool isEqual(polar::ast::Type LHS, polar::ast::Type RHS) {
+    static bool isEqual(polar::Type LHS, polar::Type RHS) {
       return LHS.getPointer() == RHS.getPointer();
     }
   };
-  template<> struct DenseMapInfo<polar::ast::CanType>
-    : public DenseMapInfo<polar::ast::Type> {
-    static polar::ast::CanType getEmptyKey() {
-      return polar::ast::CanType(llvm::DenseMapInfo<polar::ast::
+  template<> struct DenseMapInfo<polar::CanType>
+    : public DenseMapInfo<polar::Type> {
+    static polar::CanType getEmptyKey() {
+      return polar::CanType(llvm::DenseMapInfo<polar::
                               TypeBase*>::getEmptyKey());
     }
-    static polar::ast::CanType getTombstoneKey() {
-      return polar::ast::CanType(llvm::DenseMapInfo<polar::ast::
+    static polar::CanType getTombstoneKey() {
+      return polar::CanType(llvm::DenseMapInfo<polar::
                               TypeBase*>::getTombstoneKey());
     }
   };
 
   // A Type is "pointer like".
   template<>
-  struct PointerLikeTypeTraits<polar::ast::Type> {
+  struct PointerLikeTypeTraits<polar::Type> {
   public:
-    static inline void *getAsVoidPointer(polar::ast::Type I) {
+    static inline void *getAsVoidPointer(polar::Type I) {
       return (void*)I.getPointer();
     }
-    static inline polar::ast::Type getFromVoidPointer(void *P) {
-      return (polar::ast::TypeBase*)P;
+    static inline polar::Type getFromVoidPointer(void *P) {
+      return (polar::TypeBase*)P;
     }
-    enum { NumLowBitsAvailable = polar::ast::TypeAlignInBits };
+    enum { NumLowBitsAvailable = polar::TypeAlignInBits };
   };
 
   template<>
-  struct PointerLikeTypeTraits<polar::ast::CanType> :
-    public PointerLikeTypeTraits<polar::ast::Type> {
+  struct PointerLikeTypeTraits<polar::CanType> :
+    public PointerLikeTypeTraits<polar::Type> {
   public:
-    static inline polar::ast::CanType getFromVoidPointer(void *P) {
-      return polar::ast::CanType((polar::ast::TypeBase*)P);
+    static inline polar::CanType getFromVoidPointer(void *P) {
+      return polar::CanType((polar::TypeBase*)P);
     }
   };
 } // end namespace llvm

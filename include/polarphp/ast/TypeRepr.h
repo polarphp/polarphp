@@ -30,7 +30,7 @@
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/TrailingObjects.h"
 
-namespace polar::ast {
+namespace polar {
 class AstWalker;
 class DeclContext;
 class GenericEnvironment;
@@ -38,8 +38,8 @@ class IdentTypeRepr;
 class TupleTypeRepr;
 class TypeDecl;
 
-using polar::basic::count_bits_used;
-using polar::basic::bitmax;
+using polar::count_bits_used;
+using polar::bitmax;
 using llvm::isa;
 using llvm::cast;
 
@@ -1182,7 +1182,7 @@ inline bool TypeRepr::isSimple() const {
 
 namespace llvm {
 static inline raw_ostream &
-operator<<(raw_ostream &OS, polar::ast::TypeRepr *TyR) {
+operator<<(raw_ostream &OS, polar::TypeRepr *TyR) {
    TyR->print(OS);
    return OS;
 }

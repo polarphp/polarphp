@@ -29,11 +29,11 @@
 
 namespace polar::parser {
 
-using polar::basic::SmallString;
+using polar::SmallString;
 
 using namespace internal;
 using namespace polar::syntax;
-using namespace polar::basic;
+using namespace polar;
 
 #define HEREDOC_USING_SPACES 1
 #define HEREDOC_USING_TABS 2

@@ -24,7 +24,11 @@
 
 #include <cstddef>
 
-namespace polar::ast {
+namespace polar::pil {
+class PILFunction;
+}
+
+namespace polar {
 
 class AbstractClosureExpr;
 class AbstractStorageDecl;
@@ -46,12 +50,13 @@ class OperatorDecl;
 class Pattern;
 class InterfaceDecl;
 class InterfaceConformance;
-class PILFunction;
 class Stmt;
 class TypeVariableType;
 class TypeBase;
 class TypeDecl;
 class ValueDecl;
+
+using polar::pil::PILFunction;
 
 /// We frequently use three tag bits on all of these types.
 constexpr size_t AttrAlignInBits = 3;
@@ -87,40 +92,40 @@ template <class T> struct PointerLikeTypeTraits;
    : public MoreAlignedPointerTraits<CLASS, ALIGNMENT> {}; \
    }
 
-LLVM_DECLARE_TYPE_ALIGNMENT(polar::ast::Decl, polar::ast::DeclAlignInBits)
-LLVM_DECLARE_TYPE_ALIGNMENT(polar::ast::AbstractStorageDecl, polar::ast::DeclAlignInBits)
-LLVM_DECLARE_TYPE_ALIGNMENT(polar::ast::AssociatedTypeDecl, polar::ast::DeclAlignInBits)
-LLVM_DECLARE_TYPE_ALIGNMENT(polar::ast::GenericTypeParamDecl, polar::ast::DeclAlignInBits)
-LLVM_DECLARE_TYPE_ALIGNMENT(polar::ast::OperatorDecl, polar::ast::DeclAlignInBits)
-LLVM_DECLARE_TYPE_ALIGNMENT(polar::ast::InterfaceDecl, polar::ast::DeclAlignInBits)
-LLVM_DECLARE_TYPE_ALIGNMENT(polar::ast::TypeDecl, polar::ast::DeclAlignInBits)
-LLVM_DECLARE_TYPE_ALIGNMENT(polar::ast::ValueDecl, polar::ast::DeclAlignInBits)
-LLVM_DECLARE_TYPE_ALIGNMENT(polar::ast::NominalTypeDecl, polar::ast::DeclAlignInBits)
-LLVM_DECLARE_TYPE_ALIGNMENT(polar::ast::ExtensionDecl, polar::ast::DeclAlignInBits)
+LLVM_DECLARE_TYPE_ALIGNMENT(polar::Decl, polar::DeclAlignInBits)
+LLVM_DECLARE_TYPE_ALIGNMENT(polar::AbstractStorageDecl, polar::DeclAlignInBits)
+LLVM_DECLARE_TYPE_ALIGNMENT(polar::AssociatedTypeDecl, polar::DeclAlignInBits)
+LLVM_DECLARE_TYPE_ALIGNMENT(polar::GenericTypeParamDecl, polar::DeclAlignInBits)
+LLVM_DECLARE_TYPE_ALIGNMENT(polar::OperatorDecl, polar::DeclAlignInBits)
+LLVM_DECLARE_TYPE_ALIGNMENT(polar::InterfaceDecl, polar::DeclAlignInBits)
+LLVM_DECLARE_TYPE_ALIGNMENT(polar::TypeDecl, polar::DeclAlignInBits)
+LLVM_DECLARE_TYPE_ALIGNMENT(polar::ValueDecl, polar::DeclAlignInBits)
+LLVM_DECLARE_TYPE_ALIGNMENT(polar::NominalTypeDecl, polar::DeclAlignInBits)
+LLVM_DECLARE_TYPE_ALIGNMENT(polar::ExtensionDecl, polar::DeclAlignInBits)
 
-LLVM_DECLARE_TYPE_ALIGNMENT(polar::ast::TypeBase, polar::ast::TypeAlignInBits)
-LLVM_DECLARE_TYPE_ALIGNMENT(polar::ast::ArchetypeType, polar::ast::TypeAlignInBits)
-LLVM_DECLARE_TYPE_ALIGNMENT(polar::ast::TypeVariableType, polar::ast::TypeVariableAlignInBits)
+LLVM_DECLARE_TYPE_ALIGNMENT(polar::TypeBase, polar::TypeAlignInBits)
+LLVM_DECLARE_TYPE_ALIGNMENT(polar::ArchetypeType, polar::TypeAlignInBits)
+LLVM_DECLARE_TYPE_ALIGNMENT(polar::TypeVariableType, polar::TypeVariableAlignInBits)
 
-LLVM_DECLARE_TYPE_ALIGNMENT(polar::ast::Stmt, polar::ast::StmtAlignInBits)
-LLVM_DECLARE_TYPE_ALIGNMENT(polar::ast::BraceStmt, polar::ast::StmtAlignInBits)
+LLVM_DECLARE_TYPE_ALIGNMENT(polar::Stmt, polar::StmtAlignInBits)
+LLVM_DECLARE_TYPE_ALIGNMENT(polar::BraceStmt, polar::StmtAlignInBits)
 
-LLVM_DECLARE_TYPE_ALIGNMENT(polar::ast::AstContext, 2)
-LLVM_DECLARE_TYPE_ALIGNMENT(polar::ast::DeclContext, polar::ast::DeclContextAlignInBits)
-LLVM_DECLARE_TYPE_ALIGNMENT(polar::ast::Expr, polar::ast::ExprAlignInBits)
-LLVM_DECLARE_TYPE_ALIGNMENT(polar::ast::AbstractClosureExpr, polar::ast::ExprAlignInBits)
-LLVM_DECLARE_TYPE_ALIGNMENT(polar::ast::OpaqueValueExpr, polar::ast::ExprAlignInBits)
-LLVM_DECLARE_TYPE_ALIGNMENT(polar::ast::InterfaceConformance, polar::ast::DeclAlignInBits)
-LLVM_DECLARE_TYPE_ALIGNMENT(polar::ast::NormalInterfaceConformance,
-                            polar::ast::DeclAlignInBits)
-LLVM_DECLARE_TYPE_ALIGNMENT(polar::ast::GenericEnvironment,
-                            polar::ast::DeclAlignInBits)
-LLVM_DECLARE_TYPE_ALIGNMENT(polar::ast::Pattern,
-                            polar::ast::PatternAlignInBits)
-LLVM_DECLARE_TYPE_ALIGNMENT(polar::ast::PILFunction,
-                            polar::ast::PILFunctionAlignInBits)
+LLVM_DECLARE_TYPE_ALIGNMENT(polar::AstContext, 2)
+LLVM_DECLARE_TYPE_ALIGNMENT(polar::DeclContext, polar::DeclContextAlignInBits)
+LLVM_DECLARE_TYPE_ALIGNMENT(polar::Expr, polar::ExprAlignInBits)
+LLVM_DECLARE_TYPE_ALIGNMENT(polar::AbstractClosureExpr, polar::ExprAlignInBits)
+LLVM_DECLARE_TYPE_ALIGNMENT(polar::OpaqueValueExpr, polar::ExprAlignInBits)
+LLVM_DECLARE_TYPE_ALIGNMENT(polar::InterfaceConformance, polar::DeclAlignInBits)
+LLVM_DECLARE_TYPE_ALIGNMENT(polar::NormalInterfaceConformance,
+                            polar::DeclAlignInBits)
+LLVM_DECLARE_TYPE_ALIGNMENT(polar::GenericEnvironment,
+                            polar::DeclAlignInBits)
+LLVM_DECLARE_TYPE_ALIGNMENT(polar::Pattern,
+                            polar::PatternAlignInBits)
+LLVM_DECLARE_TYPE_ALIGNMENT(polar::PILFunction,
+                            polar::PILFunctionAlignInBits)
 
-LLVM_DECLARE_TYPE_ALIGNMENT(polar::ast::AttributeBase, polar::ast::AttrAlignInBits)
+LLVM_DECLARE_TYPE_ALIGNMENT(polar::AttributeBase, polar::AttrAlignInBits)
 
 static_assert(alignof(void*) >= 2, "pointer alignment is too small");
 

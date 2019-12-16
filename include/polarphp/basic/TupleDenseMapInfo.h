@@ -18,7 +18,7 @@
 
 namespace llvm {
 
-using polar::basic::is_tuple;
+using polar::is_tuple;
 
 namespace {
 template <typename T, size_t...I>

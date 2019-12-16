@@ -16,7 +16,7 @@
 #include "polarphp/basic/LLVM.h"
 #include "llvm/ADT/StringRef.h"
 
-namespace polar::basic::unicode {
+namespace polar::unicode {
 
 StringRef extractFirstExtendedGraphemeCluster(StringRef S);
 
@@ -71,6 +71,6 @@ unsigned extractFirstUnicodeScalar(StringRef S);
 /// Returns the number of code units in UTF16 representation
 uint64_t getUTF16Length(StringRef Str);
 
-} // end namespace polar::basic::unicode
+} // end namespace polar::unicode
 
 #endif // POLARPHP_BASIC_UNICODE_H

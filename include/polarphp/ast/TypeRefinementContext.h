@@ -28,7 +28,7 @@
 #include "llvm/ADT/PointerUnion.h"
 #include "llvm/Support/ErrorHandling.h"
 
-namespace polar::ast {
+namespace polar {
 class BraceStmt;
 class Decl;
 class IfStmt;
@@ -268,6 +268,6 @@ public:
                       unsigned Alignment = alignof(TypeRefinementContext));
 };
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif

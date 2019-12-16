@@ -30,7 +30,7 @@ namespace llvm {
 class FoldingSetNodeID;
 }
 
-namespace polar::ast {
+namespace polar {
 
 class GenericEnvironment;
 class SubstitutableType;
@@ -307,17 +307,17 @@ public:
                                       InterfaceDecl *conformedInterface) const;
 };
 
-} // end namespace polar::ast
+} // end namespace polar
 
 namespace llvm
 {
 template <>
-struct PointerLikeTypeTraits<polar::ast::SubstitutionMap> {
-   static void *getAsVoidPointer(polar::ast::SubstitutionMap map) {
+struct PointerLikeTypeTraits<polar::SubstitutionMap> {
+   static void *getAsVoidPointer(polar::SubstitutionMap map) {
       return const_cast<void *>(map.getOpaqueValue());
    }
-   static polar::ast::SubstitutionMap getFromVoidPointer(const void *ptr) {
-      return polar::ast::SubstitutionMap::getFromOpaqueValue(ptr);
+   static polar::SubstitutionMap getFromVoidPointer(const void *ptr) {
+      return polar::SubstitutionMap::getFromOpaqueValue(ptr);
    }
 
    /// Note: Assuming storage is at leaste 4-byte aligned.
@@ -325,18 +325,18 @@ struct PointerLikeTypeTraits<polar::ast::SubstitutionMap> {
 };
 
 // Substitution maps hash just like pointers.
-template<> struct DenseMapInfo<polar::ast::SubstitutionMap> {
-   static polar::ast::SubstitutionMap getEmptyKey() {
-      return polar::ast::SubstitutionMap::getEmptyKey();
+template<> struct DenseMapInfo<polar::SubstitutionMap> {
+   static polar::SubstitutionMap getEmptyKey() {
+      return polar::SubstitutionMap::getEmptyKey();
    }
-   static polar::ast::SubstitutionMap getTombstoneKey() {
-      return polar::ast::SubstitutionMap::getTombstoneKey();
+   static polar::SubstitutionMap getTombstoneKey() {
+      return polar::SubstitutionMap::getTombstoneKey();
    }
-   static unsigned getHashValue(polar::ast::SubstitutionMap map) {
+   static unsigned getHashValue(polar::SubstitutionMap map) {
       return DenseMapInfo<void*>::getHashValue(map.getOpaqueValue());
    }
-   static bool isEqual(polar::ast::SubstitutionMap lhs,
-                       polar::ast::SubstitutionMap rhs) {
+   static bool isEqual(polar::SubstitutionMap lhs,
+                       polar::SubstitutionMap rhs) {
       return lhs.getOpaqueValue() == rhs.getOpaqueValue();
    }
 };

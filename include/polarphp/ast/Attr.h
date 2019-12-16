@@ -42,7 +42,7 @@
 #include "llvm/Support/TrailingObjects.h"
 #include "llvm/Support/VersionTuple.h"
 
-namespace polar::ast {
+namespace polar {
 
 class AstPrinter;
 class AstContext;
@@ -58,12 +58,12 @@ class PatternBindingInitializer;
 class TrailingWhereClause;
 
 using llvm::dyn_cast;
-using polar::basic::UUID;
-using polar::basic::bitmax;
-using polar::basic::NumOptimizationModeBits;
-using polar::basic::CharSourceRange;
-using polar::basic::OptimizationMode;
-using polar::basic::OptionalTransformRange;
+using polar::UUID;
+using polar::bitmax;
+using polar::NumOptimizationModeBits;
+using polar::CharSourceRange;
+using polar::OptimizationMode;
+using polar::OptionalTransformRange;
 
 /// TypeAttributes - These are attributes that may be applied to types.
 class TypeAttributes {
@@ -799,12 +799,12 @@ public:
 
    /// Returns the string for the platform of the attribute.
    StringRef platformString() const {
-      return polar::ast::platformString(Platform);
+      return polar::platformString(Platform);
    }
 
    /// Returns the human-readable string for the platform of the attribute.
    StringRef prettyPlatformString() const {
-      return polar::ast::prettyPlatformString(Platform);
+      return polar::prettyPlatformString(Platform);
    }
 
    /// Returns true if this attribute is active given the current platform.

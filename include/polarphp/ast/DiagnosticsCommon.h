@@ -23,7 +23,7 @@
 #include "polarphp/basic/LLVM.h"
 #include "polarphp/global/Config.h"
 
-namespace polar::ast {
+namespace polar {
 template<typename ...ArgTypes>
 struct Diag;
 
@@ -62,6 +62,6 @@ using DeclAttribute = const DeclAttribute *;
     extern internal::StructuredFixItWithArguments<void Signature>::type ID;
 #include "polarphp/ast/DiagnosticsCommonDefs.h"
 } // end namespace diag
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif // POLARPHP_AST_DIAGNOSTICSCOMMON_H

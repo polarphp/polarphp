@@ -23,8 +23,8 @@
 
 namespace polar::demangling {
 
-using polar::basic::interleave;
-using polar::ast::ReferenceOwnership;
+using polar::interleave;
+using polar::ReferenceOwnership;
 
 using llvm::StringRef;
 

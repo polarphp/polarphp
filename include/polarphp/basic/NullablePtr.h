@@ -31,7 +31,7 @@
 #include <cstddef>
 #include <type_traits>
 
-namespace polar::basic {
+namespace polar {
 /// NullablePtr pointer wrapper - NullablePtr is used for APIs where a
 /// potentially-null pointer gets passed around that must be explicitly handled
 /// in lots of places.  By putting a wrapper around the null pointer, it makes
@@ -89,6 +89,6 @@ public:
   bool operator!=(const T *other) const { return !(*this == other); }
 };
 
-} // polar::basic
+} // polar
 
 #endif // POLARPHP_BASIC_NULLABLEPTR_H

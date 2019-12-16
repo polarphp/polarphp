@@ -224,7 +224,7 @@ GenericUnix::constructInvocation(const DynamicLinkJobAction &job,
 
    SmallString<128> polarphprtPath = sharedResourceDirPath;
    llvm::sys::path::append(polarphprtPath,
-                           polar::basic::get_major_architecture_name(getTriple()));
+                           polar::get_major_architecture_name(getTriple()));
    llvm::sys::path::append(polarphprtPath, "swiftrt.o");
    arguments.push_back(context.args.MakeArgString(polarphprtPath));
 

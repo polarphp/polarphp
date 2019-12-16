@@ -32,7 +32,7 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Support/SaveAndRestore.h"
 
-namespace polar::ast {
+namespace polar {
 
 using llvm::dyn_cast;
 using llvm::dyn_cast_or_null;
@@ -1139,4 +1139,4 @@ SourceLoc extractNearestSourceLoc(const IterableDeclContext *idc) {
    return extractNearestSourceLoc(idc->getDecl());
 }
 
-} // polar::ast
+} // polar

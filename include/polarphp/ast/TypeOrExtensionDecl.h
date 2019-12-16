@@ -5,8 +5,8 @@
 // Copyright (c) 2014 - 2017 Apple Inc. and the Swift project authors
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
-// See https://polar::ast.org/LICENSE.txt for license information
-// See https://polar::ast.org/CONTRIBUTORS.txt for the list of Swift project authors
+// See https://polar.org/LICENSE.txt for license information
+// See https://polar.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
 //===----------------------------------------------------------------------===//
 //
@@ -21,7 +21,7 @@
 #include "polarphp/ast/TypeAlignments.h"
 #include "llvm/ADT/PointerUnion.h"
 
-namespace polar::ast {
+namespace polar {
 
 /// Describes either a nominal type declaration or an extension
 /// declaration.
@@ -52,6 +52,6 @@ struct TypeOrExtensionDecl
   bool operator<(TypeOrExtensionDecl rhs) { return Decl < rhs.Decl; }
 };
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif

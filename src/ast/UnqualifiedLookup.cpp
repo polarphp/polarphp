@@ -39,10 +39,10 @@
 
 #define DEBUG_TYPE "namelookup"
 
-namespace polar::ast {
+namespace polar {
 using namespace namelookup;
 
-using polar::basic::indices;
+using polar::indices;
 
 namespace {
 
@@ -1449,4 +1449,4 @@ const unsigned UnqualifiedLookupFactory::targetLookup = ~0;
 
 #endif // NDEBUG
 
-} // polar::ast
+} // polar

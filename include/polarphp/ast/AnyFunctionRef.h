@@ -22,7 +22,7 @@
 #include "llvm/ADT/DenseMap.h"
 #include "llvm/ADT/PointerUnion.h"
 
-namespace polar::ast {
+namespace polar {
 class CaptureInfo;
 using llvm::dyn_cast_or_null;
 
@@ -264,6 +264,6 @@ private:
 #pragma warning(pop)
 #endif
 
-} // polar::ast
+} // polar
 
 #endif // POLARPHP_AST_ANY_FUNCTION_REF_H

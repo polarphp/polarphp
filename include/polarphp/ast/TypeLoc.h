@@ -21,7 +21,7 @@
 #include "polarphp/ast/Type.h"
 #include "llvm/ADT/PointerIntPair.h"
 
-namespace polar::ast {
+namespace polar {
 
 class AstContext;
 class TypeRepr;
@@ -83,6 +83,6 @@ public:
    }
 };
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif

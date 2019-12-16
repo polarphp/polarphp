@@ -24,7 +24,7 @@
 #include "polarphp/ast/Identifier.h"
 #include "polarphp/ast/Type.h"
 
-namespace polar::ast {
+namespace polar {
 class AstContext;
 class Decl;
 class Expr;
@@ -178,6 +178,6 @@ public:
    void print(llvm::raw_ostream &out) const override;
 };
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif // POLARPHP_AST_PRETTYSTACKTRACE

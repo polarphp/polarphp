@@ -31,7 +31,7 @@
 #endif
 #include "polarphp/basic/Malloc.h"
 
-namespace polar::basic {
+namespace polar {
 
 #ifdef __APPLE__
 using OnceToken_t = dispatch_once_t;
@@ -119,12 +119,12 @@ inline T &Lazy<T>::getWithInit(Arg1 &&arg1)
    return unsafeGetAlreadyInitialized();
 }
 
-} // polar::basic
+} // polar
 
 #define POLAR_LAZY_CONSTANT(INITIAL_VALUE) \
    ([]{ \
    using T = ::std::remove_reference<decltype(INITIAL_VALUE)>::type; \
-   static ::polar::basic::Lazy<T> TheLazy; \
+   static ::polar::Lazy<T> TheLazy; \
    return TheLazy.get([](void *valueAddr){ ::new(valueAddr) T{INITIAL_VALUE}; });\
    }())
 

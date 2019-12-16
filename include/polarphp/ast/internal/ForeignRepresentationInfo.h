@@ -18,7 +18,7 @@
 #include "llvm/ADT/PointerEmbeddedInt.h"
 #include "llvm/ADT/PointerIntPair.h"
 
-namespace polar::ast {
+namespace polar {
 
 class InterfaceConformance;
 
@@ -116,6 +116,6 @@ public:
   bool isRepresentableAsOptional() const;
 };
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif // POLARPHP_AST_INTERNAL_FOREIGN_REPRESENTATIONINFO_H

@@ -35,7 +35,7 @@ namespace llvm {
 class Regex;
 }
 
-namespace polar::kernel {
+namespace polar {
 
 using llvm::VersionTuple;
 using llvm::Triple;
@@ -43,7 +43,7 @@ using llvm::StringRef;
 using llvm::ArrayRef;
 using llvm::SmallVector;
 using llvm::SmallString;
-using polar::basic::CycleDiagnosticKind;
+using polar::CycleDiagnosticKind;
 
 /// Kind of implicit platform conditions.
 enum class PlatformConditionKind {
@@ -501,6 +501,6 @@ public:
   bool SolverEnableOperatorDesignatedTypes = false;
 };
 
-} // polar::kernel
+} // polar
 
 #endif // POLARPHP_KERNEL_LANGOPTIONS_H

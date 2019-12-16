@@ -43,9 +43,7 @@ namespace polar {
 namespace ast {
 class DiagnosticEngine;
 } // ast
-namespace basic {
 class SourceLoc;
-} // parser
 } // polar
 namespace llvm {
 class raw_ostream;
@@ -54,7 +52,7 @@ class raw_ostream;
 namespace polar::version {
 
 using polar::ast::DiagnosticEngine;
-using polar::basic::SourceLoc;
+using polar::SourceLoc;
 using llvm::SmallVector;
 using llvm::StringRef;
 using llvm::ArrayRef;

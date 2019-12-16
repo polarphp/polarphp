@@ -49,7 +49,7 @@ using namespace polar::driver;
 
 namespace polar::driver {
 
-using polar::basic::interleave;
+using polar::interleave;
 
 bool ToolChain::JobContext::shouldUseInputFileList() const
 {
@@ -1096,7 +1096,7 @@ void ToolChain::getClangLibraryPath(const ArgList &args,
    llvm::sys::path::remove_filename(libPath);
    llvm::sys::path::append(libPath, "clang", "lib",
                            triple.isOSDarwin() ? "darwin"
-                                               : polar::basic::get_platform_name_for_triple(triple));
+                                               : polar::get_platform_name_for_triple(triple));
 }
 
 /// Get the runtime library link path, which is platform-specific and found
@@ -1120,7 +1120,7 @@ void ToolChain::getResourceDirPath(SmallVectorImpl<char> &resourceDirPath,
                               shared ? "swift" : "swift_static");
    }
    llvm::sys::path::append(resourceDirPath,
-                           polar::basic::get_platform_name_for_triple(getTriple()));
+                           polar::get_platform_name_for_triple(getTriple()));
 }
 
 void ToolChain::getRuntimeLibraryPaths(SmallVectorImpl<std::string> &runtimeLibPaths,

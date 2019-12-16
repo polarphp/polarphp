@@ -48,6 +48,14 @@ class PILModule;
 using polar::ast::ValueDecl;
 using polar::ast::ModuleDecl;
 using polar::ast::AnyFunctionRef;
+using polar::ast::ResilienceExpansion;
+using polar::ast::CaptureInfo;
+using polar::ast::CapturedValue;
+using polar::ast::SubscriptDecl;
+using polar::ast::GenericSignature;
+using polar::ast::GenericEnvironment;
+using polar::abi::InterfaceDispatchStrategy;
+using polar::abi::InterfaceDescriptorFlags;
 
 namespace lowering {
 
@@ -80,16 +88,16 @@ inline CanAnyFunctionType adjustFunctionType(CanAnyFunctionType t,
 CanPILFunctionType
 adjustFunctionType(CanPILFunctionType type, PILFunctionType::ExtInfo extInfo,
                    ParameterConvention calleeConv,
-                   ProtocolConformanceRef witnessMethodConformance);
+                   InterfaceConformanceRef witnessMethodConformance);
 inline CanPILFunctionType
 adjustFunctionType(CanPILFunctionType type, PILFunctionType::ExtInfo extInfo,
-                   ProtocolConformanceRef witnessMethodConformance) {
+                   InterfaceConformanceRef witnessMethodConformance) {
    return adjustFunctionType(type, extInfo, type->getCalleeConvention(),
                              witnessMethodConformance);
 }
 inline CanPILFunctionType
 adjustFunctionType(CanPILFunctionType t, PILFunctionType::Representation rep,
-                   ProtocolConformanceRef witnessMethodConformance) {
+                   InterfaceConformanceRef witnessMethodConformance) {
    if (t->getRepresentation() == rep) return t;
    auto extInfo = t->getExtInfo().withRepresentation(rep);
    auto contextConvention = DefaultThickCalleeConvention;
@@ -260,7 +268,7 @@ public:
    void print(llvm::raw_ostream &os) const;
 
    /// Dump out the internal state of this type lowering to llvm::dbgs().
-   POLARPHP_DEBUG_DUMP;
+   POLAR_DEBUG_DUMP;
 
    RecursiveProperties getRecursiveProperties() const {
       return Properties;
@@ -680,7 +688,7 @@ class TypeConverter {
    // Types converted during foreign bridging.
 #define BRIDGING_KNOWN_TYPE(BridgedModule,BridgedType) \
   Optional<CanType> BridgedType##Ty;
-#include "polarphp/pil/lang/BridgedTypes.def"
+#include "polarphp/pil/lang/BridgedTypesDef.h"
 
    const Typelowering &
    getTypeloweringForLoweredType(AbstractionPattern origType,
@@ -696,7 +704,7 @@ class TypeConverter {
 
 public:
    ModuleDecl &M;
-   ASTContext &Context;
+   AstContext &Context;
 
    TypeConverter(ModuleDecl &m);
    ~TypeConverter();
@@ -714,10 +722,11 @@ public:
 
    /// Get the calling convention used by witnesses of a protocol.
    static PILFunctionTypeRepresentation
-   getProtocolWitnessRepresentation(ProtocolDecl *P) {
+   getInterfaceWitnessRepresentation(InterfaceDecl *P) {
       // ObjC protocols use the objc method convention.
-      if (P->isObjC())
-         return PILFunctionTypeRepresentation::ObjCMethod;
+      // @todo
+//      if (P->isObjC())
+//         return PILFunctionTypeRepresentation::ObjCMethod;
 
       // Native protocols use the witness calling convention.
       return PILFunctionTypeRepresentation::WitnessMethod;
@@ -727,15 +736,15 @@ public:
    PILFunctionTypeRepresentation getDeclRefRepresentation(PILDeclRef c);
 
    /// Get the method dispatch strategy for a protocol.
-   static ProtocolDispatchStrategy getProtocolDispatchStrategy(ProtocolDecl *P);
+   static InterfaceDispatchStrategy getInterfaceDispatchStrategy(InterfaceDecl *P);
 
    /// Count the total number of fields inside the given PIL Type
    unsigned countNumberOfFields(PILType Ty, TypeExpansionContext expansion);
 
    /// True if a protocol uses witness tables for dynamic dispatch.
-   static bool protocolRequiresWitnessTable(ProtocolDecl *P) {
-      return ProtocolDescriptorFlags::needsWitnessTable
-         (getProtocolDispatchStrategy(P));
+   static bool protocolRequiresWitnessTable(InterfaceDecl *P) {
+      return InterfaceDescriptorFlags::needsWitnessTable
+         (getInterfaceDispatchStrategy(P));
    }
 
    /// True if a type is passed indirectly at +0 when used as the "self"
@@ -750,7 +759,7 @@ public:
    }
 
    static bool isIndirectPlusZeroSelfParameter(PILType T) {
-      return isIndirectPlusZeroSelfParameter(T.getASTType());
+      return isIndirectPlusZeroSelfParameter(T.getAstType());
    }
 
    /// Lowers a context-independent Polarphp type to a PILType, and returns the PIL Typelowering
@@ -809,12 +818,12 @@ public:
    }
 
    CanType getLoweredRValueType(TypeExpansionContext context, Type t) {
-      return getLoweredType(t, context).getASTType();
+      return getLoweredType(t, context).getAstType();
    }
 
    CanType getLoweredRValueType(TypeExpansionContext context,
                                 AbstractionPattern origType, Type substType) {
-      return getLoweredType(origType, substType, context).getASTType();
+      return getLoweredType(origType, substType, context).getAstType();
    }
 
    AbstractionPattern getAbstractionPattern(AbstractStorageDecl *storage,

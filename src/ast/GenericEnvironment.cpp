@@ -19,7 +19,7 @@
 #include "polarphp/ast/GenericSignatureBuilder.h"
 #include "polarphp/ast/InterfaceConformance.h"
 
-namespace polar::ast {
+namespace polar {
 
 size_t GenericEnvironment::numTrailingObjects(OverloadToken <Type>) const {
    return Signature->getGenericParams().size();
@@ -220,4 +220,4 @@ GenericEnvironment::mapConformanceRefIntoContext(
    return {contextType, contextConformance};
 }
 
-} // polar::ast
+} // polar

@@ -37,15 +37,15 @@
 namespace llvm {
 class raw_ostream;
 }
-namespace polar::ast {
+namespace polar {
 class DiagnosticConsumer;
 }
 
-namespace polar::basic {
+namespace polar {
 class SourceManager;
 using llvm::raw_ostream;
 using llvm::StringRef;
-using polar::ast::DiagnosticConsumer;
+using polar::DiagnosticConsumer;
 /// SourceLoc in swift is just an SMLoc.  We define it as a different type
 /// (instead of as a typedef) just to remove the "getFromPointer" methods and
 /// enforce purity in the Swift codebase.
@@ -245,55 +245,55 @@ public:
    POLAR_DEBUG_DUMPER(dump(const SourceManager &SM));
 };
 
-} // polar::basic
+} // polar
 
 namespace llvm {
 template <typename T> struct DenseMapInfo;
 
-template <> struct DenseMapInfo<polar::basic::SourceLoc> {
-   static polar::basic::SourceLoc getEmptyKey() {
-      return polar::basic::SourceLoc(
+template <> struct DenseMapInfo<polar::SourceLoc> {
+   static polar::SourceLoc getEmptyKey() {
+      return polar::SourceLoc(
                SMLoc::getFromPointer(DenseMapInfo<const char *>::getEmptyKey()));
    }
 
-   static polar::basic::SourceLoc getTombstoneKey() {
+   static polar::SourceLoc getTombstoneKey() {
       // Make this different from empty key. See for context:
       // http://lists.llvm.org/pipermail/llvm-dev/2015-July/088744.html
-      return polar::basic::SourceLoc(
+      return polar::SourceLoc(
                SMLoc::getFromPointer(DenseMapInfo<const char *>::getTombstoneKey()));
    }
 
-   static unsigned getHashValue(const polar::basic::SourceLoc &Val) {
+   static unsigned getHashValue(const polar::SourceLoc &Val) {
       return DenseMapInfo<const void *>::getHashValue(
                Val.getOpaquePointerValue());
    }
 
-   static bool isEqual(const polar::basic::SourceLoc &LHS,
-                       const polar::basic::SourceLoc &RHS) {
+   static bool isEqual(const polar::SourceLoc &LHS,
+                       const polar::SourceLoc &RHS) {
       return LHS == RHS;
    }
 };
 
-template <> struct DenseMapInfo<polar::basic::SourceRange> {
-   static polar::basic::SourceRange getEmptyKey() {
-      return polar::basic::SourceRange(polar::basic::SourceLoc(
+template <> struct DenseMapInfo<polar::SourceRange> {
+   static polar::SourceRange getEmptyKey() {
+      return polar::SourceRange(polar::SourceLoc(
                                           SMLoc::getFromPointer(DenseMapInfo<const char *>::getEmptyKey())));
    }
 
-   static polar::basic::SourceRange getTombstoneKey() {
+   static polar::SourceRange getTombstoneKey() {
       // Make this different from empty key. See for context:
       // http://lists.llvm.org/pipermail/llvm-dev/2015-July/088744.html
-      return polar::basic::SourceRange(polar::basic::SourceLoc(
+      return polar::SourceRange(polar::SourceLoc(
                                           SMLoc::getFromPointer(DenseMapInfo<const char *>::getTombstoneKey())));
    }
 
-   static unsigned getHashValue(const polar::basic::SourceRange &Val) {
+   static unsigned getHashValue(const polar::SourceRange &Val) {
       return hash_combine(Val.start.getOpaquePointerValue(),
                           Val.end.getOpaquePointerValue());
    }
 
-   static bool isEqual(const polar::basic::SourceRange &LHS,
-                       const polar::basic::SourceRange &RHS) {
+   static bool isEqual(const polar::SourceRange &LHS,
+                       const polar::SourceRange &RHS) {
       return LHS == RHS;
    }
 };

@@ -29,11 +29,8 @@
 #include "polarphp/basic/StlExtras.h"
 #include <algorithm>
 
-using namespace polar::ast;
+using namespace polar;
 using namespace ast_scope;
-
-using polar::basic::indices;
-using polar::basic::interleave;
 
 #pragma mark dumping
 

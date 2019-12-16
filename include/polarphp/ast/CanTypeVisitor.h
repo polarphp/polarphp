@@ -20,7 +20,7 @@
 
 #include "polarphp/ast/Types.h"
 
-namespace polar::ast {
+namespace polar {
 
 /// This is a specialization of swift::TypeVisitor which:
 ///   - works only on canonical and fully-checked types and
@@ -68,6 +68,6 @@ public:
 #include "polarphp/ast/TypeNodesDef.h"
 };
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif

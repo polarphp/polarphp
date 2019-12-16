@@ -12,7 +12,7 @@
 #ifndef POLARPHP_BASIC_SANITIZERS_H
 #define POLARPHP_BASIC_SANITIZERS_H
 
-namespace polar::basic {
+namespace polar {
 
 // Enabling bitwise masking.
 enum class SanitizerKind : unsigned
@@ -21,6 +21,6 @@ enum class SanitizerKind : unsigned
 #include "polarphp/basic/SanitizersDef.h"
 };
 
-} // polar::basic
+} // polar
 
 #endif // POLARPHP_BASIC_SANITIZERS_H

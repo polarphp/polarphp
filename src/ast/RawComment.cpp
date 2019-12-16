@@ -26,12 +26,19 @@
 #include "polarphp/basic/PrimitiveParsing.h"
 #include "polarphp/basic/SourceMgr.h"
 #include "polarphp/markup/Markup.h"
-#include "polarphp/parser/Lexer.h"
+#include "polarphp/llparser/Lexer.h"
 #include "llvm/ADT/SmallString.h"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/Support/raw_ostream.h"
 
-namespace polar::ast {
+namespace polar {
+
+using polar::llparser::tok;
+using polar::llparser::Lexer;
+using polar::llparser::LexerMode;
+using polar::llparser::HashbangMode;
+using polar::llparser::CommentRetentionMode;
+using polar::llparser::TriviaRetentionMode;
 
 static SingleRawComment::CommentKind getCommentKind(StringRef Comment) {
    assert(Comment.size() >= 2);
@@ -101,32 +108,31 @@ static void addCommentToList(SmallVectorImpl<SingleRawComment> &Comments,
 }
 
 static RawComment toRawComment(AstContext &Context, CharSourceRange Range) {
-/// @todo
-//   if (Range.isInvalid())
-//      return RawComment();
-//
-//   auto &SourceMgr = Context.SourceMgr;
-//   unsigned BufferID = SourceMgr.findBufferContainingLoc(Range.getStart());
-//   unsigned Offset = SourceMgr.getLocOffsetInBuffer(Range.getStart(), BufferID);
-//   unsigned EndOffset = SourceMgr.getLocOffsetInBuffer(Range.getEnd(), BufferID);
-//   LangOptions FakeLangOpts;
-//   Lexer L(FakeLangOpts, SourceMgr, BufferID, nullptr, LexerMode::Swift,
-//           HashbangMode::Disallowed,
-//           CommentRetentionMode::ReturnAsTokens,
-//           TriviaRetentionMode::WithoutTrivia,
-//           Offset, EndOffset);
-//   SmallVector<SingleRawComment, 16> Comments;
-//   Token Tok;
-//   while (true) {
-//      L.lex(Tok);
-//      if (Tok.is(tok::eof))
-//         break;
-//      assert(Tok.is(tok::comment));
-//      addCommentToList(Comments, SingleRawComment(Tok.getRange(), SourceMgr));
-//   }
-//   RawComment Result;
-//   Result.Comments = Context.AllocateCopy(Comments);
-//   return Result;
+   if (Range.isInvalid())
+      return RawComment();
+
+   auto &SourceMgr = Context.SourceMgr;
+   unsigned BufferID = SourceMgr.findBufferContainingLoc(Range.getStart());
+   unsigned Offset = SourceMgr.getLocOffsetInBuffer(Range.getStart(), BufferID);
+   unsigned EndOffset = SourceMgr.getLocOffsetInBuffer(Range.getEnd(), BufferID);
+   LangOptions FakeLangOpts;
+   Lexer L(FakeLangOpts, SourceMgr, BufferID, nullptr, LexerMode::Polarphp,
+           HashbangMode::Disallowed,
+           CommentRetentionMode::ReturnAsTokens,
+           TriviaRetentionMode::WithoutTrivia,
+           Offset, EndOffset);
+   SmallVector<SingleRawComment, 16> Comments;
+   Token Tok;
+   while (true) {
+      L.lex(Tok);
+      if (Tok.is(tok::eof))
+         break;
+      assert(Tok.is(tok::comment));
+      addCommentToList(Comments, SingleRawComment(Tok.getRange(), SourceMgr));
+   }
+   RawComment Result;
+   Result.Comments = Context.AllocateCopy(Comments);
+   return Result;
 }
 
 RawComment Decl::getRawComment() const {
@@ -224,4 +230,4 @@ CharSourceRange RawComment::getCharSourceRange() {
    return CharSourceRange(Start, Length);
 }
 
-} // polar::ast
+} // polar

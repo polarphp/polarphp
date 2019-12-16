@@ -27,7 +27,7 @@
 #include "llvm/ADT/DenseMap.h"
 #include "llvm/Support/Mutex.h"
 
-namespace polar::basic {
+namespace polar {
 
 using llvm::StringRef;
 
@@ -52,10 +52,10 @@ struct DefaultCache
 };
 } // end anonymous namespace
 
-} // polar::basic
+} // polar
 
 namespace llvm {
-using polar::basic::DefaultCacheKey;
+using polar::DefaultCacheKey;
 
 template<>
 struct DenseMapInfo<DefaultCacheKey>
@@ -92,7 +92,7 @@ struct DenseMapInfo<DefaultCacheKey>
 };
 } // namespace llvm
 
-namespace polar::basic {
+namespace polar {
 
 CacheImpl::ImplTy CacheImpl::create(StringRef name, const CallBacks &callbacks)
 {
@@ -177,4 +177,4 @@ void CacheImpl::destroy()
    delete static_cast<DefaultCache*>(impl);
 }
 
-} // polar::basic
+} // polar

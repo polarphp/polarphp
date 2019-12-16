@@ -24,7 +24,7 @@
 
 #include <cstdint>
 
-namespace polar::ast {
+namespace polar {
 
 /// The kind of reference counting implementation a heap object uses.
 enum class ReferenceCounting : std::uint8_t

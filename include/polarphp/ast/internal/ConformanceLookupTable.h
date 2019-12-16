@@ -30,7 +30,7 @@
 #include "llvm/ADT/SetVector.h"
 #include <unordered_map>
 
-namespace polar::ast {
+namespace polar {
 
 class ExtensionDecl;
 class ModuleDecl;
@@ -485,6 +485,6 @@ public:
                                            InterfaceConformance * const *rhsPtr);
 };
 
-} // polar::ast
+} // polar
 
 #endif /* POLARPHP_AST_INTERNAL_CONFORMANCE_LOOKUP_TABLE_H */

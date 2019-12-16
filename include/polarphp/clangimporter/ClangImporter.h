@@ -28,7 +28,7 @@ namespace llvm {
 }
 
 namespace clang {
-  class AstContext;
+  class ASTContext;
   class CodeGenOptions;
   class Decl;
   class DependencyCollector;
@@ -44,7 +44,7 @@ namespace clang {
   class DeclarationName;
 }
 
-namespace polar::ast {
+namespace polar {
 class AstContext;
 class CompilerInvocation;
 class ClangModuleUnit;
@@ -68,29 +68,29 @@ namespace polar::clangimporter {
 
 class ClangImporterOptions;
 
-using polar::ast::ClangTypeKind;
-using polar::ast::AstContext;
-using polar::ast::CompilerInvocation;
-using polar::ast::ClangModuleUnit;
-using polar::ast::ClangNode;
-using polar::ast::Decl;
-using polar::ast::DeclContext;
-using polar::ast::EnumDecl;
-using polar::ast::ImportDecl;
-using polar::ast::IRGenOptions;
-using polar::ast::ModuleDecl;
-using polar::ast::NominalTypeDecl;
-using polar::ast::StructDecl;
-using polar::ast::TypeDecl;
-using polar::ast::VisibleDeclConsumer;
-using polar::ast::SelectorSplitKind;
-using polar::ast::DependencyTracker;
-using polar::ast::ClangModuleLoader;
-using polar::ast::Identifier;
-using polar::ast::SourceLoc;
-using polar::ast::DeclName;
-using polar::ast::ClassDecl;
-using polar::ast::AbstractFunctionDecl;
+using polar::ClangTypeKind;
+using polar::AstContext;
+using polar::CompilerInvocation;
+using polar::ClangModuleUnit;
+using polar::ClangNode;
+using polar::Decl;
+using polar::DeclContext;
+using polar::EnumDecl;
+using polar::ImportDecl;
+using polar::IRGenOptions;
+using polar::ModuleDecl;
+using polar::NominalTypeDecl;
+using polar::StructDecl;
+using polar::TypeDecl;
+using polar::VisibleDeclConsumer;
+using polar::SelectorSplitKind;
+using polar::DependencyTracker;
+using polar::ClangModuleLoader;
+using polar::Identifier;
+using polar::SourceLoc;
+using polar::DeclName;
+using polar::ClassDecl;
+using polar::AbstractFunctionDecl;
 
 /// Kinds of optional types.
 enum OptionalTypeKind : unsigned {

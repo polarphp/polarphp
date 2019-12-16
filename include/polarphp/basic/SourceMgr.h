@@ -40,7 +40,7 @@ namespace llvm {
 class MemoryBuffer;
 }
 
-namespace polar::basic {
+namespace polar {
 
 using llvm::IntrusiveRefCntPtr;
 using llvm::DenseMap;
@@ -292,6 +292,6 @@ private:
    }
 };
 
-} // polar::basic
+} // polar
 
 #endif // POLARPHP_BASIC_SOURCE_MGR_H

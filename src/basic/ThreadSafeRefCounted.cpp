@@ -22,6 +22,6 @@
 
 #include "polarphp/basic/ThreadSafeRefCounted.h"
 
-namespace polar::basic {
+namespace polar {
 void ThreadSafeRefCountedBaseVPTR::anchor() {}
-} // polar::basic
+} // polar

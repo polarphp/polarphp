@@ -17,7 +17,7 @@
 #include "polarphp/ast/TypeWalker.h"
 #include "polarphp/ast/TypeVisitor.h"
 
-namespace polar::ast {
+namespace polar {
 
 void TypeWalker::anchor() {}
 
@@ -246,4 +246,4 @@ bool Type::walk(TypeWalker &walker) const {
    return Traversal(walker).doIt(*this);
 }
 
-} // polar::ast
+} // polar

@@ -44,7 +44,7 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Support/CommandLine.h"
 
-namespace polar::ast::mangle {
+namespace polar::mangle {
 
 using namespace polar::mangling;
 using namespace polar::demangling;
@@ -2749,4 +2749,4 @@ std::string AstMangler::mangleOpaqueTypeDescriptor(const OpaqueTypeDecl *decl) {
    return finalize();
 }
 
-} // polar::ast::mangle
+} // polar::mangle

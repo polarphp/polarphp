@@ -38,7 +38,7 @@
 #include <numeric>
 #include <type_traits>
 
-namespace polar::basic {
+namespace polar {
 
 //===----------------------------------------------------------------------===//
 //                              Function Traits
@@ -765,6 +765,6 @@ struct is_instantiation_of<Template, Template<Args...>> : std::true_type {};
 template <typename> struct is_tuple: std::false_type {};
 template <typename ...T> struct is_tuple<std::tuple<T...>>: std::true_type {};
 
-} // polar::basic
+} // polar
 
 #endif // POLARPHP_BASIC_STLEXTRAS_H

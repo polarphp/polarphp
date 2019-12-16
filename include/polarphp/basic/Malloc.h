@@ -35,7 +35,7 @@
 #include <cstdlib>
 #endif
 
-namespace polar::basic {
+namespace polar {
 
 // FIXME: Use C11 aligned_alloc if available.
 inline void *aligned_alloc(size_t size, size_t align)
@@ -66,6 +66,6 @@ inline void aligned_free(void *p)
 #endif
 }
 
-} // polar::basic
+} // polar
 
 #endif // POLARPHP_BASIC_MALLOC_H

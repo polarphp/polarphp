@@ -25,7 +25,7 @@ namespace clang {
 class Type;
 }
 
-namespace polar::ast {
+namespace polar {
 /// Checks whether a Clang type can be imported as a Swift Optional type.
 ///
 /// For example, a `const uint8_t *` could be imported as

@@ -17,7 +17,7 @@
 #include "polarphp/ast/NameLookup.h"
 #include "llvm/Support/raw_ostream.h"
 
-namespace polar::ast::namelookup {
+namespace polar::namelookup {
 
 namespace {
 
@@ -259,4 +259,4 @@ void lookupVisibleDeclsInModule(
    lookup.lookupInModule(decls, moduleOrFile, accessPath, moduleScopeContext);
 }
 
-} // polar::ast::namelookup
+} // polar::namelookup

@@ -32,11 +32,9 @@
 #include "llvm/Support/Compiler.h"
 #include <algorithm>
 
-using namespace polar::ast;
+using namespace polar;
 using namespace namelookup;
 using namespace ast_scope;
-
-using polar::basic::up_cast;
 
 static bool isLocWithinAnInactiveClause(const SourceLoc loc, SourceFile *SF);
 

@@ -65,10 +65,10 @@ public:
    PILFunction *getParentFunction() const;
 
 #ifndef NDEBUG
-   POLARPHP_DEBUG_DUMPER(dump(SourceManager &SM,
+   POLAR_DEBUG_DUMPER(dump(SourceManager &SM,
                               llvm::raw_ostream &OS = llvm::errs(),
                               unsigned Indent = 0));
-   POLARPHP_DEBUG_DUMPER(dump(PILModule &Mod));
+   POLAR_DEBUG_DUMPER(dump(PILModule &Mod));
 #endif
 };
 

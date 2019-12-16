@@ -29,7 +29,7 @@
 #include <cstring>
 #include <utility>
 
-namespace polar::basic {
+namespace polar {
 
 template <typename T>
 class DiverseStackImpl;
@@ -548,15 +548,15 @@ public:
    }
 };
 
-} // end namespace polar::basic
+} // end namespace polar
 
 /// Allow stable_iterators to be put in things like TinyPtrVectors.
 namespace llvm {
 template <>
 struct PointerLikeTypeTraits<
-      polar::basic::DiverseStackBase::stable_iterator::AsPointer>
+      polar::DiverseStackBase::stable_iterator::AsPointer>
 {
-   using AsPointer = polar::basic::DiverseStackBase::stable_iterator::AsPointer;
+   using AsPointer = polar::DiverseStackBase::stable_iterator::AsPointer;
 public:
    static inline void *getAsVoidPointer(AsPointer ptr)
    {

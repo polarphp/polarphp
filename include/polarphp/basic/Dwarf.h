@@ -28,7 +28,7 @@
 
 #include "llvm/BinaryFormat/Dwarf.h"
 
-namespace polar::basic {
+namespace polar {
 /// The DWARF version emitted by the Swift compiler.
 const unsigned DWARFVersion = 4;
 static const char MachOASTSegmentName[] = "__POLARPHP";
@@ -36,6 +36,6 @@ static const char MachOASTSectionName[] = "__ast";
 static const char ELFASTSectionName[] = ".polarphp_ast";
 static const char COFFASTSectionName[] = "polarphpast";
 static const char WasmASTSectionName[] = ".polarphp_ast";
-} // polar::basic
+} // polar
 
 #endif // POLARPHP_BASIC_DWARF_H

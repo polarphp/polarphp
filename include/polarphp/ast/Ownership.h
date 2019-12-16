@@ -27,9 +27,9 @@
 #include <stdint.h>
 #include <assert.h>
 
-namespace polar::ast {
+namespace polar {
 
-using polar::basic::count_bits_used;
+using polar::count_bits_used;
 
 /// Different kinds of reference ownership supported by Swift.
 // This enum is used in diagnostics. If you add a case here, the diagnostics
@@ -139,6 +139,6 @@ enum class ValueOwnership : uint8_t {
 enum : unsigned { NumValueOwnershipBits =
                   count_bits_used(static_cast<unsigned>(ValueOwnership::Last_Kind)) };
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif // POLARPHP_AST_OWNERSHIP_H

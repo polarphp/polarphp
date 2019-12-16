@@ -26,7 +26,7 @@
 #include "llvm/ADT/Triple.h"
 #include "llvm/Support/VersionTuple.h"
 
-namespace polar::basic {
+namespace polar {
 
 bool triple_is_ios_simulator(const llvm::Triple &triple)
 {
@@ -374,6 +374,6 @@ get_runtime_compatibility_version_for_target(const llvm::Triple &triple){
    }
 }
 
-} // polar::basic
+} // polar
 
 

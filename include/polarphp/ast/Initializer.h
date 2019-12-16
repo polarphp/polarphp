@@ -23,7 +23,7 @@
 #include "polarphp/ast/DeclContext.h"
 #include "polarphp/ast/Decl.h"
 
-namespace polar::ast {
+namespace polar {
 class PatternBindingDecl;
 
 enum class InitializerKind : uint8_t {
@@ -196,6 +196,6 @@ public:
   }
 };
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif // POLARPHP_AST_INITIALIZER_H

@@ -21,6 +21,7 @@
 #include "polarphp/basic/Range.h"
 #include "polarphp/pil/lang/PILArgumentArrayRef.h"
 #include "polarphp/pil/lang/PILInstruction.h"
+#include "llvm/ADT/ilist.h"
 
 namespace polar::pil {
 
@@ -54,7 +55,7 @@ private:
    PILBasicBlock() : Parent(nullptr) {}
    void operator=(const PILBasicBlock &) = delete;
 
-   void operator delete(void *Ptr, size_t) SWIFT_DELETE_OPERATOR_DELETED
+   void operator delete(void *Ptr, size_t) POLAR_DELETE_OPERATOR_DELETED;
 
    PILBasicBlock(PILFunction *F, PILBasicBlock *relativeToBB, bool after);
 
@@ -182,10 +183,10 @@ public:
       const_phi_iterator;
 
    inline iterator_range<phi_iterator> phis() {
-      return make_range(phi_iterator(args_begin()), phi_iterator(args_end()));
+      return llvm::make_range(phi_iterator(args_begin()), phi_iterator(args_end()));
    }
    inline iterator_range<const_phi_iterator> phis() const {
-      return make_range(const_phi_iterator(args_begin()),
+      return llvm::make_range(const_phi_iterator(args_begin()),
                         const_phi_iterator(args_end()));
    }
 

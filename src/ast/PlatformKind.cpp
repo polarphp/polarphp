@@ -19,7 +19,7 @@
 #include "llvm/ADT/StringSwitch.h"
 #include "llvm/Support/ErrorHandling.h"
 
-namespace polar::ast {
+namespace polar {
 
 StringRef platformString(PlatformKind platform) {
   switch (platform) {
@@ -121,4 +121,4 @@ PlatformKind targetPlatform(LangOptions &LangOpts) {
   return PlatformKind::none;
 }
 
-} // polar::ast
+} // polar

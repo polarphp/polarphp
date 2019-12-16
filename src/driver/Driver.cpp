@@ -69,8 +69,8 @@
 
 namespace polar::driver {
 
-using namespace polar::basic;
-using namespace polar::ast;
+using namespace polar;
+using namespace polar;
 using namespace polar::version;
 using namespace llvm;
 using namespace llvm::opt;

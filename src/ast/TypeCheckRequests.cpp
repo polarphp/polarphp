@@ -25,9 +25,7 @@
 #include "polarphp/ast/Types.h"
 #include "polarphp/global/Subsystems.h"
 
-namespace polar::ast {
-
-using polar::basic::indices;
+namespace polar {
 
 // Implement the type checker type zone (zone 10).
 #define POLAR_TYPEID_ZONE TypeChecker
@@ -1270,4 +1268,4 @@ void TypeCheckSourceFileRequest::cacheResult(bool result) const {
    }
 }
 
-} // polar::ast
+} // polar

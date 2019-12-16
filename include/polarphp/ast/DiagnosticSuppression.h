@@ -20,7 +20,7 @@
 
 #include <vector>
 
-namespace polar::ast {
+namespace polar {
 
 class DiagnosticConsumer;
 class DiagnosticEngine;
@@ -40,5 +40,5 @@ public:
   static bool isEnabled(const DiagnosticEngine &diags);
 };
 
-} // polar::ast
+} // polar
 #endif // POLARPHP_AST_DIAGNOSTIC_SUPPRESSION_H

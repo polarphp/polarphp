@@ -42,11 +42,9 @@
 #include <functional>
 #include <iterator>
 
-namespace polar::ast {
+namespace polar {
 
 using llvm::dyn_cast_or_null;
-using polar::basic::interleave;
-using polar::basic::indices;
 
 #define TYPE(Id, _) \
   static_assert(std::is_trivially_destructible_v<Id##Type>, \
@@ -4876,4 +4874,4 @@ CanType substOpaqueTypesWithUnderlyingTypes(CanType ty,
    return ty.subst(replacer, replacer, flags)->getCanonicalType();
 }
 
-} // polar::ast
+} // polar

@@ -24,7 +24,7 @@
 #include "llvm/ADT/PointerIntPair.h"
 #include "llvm/Support/ErrorHandling.h"
 
-namespace polar::ast {
+namespace polar {
 
 /// Describes the kind of a requirement that occurs within a requirements
 /// clause.
@@ -176,6 +176,6 @@ inline void simple_display(llvm::raw_ostream &out, const Requirement &req) {
   req.print(out, PrintOptions());
 }
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif

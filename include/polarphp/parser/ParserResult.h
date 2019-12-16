@@ -27,7 +27,7 @@
 
 namespace polar::parser {
 
-using polar::basic::PointerIntPair;
+using polar::PointerIntPair;
 
 class ParserStatus;
 

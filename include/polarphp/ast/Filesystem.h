@@ -27,7 +27,7 @@
 #include "polarphp/ast/DiagnosticEngine.h"
 #include "polarphp/ast/DiagnosticsCommon.h"
 
-namespace polar::ast {
+namespace polar {
 
 /// A wrapper around swift::atomicallyWritingToFile that handles diagnosing any
 /// filesystem errors and asserts the output path is nonempty.
@@ -41,7 +41,7 @@ withOutputFile(DiagnosticEngine &diags, StringRef outputPath,
    assert(!outputPath.empty());
 
    bool actionFailed = false;
-   std::error_code errorCode = polar::basic::atomically_writing_to_file(
+   std::error_code errorCode = polar::atomically_writing_to_file(
             outputPath,
             [&](llvm::raw_pwrite_stream &out) { actionFailed = action(out); });
    if (errorCode) {
@@ -52,6 +52,6 @@ withOutputFile(DiagnosticEngine &diags, StringRef outputPath,
    return actionFailed;
 }
 
-} // polar::ast
+} // polar
 
 #endif // POLARPHP_AST_FILESYSTEM_H

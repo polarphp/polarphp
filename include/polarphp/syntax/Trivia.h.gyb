@@ -106,7 +106,7 @@ class AbsolutePosition;
 using llvm::StringRef;
 using llvm::FoldingSetNodeID;
 using llvm::raw_ostream;
-using polar::basic::OwnedString;
+using polar::OwnedString;
 
 /// The kind of source trivia, such as spaces, newlines, or comments.
 enum class TriviaKind : uint8_t
@@ -495,7 +495,7 @@ private:
 
 } // polar::syntax
 
-namespace polar::basic::bytetree {
+namespace polar::bytetree {
 
 using polar::syntax::TriviaKind;
 
@@ -569,7 +569,7 @@ struct ObjectTraits<syntax::TriviaPiece>
    }
 };
 
-} // polar::basic::bytetree
+} // polar::bytetree
 
 namespace llvm::yaml {
 
@@ -611,7 +611,7 @@ struct MappingTraits<polar::syntax::TriviaPiece>
          StringRef text;
          in.mapRequired("value", text);
          return polar::syntax::TriviaPiece(
-            kind, polar::basic::OwnedString::makeRefCounted(text));
+            kind, polar::OwnedString::makeRefCounted(text));
 <?php
       }
 ?>

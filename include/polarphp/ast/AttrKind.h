@@ -22,9 +22,9 @@
 #include "polarphp/global/Config.h"
 #include "llvm/Support/DataTypes.h"
 
-namespace polar::ast {
+namespace polar {
 
-using polar::basic::count_bits_used;
+using polar::count_bits_used;
 
 /// The associativity of a binary operator.
 enum class Associativity : uint8_t {
@@ -113,6 +113,6 @@ enum TypeAttrKind {
   TAK_Count
 };
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif

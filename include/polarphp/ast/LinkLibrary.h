@@ -26,7 +26,7 @@
 #include "llvm/ADT/SmallString.h"
 #include <string>
 
-namespace polar::ast {
+namespace polar {
 
 // Must be kept in sync with diag::error_immediate_mode_missing_library.
 enum class LibraryKind
@@ -70,6 +70,6 @@ private:
    unsigned m_forceLoad : 1;
 };
 
-} // polar::ast
+} // polar
 
 #endif // POLARPHP_AST_LINK_LIBRARY_H

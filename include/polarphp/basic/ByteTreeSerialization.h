@@ -34,7 +34,7 @@
 #include "polarphp/basic/ExponentialGrowthAppendingBinaryByteStream.h"
 #include <map>
 
-namespace polar::basic::bytetree {
+namespace polar::bytetree {
 
 using llvm::BinaryStreamWriter;
 using llvm::StringRef;
@@ -401,6 +401,6 @@ struct ObjectTraits<std::nullopt_t>
    }
 };
 
-} // polar::basic::bytetree
+} // polar::bytetree
 
 #endif // POLARPHP_BASIC_BYTETREESERIALIZATION_H

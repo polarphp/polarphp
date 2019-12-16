@@ -17,7 +17,7 @@
 #include <type_traits>
 #include <cstdint>
 
-namespace polar::basic {
+namespace polar {
 
 using llvm::None;
 
@@ -159,6 +159,6 @@ private:
    StorageType m_storage;
 };
 
-} // polar::basic
+} // polar
 
 #endif // POLARPHP_BASIC_OPTION_SET_H

@@ -30,7 +30,7 @@
 #include "llvm/Support/MemoryBuffer.h"
 #include "llvm/Support/raw_ostream.h"
 
-namespace polar::basic {
+namespace polar {
 
 void PrettyStackTraceStringAction::print(llvm::raw_ostream &out) const
 {
@@ -47,4 +47,4 @@ void PrettyStackTraceFileContents::print(llvm::raw_ostream &out) const
    out << "---\n";
 }
 
-} // polar::basic
+} // polar

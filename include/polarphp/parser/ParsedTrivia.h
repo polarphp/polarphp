@@ -31,10 +31,10 @@ enum class TriviaKind : uint8_t;
 struct Trivia;
 } // polar::syntax
 
-namespace polar::basic {
+namespace polar {
 class SourceLoc;
 class SourceManager;
-} // polar::basic
+} // polar
 
 namespace polar::parser {
 
@@ -42,8 +42,8 @@ using polar::syntax::Trivia;
 using polar::syntax::TriviaKind;
 using llvm::ArrayRef;
 using llvm::SmallVector;
-using polar::basic::SourceLoc;
-using polar::basic::SourceManager;
+using polar::SourceLoc;
+using polar::SourceManager;
 
 class ParsedTriviaPiece
 {

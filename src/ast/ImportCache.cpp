@@ -22,7 +22,7 @@
 #include "polarphp/ast/ImportCache.h"
 #include "polarphp/ast/Module.h"
 
-namespace polar::ast {
+namespace polar {
 using namespace namelookup;
 
 ImportSet::ImportSet(bool hasHeaderImportModule,
@@ -301,4 +301,4 @@ namelookup::getAllImports(const DeclContext *dc) {
       .getAllImports();
 }
 
-} // polar::ast
+} // polar

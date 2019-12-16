@@ -15,22 +15,17 @@
 
 #include "polarphp/ast/AstNode.h"
 #include "polarphp/basic/LLVM.h"
+#include "polarphp/basic/SourceMgr.h"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/ADT/SmallVector.h"
 
-namespace polar::basic {
-class SourceManager;
-} // polar::basic
-
-namespace polar::ast {
-
-using polar::basic::SourceManager;
+namespace polar {
 
 /// Extracts the text of this ASTNode from the source buffer, ignoring
 /// all #if declarations and clauses except the elements that are active.
 StringRef extractInlinableText(SourceManager &sourceMgr, AstNode node,
                                SmallVectorImpl<char> &scratch);
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif // POLARPHP_AST_INTERNAL_INLINABLETEXT_H

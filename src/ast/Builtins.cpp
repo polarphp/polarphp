@@ -30,7 +30,8 @@
 #include "llvm/IR/LLVMContext.h"
 #include <tuple>
 
-namespace polar::ast {
+namespace polar {
+
 using llvm::SmallVectorImpl;
 
 struct BuiltinExtraInfoTy {
@@ -2182,4 +2183,4 @@ StringRef BuiltinType::getTypeName(SmallVectorImpl<char> &result,
 
    return printer.str();
 }
-} // polar::ast
+} // polar

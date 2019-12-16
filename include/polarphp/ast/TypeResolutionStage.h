@@ -28,7 +28,7 @@ namespace llvm {
 class raw_ostream;
 }
 
-namespace polar::ast {
+namespace polar {
 
 /// Describes the stage at which a particular type should be computed.
 ///
@@ -53,6 +53,6 @@ enum class TypeResolutionStage : std::uint8_t
 /// Display a type resolution stage.
 void simple_display(llvm::raw_ostream &out, const TypeResolutionStage &value);
 
-} // polar::ast
+} // polar
 
 #endif // POLARPHP_AST_TYPE_RESOLUTION_STAGE_H

@@ -38,7 +38,7 @@ namespace llvm {
 class raw_ostream;
 }
 
-namespace polar::ast {
+namespace polar {
 class AbstractFunctionDecl;
 class GenericEnvironment;
 class AstContext;
@@ -71,7 +71,7 @@ class SerializedDefaultArgumentInitializer;
 class SerializedTopLevelCodeDecl;
 class StructDecl;
 
-using polar::basic::SourceLoc;
+using polar::SourceLoc;
 using llvm::iterator_range;
 
 namespace serialization {
@@ -861,20 +861,20 @@ SourceLoc extractNearestSourceLoc(const DeclContext *dc);
 /// Extract the source location from the given declaration context.
 SourceLoc extractNearestSourceLoc(const IterableDeclContext *idc);
 
-} // end namespace polar::ast
+} // end namespace polar
 
 namespace llvm {
 template<class FromTy>
-struct cast_convert_val< ::polar::ast::DeclContext, FromTy, FromTy> {
-   static ::polar::ast::DeclContext *doit(const FromTy &Val) {
-      return ::polar::ast::DeclContext::castDeclToDeclContext(Val);
+struct cast_convert_val< ::polar::DeclContext, FromTy, FromTy> {
+   static ::polar::DeclContext *doit(const FromTy &Val) {
+      return ::polar::DeclContext::castDeclToDeclContext(Val);
    }
 };
 
 template<class FromTy>
-struct cast_convert_val< ::polar::ast::IterableDeclContext, FromTy, FromTy> {
-   static ::polar::ast::IterableDeclContext *doit(const FromTy &Val) {
-      return ::polar::ast::IterableDeclContext::castDeclToIterableDeclContext(Val);
+struct cast_convert_val< ::polar::IterableDeclContext, FromTy, FromTy> {
+   static ::polar::IterableDeclContext *doit(const FromTy &Val) {
+      return ::polar::IterableDeclContext::castDeclToIterableDeclContext(Val);
    }
 };
 }

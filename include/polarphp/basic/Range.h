@@ -53,7 +53,7 @@
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/STLExtras.h"
 
-namespace polar::basic {
+namespace polar {
 
 using llvm::make_range;
 using llvm::iterator_range;
@@ -247,6 +247,6 @@ decltype(llvm::reverse(range(start+1, end+1))) {
    return llvm::reverse(range(start+1, end+1));
 }
 
-} // polar::basic
+} // polar
 
 #endif // POLARPHP_BASIC_RANGE_H

@@ -35,7 +35,7 @@
 #include <string>
 #include <vector>
 
-namespace polar::ast {
+namespace polar {
 
 enum class Zone : uint8_t {
    C                       = 0,
@@ -76,6 +76,6 @@ constexpr uint64_t formTypeID(uint8_t zone, uint8_t type) {
 #define POLAR_TYPEID_HEADER "polarphp/basic/CTypeIdZoneDefs.h"
 #include "polarphp/basic/DefineTypeIdZone.h"
 
-} // polar::ast
+} // polar
 
 #endif // POLARPHP_BASIC_TYPEID_H

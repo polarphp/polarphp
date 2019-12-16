@@ -37,7 +37,7 @@ namespace llvm {
 struct fltSemantics;
 }
 
-namespace polar::ast {
+namespace polar {
 enum class AccessKind : unsigned char;
 class ArchetypeType;
 class AstContext;
@@ -67,8 +67,8 @@ class EnumElementDecl;
 class CallExpr;
 class KeyPathExpr;
 
-using polar::basic::count_bits_used;
-using polar::basic::bitmax;
+using polar::count_bits_used;
+using polar::bitmax;
 using llvm::isa;
 using llvm::cast;
 using llvm::dyn_cast;
@@ -125,7 +125,7 @@ enum class AccessSemantics : uint8_t
    Ordinary,
 };
 
-/// Expr - Base class for all expressions in polar::ast.
+/// Expr - Base class for all expressions in polar.
 class alignas(8) Expr {
    Expr(const Expr &) = delete;
 
@@ -5447,6 +5447,6 @@ void simple_display(llvm::raw_ostream &out, const DefaultArgumentExpr *expr);
 
 SourceLoc extractNearestSourceLoc(const DefaultArgumentExpr *expr);
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif

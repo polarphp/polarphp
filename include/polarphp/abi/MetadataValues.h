@@ -29,6 +29,9 @@
 
 namespace polar::abi {
 
+using polar::ast::ValueOwnership;
+using polar::FlagSet;
+
 enum {
    /// The number of words (pointers) in a value buffer.
       NumWords_ValueBuffer = 3,
@@ -68,7 +71,7 @@ enum class MetadataKind : uint32_t {
 #define METADATAKIND(name, value) name = value,
 #define ABSTRACTMETADATAKIND(name, start, end)                                 \
   name##_Start = start, name##_End = end,
-#include "MetadataKind.def"
+#include "polarphp/abi/MetaDataKindDef.h"
 
    /// The largest possible non-isa-pointer metadata kind value.
    ///
@@ -107,7 +110,7 @@ StringRef getStringForMetadataKind(MetadataKind kind);
 /// Kinds of Swift nominal type descriptor records.
 enum class NominalTypeKind : uint32_t {
 #define NOMINALTYPEMETADATAKIND(name, value) name = value,
-#include "MetadataKind.def"
+#include "polarphp/abi/MetaDataKindDef.h"
 };
 
 /// The maximum supported type alignment.
@@ -258,7 +261,7 @@ enum class ClassFlags : uint32_t {
    /// Is this a Swift class from the Darwin pre-stable ABI?
    /// This bit is clear in stable ABI Swift classes.
    /// The Objective-C runtime also reads this bit.
-      IsSwiftPreStableABI = 0x1,
+      IsPolarphpPreStableABI = 0x1,
 
    /// Does this class use Swift refcounting?
       UsesSwiftRefcounting = 0x2,
@@ -405,7 +408,7 @@ enum class InterfaceDispatchStrategy: uint8_t {
 class InterfaceDescriptorFlags {
    typedef uint32_t int_type;
    enum : int_type {
-      IsSwift           =   1U <<  0U,
+      IsPolarphp           =   1U <<  0U,
       ClassConstraint   =   1U <<  1U,
 
       DispatchStrategyMask  = 0xFU << 2U,
@@ -426,7 +429,7 @@ class InterfaceDescriptorFlags {
 public:
    constexpr InterfaceDescriptorFlags() : Data(0) {}
    constexpr InterfaceDescriptorFlags withSwift(bool s) const {
-      return InterfaceDescriptorFlags((Data & ~IsSwift) | (s ? IsSwift : 0));
+      return InterfaceDescriptorFlags((Data & ~IsPolarphp) | (s ? IsPolarphp : 0));
    }
    constexpr InterfaceDescriptorFlags withClassConstraint(
       InterfaceClassConstraint c) const {
@@ -448,7 +451,7 @@ public:
    }
 
    /// Was the protocol defined in Swift 1 or 2?
-   bool isSwift() const { return Data & IsSwift; }
+   bool isSwift() const { return Data & IsPolarphp; }
 
    /// Is the protocol class-constrained?
    InterfaceClassConstraint getClassConstraint() const {
@@ -474,7 +477,7 @@ public:
             return true;
       }
 
-      swift_runtime_unreachable("Unhandled InterfaceDispatchStrategy in switch.");
+      polarphp_runtime_unreachable("Unhandled InterfaceDispatchStrategy in switch.");
    }
 
    /// Return the identifier if this is a special runtime-known protocol.

@@ -16,7 +16,7 @@
 #include "polarphp/ast/Identifier.h"
 #include "llvm/ADT/DenseMap.h"
 
-namespace polar::ast {
+namespace polar {
 
 class NominalTypeDecl;
 
@@ -41,6 +41,6 @@ private: \
 #undef TRACKED_SET
 };
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif // POLARPHP_REFERENCED_NAME_TRACKER_H

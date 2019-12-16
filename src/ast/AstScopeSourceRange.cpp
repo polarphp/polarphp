@@ -32,7 +32,7 @@
 #include "llvm/Support/Compiler.h"
 #include <algorithm>
 
-using namespace polar::ast;
+using namespace polar;
 using namespace ast_scope;
 
 static SourceLoc getStartOfFirstParam(ClosureExpr *closure);

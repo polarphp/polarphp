@@ -16,10 +16,10 @@
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/SmallVector.h"
 
-namespace polar::basic {
+namespace polar {
 class SourceLoc;
 class SourceManager;
-} // polar::basic
+} // polar
 
 namespace polar::llparser {
 

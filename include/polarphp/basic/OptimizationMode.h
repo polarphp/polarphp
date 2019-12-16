@@ -15,7 +15,7 @@
 #include "polarphp/basic/InlineBitfield.h"
 #include "llvm/Support/DataTypes.h"
 
-namespace polar::basic {
+namespace polar {
 // The optimization mode specified on the command line or with function
 // attributes.
 enum class OptimizationMode : uint8_t
@@ -33,6 +33,6 @@ enum : unsigned
    count_bits_used(static_cast<unsigned>(OptimizationMode::LastMode))
 };
 
-} // polar::basic
+} // polar
 
 #endif // POLARPHP_BASIC_OPTIMIZATION_MODE_H

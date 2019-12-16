@@ -25,13 +25,15 @@
 
 namespace polar::pil {
 
+using polar::TransformRange;
+
 class PILArgument;
 
 #define ARGUMENT(NAME, PARENT)                                                 \
   class NAME;                                                                  \
   using NAME##ArrayRef =                                                       \
       TransformRange<ArrayRef<PILArgument *>, NAME *(*)(PILArgument *)>;
-#include "polarphp/pil/lang/PILNodes.def"
+#include "polarphp/pil/lang/PILNodesDef.h"
 
 } // namespace polar::pil
 

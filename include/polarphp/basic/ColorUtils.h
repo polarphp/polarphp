@@ -31,7 +31,7 @@
 
 #include "llvm/Support/raw_ostream.h"
 
-namespace polar::basic {
+namespace polar {
 
 using llvm::raw_ostream;
 using llvm::StringRef;
@@ -73,6 +73,6 @@ private:
    bool m_hasColors;
 };
 
-} // polar::basic
+} // polar
 
 #endif // POLARPHP_BASIC_COLORUTILS_H

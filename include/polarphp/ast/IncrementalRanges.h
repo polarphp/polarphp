@@ -24,20 +24,20 @@
 #include "llvm/Support/YAMLTraits.h"
 #include <vector>
 
-namespace polar::basic {
+namespace polar {
 class SourceManager;
-} // namespace polar::basic
+} // namespace polar
 
 //==============================================================================
 // MARK: Range types
 //==============================================================================
 
-namespace polar::ast {
+namespace polar {
 class DiagnosticEngine;
 class SourceFile;
-using polar::basic::CharSourceRange;
-using polar::basic::SourceManager;
-using polar::basic::SourceLoc;
+using polar::CharSourceRange;
+using polar::SourceManager;
+using polar::SourceLoc;
 
 namespace incremental_ranges {
 
@@ -46,12 +46,12 @@ struct SerializableSourceRange;
 typedef std::vector<SerializableSourceRange> Ranges;
 typedef std::map<std::string, Ranges> RangesByFilename;
 } // namespace incremental_ranges
-} // namespace polar::ast
+} // namespace polar
 
 //==============================================================================
 // MARK: SerializableSourceLocation
 //==============================================================================
-namespace polar::ast {
+namespace polar {
 namespace incremental_ranges {
 
 /// A source location that can be written from the frontend and read by the
@@ -82,15 +82,15 @@ struct SerializableSourceLocation {
 };
 
 } // namespace incremental_ranges
-} // namespace polar::ast
+} // namespace polar
 
 template <>
 struct llvm::yaml::MappingTraits<
-      polar::ast::incremental_ranges::SerializableSourceLocation> {
+      polar::incremental_ranges::SerializableSourceLocation> {
    static const bool flow = true;
    static void
    mapping(llvm::yaml::IO &io,
-           polar::ast::incremental_ranges::SerializableSourceLocation &loc) {
+           polar::incremental_ranges::SerializableSourceLocation &loc) {
       io.mapRequired("line", loc.line), io.mapRequired("column", loc.column);
    }
 };
@@ -98,7 +98,7 @@ struct llvm::yaml::MappingTraits<
 // MARK: SerializableSourceRange
 //==============================================================================
 
-namespace polar::ast {
+namespace polar {
 namespace incremental_ranges {
 /// A range in the source, that can be written by the frontend and read by the
 /// driver. Half-open, to facilitate representing empty ranges. In other words,
@@ -146,15 +146,15 @@ struct SerializableSourceRange {
 };
 
 } // namespace incremental_ranges
-} // namespace polar::ast
+} // namespace polar
 
 
 template <>
 struct llvm::yaml::MappingTraits<
-      polar::ast::incremental_ranges::SerializableSourceRange> {
+      polar::incremental_ranges::SerializableSourceRange> {
    static const bool flow = true;
    static void mapping(llvm::yaml::IO &io,
-                       polar::ast::incremental_ranges::SerializableSourceRange &sr) {
+                       polar::incremental_ranges::SerializableSourceRange &sr) {
       io.mapRequired("start", sr.start);
       io.mapRequired("end", sr.end);
    }
@@ -164,7 +164,7 @@ struct llvm::yaml::MappingTraits<
 // MARK: PolarphpRangesFileContents
 //==============================================================================
 
-namespace polar::ast {
+namespace polar {
 namespace incremental_ranges {
 
 /// The complete contents of the file written by the frontend and read by the
@@ -190,27 +190,27 @@ struct PolarphpRangesFileContents {
    static constexpr const char *header = "### Swift source ranges file v0 ###\n";
 };
 } // namespace incremental_ranges
-} // namespace polar::ast
+} // namespace polar
 
 template <>
 struct llvm::yaml::MappingTraits<
-      polar::ast::incremental_ranges::PolarphpRangesFileContents> {
+      polar::incremental_ranges::PolarphpRangesFileContents> {
    static void
    mapping(llvm::yaml::IO &io,
-           polar::ast::incremental_ranges::PolarphpRangesFileContents &srfc) {
+           polar::incremental_ranges::PolarphpRangesFileContents &srfc) {
       io.mapRequired("noninlinableFunctionBodies",
                      srfc.noninlinableFunctionBodies);
    }
 };
 
-LLVM_YAML_IS_SEQUENCE_VECTOR(polar::ast::incremental_ranges::SerializableSourceRange)
-LLVM_YAML_IS_STRING_MAP(polar::ast::incremental_ranges::Ranges)
-LLVM_YAML_IS_STRING_MAP(polar::ast::incremental_ranges::RangesByFilename)
+LLVM_YAML_IS_SEQUENCE_VECTOR(polar::incremental_ranges::SerializableSourceRange)
+LLVM_YAML_IS_STRING_MAP(polar::incremental_ranges::Ranges)
+LLVM_YAML_IS_STRING_MAP(polar::incremental_ranges::RangesByFilename)
 
 //==============================================================================
 // MARK: PolarphpRangesEmitter
 //==============================================================================
-namespace polar::ast {
+namespace polar {
 namespace incremental_ranges {
 /// Gathers up the information from the frontend, processes it, and writes it.
 class PolarphpRangesEmitter {
@@ -250,12 +250,12 @@ private:
                                          CharSourceRange next) const;
 };
 } // namespace incremental_ranges
-} // namespace polar::ast
+} // namespace polar
 
 //==============================================================================
 // MARK: CompiledSourceEmitter
 //==============================================================================
-namespace polar::ast {
+namespace polar {
 namespace incremental_ranges {
 /// The class that writes out the unchanged source code in the primary input so
 /// that the driver can diff it later, after the user has changed the file.
@@ -277,6 +277,6 @@ public:
 };
 
 } // namespace incremental_ranges
-} // namespace polar::ast
+} // namespace polar
 
 #endif // POLARPHP_AST_INCREMENTALRANGES_H

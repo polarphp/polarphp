@@ -52,7 +52,7 @@ struct EnumElementInfo;
 class SourceFile;
 }
 
-namespace polar::basic {
+namespace polar {
 class SourceManager;
 }
 
@@ -68,7 +68,7 @@ enum class SyntaxKind;
 class PersistentParserState;
 class PILParserTUStateBase;
 
-using polar::basic::OptionSet;
+using polar::OptionSet;
 using namespace polar::ast;
 
 // @todo

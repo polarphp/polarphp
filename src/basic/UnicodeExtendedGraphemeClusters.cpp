@@ -14,7 +14,7 @@
 
 #include "polarphp/basic/Unicode.h"
 
-namespace polar::basic::unicode {
+namespace polar::unicode {
 
 /// @todo use gyb to generate unicode data
 
@@ -27,6 +27,6 @@ const uint16_t ExtendedGraphemeClusterNoBoundaryRulesMatrix[] = {
    1
 };
 
-} // polar::basic::unicode
+} // polar::unicode
 
 

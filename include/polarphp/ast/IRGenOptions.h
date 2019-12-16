@@ -34,12 +34,12 @@
 #include <string>
 #include <vector>
 
-namespace polar::ast {
+namespace polar {
 
-using polar::basic::OptimizationMode;
-using polar::basic::OptionSet;
-using polar::basic::SanitizerKind;
-using polar::basic::PathRemapper;
+using polar::OptimizationMode;
+using polar::OptionSet;
+using polar::SanitizerKind;
+using polar::PathRemapper;
 
 enum class IRGenOutputKind : unsigned
 {
@@ -308,6 +308,6 @@ public:
    }
 };
 
-} // polar::ast
+} // polar
 
 #endif // POLARPHP_AST_IRGEN_OPTIONS_H

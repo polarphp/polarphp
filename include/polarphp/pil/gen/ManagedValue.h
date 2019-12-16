@@ -444,12 +444,12 @@ public:
 } // namespace lowering
 } // namespace polar::pil
 
-namespace polar::basic {
+namespace polar {
 
 template <typename To> inline bool isa(const polar::pil::lowering::ManagedValue &M) {
    return isa<To>(M.getValue());
 }
 
-} // end namespace polar::basic
+} // end namespace polar
 
 #endif // POLARPHP_PIL_GEN_MANAGEDVALUE_H

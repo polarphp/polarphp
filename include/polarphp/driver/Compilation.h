@@ -56,8 +56,8 @@ using polar::ast::DiagnosticEngine;
 using llvm::opt::InputArgList;
 using llvm::opt::DerivedArgList;
 using polar::sys::TaskQueue;
-using polar::basic::ArrayRefView;
-using polar::basic::UnifiedStatsReporter;
+using polar::ArrayRefView;
+using polar::UnifiedStatsReporter;
 
 class Driver;
 class ToolChain;

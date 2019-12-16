@@ -22,7 +22,7 @@
 #include "polarphp/ast/Type.h"
 #include "llvm/ADT/SmallVector.h"
 
-namespace polar::ast {
+namespace polar {
 
 class InterfaceDecl;
 class InterfaceType;

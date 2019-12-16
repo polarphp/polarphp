@@ -28,7 +28,7 @@
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/ADT/TinyPtrVector.h"
 
-namespace polar::ast {
+namespace polar {
 
 class AbstractStorageDecl;
 class AccessorDecl;
@@ -2012,6 +2012,6 @@ void simple_display(llvm::raw_ostream &out, FunctionBuilderClosurePreCheck pck);
 #include "polarphp/ast/TypeCheckerTypeIDZoneDef.h"
 #undef POLAR_REQUEST
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif // POLARPHP_TYPE_CHECK_REQUESTS_H

@@ -21,7 +21,7 @@
 
 namespace polar::parser::internal {
 
-using namespace polar::basic;
+using namespace polar;
 
 #define POLAR_IS_OCT(c)  ((c)>='0' && (c)<='7')
 

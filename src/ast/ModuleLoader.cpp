@@ -22,7 +22,7 @@ namespace llvm {
 class FileCollector;
 }
 
-namespace polar::ast {
+namespace polar {
 
 using polar::clangimporter::ClangImporter;
 
@@ -56,4 +56,4 @@ DependencyTracker::getClangCollector() {
    return clangCollector;
 }
 
-} // namespace polar::ast
+} // namespace polar

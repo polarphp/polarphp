@@ -24,7 +24,7 @@
 #include "llvm/ADT/DenseMap.h"
 #include "polarphp/basic/LLVM.h"
 
-namespace polar::basic {
+namespace polar {
 
 struct WidthPreservingAPIntDenseMapInfo {
   // For the special values, we use -1 with a bit-width that isn't minimal
@@ -49,6 +49,6 @@ struct WidthPreservingAPIntDenseMapInfo {
 template <class Value>
 using APIntMap = llvm::DenseMap<APInt, Value, WidthPreservingAPIntDenseMapInfo>;
 
-} // polar::basic
+} // polar
 
 #endif

@@ -28,7 +28,7 @@
 #include "llvm/ADT/SmallString.h"
 #include <cache.h>
 
-namespace polar::basic {
+namespace polar {
 
 using llvm::StringRef;
 
@@ -87,4 +87,4 @@ void CacheImpl::destroy()
    cache_destroy(static_cast<cache_t*>(impl));
 }
 
-} // polar::basic
+} // polar

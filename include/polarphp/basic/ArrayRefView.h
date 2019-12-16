@@ -31,7 +31,7 @@
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/Support/Casting.h"
 
-namespace polar::basic {
+namespace polar {
 
 /// An adapter for iterating over a range of values as a range of
 /// values of a different type.
@@ -281,6 +281,6 @@ template<typename Orig, typename Projected>
 using CastArrayRefView =
 ArrayRefView<Orig, Projected *, array_ref_view_cast_helper<Projected, Orig>>;
 
-} // polar::basic
+} // polar
 
 #endif // POLARPHP_BASIC_ARRAYREF_VIEW_H

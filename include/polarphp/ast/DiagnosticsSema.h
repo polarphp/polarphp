@@ -20,7 +20,7 @@
 
 #include "polarphp/ast/DiagnosticsCommon.h"
 
-namespace polar::ast {
+namespace polar {
 class SwitchStmt;
 namespace diag {
 
@@ -39,6 +39,6 @@ enum class RequirementKind : uint8_t {
     extern internal::StructuredFixItWithArguments<void Signature>::type ID;
 #include "polarphp/ast/DiagnosticsSemaDefs.h"
 } //diag
-} // polar::ast
+} // polar
 
 #endif // POLARPHP_AST_DIAGNOSTICSSEMA_H

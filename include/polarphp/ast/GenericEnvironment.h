@@ -36,7 +36,7 @@
 #include "llvm/Support/TrailingObjects.h"
 #include <utility>
 
-namespace polar::ast {
+namespace polar {
 
 
 class ArchetypeType;
@@ -174,6 +174,6 @@ void dump(raw_ostream &os) const;
 POLAR_DEBUG_DUMP;
 };
 
-} // polar::ast
+} // polar
 
 #endif // POLARPHP_AST_GENERIC_ENVIRONMENT_H

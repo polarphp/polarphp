@@ -26,11 +26,11 @@
 #include <string>
 #include <climits>
 
-namespace polar::ast {
+namespace polar {
 
-using polar::basic::OptimizationMode;
-using polar::basic::OptionSet;
-using polar::basic::SanitizerKind;
+using polar::OptimizationMode;
+using polar::OptionSet;
+using polar::SanitizerKind;
 
 class PILOptions {
 public:
@@ -178,6 +178,6 @@ public:
   bool hasMultipleIGMs() const { return hasMultipleIRGenThreads(); }
 };
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif // POLARPHP_AST_PIL_OPTIONS_H

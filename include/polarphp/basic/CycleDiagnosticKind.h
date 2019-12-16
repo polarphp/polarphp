@@ -27,7 +27,7 @@
 #ifndef POLARPHP_BASIC_CYCLE_DIAGNOSTIC_KIND_H
 #define POLARPHP_BASIC_CYCLE_DIAGNOSTIC_KIND_H
 
-namespace polar::basic {
+namespace polar {
 
 /// How to diagnose cycles when they are encountered during evaluation.
 enum class CycleDiagnosticKind
@@ -40,6 +40,6 @@ enum class CycleDiagnosticKind
    DebugDiagnose,
 };
 
-} // polar::basic
+} // polar
 
 #endif // POLARPHP_BASIC_CYCLE_DIAGNOSTIC_KIND_H

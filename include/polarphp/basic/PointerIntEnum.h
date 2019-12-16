@@ -33,7 +33,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace polar::basic {
+namespace polar {
 
 /// A tiny meta function to compute the log2 of a compile time constant.
 ///
@@ -255,6 +255,6 @@ public:
    }
 };
 
-} // polar::basic
+} // polar
 
 #endif // POLARPHP_BASIC_POINTERINTENUM_H

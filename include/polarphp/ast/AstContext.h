@@ -49,26 +49,17 @@ class Module;
 class ObjCInterfaceDecl;
 }
 
-namespace polar::basic {
-class SourceManager;
-class UnifiedStatsReporter;
-class SourceLoc;
-}
-
 namespace polar::syntax {
 class SyntaxArena;
 }
 
-namespace polar::ast {
+namespace polar {
 
-using polar::basic::SourceManager;
-using polar::basic::UnifiedStatsReporter;
-using polar::basic::SourceLoc;
-using polar::basic::aligned_alloc;
 using polar::syntax::SyntaxArena;
-using polar::kernel::LangOptions;
-using polar::kernel::TypeCheckerOptions;
 
+class SourceManager;
+class UnifiedStatsReporter;
+class SourceLoc;
 class AbstractFunctionDecl;
 class AstContext;
 enum class Associativity : unsigned char;
@@ -918,6 +909,6 @@ private:
    friend PILBoxType;
 };
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif

@@ -20,7 +20,7 @@ namespace polar::llparser {
 class Token;
 }
 
-namespace polar::ast {
+namespace polar {
 
 using llvm::Optional;
 using polar::llparser::Token;
@@ -486,6 +486,6 @@ inline void simple_display(llvm::raw_ostream &out, const SourceFile *SF) {
 
   out << "source_file " << '\"' << SF->getFilename() << '\"';
 }
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif

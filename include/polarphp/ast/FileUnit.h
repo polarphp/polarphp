@@ -15,7 +15,7 @@
 
 #include "polarphp/ast/Module.h"
 
-namespace polar::ast {
+namespace polar {
 
 class AstContext;
 

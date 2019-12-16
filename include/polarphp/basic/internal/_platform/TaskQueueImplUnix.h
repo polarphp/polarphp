@@ -17,7 +17,7 @@
 #include "llvm/ADT/DenseSet.h"
 #include "llvm/ADT/ArrayRef.h"
 
-namespace polar::basic {
+namespace polar {
 class UnifiedStatsReporter;
 }
 

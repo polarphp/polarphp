@@ -38,7 +38,7 @@
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/Support/raw_ostream.h"
 
-namespace polar::basic {
+namespace polar {
 
 /// Traits for a key type.  The default implementation is suitable for
 /// a fundamental discrete type like 'unsigned'.
@@ -510,6 +510,6 @@ private:
    }
 };
 
-} // polar::basic
+} // polar
 
 #endif // POLARPHP_BASIC_SUCCESSORMAP_H

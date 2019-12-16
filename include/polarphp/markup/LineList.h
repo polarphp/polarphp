@@ -22,8 +22,8 @@ namespace polar::markup {
 using llvm::StringRef;
 using llvm::MutableArrayRef;
 using llvm::ArrayRef;
-using polar::basic::SourceLoc;
-using polar::basic::SourceRange;
+using polar::SourceLoc;
+using polar::SourceRange;
 
 class MarkupContext;
 

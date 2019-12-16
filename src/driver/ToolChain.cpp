@@ -417,4 +417,4 @@ ToolChain::constructBatchJob(ArrayRef<const Job *> unsortedJobs,
             responseFileInfo);
 }
 
-} // polar::basic
+} // polar

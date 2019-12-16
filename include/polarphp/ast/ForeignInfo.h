@@ -22,13 +22,13 @@
 #include "polarphp/ast/ForeignErrorConvention.h"
 #include "polarphp/ast/Decl.h"
 
-namespace polar::ast {
+namespace polar {
 
 struct ForeignInfo {
   ImportAsMemberStatus Self;
   Optional<ForeignErrorConvention> Error;
 };
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif

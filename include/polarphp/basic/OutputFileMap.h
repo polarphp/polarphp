@@ -25,7 +25,7 @@
 #include <memory>
 #include <string>
 
-namespace polar::basic {
+namespace polar {
 
 using TypeToPathMap = llvm::DenseMap<filetypes::FileTypeId, std::string>;
 
@@ -90,6 +90,6 @@ private:
    llvm::StringMap<TypeToPathMap> m_inputToOutputsMap;
 };
 
-} // polar::basic
+} // polar
 
 #endif // POLARPHP_BASIC_OUTPUT_FILE_MAP_H

@@ -51,7 +51,7 @@
 #include "psapi.h"
 #endif
 
-namespace polar::basic {
+namespace polar {
 using namespace llvm;
 using namespace llvm::sys;
 
@@ -177,10 +177,10 @@ public:
    }
 };
 
-} // polar::basic
+} // polar
 
 namespace llvm {
-using polar::basic::UnifiedStatsReporter;
+using polar::UnifiedStatsReporter;
 using NodeKey = std::tuple<StringRef, const void *, const UnifiedStatsReporter::TraceFormatter *>;
 template<>
 struct DenseMapInfo<NodeKey>
@@ -218,7 +218,7 @@ struct DenseMapInfo<NodeKey>
 };
 } // llvm
 
-namespace polar::basic {
+namespace polar {
 
 class StatsProfiler {
    struct Node {
@@ -823,4 +823,4 @@ UnifiedStatsReporter::flushTracesAndProfiles() {
    EntityProfilers.reset();
 }
 
-} // namespace polar::basic
+} // namespace polar

@@ -21,7 +21,7 @@
 #include "polarphp/ast/Decl.h"
 #include "llvm/ADT/DenseMapInfo.h"
 
-namespace polar::ast {
+namespace polar {
 
 /// A type associated with a protocol.
 ///
@@ -149,39 +149,39 @@ public:
 } // end namespace swift
 
 namespace llvm {
-template <> struct DenseMapInfo<polar::ast::AssociatedType> {
-   static inline polar::ast::AssociatedType getEmptyKey() {
-      return polar::ast::AssociatedType::getEmptyKey();
+template <> struct DenseMapInfo<polar::AssociatedType> {
+   static inline polar::AssociatedType getEmptyKey() {
+      return polar::AssociatedType::getEmptyKey();
    }
 
-   static inline polar::ast::AssociatedType getTombstoneKey() {
-      return polar::ast::AssociatedType::getTombstoneKey();
+   static inline polar::AssociatedType getTombstoneKey() {
+      return polar::AssociatedType::getTombstoneKey();
    }
 
-   static unsigned getHashValue(polar::ast::AssociatedType val) {
+   static unsigned getHashValue(polar::AssociatedType val) {
       return val.getHashValue();
    }
 
-   static bool isEqual(polar::ast::AssociatedType lhs, polar::ast::AssociatedType rhs) {
+   static bool isEqual(polar::AssociatedType lhs, polar::AssociatedType rhs) {
       return lhs == rhs;
    }
 };
 
-template <> struct DenseMapInfo<polar::ast::AssociatedConformance> {
-   static inline polar::ast::AssociatedConformance getEmptyKey() {
-      return polar::ast::AssociatedConformance::getEmptyKey();
+template <> struct DenseMapInfo<polar::AssociatedConformance> {
+   static inline polar::AssociatedConformance getEmptyKey() {
+      return polar::AssociatedConformance::getEmptyKey();
    }
 
-   static inline polar::ast::AssociatedConformance getTombstoneKey() {
-      return polar::ast::AssociatedConformance::getTombstoneKey();
+   static inline polar::AssociatedConformance getTombstoneKey() {
+      return polar::AssociatedConformance::getTombstoneKey();
    }
 
-   static unsigned getHashValue(polar::ast::AssociatedConformance val) {
+   static unsigned getHashValue(polar::AssociatedConformance val) {
       return val.getHashValue();
    }
 
-   static bool isEqual(polar::ast::AssociatedConformance lhs,
-                       polar::ast::AssociatedConformance rhs) {
+   static bool isEqual(polar::AssociatedConformance lhs,
+                       polar::AssociatedConformance rhs) {
       return lhs == rhs;
    }
 };

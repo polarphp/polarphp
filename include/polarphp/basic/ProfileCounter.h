@@ -20,7 +20,7 @@
 #include <cassert>
 #include <cstdint>
 
-namespace polar::basic {
+namespace polar {
 /// A class designed to be smaller than using Optional<uint64_t> for PGO
 class ProfileCounter {
 private:
@@ -41,6 +41,6 @@ public:
   }
   explicit operator bool() const { return hasValue(); }
 };
-} // end namespace polar::basic
+} // end namespace polar
 
 #endif // POLARPHP_BASIC_PROFILECOUNTER_H

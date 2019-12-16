@@ -26,10 +26,10 @@
 #include "polarphp/basic/StlExtras.h"
 #include <functional>
 
-namespace polar::ast {
+namespace polar {
 
-using polar::basic::interleave;
-using polar::basic::indices;
+using polar::interleave;
+using polar::indices;
 
 void ConformanceAccessPath::print(raw_ostream &out) const {
    interleave(begin(), end(),
@@ -1115,4 +1115,4 @@ Requirement Requirement::getCanonical() const {
    }
    llvm_unreachable("Unhandled RequirementKind in switch");
 }
-} // polar::ast
+} // polar

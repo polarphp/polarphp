@@ -15,7 +15,7 @@
 
 #include "polarphp/ast/Type.h"
 
-namespace polar::ast {
+namespace polar {
 
 /// An abstract class used to traverse a Type.
 class TypeWalker {

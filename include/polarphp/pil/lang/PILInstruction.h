@@ -17,13 +17,12 @@
 #ifndef POLARPHP_PIL_INSTRUCTION_H
 #define POLARPHP_PIL_INSTRUCTION_H
 
-#include "polarphp/ast/Builtins.h"
+#include "polarphp/ast/BuiltinTypes.h"
 #include "polarphp/ast/Decl.h"
 #include "polarphp/ast/GenericSignature.h"
 #include "polarphp/ast/InterfaceConformanceRef.h"
 #include "polarphp/ast/SubstitutionMap.h"
 #include "polarphp/ast/TypeAlignments.h"
-#include "polarphp/basic/Compiler.h"
 #include "polarphp/basic/NullablePtr.h"
 #include "polarphp/basic/ProfileCounter.h"
 #include "polarphp/basic/Range.h"
@@ -36,6 +35,7 @@
 #include "polarphp/pil/lang/PILSuccessor.h"
 #include "polarphp/pil/lang/PILValue.h"
 #include "polarphp/pil/lang/ValueUtils.h"
+#include "polarphp/pil/lang/PILFunction.h"
 #include "polarphp/global/NameStrings.h"
 #include "llvm/ADT/APFloat.h"
 #include "llvm/ADT/APInt.h"
@@ -43,12 +43,21 @@
 #include "llvm/ADT/ilist_node.h"
 #include "llvm/Support/TrailingObjects.h"
 
+#include <type_traits>
+
+namespace polar::ast {
+class Stmt;
+class ValueDecl;
+class FuncDecl;
+class VarDecl;
+}
+
 namespace polar::pil {
 
 class AllocationInst;
 class DeclRefExpr;
 class FloatLiteralExpr;
-class FuncDecl;
+
 class IntegerLiteralExpr;
 class SingleValueInstruction;
 class MultipleValueInstruction;
@@ -68,11 +77,32 @@ class PILType;
 class PILArgument;
 class PILPhiArgument;
 class PILUndef;
-class Stmt;
+class TermInst;
 class StringLiteralExpr;
-class ValueDecl;
-class VarDecl;
 class FunctionRefBaseInst;
+
+using polar::IntRange;
+using polar::OptionalTransformRange;
+using polar::range;
+using polar::indices;
+using polar::NullablePtr;
+using polar::TransformIterator;
+using polar::ast::Stmt;
+using polar::ast::ValueDecl;
+using polar::ast::FuncDecl;
+using polar::ast::VarDecl;
+using polar::ast::CanPILBoxType;
+using polar::ast::PILBoxType;
+using polar::ast::AbstractStorageDecl;
+using polar::ast::Identifier;
+using polar::ast::IntrinsicInfo;
+using polar::ast::BuiltinInfo;
+using polar::ast::BuiltinValueKind;
+using polar::ast::ReferenceStorageType;
+using polar::ast::InterfaceDecl;
+using polar::ast::AccessKind;
+using polar::ast::ExistentialMetatypeType;
+using polar::ast::MetatypeType;
 
 template <typename ImplClass> class PILClonerWithScopes;
 
@@ -84,7 +114,7 @@ enum class PILInstructionKind : std::underlying_type<PILNodeKind>::type {
 #define INST_RANGE(ID, FIRST, LAST) \
   First_##ID = unsigned(PILNodeKind::First_##ID), \
   Last_##ID = unsigned(PILNodeKind::Last_##ID),
-#include "PILNodes.def"
+#include "polarphp/pil/lang/PILNodesDef.h"
 };
 
 /// Return a range which can be used to easily iterate over all
@@ -318,7 +348,7 @@ class PILInstruction
 
    PILInstruction() = delete;
    void operator=(const PILInstruction &) = delete;
-   void operator delete(void *Ptr, size_t) SWIFT_DELETE_OPERATOR_DELETED
+   void operator delete(void *Ptr, size_t) POLAR_DELETE_OPERATOR_DELETED;
 
    /// Check any special state of instructions that are not represented in the
    /// instructions operands/type.
@@ -799,7 +829,7 @@ public:
    PILModule &getModule() const { return PILInstruction::getModule(); }
    PILInstructionKind getKind() const { return PILInstruction::getKind(); }
 
-   void operator delete(void *Ptr, size_t) SWIFT_DELETE_OPERATOR_DELETED
+   void operator delete(void *Ptr, size_t) POLAR_DELETE_OPERATOR_DELETED;
 
       ValueKind getValueKind() const {
       return ValueBase::getKind();
@@ -950,7 +980,7 @@ protected:
       : PILInstruction(kind, loc) {}
 
 public:
-   void operator delete(void *Ptr, size_t)SWIFT_DELETE_OPERATOR_DELETED;
+   void operator delete(void *Ptr, size_t) POLAR_DELETE_OPERATOR_DELETED;
 
    MultipleValueInstruction *clone(PILInstruction *insertPt = nullptr) {
       return cast<MultipleValueInstruction>(PILInstruction::clone(insertPt));
@@ -998,7 +1028,7 @@ class MultipleValueInstructionTrailingObjects<Derived, DerivedResult,
       MultipleValueInstruction *,
       DerivedResult,
       FinalOtherTrailingTypes...> {
-   static_assert(LLVM_IS_FINAL(DerivedResult),
+   static_assert(std::is_final_v<DerivedResult>,
                  "Expected DerivedResult to be final");
    static_assert(
       std::is_base_of<MultipleValueInstructionResult, DerivedResult>::value,
@@ -1711,11 +1741,11 @@ class AllocExistentialBoxInst final
       AllocExistentialBoxInst, AllocationInst> {
    friend PILBuilder;
    CanType ConcreteType;
-   ArrayRef<ProtocolConformanceRef> Conformances;
+   ArrayRef<InterfaceConformanceRef> Conformances;
 
    AllocExistentialBoxInst(PILDebugLocation DebugLoc, PILType ExistentialType,
                            CanType ConcreteType,
-                           ArrayRef<ProtocolConformanceRef> Conformances,
+                           ArrayRef<InterfaceConformanceRef> Conformances,
                            ArrayRef<PILValue> TypeDependentOperands,
                            PILFunction *Parent)
       : InstructionBaseWithTrailingOperands(TypeDependentOperands, DebugLoc,
@@ -1724,7 +1754,7 @@ class AllocExistentialBoxInst final
 
    static AllocExistentialBoxInst *
    create(PILDebugLocation DebugLoc, PILType ExistentialType,
-          CanType ConcreteType, ArrayRef<ProtocolConformanceRef> Conformances,
+          CanType ConcreteType, ArrayRef<InterfaceConformanceRef> Conformances,
           PILFunction *Parent, PILOpenedArchetypesState &OpenedArchetypes);
 
 public:
@@ -1732,7 +1762,7 @@ public:
 
    PILType getExistentialType() const { return getType(); }
 
-   ArrayRef<ProtocolConformanceRef> getConformances() const {
+   ArrayRef<InterfaceConformanceRef> getConformances() const {
       return Conformances;
    }
 
@@ -2559,7 +2589,7 @@ public:
       unsigned Operand;
       CanType FormalType;
       PILType LoweredType;
-      ProtocolConformanceRef Hashable;
+      InterfaceConformanceRef Hashable;
    };
 
 private:
@@ -4062,7 +4092,7 @@ class LoadReferenceInstBase
    : public UnaryInstructionBase<K, SingleValueInstruction> {
    static PILType getResultType(PILType operandTy) {
       assert(operandTy.isAddress() && "loading from non-address operand?");
-      auto refType = cast<ReferenceStorageType>(operandTy.getASTType());
+      auto refType = cast<ReferenceStorageType>(operandTy.getAstType());
       return PILType::getPrimitiveObjectType(refType.getReferentType());
    }
 
@@ -4124,7 +4154,7 @@ class Load##Name##Inst \
   Load##Name##Inst(PILDebugLocation loc, PILValue lvalue, IsTake_t isTake) \
     : LoadReferenceInstBase(loc, lvalue, isTake) {} \
 };
-#include "polarphp/ast/ReferenceStorage.def"
+#include "polarphp/ast/ReferenceStorageDef.h"
 
 /// Represents a store to a dynamic reference storage memory location.
 /// This is only required for address-only scenarios; for loadable
@@ -4137,7 +4167,7 @@ class Store##Name##Inst \
                 IsInitialization_t isInit) \
     : StoreReferenceInstBase(loc, src, dest, isInit) {} \
 };
-#include "polarphp/ast/ReferenceStorage.def"
+#include "polarphp/ast/ReferenceStorageDef.h"
 
 /// CopyAddrInst - Represents a copy from one memory location to another. This
 /// is similar to:
@@ -4659,7 +4689,7 @@ class Name##ToRefInst \
   Name##ToRefInst(PILDebugLocation DebugLoc, PILValue Operand, PILType Ty) \
       : UnaryInstructionBase(DebugLoc, Operand, Ty) {} \
 };
-#include "polarphp/ast/ReferenceStorage.def"
+#include "polarphp/ast/ReferenceStorageDef.h"
 
 /// ThinToThickFunctionInst - Given a thin function reference, adds a null
 /// context to convert the value to a thick function type.
@@ -4744,13 +4774,13 @@ class ObjCProtocolInst
       SingleValueInstruction> {
    friend PILBuilder;
 
-   ProtocolDecl *Proto;
-   ObjCProtocolInst(PILDebugLocation DebugLoc, ProtocolDecl *Proto, PILType Ty)
+   InterfaceDecl *Proto;
+   ObjCProtocolInst(PILDebugLocation DebugLoc, InterfaceDecl *Proto, PILType Ty)
       : InstructionBase(DebugLoc, Ty),
         Proto(Proto) {}
 
 public:
-   ProtocolDecl *getProtocol() const { return Proto; }
+   InterfaceDecl *getProtocol() const { return Proto; }
 
    ArrayRef<Operand> getAllOperands() const { return {}; }
    MutableArrayRef<Operand> getAllOperands() { return {}; }
@@ -4780,7 +4810,7 @@ class UnconditionalCheckedCastInst final
 
 public:
    PILType getSourceLoweredType() const { return getOperand()->getType(); }
-   CanType getSourceFormalType() const { return getSourceLoweredType().getASTType(); }
+   CanType getSourceFormalType() const { return getSourceLoweredType().getAstType(); }
 
    CanType getTargetFormalType() const { return DestFormalTy; }
    PILType getTargetLoweredType() const { return getType(); }
@@ -5952,10 +5982,10 @@ class WitnessMethodInst final
    friend PILBuilder;
 
    CanType LookupType;
-   ProtocolConformanceRef Conformance;
+   InterfaceConformanceRef Conformance;
 
    WitnessMethodInst(PILDebugLocation DebugLoc, CanType LookupType,
-                     ProtocolConformanceRef Conformance, PILDeclRef Member,
+                     InterfaceConformanceRef Conformance, PILDeclRef Member,
                      PILType Ty, ArrayRef<PILValue> TypeDependentOperands)
       : InstructionBaseWithTrailingOperands(TypeDependentOperands,
                                             DebugLoc, Ty, Member),
@@ -5975,16 +6005,16 @@ class WitnessMethodInst final
    /// refined by the conforming protocol.
    static WitnessMethodInst *
    create(PILDebugLocation DebugLoc, CanType LookupType,
-          ProtocolConformanceRef Conformance, PILDeclRef Member, PILType Ty,
+          InterfaceConformanceRef Conformance, PILDeclRef Member, PILType Ty,
           PILFunction *Parent, PILOpenedArchetypesState &OpenedArchetypes);
 
 public:
    CanType getLookupType() const { return LookupType; }
-   ProtocolDecl *getLookupProtocol() const {
-      return getMember().getDecl()->getDeclContext()->getSelfProtocolDecl();
+   InterfaceDecl *getLookupProtocol() const {
+      return getMember().getDecl()->getDeclContext()->getSelfInterfaceDecl();
    }
 
-   ProtocolConformanceRef getConformance() const { return Conformance; }
+   InterfaceConformanceRef getConformance() const { return Conformance; }
 
    ArrayRef<Operand> getTypeDependentOperands() const {
       return getAllOperands();
@@ -6095,12 +6125,12 @@ class InitExistentialAddrInst final
    friend PILBuilder;
 
    CanType ConcreteType;
-   ArrayRef<ProtocolConformanceRef> Conformances;
+   ArrayRef<InterfaceConformanceRef> Conformances;
 
    InitExistentialAddrInst(PILDebugLocation DebugLoc, PILValue Existential,
                            ArrayRef<PILValue> TypeDependentOperands,
                            CanType ConcreteType, PILType ConcreteLoweredType,
-                           ArrayRef<ProtocolConformanceRef> Conformances)
+                           ArrayRef<InterfaceConformanceRef> Conformances)
       : UnaryInstructionWithTypeDependentOperandsBase(DebugLoc, Existential,
                                                       TypeDependentOperands,
                                                       ConcreteLoweredType.getAddressType()),
@@ -6109,11 +6139,11 @@ class InitExistentialAddrInst final
    static InitExistentialAddrInst *
    create(PILDebugLocation DebugLoc, PILValue Existential, CanType ConcreteType,
           PILType ConcreteLoweredType,
-          ArrayRef<ProtocolConformanceRef> Conformances, PILFunction *Parent,
+          ArrayRef<InterfaceConformanceRef> Conformances, PILFunction *Parent,
           PILOpenedArchetypesState &OpenedArchetypes);
 
 public:
-   ArrayRef<ProtocolConformanceRef> getConformances() const {
+   ArrayRef<InterfaceConformanceRef> getConformances() const {
       return Conformances;
    }
 
@@ -6137,12 +6167,12 @@ class InitExistentialValueInst final
    friend PILBuilder;
 
    CanType ConcreteType;
-   ArrayRef<ProtocolConformanceRef> Conformances;
+   ArrayRef<InterfaceConformanceRef> Conformances;
 
    InitExistentialValueInst(PILDebugLocation DebugLoc, PILType ExistentialType,
                             CanType FormalConcreteType, PILValue Instance,
                             ArrayRef<PILValue> TypeDependentOperands,
-                            ArrayRef<ProtocolConformanceRef> Conformances)
+                            ArrayRef<InterfaceConformanceRef> Conformances)
       : UnaryInstructionWithTypeDependentOperandsBase(
       DebugLoc, Instance, TypeDependentOperands, ExistentialType),
         ConcreteType(FormalConcreteType), Conformances(Conformances) {}
@@ -6150,13 +6180,13 @@ class InitExistentialValueInst final
    static InitExistentialValueInst *
    create(PILDebugLocation DebugLoc, PILType ExistentialType,
           CanType ConcreteType, PILValue Instance,
-          ArrayRef<ProtocolConformanceRef> Conformances, PILFunction *Parent,
+          ArrayRef<InterfaceConformanceRef> Conformances, PILFunction *Parent,
           PILOpenedArchetypesState &OpenedArchetypes);
 
 public:
    CanType getFormalConcreteType() const { return ConcreteType; }
 
-   ArrayRef<ProtocolConformanceRef> getConformances() const {
+   ArrayRef<InterfaceConformanceRef> getConformances() const {
       return Conformances;
    }
 };
@@ -6171,12 +6201,12 @@ class InitExistentialRefInst final
    friend PILBuilder;
 
    CanType ConcreteType;
-   ArrayRef<ProtocolConformanceRef> Conformances;
+   ArrayRef<InterfaceConformanceRef> Conformances;
 
    InitExistentialRefInst(PILDebugLocation DebugLoc, PILType ExistentialType,
                           CanType FormalConcreteType, PILValue Instance,
                           ArrayRef<PILValue> TypeDependentOperands,
-                          ArrayRef<ProtocolConformanceRef> Conformances)
+                          ArrayRef<InterfaceConformanceRef> Conformances)
       : UnaryInstructionWithTypeDependentOperandsBase(
       DebugLoc, Instance, TypeDependentOperands, ExistentialType),
         ConcreteType(FormalConcreteType), Conformances(Conformances) {}
@@ -6184,7 +6214,7 @@ class InitExistentialRefInst final
    static InitExistentialRefInst *
    create(PILDebugLocation DebugLoc, PILType ExistentialType,
           CanType ConcreteType, PILValue Instance,
-          ArrayRef<ProtocolConformanceRef> Conformances, PILFunction *Parent,
+          ArrayRef<InterfaceConformanceRef> Conformances, PILFunction *Parent,
           PILOpenedArchetypesState &OpenedArchetypes);
 
 public:
@@ -6192,7 +6222,7 @@ public:
       return ConcreteType;
    }
 
-   ArrayRef<ProtocolConformanceRef> getConformances() const {
+   ArrayRef<InterfaceConformanceRef> getConformances() const {
       return Conformances;
    }
 };
@@ -6205,7 +6235,7 @@ class InitExistentialMetatypeInst final
       PILInstructionKind::InitExistentialMetatypeInst,
       InitExistentialMetatypeInst,
       SingleValueInstruction,
-      ProtocolConformanceRef>
+      InterfaceConformanceRef>
 {
    friend PILBuilder;
 
@@ -6215,11 +6245,11 @@ class InitExistentialMetatypeInst final
                                PILType existentialMetatypeType,
                                PILValue metatype,
                                ArrayRef<PILValue> TypeDependentOperands,
-                               ArrayRef<ProtocolConformanceRef> conformances);
+                               ArrayRef<InterfaceConformanceRef> conformances);
 
    static InitExistentialMetatypeInst *
    create(PILDebugLocation DebugLoc, PILType existentialMetatypeType,
-          PILValue metatype, ArrayRef<ProtocolConformanceRef> conformances,
+          PILValue metatype, ArrayRef<InterfaceConformanceRef> conformances,
           PILFunction *parent, PILOpenedArchetypesState &OpenedArchetypes);
 
 public:
@@ -6227,8 +6257,8 @@ public:
    /// instruction erases Decoder<T>.Type.Type to Printable.Type.Type,
    /// this method returns Decoder<T>.
    CanType getFormalErasedObjectType() const {
-      auto exType = getType().getASTType();
-      auto concreteType = getOperand()->getType().getASTType();
+      auto exType = getType().getAstType();
+      auto concreteType = getOperand()->getType().getAstType();
       while (auto exMetatype = dyn_cast<ExistentialMetatypeType>(exType)) {
          exType = exMetatype.getInstanceType();
          concreteType = cast<MetatypeType>(concreteType).getInstanceType();
@@ -6237,7 +6267,7 @@ public:
       return concreteType;
    }
 
-   ArrayRef<ProtocolConformanceRef> getConformances() const;
+   ArrayRef<InterfaceConformanceRef> getConformances() const;
 };
 
 /// DeinitExistentialAddrInst - Given an address of an existential that has been
@@ -6385,7 +6415,7 @@ class Name##ReleaseInst \
     setAtomicity(atomicity); \
   } \
 };
-#include "polarphp/ast/ReferenceStorage.def"
+#include "polarphp/ast/ReferenceStorageDef.h"
 
 /// FixLifetimeInst - An artificial use of a value for the purposes of ARC or
 /// RVO optimizations.
@@ -6568,7 +6598,7 @@ class CopyValueInst
                                 PILType type)                                  \
         : UnaryInstructionBase(DebugLoc, operand, type) {}                     \
   };
-#include "polarphp/ast/ReferenceStorage.def"
+#include "polarphp/ast/ReferenceStorageDef.h"
 
 class DestroyValueInst
    : public UnaryInstructionBase<PILInstructionKind::DestroyValueInst,
@@ -6917,7 +6947,7 @@ class IndexRawPointerInst
 enum class TermKind {
 #define TERMINATOR(Id, TextualName, Parent, MemBehavior, MayRelease) \
   Id = unsigned(PILInstructionKind::Id),
-#include "PILNodes.def"
+#include "polarphp/pil/lang/PILNodesDef.h"
 };
 
 /// This class defines a "terminating instruction" for a PILBasicBlock.
@@ -7143,7 +7173,9 @@ class YieldInst final
    YieldInst(PILDebugLocation loc, ArrayRef<PILValue> yieldedValues,
              PILBasicBlock *normalBB, PILBasicBlock *unwindBB)
       : InstructionBaseWithTrailingOperands(yieldedValues, loc),
-        DestBBs{{this, normalBB}, {this, unwindBB}} {}
+        DestBBs{{this, normalBB}, {this, unwindBB}} {
+
+      }
 
    static YieldInst *create(PILDebugLocation loc,
                             ArrayRef<PILValue> yieldedValues,
@@ -7716,7 +7748,7 @@ public:
    }
 
    PILType getSourceLoweredType() const { return getOperand()->getType(); }
-   CanType getSourceFormalType() const { return getSourceLoweredType().getASTType(); }
+   CanType getSourceFormalType() const { return getSourceLoweredType().getAstType(); }
 
    PILType getTargetLoweredType() const { return DestLoweredTy; }
    CanType getTargetFormalType() const { return DestFormalTy; }
@@ -8134,7 +8166,7 @@ inline bool Operand::isTypeDependent() const {
    return getUser()->isTypeDependentOperand(*this);
 }
 
-} // end swift namespace
+} // end polar::pil namespace
 
 //===----------------------------------------------------------------------===//
 // ilist_traits for PILInstruction
@@ -8143,12 +8175,12 @@ inline bool Operand::isTypeDependent() const {
 namespace llvm {
 
 template <>
-struct ilist_traits<::swift::PILInstruction> :
-   public ilist_node_traits<::swift::PILInstruction> {
-   using PILInstruction = ::swift::PILInstruction;
+struct ilist_traits<::polar::pil::PILInstruction> :
+   public ilist_node_traits<::polar::pil::PILInstruction> {
+   using PILInstruction = ::polar::pil::PILInstruction;
 
 private:
-   swift::PILBasicBlock *getContainingBlock();
+   polar::pil::PILBasicBlock *getContainingBlock();
 
    using instr_iterator = simple_ilist<PILInstruction>::iterator;
 

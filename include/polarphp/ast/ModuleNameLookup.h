@@ -23,7 +23,7 @@
 #include "polarphp/ast/Module.h"
 #include "polarphp/basic/SourceLoc.h"
 
-namespace polar::ast {
+namespace polar {
 class ValueDecl;
 
 namespace namelookup {
@@ -71,6 +71,6 @@ lookupVisibleDeclsInModule(const DeclContext *moduleOrFile,
 
 } // end namespace namelookup
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif // POLARPHP_AST_MODULE_NAME_LOOKUP_H

@@ -31,7 +31,7 @@
 
 namespace polar::syntax {
 
-using polar::basic::count_bits_used;
+using polar::count_bits_used;
 using llvm::StringRef;
 using llvm::raw_ostream;
 
@@ -56,7 +56,7 @@ int retrieve_syntax_kind_serialization_code(SyntaxKind kind);
 std::pair<std::uint32_t, std::uint32_t> retrieve_syntax_kind_child_count(SyntaxKind kind, bool &exist);
 } // polar::syntax
 
-namespace polar::basic::bytetree {
+namespace polar::bytetree {
 
 using polar::syntax::SyntaxKind;
 
@@ -84,7 +84,7 @@ struct WrapperTypeTraits<syntax::SyntaxKind>
    }
 };
 
-} // polar::basic::bytetree
+} // polar::bytetree
 
 namespace llvm::yaml {
 

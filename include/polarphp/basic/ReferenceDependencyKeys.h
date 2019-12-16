@@ -16,7 +16,7 @@
 #include "polarphp/basic/LLVM.h"
 #include "llvm/ADT/StringRef.h"
 
-namespace polar::basic::referencedependencykeys {
+namespace polar::referencedependencykeys {
 using llvm::StringLiteral;
 /// Define these string constants for reference dependencies (a.k.a. swiftdeps)
 /// in one place to ensure consistency.
@@ -32,6 +32,6 @@ static constexpr StringLiteral dependsDynamicLookup("depends-dynamic-lookup");
 static constexpr StringLiteral dependsExternal("depends-external");
 static constexpr StringLiteral interfaceHash("interface-hash");
 
-} // polar::basic::referencedependencykeys
+} // polar::referencedependencykeys
 
 #endif // POLARPHP_BASIC_REFERENCE_DEPENDENCYKEYS_H

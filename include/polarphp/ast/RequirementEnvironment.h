@@ -20,7 +20,7 @@
 
 #include "polarphp/ast/SubstitutionMap.h"
 
-namespace polar::ast {
+namespace polar {
 
 /// Describes the environment of a requirement that will be used when
 /// matching witnesses against the requirement and to form the resulting
@@ -119,6 +119,6 @@ public:
   }
 };
 
-} // polar::ast
+} // polar
 
 #endif // SWIFT_AST_REQUIREMENT_ENVIRONMENT_H

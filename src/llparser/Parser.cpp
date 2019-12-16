@@ -40,9 +40,9 @@
 
 namespace polar::llparser {
 
-using namespace polar::ast;
-using polar::basic::FrontendStatsTracer;
-using polar::ast::SourceFileKind;
+using namespace polar;
+using polar::FrontendStatsTracer;
+using polar::SourceFileKind;
 
 static void getStringPartTokens(const Token &Tok,
                                 const LangOptions &LangOpts,
@@ -1163,7 +1163,7 @@ Parser::getStringLiteralIfNotInterpolated(SourceLoc Loc,
 
 } // polar::llparser
 
-namespace polar::ast {
+namespace polar {
 
 using namespace polar::llparser;
 
@@ -1263,7 +1263,7 @@ const LangOptions &ParserUnit::getLangOptions() const {
 SourceFile &ParserUnit::getSourceFile() {
    return *Impl.SF;
 }
-} // polar::ast
+} // polar
 
 namespace polar::llparser {
 

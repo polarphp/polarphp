@@ -28,7 +28,7 @@ namespace llvm {
 class raw_ostream;
 }
 
-namespace polar::ast {
+namespace polar {
 class AstContext;
 class ParameterList;
 
@@ -145,7 +145,7 @@ public:
    }
 
    static bool isEditorPlaceholder(StringRef name) {
-      return polar::basic::is_editor_placeholder(name);
+      return polar::is_editor_placeholder(name);
    }
 
    bool isEditorPlaceholder() const {
@@ -189,24 +189,24 @@ private:
 
 class DeclName;
 
-} // end namespace polar::ast
+} // end namespace polar
 
 namespace llvm {
-raw_ostream &operator<<(raw_ostream &OS, polar::ast::Identifier I);
-raw_ostream &operator<<(raw_ostream &OS, polar::ast::DeclName I);
+raw_ostream &operator<<(raw_ostream &OS, polar::Identifier I);
+raw_ostream &operator<<(raw_ostream &OS, polar::DeclName I);
 
 // Identifiers hash just like pointers.
-template<> struct DenseMapInfo<polar::ast::Identifier> {
-   static polar::ast::Identifier getEmptyKey() {
-      return polar::ast::Identifier::getEmptyKey();
+template<> struct DenseMapInfo<polar::Identifier> {
+   static polar::Identifier getEmptyKey() {
+      return polar::Identifier::getEmptyKey();
    }
-   static polar::ast::Identifier getTombstoneKey() {
-      return polar::ast::Identifier::getTombstoneKey();
+   static polar::Identifier getTombstoneKey() {
+      return polar::Identifier::getTombstoneKey();
    }
-   static unsigned getHashValue(polar::ast::Identifier Val) {
+   static unsigned getHashValue(polar::Identifier Val) {
       return DenseMapInfo<const void*>::getHashValue(Val.get());
    }
-   static bool isEqual(polar::ast::Identifier LHS, polar::ast::Identifier RHS) {
+   static bool isEqual(polar::Identifier LHS, polar::Identifier RHS) {
       return LHS == RHS;
    }
 };
@@ -214,20 +214,20 @@ template<> struct DenseMapInfo<polar::ast::Identifier> {
 // An Identifier is "pointer like".
 template<typename T> struct PointerLikeTypeTraits;
 template<>
-struct PointerLikeTypeTraits<polar::ast::Identifier> {
+struct PointerLikeTypeTraits<polar::Identifier> {
 public:
-   static inline void *getAsVoidPointer(polar::ast::Identifier I) {
+   static inline void *getAsVoidPointer(polar::Identifier I) {
       return const_cast<void *>(I.getAsOpaquePointer());
    }
-   static inline polar::ast::Identifier getFromVoidPointer(void *P) {
-      return polar::ast::Identifier::getFromOpaquePointer(P);
+   static inline polar::Identifier getFromVoidPointer(void *P) {
+      return polar::Identifier::getFromOpaquePointer(P);
    }
-   enum { NumLowBitsAvailable = polar::ast::Identifier::NumLowBitsAvailable };
+   enum { NumLowBitsAvailable = polar::Identifier::NumLowBitsAvailable };
 };
 
 } // end namespace llvm
 
-namespace polar::ast {
+namespace polar {
 
 /// Wrapper that may either be an Identifier or a special name
 /// (e.g. for subscripts)
@@ -345,44 +345,44 @@ public:
    }
 };
 
-} // end namespace polar::ast
+} // end namespace polar
 
 namespace llvm {
 
-raw_ostream &operator<<(raw_ostream &OS, polar::ast::DeclBaseName D);
+raw_ostream &operator<<(raw_ostream &OS, polar::DeclBaseName D);
 
 // DeclBaseNames hash just like pointers.
-template<> struct DenseMapInfo<polar::ast::DeclBaseName> {
-   static polar::ast::DeclBaseName getEmptyKey() {
-      return polar::ast::Identifier::getEmptyKey();
+template<> struct DenseMapInfo<polar::DeclBaseName> {
+   static polar::DeclBaseName getEmptyKey() {
+      return polar::Identifier::getEmptyKey();
    }
-   static polar::ast::DeclBaseName getTombstoneKey() {
-      return polar::ast::Identifier::getTombstoneKey();
+   static polar::DeclBaseName getTombstoneKey() {
+      return polar::Identifier::getTombstoneKey();
    }
-   static unsigned getHashValue(polar::ast::DeclBaseName Val) {
+   static unsigned getHashValue(polar::DeclBaseName Val) {
       return DenseMapInfo<const void *>::getHashValue(Val.getAsOpaquePointer());
    }
-   static bool isEqual(polar::ast::DeclBaseName LHS, polar::ast::DeclBaseName RHS) {
+   static bool isEqual(polar::DeclBaseName LHS, polar::DeclBaseName RHS) {
       return LHS == RHS;
    }
 };
 
 // A DeclBaseName is "pointer like".
 template <typename T> struct PointerLikeTypeTraits;
-template <> struct PointerLikeTypeTraits<polar::ast::DeclBaseName> {
+template <> struct PointerLikeTypeTraits<polar::DeclBaseName> {
 public:
-   static inline void *getAsVoidPointer(polar::ast::DeclBaseName D) {
+   static inline void *getAsVoidPointer(polar::DeclBaseName D) {
       return const_cast<void *>(D.getAsOpaquePointer());
    }
-   static inline polar::ast::DeclBaseName getFromVoidPointer(void *P) {
-      return polar::ast::DeclBaseName::getFromOpaquePointer(P);
+   static inline polar::DeclBaseName getFromVoidPointer(void *P) {
+      return polar::DeclBaseName::getFromOpaquePointer(P);
    }
-   enum { NumLowBitsAvailable = PointerLikeTypeTraits<polar::ast::Identifier>::NumLowBitsAvailable };
+   enum { NumLowBitsAvailable = PointerLikeTypeTraits<polar::Identifier>::NumLowBitsAvailable };
 };
 
 } // end namespace llvm
 
-namespace polar::ast {
+namespace polar {
 
 /// A declaration name, which may comprise one or more identifier pieces.
 class DeclName {
@@ -620,35 +620,35 @@ public:
 
 void simple_display(llvm::raw_ostream &out, DeclName name);
 
-} // end namespace polar::ast
+} // end namespace polar
 
 namespace llvm {
 // A DeclName is "pointer like".
 template<typename T> struct PointerLikeTypeTraits;
 template<>
-struct PointerLikeTypeTraits<polar::ast::DeclName> {
+struct PointerLikeTypeTraits<polar::DeclName> {
 public:
-   static inline void *getAsVoidPointer(polar::ast::DeclName name) {
+   static inline void *getAsVoidPointer(polar::DeclName name) {
       return name.getOpaqueValue();
    }
-   static inline polar::ast::DeclName getFromVoidPointer(void *ptr) {
-      return polar::ast::DeclName::getFromOpaqueValue(ptr);
+   static inline polar::DeclName getFromVoidPointer(void *ptr) {
+      return polar::DeclName::getFromOpaqueValue(ptr);
    }
-   enum { NumLowBitsAvailable = PointerLikeTypeTraits<polar::ast::DeclBaseName>::NumLowBitsAvailable - 2 };
+   enum { NumLowBitsAvailable = PointerLikeTypeTraits<polar::DeclBaseName>::NumLowBitsAvailable - 2 };
 };
 
 // DeclNames hash just like pointers.
-template<> struct DenseMapInfo<polar::ast::DeclName> {
-   static polar::ast::DeclName getEmptyKey() {
-      return polar::ast::Identifier::getEmptyKey();
+template<> struct DenseMapInfo<polar::DeclName> {
+   static polar::DeclName getEmptyKey() {
+      return polar::Identifier::getEmptyKey();
    }
-   static polar::ast::DeclName getTombstoneKey() {
-      return polar::ast::Identifier::getTombstoneKey();
+   static polar::DeclName getTombstoneKey() {
+      return polar::Identifier::getTombstoneKey();
    }
-   static unsigned getHashValue(polar::ast::DeclName Val) {
+   static unsigned getHashValue(polar::DeclName Val) {
       return DenseMapInfo<void*>::getHashValue(Val.getOpaqueValue());
    }
-   static bool isEqual(polar::ast::DeclName LHS, polar::ast::DeclName RHS) {
+   static bool isEqual(polar::DeclName LHS, polar::DeclName RHS) {
       return LHS.getOpaqueValue() == RHS.getOpaqueValue();
    }
 };

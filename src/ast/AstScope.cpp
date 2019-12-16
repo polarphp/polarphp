@@ -35,27 +35,26 @@
 
 #pragma mark AstScope
 
-namespace polar::ast {
+namespace polar {
 
 using namespace ast_scope;
 
-using polar::basic::NullablePtr;
 using ast_scope::AstScopeImpl;
 
 llvm::SmallVector<const AstScopeImpl *, 0> AstScope::unqualifiedLookup(
-    SourceFile *SF, DeclName name, SourceLoc loc,
-    const DeclContext *startingContext,
-    namelookup::AbstractAstScopeDeclConsumer &consumer) {
-//  if (auto *s = SF->getAstContext().Stats)
-//    ++s->getFrontendCounters().NumAstScopeLookups;
-//  return AstScopeImpl::unqualifiedLookup(SF, name, loc, startingContext,
-//                                         consumer);
+   SourceFile *SF, DeclName name, SourceLoc loc,
+   const DeclContext *startingContext,
+   namelookup::AbstractAstScopeDeclConsumer &consumer) {
+   if (auto *s = SF->getAstContext().Stats)
+      ++s->getFrontendCounters().NumAstScopeLookups;
+   return AstScopeImpl::unqualifiedLookup(SF, name, loc, startingContext,
+                                          consumer);
 }
 
 Optional<bool> AstScope::computeIsCascadingUse(
-    ArrayRef<const ast_scope::AstScopeImpl *> history,
-    Optional<bool> initialIsCascadingUse) {
-  return AstScopeImpl::computeIsCascadingUse(history, initialIsCascadingUse);
+   ArrayRef<const ast_scope::AstScopeImpl *> history,
+   Optional<bool> initialIsCascadingUse) {
+   return AstScopeImpl::computeIsCascadingUse(history, initialIsCascadingUse);
 }
 
 #if POLAR_CC_MSVC
@@ -71,144 +70,144 @@ void AstScope::dump() const { impl->dump(); }
 
 void AstScope::print(llvm::raw_ostream &out) const { impl->print(out); }
 void AstScope::dumpOneScopeMapLocation(std::pair<unsigned, unsigned> lineCol) {
-  impl->dumpOneScopeMapLocation(lineCol);
+   impl->dumpOneScopeMapLocation(lineCol);
 }
 
 #pragma mark AstScopeImpl
 
 
 const PatternBindingEntry &AbstractPatternEntryScope::getPatternEntry() const {
-  return decl->getPatternList()[patternEntryIndex];
+   return decl->getPatternList()[patternEntryIndex];
 }
 
 Pattern *AbstractPatternEntryScope::getPattern() const {
-  return getPatternEntry().getPattern();
+   return getPatternEntry().getPattern();
 }
 
 NullablePtr<ClosureExpr> BraceStmtScope::parentClosureIfAny() const {
-  return !getParent() ? nullptr : getParent().get()->getClosureIfClosureScope();
+   return !getParent() ? nullptr : getParent().get()->getClosureIfClosureScope();
 }
 
 NullablePtr<ClosureExpr> AstScopeImpl::getClosureIfClosureScope() const {
-  return nullptr;
+   return nullptr;
 }
 NullablePtr<ClosureExpr>
 AbstractClosureScope::getClosureIfClosureScope() const {
-  return closureExpr;
+   return closureExpr;
 }
 
 // Conservative, because using precise info would be circular
 SourceRange
 AttachedPropertyWrapperScope::getSourceRangeOfVarDecl(const VarDecl *const vd) {
-  SourceRange sr;
-  for (auto *attr : vd->getAttrs().getAttributes<CustomAttr>()) {
-    if (sr.isInvalid())
-      sr = attr->getTypeLoc().getSourceRange();
-    else
-      sr.widen(attr->getTypeLoc().getSourceRange());
-  }
-  return sr;
+   SourceRange sr;
+   for (auto *attr : vd->getAttrs().getAttributes<CustomAttr>()) {
+      if (sr.isInvalid())
+         sr = attr->getTypeLoc().getSourceRange();
+      else
+         sr.widen(attr->getTypeLoc().getSourceRange());
+   }
+   return sr;
 }
 
 SourceManager &AstScopeImpl::getSourceManager() const {
-  return getAstContext().SourceMgr;
+   return getAstContext().SourceMgr;
 }
 
 Stmt *LabeledConditionalStmtScope::getStmt() const {
-  return getLabeledConditionalStmt();
+   return getLabeledConditionalStmt();
 }
 
 bool AbstractFunctionBodyScope::isAMethod(
-    const AbstractFunctionDecl *const afd) {
-  // What makes this interesting is that a method named "init" which is not
-  // in a nominal type or extension decl body still gets an implicit self
-  // parameter (even though the program is illegal).
-  // So when choosing between creating a MethodBodyScope and a
-  // PureFunctionBodyScope do we go by the enclosing Decl (i.e.
-  // "afd->getDeclContext()->isTypeContext()") or by
-  // "bool(afd->getImplicitSelfDecl())"?
-  //
-  // Since the code uses \c getImplicitSelfDecl, use that.
-  return afd->getImplicitSelfDecl();
+   const AbstractFunctionDecl *const afd) {
+   // What makes this interesting is that a method named "init" which is not
+   // in a nominal type or extension decl body still gets an implicit self
+   // parameter (even though the program is illegal).
+   // So when choosing between creating a MethodBodyScope and a
+   // PureFunctionBodyScope do we go by the enclosing Decl (i.e.
+   // "afd->getDeclContext()->isTypeContext()") or by
+   // "bool(afd->getImplicitSelfDecl())"?
+   //
+   // Since the code uses \c getImplicitSelfDecl, use that.
+   return afd->getImplicitSelfDecl();
 }
 
 #pragma mark getLabeledConditionalStmt
 LabeledConditionalStmt *IfStmtScope::getLabeledConditionalStmt() const {
-  return stmt;
+   return stmt;
 }
 LabeledConditionalStmt *WhileStmtScope::getLabeledConditionalStmt() const {
-  return stmt;
+   return stmt;
 }
 LabeledConditionalStmt *GuardStmtScope::getLabeledConditionalStmt() const {
-  return stmt;
+   return stmt;
 }
 
 
 #pragma mark getAstContext
 
 AstContext &AstScopeImpl::getAstContext() const {
-  if (auto d = getDeclIfAny())
-    return d.get()->getAstContext();
-  if (auto dc = getDeclContext())
-    return dc.get()->getAstContext();
-  return getParent().get()->getAstContext();
+   if (auto d = getDeclIfAny())
+      return d.get()->getAstContext();
+   if (auto dc = getDeclContext())
+      return dc.get()->getAstContext();
+   return getParent().get()->getAstContext();
 }
 
 #pragma mark getDeclContext
 
 NullablePtr<DeclContext> AstScopeImpl::getDeclContext() const {
-  return nullptr;
+   return nullptr;
 }
 
 NullablePtr<DeclContext> AstSourceFileScope::getDeclContext() const {
-  return NullablePtr<DeclContext>(SF);
+   return NullablePtr<DeclContext>(SF);
 }
 
 NullablePtr<DeclContext> GenericTypeOrExtensionScope::getDeclContext() const {
-  return getGenericContext();
+   return getGenericContext();
 }
 
 NullablePtr<DeclContext> GenericParamScope::getDeclContext() const {
-  return dyn_cast<DeclContext>(holder);
+   return dyn_cast<DeclContext>(holder);
 }
 
 NullablePtr<DeclContext> PatternEntryInitializerScope::getDeclContext() const {
-  return getPatternEntry().getInitContext();
+   return getPatternEntry().getInitContext();
 }
 
 NullablePtr<DeclContext> BraceStmtScope::getDeclContext() const {
-  return getParent().get()->getDeclContext();
+   return getParent().get()->getDeclContext();
 }
 
 NullablePtr<DeclContext>
 DefaultArgumentInitializerScope::getDeclContext() const {
-  auto *dc = decl->getDefaultArgumentInitContext();
+   auto *dc = decl->getDefaultArgumentInitContext();
    ast_scope_assert(dc, "If scope exists, this must exist");
-  return dc;
+   return dc;
 }
 
 // When asked for a loc in an intializer in a capture list, the asked-for
 // context is the closure.
 NullablePtr<DeclContext> CaptureListScope::getDeclContext() const {
-  return expr->getClosureBody();
+   return expr->getClosureBody();
 }
 
 NullablePtr<DeclContext> AttachedPropertyWrapperScope::getDeclContext() const {
-  return decl->getParentPatternBinding()->getInitContext(0);
+   return decl->getParentPatternBinding()->getInitContext(0);
 }
 
 NullablePtr<DeclContext> AbstractFunctionDeclScope::getDeclContext() const {
-  return decl;
+   return decl;
 }
 
 NullablePtr<DeclContext> ParameterListScope::getDeclContext() const {
-  return matchingContext;
+   return matchingContext;
 }
 
 #pragma mark getClassName
 
 std::string GenericTypeOrExtensionScope::getClassName() const {
-  return declKindName() + portionName() + "Scope";
+   return declKindName() + portionName() + "Scope";
 }
 
 #define DEFINE_GET_CLASS_NAME(Name)                                            \
@@ -253,7 +252,7 @@ DEFINE_GET_CLASS_NAME(BraceStmtScope)
 #pragma mark getSourceFile
 
 const SourceFile *AstScopeImpl::getSourceFile() const {
-  return getParent().get()->getSourceFile();
+   return getParent().get()->getSourceFile();
 }
 
 const SourceFile *AstSourceFileScope::getSourceFile() const { return SF; }
@@ -264,50 +263,50 @@ SourceRange NominalTypeScope::getBraces() const { return decl->getBraces(); }
 
 NullablePtr<NominalTypeDecl>
 ExtensionScope::getCorrespondingNominalTypeDecl() const {
-  return decl->getExtendedNominal();
+   return decl->getExtendedNominal();
 }
 
 void AstScopeImpl::preOrderDo(function_ref<void(AstScopeImpl *)> fn) {
-  fn(this);
-  preOrderChildrenDo(fn);
+   fn(this);
+   preOrderChildrenDo(fn);
 }
 void AstScopeImpl::preOrderChildrenDo(function_ref<void(AstScopeImpl *)> fn) {
-  for (auto *child : getChildren())
-    child->preOrderDo(fn);
+   for (auto *child : getChildren())
+      child->preOrderDo(fn);
 }
 
 void AstScopeImpl::postOrderDo(function_ref<void(AstScopeImpl *)> fn) {
-  for (auto *child : getChildren())
-    child->postOrderDo(fn);
-  fn(this);
+   for (auto *child : getChildren())
+      child->postOrderDo(fn);
+   fn(this);
 }
 
 ArrayRef<StmtConditionElement> ConditionalClauseScope::getCond() const {
-  return stmt->getCond();
+   return stmt->getCond();
 }
 
 const StmtConditionElement &
 ConditionalClauseScope::getStmtConditionElement() const {
-  return getCond()[index];
+   return getCond()[index];
 }
 
 unsigned AstScopeImpl::countDescendants() const {
-  unsigned count = 0;
-  const_cast<AstScopeImpl *>(this)->preOrderDo(
+   unsigned count = 0;
+   const_cast<AstScopeImpl *>(this)->preOrderDo(
       [&](AstScopeImpl *) { ++count; });
-  return count - 1;
+   return count - 1;
 }
 
 // Can fail if a subscope is lazy and not reexpanded
 void AstScopeImpl::assertThatTreeDoesNotShrink(function_ref<void()> fn) {
 #ifndef NDEBUG
-  unsigned beforeCount = countDescendants();
+   unsigned beforeCount = countDescendants();
 #endif
-  fn();
+   fn();
 #ifndef NDEBUG
-  unsigned afterCount = countDescendants();
+   unsigned afterCount = countDescendants();
    ast_scope_assert(beforeCount <= afterCount, "shrank?!");
 #endif
 }
 
-} // polar::ast
+} // polar

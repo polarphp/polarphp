@@ -20,13 +20,13 @@
 #include "polarphp/markup/Ast.h"
 #include "polarphp/markup/LineList.h"
 
-namespace polar::ast {
+namespace polar {
 struct RawComment;
-} // polar::ast
+} // polar
 
 namespace polar::markup {
 
-using polar::ast::RawComment;
+using polar::RawComment;
 class LineList;
 
 class MarkupContext final {

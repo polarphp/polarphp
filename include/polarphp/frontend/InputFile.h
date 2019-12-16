@@ -31,8 +31,8 @@
 
 namespace polar::frontend {
 
-using polar::basic::PrimarySpecificPaths;
-using polar::basic::SupplementaryOutputPaths;
+using polar::PrimarySpecificPaths;
+using polar::SupplementaryOutputPaths;
 
 enum class InputFileKind
 {

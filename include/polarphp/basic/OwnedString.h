@@ -17,7 +17,6 @@
 #include "llvm/Support/TrailingObjects.h"
 
 namespace polar {
-namespace basic {
 
 using llvm::StringRef;
 using llvm::TrailingObjects;
@@ -141,7 +140,6 @@ public:
    }
 };
 
-} // basic
 } // polar
 
 #endif // POLARPHP_BASIC_OWNED_STRING_H

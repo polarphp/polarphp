@@ -29,13 +29,13 @@
 
 namespace polar::ast {
 class AstContext;
+class VarDecl;
+
 }
 
 namespace polar::pil {
-
-class VarDecl;
 class PILFunction;
-
+using polar::ast::VarDecl;
 using polar::ast::AstContext;
 using polar::ast::TypeBase;
 using polar::ast::CanType;
@@ -638,7 +638,7 @@ using polar::ast::LValueType;
 
 // Statically prevent PILTypes from being directly cast to a type
 // that's not legal as a PIL value.
-#define NON_PIL_TYPE(ID)              PILUndef.h                               \
+#define NON_PIL_TYPE(ID)                                             \
 template<> Can##ID##Type PILType::getAs<ID##Type>() const = delete;  \
 template<> Can##ID##Type PILType::castTo<ID##Type>() const = delete; \
 template<> bool PILType::is<ID##Type>() const = delete;

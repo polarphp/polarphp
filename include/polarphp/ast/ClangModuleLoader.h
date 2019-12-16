@@ -23,7 +23,7 @@ class Sema;
 class TargetInfo;
 } // namespace clang
 
-namespace polar::ast {
+namespace polar {
 
 class DeclContext;
 class VisibleDeclConsumer;
@@ -103,6 +103,6 @@ public:
                        llvm::function_ref<void(TypeDecl *)> receiver) = 0;
 };
 
-} // namespace polar::ast
+} // namespace polar
 
 #endif // POLARPHP_AST_CLANG_MODULE_LOADER_H

@@ -35,7 +35,7 @@
 #include "polarphp/basic/LLVM.h"
 #include "llvm/ADT/SmallVector.h"
 
-namespace polar::basic {
+namespace polar {
 
 template <class ScoreType, class T, unsigned InlineCapacity = 16>
 class TopCollection
@@ -218,7 +218,7 @@ public:
    }
 };
 
-} // polar::basic
+} // polar
 
 #endif // POLARPHP_BASIC_TOPCOLLECTION_H
 

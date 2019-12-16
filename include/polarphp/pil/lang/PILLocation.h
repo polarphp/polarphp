@@ -21,13 +21,31 @@
 #include <cstddef>
 #include <type_traits>
 
-namespace swift {
-
-class SourceLoc;
+namespace polar::ast {
 class ReturnStmt;
 class BraceStmt;
 class AbstractClosureExpr;
 class AbstractFunctionDecl;
+class Decl;
+class Expr;
+class Stmt;
+class Pattern;
+}
+
+namespace polar::pil {
+
+using polar::ast::ReturnStmt;
+using polar::ast::BraceStmt;
+using polar::ast::AbstractClosureExpr;
+using polar::ast::AbstractFunctionDecl;
+using polar::ast::DeclContext;
+using polar::SourceLoc;
+using polar::SourceManager;
+using polar::SourceRange;
+using polar::ast::Decl;
+using polar::ast::Expr;
+using polar::ast::Stmt;
+using polar::ast::Pattern;
 
 /// This is a pointer to the AST node that a PIL instruction was
 /// derived from. This may be null if AST information is unavailable or

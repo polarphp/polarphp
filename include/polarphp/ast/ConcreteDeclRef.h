@@ -26,16 +26,16 @@
 #include "llvm/Support/Compiler.h"
 #include <cstring>
 
-namespace polar::basic{
+namespace polar{
 class SourceManager;
 }
 
-namespace polar::ast {
+namespace polar {
 
 class AstContext;
 class ValueDecl;
 
-using polar::basic::SourceManager;
+using polar::SourceManager;
 
 /// A reference to a concrete representation of a particular declaration,
 /// providing substitutions for all type parameters of the original,
@@ -92,6 +92,6 @@ public:
   POLAR_DEBUG_DUMP;
 };
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif // POLARPHP_AST_CONCRETEDECLREF_H

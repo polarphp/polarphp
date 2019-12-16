@@ -22,8 +22,8 @@
 
 #include "polarphp/basic/Timer.h"
 
-namespace polar::basic {
+namespace polar {
 
 SharedTimer::State SharedTimer::sm_compilationTimersEnabled = SharedTimer::State::Initial;
 
-} // polar::basic
+} // polar

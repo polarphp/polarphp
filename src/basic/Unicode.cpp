@@ -14,7 +14,7 @@
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/Support/ConvertUTF.h"
 
-namespace polar::basic::unicode {
+namespace polar::unicode {
 
 // HACK: Allow support for many newer emoji by overriding behavior of ZWJ and
 // emoji modifiers. This does not make the breaks correct for any version of
@@ -143,4 +143,4 @@ uint64_t getUTF16Length(StringRef Str) {
    return Length;
 }
 
-} // polar::basic::unicode
+} // polar::unicode

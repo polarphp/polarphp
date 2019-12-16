@@ -16,7 +16,7 @@
 #include "polarphp/markup/Markup.h"
 #include "llvm/ADT/Optional.h"
 
-namespace polar::ast {
+namespace polar {
 class Decl;
 class TypeDecl;
 struct RawComment;
@@ -114,6 +114,6 @@ extractCommentParts(polar::markup::MarkupContext &MC,
 /// Extract brief comment from \p RC, and print it to \p OS .
 void printBriefComment(RawComment RC, llvm::raw_ostream &OS);
 
-} // namespace polar::ast
+} // namespace polar
 
 #endif // POLARPHP_AST_COMMENT_H

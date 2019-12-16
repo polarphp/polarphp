@@ -30,7 +30,7 @@
 
 #include <type_traits>
 
-namespace polar::basic {
+namespace polar {
 
 template <typename F>
 class DoAtScopeExit
@@ -72,8 +72,8 @@ DoAtScopeExit<typename std::decay<F>::type> operator+(DeferTask, F&& func)
 ///
 #define POLAR_DEFER                                                            \
    auto DEFER_MACRO_CONCAT(defer_func, __COUNTER__) =                           \
-   ::polar::basic::internal::DeferTask() + [&]()
+   ::polar::internal::DeferTask() + [&]()
 
-} // polar::basic
+} // polar
 
 #endif // POLAR_BASIC_DEFER_H

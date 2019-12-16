@@ -26,7 +26,7 @@
 #include "polarphp/ast/TypeRepr.h"
 #include "llvm/Support/ErrorHandling.h"
 
-namespace polar::ast {
+namespace polar {
 class ParameterList;
 
 /// AstVisitor - This is a simple visitor class for Swift expressions.
@@ -192,6 +192,6 @@ template<typename ImplClass, typename AttributeRetTy = void, typename... Args>
 using AttributeVisitor = AstVisitor<ImplClass, void,void,void,void,void,
    AttributeRetTy, Args...>;
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif

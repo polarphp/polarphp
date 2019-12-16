@@ -42,7 +42,7 @@ using clang::isHexDigit;
 using clang::isHorizontalWhitespace;
 using clang::isPrintable;
 using clang::isWhitespace;
-using namespace polar::ast;
+using namespace polar;
 
 //===----------------------------------------------------------------------===//
 // UTF8 Validation/Encoding/Decoding helper functions

@@ -24,7 +24,7 @@
 #include "llvm/ADT/PointerUnion.h"
 #include "llvm/Support/Compiler.h"
 
-namespace polar::ast {
+namespace polar {
 
 class GenericEnvironment;
 class GenericSignature;
@@ -224,6 +224,6 @@ public:
    }
 };
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif // POLARPHP_AST_WITNESS_H

@@ -17,7 +17,7 @@
 #include "polarphp/ast/ClangPolarphpTypeCorrespondence.h"
 #include "clang/AST/Type.h"
 
-namespace polar::ast {
+namespace polar {
 
 bool canImportAsOptional(const clang::Type *type) {
    // Note: this mimics ImportHint::canImportAsOptional.
@@ -28,4 +28,4 @@ bool canImportAsOptional(const clang::Type *type) {
                    || type->isObjCObjectPointerType());
 }
 
-} // polar::ast
+} // polar

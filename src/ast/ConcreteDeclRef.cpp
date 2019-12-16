@@ -24,7 +24,7 @@
 #include "polarphp/ast/Types.h"
 #include "llvm/Support/raw_ostream.h"
 
-namespace polar::ast {
+namespace polar {
 
 ConcreteDeclRef ConcreteDeclRef::getOverriddenDecl() const {
    auto *derivedDecl = getDecl();
@@ -66,4 +66,4 @@ void ConcreteDeclRef::dump() const {
    dump(llvm::errs());
 }
 
-} // polar::ast
+} // polar

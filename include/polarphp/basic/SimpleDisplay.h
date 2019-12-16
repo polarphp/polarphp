@@ -25,7 +25,7 @@
 #include <tuple>
 #include <type_traits>
 
-namespace polar::ast {
+namespace polar {
 
 template<typename T>
 struct HasTrivialDisplay {
@@ -136,6 +136,6 @@ void simple_display(llvm::raw_ostream &out,
    out << "}";
 }
 
-} // polar::ast
+} // polar
 
 #endif // POLAR_BASIC_SIMPLE_DISPLAY_H

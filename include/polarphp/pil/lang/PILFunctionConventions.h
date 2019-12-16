@@ -34,8 +34,16 @@
 #include "polarphp/pil/lang/PILArgumentConvention.h"
 #include "polarphp/pil/lang/PILType.h"
 #include "llvm/Support/ErrorHandling.h"
+#include "llvm/ADT/iterator_range.h"
 
 namespace polar::pil {
+
+using polar::ast::PILParameterInfo;
+using polar::ast::PILResultInfo;
+using polar::ast::PILFunctionConventions;
+using polar::ast::PILYieldInfo;
+using polar::ast::ResultConvention;
+using llvm::iterator_range;
 
 template<bool _, template<typename...> class T, typename...Args>
 struct delay_template_expansion {
@@ -515,6 +523,12 @@ inline PILType PILModuleConventions::getPILResultInterfaceType(
           : PILType::getPrimitiveObjectType(result.getInterfaceType());
 }
 
+} // end polar::pil namespace
+
+namespace polar::ast {
+
+using namespace polar::pil;
+
 inline PILType
 PILParameterInfo::getPILStorageInterfaceType() const {
    return PILModuleConventions::getPILParamInterfaceType(*this, true);
@@ -537,6 +551,6 @@ PILResultInfo::getPILStorageType(PILModule &M,
    return funcTy->substInterfaceType(M, getPILStorageInterfaceType());
 }
 
-} // end polar::pil namespace
+}
 
 #endif

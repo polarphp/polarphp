@@ -27,10 +27,10 @@
 #include <tuple>
 #include <type_traits>
 
-namespace polar::ast {
+namespace polar {
 
-using polar::basic::UnifiedStatsReporter;
-using polar::basic::FrontendStatsTracer;
+using polar::UnifiedStatsReporter;
+using polar::FrontendStatsTracer;
 
 class Evaluator;
 
@@ -265,7 +265,7 @@ public:
       return make_tracer(Reporter, TypeId<Derived>::getName(), request.storage);
    }
 };
-} // polar::ast
+} // polar
 
 namespace llvm {
 template <typename T, unsigned N>

@@ -27,7 +27,7 @@
 #include "llvm/ADT/Optional.h"
 #include "llvm/Support/Timer.h"
 
-namespace polar::basic {
+namespace polar {
 
 using llvm::Timer;
 
@@ -82,6 +82,6 @@ private:
    Optional<llvm::NamedRegionTimer> m_timer;
 };
 
-} // polar::basic
+} // polar
 
 #endif // POLARPHP_BASIC_TIMER_H

@@ -21,15 +21,13 @@
 #include "llvm/Support/raw_ostream.h"
 #include "polarphp/ast/PrintOptions.h"
 
-namespace polar::basic {
+namespace polar {
 class SourceLoc;
-} // polar::basic
+} // polar
 
-namespace polar::ast {
+namespace polar {
 
-using polar::basic::SourceLoc;
-using polar::basic::UUID;
-
+class SourceLoc;
 class Decl;
 class DeclContext;
 class DynamicSelfType;
@@ -352,6 +350,6 @@ void getInheritedForPrinting(const Decl *decl, const PrintOptions &options,
                              llvm::SmallVectorImpl<TypeLoc> &Results);
 
 StringRef getAccessorKindString(AccessorKind value);
-} // namespace polar::ast
+} // namespace polar
 
 #endif // POLARPHP_AST_ASTPRINTER_H

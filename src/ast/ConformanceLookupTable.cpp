@@ -26,7 +26,7 @@
 #include "polarphp/ast/InterfaceConformanceRef.h"
 #include "llvm/Support/SaveAndRestore.h"
 
-namespace polar::ast {
+namespace polar {
 
 DeclContext *ConformanceLookupTable::ConformanceSource::getDeclContext() const {
    switch (getKind()) {
@@ -1183,4 +1183,4 @@ void ConformanceLookupTable::dump(raw_ostream &os) const {
    }
 }
 
-} // polar::ast
+} // polar

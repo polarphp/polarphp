@@ -24,9 +24,9 @@
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/Support/TrailingObjects.h"
 
-namespace polar::ast {
+namespace polar {
 
-using polar::basic::SourceLoc;
+using polar::SourceLoc;
 
 /// Helper class to capture trailing call argument labels and related
 /// information, for expression nodes that involve argument labels, trailing
@@ -127,6 +127,6 @@ public:
   }
 };
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif // POLARPHP_AST_TRAILING_CALL_ARGUMENTS_H

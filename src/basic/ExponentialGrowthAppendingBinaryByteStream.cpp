@@ -22,7 +22,7 @@
 
 #include "polarphp/basic/ExponentialGrowthAppendingBinaryByteStream.h"
 
-namespace polar::basic {
+namespace polar {
 
 using llvm::Error;
 
@@ -71,4 +71,4 @@ Error ExponentialGrowthAppendingBinaryByteStream::writeBytes(
    return Error::success();
 }
 
-} // polar::basic
+} // polar

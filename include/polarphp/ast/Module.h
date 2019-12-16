@@ -46,7 +46,7 @@ namespace polar::llparser {
 class Token;
 }
 
-namespace polar::ast {
+namespace polar {
 enum class ArtificialMainKind : uint8_t;
 class AstContext;
 class AstWalker;
@@ -633,12 +633,12 @@ inline bool DeclContext::isModuleScopeContext() const {
    return isModuleContext();
 }
 
-} // end namespace polar::ast
+} // end namespace polar
 
 namespace llvm {
 template <>
-class DenseMapInfo<polar::ast::ModuleDecl::ImportedModule> {
-   using ModuleDecl = polar::ast::ModuleDecl;
+class DenseMapInfo<polar::ModuleDecl::ImportedModule> {
+   using ModuleDecl = polar::ModuleDecl;
 public:
    static ModuleDecl::ImportedModule getEmptyKey() {
       return {{}, llvm::DenseMapInfo<ModuleDecl *>::getEmptyKey()};

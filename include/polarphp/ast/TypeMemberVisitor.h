@@ -20,7 +20,7 @@
 
 #include "polarphp/ast/AstVisitor.h"
 
-namespace polar::ast {
+namespace polar {
 
 /// TypeMemberVisitor - This is a convenience adapter of DeclVisitor
 /// which filters out a few common declaration kinds that are never
@@ -75,6 +75,6 @@ public:
 
 #undef BAD_MEMBER
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif // POLARPHP_AST_TYPEMEMBERVISITOR_H

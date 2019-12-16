@@ -25,7 +25,7 @@
 #include "llvm/Support/Compiler.h"
 #include <algorithm>
 
-namespace polar::basic {
+namespace polar {
 
 using namespace camel_case;
 
@@ -1332,4 +1332,4 @@ bool omitNeedlessWords(StringRef &baseName,
    return lowercaseAcronymsForReturn();
 }
 
-} // polar::basic
+} // polar

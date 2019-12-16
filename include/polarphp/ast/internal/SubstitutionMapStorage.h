@@ -22,7 +22,7 @@
 #include "llvm/Support/TrailingObjects.h"
 #include "llvm/ADT/FoldingSet.h"
 
-namespace polar::ast {
+namespace polar {
 
 class SubstitutionMap::Storage final
    : public llvm::FoldingSetNode,
@@ -112,6 +112,6 @@ public:
                        ArrayRef<InterfaceConformanceRef> conformances);
 };
 
-} // polar::ast
+} // polar
 
 #endif // POLARPHP_AST_INTERNAL_SUBSTITUTION_MAP_STORAGE_H

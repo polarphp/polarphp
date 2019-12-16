@@ -31,9 +31,8 @@
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/raw_ostream.h"
 
-namespace polar::ast {
+namespace polar {
 
-using polar::basic::interleave;
 using llvm::dyn_cast_or_null;
 
 #define DECL_ATTR(_, Id, ...) \
@@ -1402,4 +1401,4 @@ void simple_display(llvm::raw_ostream &out, const DeclAttribute *attr) {
       attr->print(out);
 }
 
-} // polar::ast
+} // polar

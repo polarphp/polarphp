@@ -35,11 +35,9 @@
 #include <algorithm>
 #include <unordered_set>
 
-using namespace polar::ast;
-using namespace polar::ast::ast_scope;
+using namespace polar;
+using namespace polar::ast_scope;
 using namespace llvm;
-
-using polar::basic::indices;
 
 /// If true, nest scopes so a variable is out of scope before its declaration
 /// Does not handle capture rules for local functions properly.
@@ -128,7 +126,7 @@ static std::vector<AstNode> asNodeVector(DeclRange dr) {
   return nodes;
 }
 
-namespace polar::ast {
+namespace polar {
 namespace ast_scope {
 
 namespace {
@@ -721,7 +719,7 @@ public:
   }
 };
 } // ast_scope
-} // namespace polar::ast
+} // namespace polar
 
 #pragma mark Scope tree creation and extension
 
@@ -781,7 +779,7 @@ AstSourceFileScope::AstSourceFileScope(SourceFile *SF,
 
 #pragma mark NodeAdder
 
-namespace polar::ast {
+namespace polar {
 namespace ast_scope {
 
 class NodeAdder
@@ -1010,7 +1008,7 @@ public:
   }
 };
 } // namespace ast_scope
-} // namespace polar::ast
+} // namespace polar
 
 // These definitions are way down here so it can call into
 // NodeAdder

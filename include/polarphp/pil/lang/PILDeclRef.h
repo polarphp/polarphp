@@ -34,27 +34,36 @@ namespace polar::ast {
 class PILFunctionType;
 class ClassDecl;
 class AstContext;
-}
-
-namespace polar::pil {
-
-enum class EffectsKind : uint8_t;
 class AbstractFunctionDecl;
 class AbstractClosureExpr;
 class ValueDecl;
 class FuncDecl;
 class ClosureExpr;
 class AutoClosureExpr;
+class AnyFunctionRef;
+enum class EffectsKind : uint8_t;
+}
+
+namespace polar::pil {
+
 enum class PILLinkage : unsigned char;
 enum IsSerialized_t : unsigned char;
 enum class SubclassScope : unsigned char;
 class PILModule;
 class PILLocation;
-class AnyFunctionRef;
 
-using polar::ast::ClassDecl;;
+using polar::ast::EffectsKind;
+using polar::ast::AbstractFunctionDecl;
+using polar::ast::AbstractClosureExpr;
+using polar::ast::ValueDecl;
+using polar::ast::ClassDecl;
+using polar::ast::FuncDecl;
+using polar::ast::ClosureExpr;
+using polar::ast::AutoClosureExpr;
 using polar::ast::PILFunctionType;
 using polar::ast::AstContext;
+using polar::ast::ClangNode;
+using polar::ast::AnyFunctionRef;
 
 /// How a method is dispatched.
 enum class MethodDispatch {
@@ -412,7 +421,7 @@ struct PILDeclRef {
    bool canBeDynamicReplacement() const;
 
 private:
-   friend struct llvm::DenseMapInfo<swift::PILDeclRef>;
+   friend struct llvm::DenseMapInfo<polar::pil::PILDeclRef>;
    /// Produces a PILDeclRef from an opaque value.
    explicit PILDeclRef(void *opaqueLoc,
                        Kind kind,
@@ -439,8 +448,8 @@ inline llvm::raw_ostream &operator<<(llvm::raw_ostream &OS, PILDeclRef C) {
 namespace llvm {
 
 // DenseMap key support for PILDeclRef.
-template<> struct DenseMapInfo<swift::PILDeclRef> {
-   using PILDeclRef = swift::PILDeclRef;
+template<> struct DenseMapInfo<polar::pil::PILDeclRef> {
+   using PILDeclRef = polar::pil::PILDeclRef;
    using Kind = PILDeclRef::Kind;
    using Loc = PILDeclRef::Loc;
    using PointerInfo = DenseMapInfo<void*>;
@@ -454,7 +463,7 @@ template<> struct DenseMapInfo<swift::PILDeclRef> {
       return PILDeclRef(PointerInfo::getTombstoneKey(), Kind::Func,
                         false, false, false, 0);
    }
-   static unsigned getHashValue(swift::PILDeclRef Val) {
+   static unsigned getHashValue(polar::pil::PILDeclRef Val) {
       unsigned h1 = PointerInfo::getHashValue(Val.loc.getOpaqueValue());
       unsigned h2 = UnsignedInfo::getHashValue(unsigned(Val.kind));
       unsigned h3 = (Val.kind == Kind::DefaultArgGenerator)
@@ -464,12 +473,12 @@ template<> struct DenseMapInfo<swift::PILDeclRef> {
       unsigned h5 = UnsignedInfo::getHashValue(Val.isDirectReference);
       return h1 ^ (h2 << 4) ^ (h3 << 9) ^ (h4 << 7) ^ (h5 << 11);
    }
-   static bool isEqual(swift::PILDeclRef const &LHS,
-                       swift::PILDeclRef const &RHS) {
+   static bool isEqual(polar::pil::PILDeclRef const &LHS,
+                       polar::pil::PILDeclRef const &RHS) {
       return LHS == RHS;
    }
 };
 
 } // end llvm namespace
 
-#endif
+#endif // POLARPHP_PIL_PIL_DECL_REF_H

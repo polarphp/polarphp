@@ -31,7 +31,7 @@ hash_code hash_value(const llvm::PointerUnion<PT1, PT2> &ptr) {
 }
 }
 
-namespace polar::ast {
+namespace polar {
 
 /// Stores a value of any type that satisfies a small set of requirements.
 ///
@@ -145,7 +145,7 @@ public:
    std::string getAsString() const;
 };
 
-} // end namespace polar::ast
+} // end namespace polar
 
 namespace llvm {
 template<typename T>

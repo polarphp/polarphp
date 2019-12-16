@@ -34,9 +34,7 @@
 #include "llvm/Support/Format.h"
 #include "llvm/Support/raw_ostream.h"
 
-namespace polar::ast {
-
-using polar::basic::SourceLoc;
+namespace polar {
 
 namespace {
 enum class DiagnosticOptions {
@@ -1090,4 +1088,4 @@ void DiagnosticEngine::onTentativeDiagnosticFlush(Diagnostic &diagnostic) {
    }
 }
 
-} // polar::ast
+} // polar

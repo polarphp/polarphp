@@ -27,11 +27,10 @@
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/raw_ostream.h"
 
-namespace polar::ast {
+namespace polar {
 
 using llvm::dyn_cast_or_null;
 using llvm::dyn_cast;
-using polar::basic::interleave;
 
 #define TYPEREPR(Id, _) \
   static_assert(std::is_trivially_destructible_v<Id##TypeRepr>, \
@@ -602,9 +601,9 @@ void PILBoxTypeRepr::printImpl(AstPrinter &Printer,
   Printer.printKeyword("pil_box", Opts);
 }
 
-} // polar::ast
+} // polar
 
-namespace polar::basic {
+namespace polar {
 
 // See polarphp/basic/Statistic.h for declaration: this enables tracing
 // TypeReprs, is defined here to avoid too much layering violation / circular
@@ -634,4 +633,4 @@ FrontendStatsTracer::getTraceFormatter<const TypeRepr *>() {
   return &TF;
 }
 
-} // polar::basic
+} // polar

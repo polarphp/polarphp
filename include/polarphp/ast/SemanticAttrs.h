@@ -21,11 +21,11 @@
 
 #include "llvm/ADT/StringRef.h"
 
-namespace polar::ast {
+namespace polar {
 namespace semantics {
 #define SEMANTICS_ATTR(NAME, C_STR) constexpr static const StringLiteral NAME = C_STR;
 #include "polarphp/ast/SemanticAttrsDef.h"
 } // semantics
-} // polar::ast
+} // polar
 
 #endif // POLARPHP_SEMANTICS_ATTRS_H

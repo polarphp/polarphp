@@ -21,7 +21,7 @@
 
 #include "polarphp/basic/LLVM.h"
 
-namespace polar::ast {
+namespace polar {
 
 class Decl;
 class AbstractStorageDecl;
@@ -63,7 +63,7 @@ bool printExtensionUSR(const ExtensionDecl *ED, raw_ostream &ostream);
 bool printDeclUSR(const Decl *D, raw_ostream &ostream);
 
 } // namespace ide
-} // namespace polar::ast
+} // namespace polar
 
 #endif // POLARPHP_AST_USRGENERATION_H
 

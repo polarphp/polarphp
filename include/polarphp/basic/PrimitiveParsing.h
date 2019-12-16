@@ -32,7 +32,7 @@
 #include "llvm/ADT/StringRef.h"
 #include "polarphp/basic/LLVM.h"
 
-namespace polar::basic {
+namespace polar {
 
 unsigned measure_newline(const char *bufferPtr, const char *bufferEnd);
 
@@ -56,7 +56,7 @@ static inline void split_into_lines(StringRef text,
    trim_leading_whitespace_from_lines(text, 0, lines);
 }
 
-} // polar::basic
+} // polar
 
 #endif // POLARPHP_BASIC_PRIMITIVE_PARSING_H
 

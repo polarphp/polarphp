@@ -32,7 +32,7 @@
 namespace polar::demangling {
 
 using namespace polar::mangling;
-using polar::ast::ReferenceOwnership;
+using polar::ReferenceOwnership;
 
 [[noreturn]]
 static void unreachable(const char *Message) {

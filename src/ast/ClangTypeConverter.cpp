@@ -36,7 +36,7 @@
 #include "clang/AST/ASTContext.h"
 #include "clang/Sema/Sema.h"
 
-namespace polar::ast {
+namespace polar {
 
 namespace {
 
@@ -732,4 +732,4 @@ clang::QualType ClangTypeConverter::convert(Type type) {
 //   return result;
 }
 
-} // polar::ast
+} // polar

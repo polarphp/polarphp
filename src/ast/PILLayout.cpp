@@ -31,9 +31,7 @@
 #include "polarphp/ast/Types.h"
 #include "polarphp/basic/Range.h"
 
-namespace polar::ast {
-
-using polar::basic::indices;
+namespace polar {
 
 static bool anyMutable(ArrayRef <PILField> Fields) {
    for (auto &field : Fields) {
@@ -96,4 +94,4 @@ void PILLayout::Profile(llvm::FoldingSetNodeID &id,
    }
 }
 
-} // polar::ast
+} // polar

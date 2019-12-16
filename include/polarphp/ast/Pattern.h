@@ -31,14 +31,14 @@
 
 #include <type_traits>
 
-namespace polar::ast {
+namespace polar {
 
 class AstContext;
 class Expr;
 enum class CheckedCastKind : unsigned;
 
-using polar::basic::count_bits_used;
-using polar::basic::bitmax;
+using polar::count_bits_used;
+using polar::bitmax;
 
 /// PatternKind - The classification of different kinds of
 /// value-matching pattern.
@@ -762,6 +762,6 @@ inline Pattern *Pattern::getSemanticsProvidingPattern() {
    return this;
 }
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif // POLARPHP_AST_PATTERN_H

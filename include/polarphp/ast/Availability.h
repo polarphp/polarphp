@@ -22,7 +22,7 @@
 #include "llvm/ADT/Optional.h"
 #include "llvm/Support/VersionTuple.h"
 
-namespace polar::ast {
+namespace polar {
 class AstContext;
 class Decl;
 
@@ -345,6 +345,6 @@ public:
 
 };
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif

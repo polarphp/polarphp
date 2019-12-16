@@ -129,7 +129,7 @@ using llvm::TrailingObjects;
 using llvm::StringRef;
 using llvm::ArrayRef;
 using llvm::FoldingSetNodeID;
-using polar::basic::OwnedString;
+using polar::OwnedString;
 
 class SyntaxArena;
 using CursorIndex = size_t;
@@ -615,17 +615,17 @@ private:
       uint64_t opaqueBits;
       struct {
          /// The kind of syntax this node represents.
-         unsigned kind : polar::basic::bitmax(NumSyntaxKindBits, 8);
+         unsigned kind : polar::bitmax(NumSyntaxKindBits, 8);
          /// Whether this piece of syntax was actually present in the source.
          unsigned presence : 1;
       } common;
-      enum { NumRawSyntaxBits = polar::basic::bitmax(NumSyntaxKindBits, 8) + 1 };
+      enum { NumRawSyntaxBits = polar::bitmax(NumSyntaxKindBits, 8) + 1 };
 
       // For "layout" nodes.
       struct {
          static_assert(NumRawSyntaxBits <= 32,
                        "Only 32 bits reserved for standard syntax bits");
-         uint64_t : polar::basic::bitmax(NumRawSyntaxBits, 32); // align to 32 bits
+         uint64_t : polar::bitmax(NumRawSyntaxBits, 32); // align to 32 bits
          /// Number of children this "layout" node has.
          unsigned numChildren : 32;
          /// Number of bytes this node takes up spelled out in the source code
@@ -638,7 +638,7 @@ private:
       struct {
          static_assert(NumRawSyntaxBits <= 16,
                        "Only 16 bits reserved for standard syntax bits");
-         uint64_t : polar::basic::bitmax(NumRawSyntaxBits, 16); // align to 16 bits
+         uint64_t : polar::bitmax(NumRawSyntaxBits, 16); // align to 16 bits
          /// The kind of token this "token" node represents.
          unsigned tokenKind : 16;
          /// Number of leading  trivia pieces.

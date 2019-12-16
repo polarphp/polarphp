@@ -29,7 +29,7 @@
 #ifndef POLARPHP_LOOKUP_KINDS_H
 #define POLARPHP_LOOKUP_KINDS_H
 
-namespace polar::ast {
+namespace polar {
 
 /// NLKind - This is a specifier for the kind of name lookup being performed
 /// by various query methods.
@@ -126,6 +126,6 @@ static inline NLOptions operator~(NLOptions value)
    return NLOptions(~(unsigned)value);
 }
 
-} // polar::ast
+} // polar
 
 #endif // POLARPHP_LOOKUP_KINDS_H

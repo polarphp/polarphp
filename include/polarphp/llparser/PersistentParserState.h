@@ -31,7 +31,7 @@ class IterableDeclContext;
 
 namespace polar::llparser {
 
-using polar::basic::SourceRange;
+using polar::SourceRange;
 using polar::ast::AstContext;
 using polar::ast::SourceFile;
 using polar::ast::DeclContext;

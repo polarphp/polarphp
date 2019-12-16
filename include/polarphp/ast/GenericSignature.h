@@ -28,7 +28,7 @@
 #include "llvm/Support/TrailingObjects.h"
 #include <utility>
 
-namespace polar::ast {
+namespace polar {
 
 class GenericSignatureBuilder;
 class InterfaceConformanceRef;
@@ -425,64 +425,64 @@ inline bool CanGenericSignature::isActuallyCanonicalOrNull() const {
          getPointer()->isCanonical();
 }
 
-} // end namespace polar::ast
+} // end namespace polar
 
 namespace llvm {
 static inline raw_ostream &operator<<(raw_ostream &OS,
-                                      polar::ast::GenericSignature Sig) {
+                                      polar::GenericSignature Sig) {
    Sig.print(OS);
    return OS;
 }
 
 // A GenericSignature casts like a GenericSignatureImpl*.
-template <> struct simplify_type<const ::polar::ast::GenericSignature> {
-   typedef ::polar::ast::GenericSignatureImpl *SimpleType;
-   static SimpleType getSimplifiedValue(const ::polar::ast::GenericSignature &Val) {
+template <> struct simplify_type<const ::polar::GenericSignature> {
+   typedef ::polar::GenericSignatureImpl *SimpleType;
+   static SimpleType getSimplifiedValue(const ::polar::GenericSignature &Val) {
       return Val.getPointer();
    }
 };
 template <>
-struct simplify_type<::polar::ast::GenericSignature>
-      : public simplify_type<const :: polar::ast::GenericSignature> {};
+struct simplify_type<::polar::GenericSignature>
+      : public simplify_type<const :: polar::GenericSignature> {};
 
-template <> struct DenseMapInfo< polar::ast::GenericSignature> {
-   static  polar::ast::GenericSignature getEmptyKey() {
-      return llvm::DenseMapInfo< polar::ast::GenericSignatureImpl *>::getEmptyKey();
+template <> struct DenseMapInfo< polar::GenericSignature> {
+   static  polar::GenericSignature getEmptyKey() {
+      return llvm::DenseMapInfo< polar::GenericSignatureImpl *>::getEmptyKey();
    }
-   static  polar::ast::GenericSignature getTombstoneKey() {
-      return llvm::DenseMapInfo< polar::ast::GenericSignatureImpl *>::getTombstoneKey();
+   static  polar::GenericSignature getTombstoneKey() {
+      return llvm::DenseMapInfo< polar::GenericSignatureImpl *>::getTombstoneKey();
    }
-   static unsigned getHashValue( polar::ast::GenericSignature Val) {
-      return DenseMapInfo< polar::ast::GenericSignatureImpl *>::getHashValue(
+   static unsigned getHashValue( polar::GenericSignature Val) {
+      return DenseMapInfo< polar::GenericSignatureImpl *>::getHashValue(
                Val.getPointer());
    }
-   static bool isEqual(polar::ast::GenericSignature LHS,
-                       polar::ast::GenericSignature RHS) {
+   static bool isEqual(polar::GenericSignature LHS,
+                       polar::GenericSignature RHS) {
       return LHS.getPointer() == RHS.getPointer();
    }
 };
 
 // A GenericSignature is "pointer like".
-template <> struct PointerLikeTypeTraits<polar::ast::GenericSignature> {
+template <> struct PointerLikeTypeTraits<polar::GenericSignature> {
 public:
-   static inline polar::ast::GenericSignature getFromVoidPointer(void *P) {
-      return (polar::ast::GenericSignatureImpl *)P;
+   static inline polar::GenericSignature getFromVoidPointer(void *P) {
+      return (polar::GenericSignatureImpl *)P;
    }
-   static inline void *getAsVoidPointer(polar::ast::GenericSignature S) {
+   static inline void *getAsVoidPointer(polar::GenericSignature S) {
       return (void *)S.getPointer();
    }
-   enum { NumLowBitsAvailable = polar::ast::TypeAlignInBits };
+   enum { NumLowBitsAvailable = polar::TypeAlignInBits };
 };
 
-template <> struct PointerLikeTypeTraits<polar::ast::CanGenericSignature> {
+template <> struct PointerLikeTypeTraits<polar::CanGenericSignature> {
 public:
-   static inline polar::ast::CanGenericSignature getFromVoidPointer(void *P) {
-      return polar::ast::CanGenericSignature((polar::ast::GenericSignatureImpl *)P);
+   static inline polar::CanGenericSignature getFromVoidPointer(void *P) {
+      return polar::CanGenericSignature((polar::GenericSignatureImpl *)P);
    }
-   static inline void *getAsVoidPointer(polar::ast::CanGenericSignature S) {
+   static inline void *getAsVoidPointer(polar::CanGenericSignature S) {
       return (void *)S.getPointer();
    }
-   enum { NumLowBitsAvailable = polar::ast::TypeAlignInBits };
+   enum { NumLowBitsAvailable = polar::TypeAlignInBits };
 };
 } // end namespace llvm
 

@@ -30,7 +30,7 @@
 #include "llvm/ADT/TinyPtrVector.h"
 #include <utility>
 
-namespace polar::ast {
+namespace polar {
 
 class AstContext;
 class DiagnosticEngine;

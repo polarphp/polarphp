@@ -30,7 +30,7 @@ namespace llvm {
 class MemoryBuffer;
 }
 
-namespace polar::basic {
+namespace polar {
 
 /// A PrettyStackTraceEntry for performing an action involving a StringRef.
 ///
@@ -61,7 +61,6 @@ public:
    void print(llvm::raw_ostream &ostream) const override;
 };
 
-
-} // polar::basic
+} // polar
 
 #endif // POLARPHP_BASIC_PRETTY_STACKTRACE_H

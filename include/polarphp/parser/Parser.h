@@ -21,7 +21,7 @@
 #include "polarphp/parser/Token.h"
 #include "polarphp/parser/ParsedTrivia.h"
 
-namespace polar::basic {
+namespace polar {
 class SourceManager;
 }
 
@@ -46,11 +46,11 @@ int token_lex_wrapper(ParserSemantic *value, YYLocation *loc,
                       Lexer *lexer, Parser *parser);
 } // internal
 
-using polar::basic::StringRef;
+using polar::StringRef;
 using polar::ast::DiagnosticEngine;
 using polar::kernel::LangOptions;
 using polar::syntax::Syntax;
-using polar::basic::SourceManager;
+using polar::SourceManager;
 
 class Lexer;
 

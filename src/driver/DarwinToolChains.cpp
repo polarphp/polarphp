@@ -47,7 +47,7 @@
 namespace polar::driver::toolchains {
 
 using namespace llvm::opt;
-using namespace polar::basic;
+using namespace polar;
 
 std::string
 Darwin::findProgramRelativeToPolarphpImpl(StringRef name) const

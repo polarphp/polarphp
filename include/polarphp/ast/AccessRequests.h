@@ -33,7 +33,7 @@
 #include "polarphp/basic/Statistic.h"
 #include "llvm/ADT/Hashing.h"
 
-namespace polar::ast {
+namespace polar {
 class AbstractStorageDecl;
 class ExtensionDecl;
 class ValueDecl;
@@ -123,6 +123,6 @@ class DefaultAndMaxAccessLevelRequest :
 #include "polarphp/ast/AccessTypeIdZoneDef.h"
 #undef POLAR_REQUEST
 
-} // polar::ast
+} // polar
 
 #endif // POLARPHP_AST_ACCESS_REQUESTS_H

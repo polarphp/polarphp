@@ -41,8 +41,8 @@ using polar::ast::DiagnosticConsumer;
 using polar::ast::DiagnosticArgument;
 using polar::ast::DiagnosticInfo;
 using polar::ast::DiagnosticKind;
-using polar::basic::SourceManager;
-using polar::basic::SourceLoc;
+using polar::SourceManager;
+using polar::SourceLoc;
 
 /// Diagnostic consumer that displays diagnostics to standard error.
 class PrintingDiagnosticConsumer : public DiagnosticConsumer

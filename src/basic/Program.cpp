@@ -32,7 +32,7 @@
 #endif
 #endif
 
-namespace polar::basic {
+namespace polar {
 
 
 int execute_in_place(const char *program, const char **args,
@@ -60,4 +60,4 @@ int execute_in_place(const char *program, const char **args,
 #endif
 }
 
-} // polar::basic
+} // polar

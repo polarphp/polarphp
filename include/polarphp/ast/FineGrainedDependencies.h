@@ -52,7 +52,7 @@
 // MARK: Shorthands
 //==============================================================================
 
-namespace polar::ast {
+namespace polar {
 class DependencyTracker;
 class DiagnosticEngine;
 class FrontendOptions;
@@ -521,16 +521,16 @@ private:
 } // namespace swift
 
 template <>
-struct std::hash<typename polar::ast::fine_grained_dependencies::DependencyKey> {
+struct std::hash<typename polar::fine_grained_dependencies::DependencyKey> {
   size_t
-  operator()(const polar::ast::fine_grained_dependencies::DependencyKey &key) const {
+  operator()(const polar::fine_grained_dependencies::DependencyKey &key) const {
     return key.hash();
   }
 };
 template <>
-struct std::hash<typename polar::ast::fine_grained_dependencies::DeclAspect> {
+struct std::hash<typename polar::fine_grained_dependencies::DeclAspect> {
   size_t
-  operator()(const polar::ast::fine_grained_dependencies::DeclAspect aspect) const {
+  operator()(const polar::fine_grained_dependencies::DeclAspect aspect) const {
     return size_t(aspect);
   }
 };
@@ -558,7 +558,7 @@ struct std::hash<typename polar::ast::fine_grained_dependencies::DeclAspect> {
 /// dependency information. Once the infrastructure is in place, we can work on
 /// improving it.
 
-namespace polar::ast {
+namespace polar {
 namespace fine_grained_dependencies {
 class DepGraphNode {
   /// Def->use arcs go by DependencyKey. There may be >1 node for a given key.
@@ -753,7 +753,7 @@ public:
   }
 
   void forEachNode(function_ref<void(SourceFileDepGraphNode *)> fn) const {
-    for (auto i : polar::basic::indices(allNodes))
+    for (auto i : polar::indices(allNodes))
       fn(getNode(i));
   }
 
@@ -937,7 +937,7 @@ private:
 };
 
 } // end namespace fine_grained_dependencies
-} // end namespace polar::ast
+} // end namespace polar
 
 //==============================================================================
 // MARK: Declarations for YAMLTraits for reading/writing of SourceFileDepGraph
@@ -948,22 +948,22 @@ private:
 #if !(defined(__linux__) || defined(_WIN64))
 LLVM_YAML_DECLARE_SCALAR_TRAITS(size_t, QuotingType::None)
 #endif
-LLVM_YAML_DECLARE_ENUM_TRAITS(polar::ast::fine_grained_dependencies::NodeKind)
-LLVM_YAML_DECLARE_ENUM_TRAITS(polar::ast::fine_grained_dependencies::DeclAspect)
+LLVM_YAML_DECLARE_ENUM_TRAITS(polar::fine_grained_dependencies::NodeKind)
+LLVM_YAML_DECLARE_ENUM_TRAITS(polar::fine_grained_dependencies::DeclAspect)
 LLVM_YAML_DECLARE_MAPPING_TRAITS(
-    polar::ast::fine_grained_dependencies::DependencyKey)
-LLVM_YAML_DECLARE_MAPPING_TRAITS(polar::ast::fine_grained_dependencies::DepGraphNode)
+    polar::fine_grained_dependencies::DependencyKey)
+LLVM_YAML_DECLARE_MAPPING_TRAITS(polar::fine_grained_dependencies::DepGraphNode)
 
 namespace llvm {
 namespace yaml {
 template <>
 struct MappingContextTraits<
-    polar::ast::fine_grained_dependencies::SourceFileDepGraphNode,
-    polar::ast::fine_grained_dependencies::SourceFileDepGraph> {
+    polar::fine_grained_dependencies::SourceFileDepGraphNode,
+    polar::fine_grained_dependencies::SourceFileDepGraph> {
   using SourceFileDepGraphNode =
-      polar::ast::fine_grained_dependencies::SourceFileDepGraphNode;
+      polar::fine_grained_dependencies::SourceFileDepGraphNode;
   using SourceFileDepGraph =
-      polar::ast::fine_grained_dependencies::SourceFileDepGraph;
+      polar::fine_grained_dependencies::SourceFileDepGraph;
 
   static void mapping(IO &io, SourceFileDepGraphNode &node,
                       SourceFileDepGraph &g);
@@ -971,9 +971,9 @@ struct MappingContextTraits<
 
 template <>
 struct SequenceTraits<
-    std::vector<polar::ast::fine_grained_dependencies::SourceFileDepGraphNode *>> {
+    std::vector<polar::fine_grained_dependencies::SourceFileDepGraphNode *>> {
   using SourceFileDepGraphNode =
-      polar::ast::fine_grained_dependencies::SourceFileDepGraphNode;
+      polar::fine_grained_dependencies::SourceFileDepGraphNode;
   using NodeVec = std::vector<SourceFileDepGraphNode *>;
   static size_t size(IO &, NodeVec &vec);
   static SourceFileDepGraphNode &element(IO &, NodeVec &vec, size_t index);
@@ -983,6 +983,6 @@ struct SequenceTraits<
 } // namespace llvm
 
 LLVM_YAML_DECLARE_MAPPING_TRAITS(
-    polar::ast::fine_grained_dependencies::SourceFileDepGraph)
+    polar::fine_grained_dependencies::SourceFileDepGraph)
 
 #endif // POLARPHP_AST_FINE_GRAINED_DEPENDENCIES_H

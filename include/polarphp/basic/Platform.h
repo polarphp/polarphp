@@ -32,7 +32,7 @@ class Triple;
 class VersionTuple;
 } // llvm
 
-namespace polar::basic {
+namespace polar {
 
 enum class DarwinPlatformKind : unsigned
 {
@@ -104,7 +104,7 @@ llvm::Triple get_target_specific_module_triple(const llvm::Triple &triple);
 Optional<llvm::VersionTuple>
 get_runtime_compatibility_version_for_target(const llvm::Triple &Triple);
 
-} // polar::basic
+} // polar
 
 #endif // POLARPHP_BASIC_PLATFORM_H
 

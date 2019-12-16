@@ -25,7 +25,7 @@
 #include "clang/Lex/PreprocessingRecord.h"
 #include "clang/Lex/Preprocessor.h"
 
-namespace polar::ast {
+namespace polar {
 
 namespace ide {
 static inline StringRef getUSRSpacePrefix() {
@@ -225,4 +225,4 @@ bool printDeclUSR(const Decl *D, raw_ostream &OS) {
    return false;
 }
 } // ide
-} // polar::ast
+} // polar

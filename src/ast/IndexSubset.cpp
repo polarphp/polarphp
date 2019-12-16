@@ -12,10 +12,7 @@
 
 #include "polarphp/ast/IndexSubset.h"
 
-namespace polar::ast {
-
-using polar::basic::range;
-using polar::basic::interleave;
+namespace polar {
 
 IndexSubset *
 IndexSubset::getFromString(AstContext &ctx, StringRef string) {
@@ -142,4 +139,4 @@ int IndexSubset::findPrevious(int endIndex) const {
    return -1;
 }
 
-} // polar::ast
+} // polar

@@ -57,30 +57,33 @@ class Decl;
 class SourceManager;
 }
 
-namespace polar::ast {
+namespace polar::pil {
+class PILFunction;
+}
+
+namespace polar {
 class Pattern;
 class Decl;
 class InterfaceConformance;
 class Expr;
-class PILFunction;
 class SourceFile;
 class Stmt;
 class TypeRepr;
 }
 
-namespace polar::basic {
+namespace polar {
 
 class SourceManager;
 class FrontendStatsTracer;
 
-using polar::ast::Pattern;
-using polar::ast::Decl;
-using polar::ast::InterfaceConformance;
-using polar::ast::Expr;
-using polar::ast::PILFunction;
-using polar::ast::SourceFile;
-using polar::ast::Stmt;
-using polar::ast::TypeRepr;
+using polar::Pattern;
+using polar::Decl;
+using polar::InterfaceConformance;
+using polar::Expr;
+using polar::SourceFile;
+using polar::Stmt;
+using polar::TypeRepr;
+using polar::pil::PILFunction;
 
 // There are a handful of cases where the polarphp compiler can introduce
 // counter-measurement noise via nondeterminism, especially via
@@ -420,5 +423,5 @@ FrontendStatsTracer make_tracer(UnifiedStatsReporter *Reporter, StringRef Name,
    return make_tracer_pointerunion(Reporter, Name, std::get<0>(Value));
 }
 
-} // namespace polar::basic
+} // namespace polar
 #endif // POLARPHP_BASIC_STATISTIC_H

@@ -38,11 +38,7 @@
 #include "llvm/Support/SaveAndRestore.h"
 #include "llvm/Support/raw_ostream.h"
 
-namespace polar::ast {
-
-using polar::basic::interleave;
-using polar::basic::indices;
-using polar::basic::QuotedString;
+namespace polar {
 
 struct TerminalColor {
    llvm::raw_ostream::Colors Color;
@@ -4014,4 +4010,4 @@ StringRef getAccessorKindString(AccessorKind value) {
    llvm_unreachable("Unhandled AccessorKind in switch.");
 }
 
-} // polar::ast
+} // polar

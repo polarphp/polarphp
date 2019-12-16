@@ -15,7 +15,7 @@
 #include "polarphp/ast/TypeRepr.h"
 #include "polarphp/ast/Types.h"
 
-namespace polar::ast {
+namespace polar {
 
 TypeWalker::Action TypeDeclFinder::walkToTypePre(Type T) {
    if (auto *TAT = dyn_cast<TypeAliasType>(T.getPointer()))
@@ -56,4 +56,4 @@ bool TypeReprIdentFinder::walkToTypeReprPost(TypeRepr *TR) {
    return Callback(CITR);
 }
 
-} // polar::ast
+} // polar

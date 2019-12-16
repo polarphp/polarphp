@@ -25,7 +25,7 @@
 #include "llvm/ADT/APFloat.h"
 #include "llvm/Support/raw_ostream.h"
 
-namespace polar::ast {
+namespace polar {
 
 #define PATTERN(Id, _) \
   static_assert(std::is_trivially_destructible<Id##Pattern>::value, \
@@ -481,10 +481,10 @@ SourceRange ExprPattern::getSourceRange() const {
    return getSubExpr()->getSourceRange();
 }
 
-} // polar::ast
+} // polar
 
-namespace polar::basic {
-using namespace polar::ast;
+namespace polar {
+using namespace polar;
 // See swift/Basic/Statistic.h for declaration: this enables tracing Patterns, is
 // defined here to avoid too much layering violation / circular linkage
 // dependency.
@@ -515,4 +515,4 @@ const UnifiedStatsReporter::TraceFormatter *
 FrontendStatsTracer::getTraceFormatter<const Pattern *>() {
    return &TF;
 }
-} // polar::basic
+} // polar

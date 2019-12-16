@@ -145,7 +145,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace polar::basic {
+namespace polar {
 
 namespace internal {
 
@@ -609,6 +609,6 @@ RelativeIndirectablePointer<T, Nullable, intptr_t>;
 template<typename T, bool Nullable = false>
 using FarRelativeDirectPointer = RelativeDirectPointer<T, Nullable, intptr_t>;
 
-} // polar::basic
+} // polar
 
 #endif // POLARPHP_BASIC_RELATIVE_POINTER_H

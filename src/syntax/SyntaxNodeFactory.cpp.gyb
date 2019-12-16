@@ -42,7 +42,7 @@ use function Gyb\Utils\make_missing_child;
 
 namespace polar::syntax {
 
-using polar::basic::ArrayRef;
+using polar::ArrayRef;
 
 TokenSyntax SyntaxNodeFactory::makeToken(TokenKindType kind, OwnedString text,
                                      const Trivia &leadingTrivia,

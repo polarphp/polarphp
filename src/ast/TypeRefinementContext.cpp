@@ -22,7 +22,7 @@
 #include "polarphp/ast/TypeRefinementContext.h"
 #include "polarphp/basic/SourceMgr.h"
 
-namespace polar::ast {
+namespace polar {
 
 TypeRefinementContext::TypeRefinementContext(AstContext &Ctx, IntroNode Node,
                                              TypeRefinementContext *Parent,
@@ -354,4 +354,4 @@ StringRef TypeRefinementContext::getReasonName(Reason R) {
    llvm_unreachable("Unhandled Reason in switch.");
 }
 
-} // polar::ast
+} // polar

@@ -39,18 +39,18 @@ namespace llvm {
 class raw_ostream;
 }
 
-namespace polar::basic {
+namespace polar {
 class UnifiedStatsReporter;
 class FrontendStatsTracer;
 }
 
-namespace polar::ast {
+namespace polar {
 
 using llvm::ArrayRef;
 using llvm::Optional;
 using llvm::None;
-using polar::basic::UnifiedStatsReporter;
-using polar::basic::FrontendStatsTracer;
+using polar::UnifiedStatsReporter;
+using polar::FrontendStatsTracer;
 
 class DiagnosticEngine;
 class Evaluator;

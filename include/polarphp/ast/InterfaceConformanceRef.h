@@ -28,7 +28,7 @@ namespace llvm {
 class raw_ostream;
 }
 
-namespace polar::ast {
+namespace polar {
 
 class ConcreteDeclRef;
 class InterfaceConformance;
@@ -172,6 +172,6 @@ public:
    ArrayRef<Requirement> getConditionalRequirements() const;
 };
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif // POLARPHP_AST_PROTOCOLCONFORMANCEREF_H

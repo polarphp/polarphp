@@ -29,7 +29,7 @@ namespace llvm {
 enum class AtomicOrdering;
 }
 
-namespace polar::ast {
+namespace polar {
 
 class AstContext;
 class Identifier;

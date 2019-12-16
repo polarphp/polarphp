@@ -22,7 +22,7 @@
 #include "polarphp/basic/Malloc.h"
 #include <utility>
 
-namespace polar::basic {
+namespace polar {
 
 template <typename K, typename V, typename AllocatorTy = llvm::MallocAllocator>
 class TreeScopedHashTable;
@@ -426,6 +426,6 @@ TreeScopedHashTableScopeImpl<K, V, Allocator>::~TreeScopedHashTableScopeImpl() {
       ParentScope->release();
 }
 
-} // end namespace polar::basic
+} // end namespace polar
 
 #endif // POLARPHP_BASIC_TREESCOPEDHASHTABLE_H

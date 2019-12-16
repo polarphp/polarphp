@@ -37,7 +37,7 @@ namespace llvm::vfs {
 class FileSystem;
 } // llvm::vfs
 
-namespace polar::basic {
+namespace polar {
 
 /// Invokes \p action with a raw_ostream that refers to a temporary file,
 /// which is then renamed into place as \p outputPath when the action
@@ -71,6 +71,6 @@ get_file_or_stdin(llvm::vfs::FileSystem &filesystem,
                   const llvm::Twine &name, int64_t fileSize = -1,
                   bool requiresNullTerminator = true, bool isVolatile = false);
 } // end namespace vfs
-} // polar::basic
+} // polar
 
 #endif // POLARPHP_BASIC_FILESYSTEM_H

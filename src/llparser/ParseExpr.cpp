@@ -33,9 +33,9 @@
 
 namespace polar::llparser {
 
-using polar::basic::EditorPlaceholderData;
-using polar::basic::canBeArgumentLabel;
-using polar::basic::interleave;
+using polar::EditorPlaceholderData;
+using polar::canBeArgumentLabel;
+using polar::interleave;
 
 /// parseExpr
 ///
@@ -2376,7 +2376,7 @@ Expr *Parser::parseExprEditorPlaceholder(Token PlaceholderTok,
 
    auto parseTypeForPlaceholder = [&](TypeLoc &TyLoc, TypeRepr *&ExpansionTyR) {
       Optional<EditorPlaceholderData> DataOpt =
-         polar::basic::parse_editor_placeholder(PlaceholderTok.getText());
+         polar::parse_editor_placeholder(PlaceholderTok.getText());
       if (!DataOpt)
          return;
       StringRef TypeStr = DataOpt->type;

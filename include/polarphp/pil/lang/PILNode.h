@@ -32,8 +32,8 @@ class PILModule;
 class SingleValueInstruction;
 class ValueBase;
 
-using polar::basic::bitmax;
-using polar::basic::count_bits_used;
+using polar::bitmax;
+using polar::count_bits_used;
 
 /// An enumeration which contains values for all the nodes in PILNodes.def.
 /// Other enumerators, like ValueKind and PILInstructionKind, ultimately

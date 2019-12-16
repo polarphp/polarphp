@@ -19,7 +19,7 @@
 #include <string>
 #include <vector>
 
-namespace polar::ast {
+namespace polar {
 
 /// Options for controlling search path behavior.
 class SearchPathOptions {
@@ -117,6 +117,6 @@ public:
    }
 };
 
-} // polar::ast
+} // polar
 
 #endif // POLARPHP_AST_SEARCHPATHOPTIONS_H

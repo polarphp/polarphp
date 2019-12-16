@@ -44,7 +44,7 @@
 
 namespace polar::llparser {
 
-using namespace polar::basic;
+using namespace polar;
 
 namespace {
 /// A RAII object for deciding whether this DeclKind needs special

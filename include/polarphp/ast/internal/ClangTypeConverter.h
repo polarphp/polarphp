@@ -24,7 +24,7 @@
 #include "clang/AST/ASTContext.h"
 #include "clang/AST/Type.h"
 
-namespace polar::ast {
+namespace polar {
 
 /// Compute C types corresponding to Swift AST types.
 class ClangTypeConverter :
@@ -106,6 +106,6 @@ private:
    clang::QualType visit(Type type);
 };
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif /* POLARPHP_AST_CLANG_TYPE_CONVERTER_H */

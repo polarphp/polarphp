@@ -31,7 +31,7 @@
 #include "llvm/ADT/StringRef.h"
 #include "polarphp/basic/LLVM.h"
 
-namespace polar::basic {
+namespace polar {
 
 enum class EditorPlaceholderKind
 {
@@ -62,6 +62,6 @@ parse_editor_placeholder(StringRef placeholderText);
 bool is_editor_placeholder(StringRef identifierText);
 
 
-} // polar::basic
+} // polar
 
 #endif // POLARPHP_BASIC_EDITORPLACEHOLDER_H

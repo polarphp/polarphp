@@ -19,7 +19,7 @@
 #include "polarphp/ast/AstTypeIds.h"
 #include "polarphp/ast/SimpleRequest.h"
 
-namespace polar::ast {
+namespace polar {
 
 /// Report that a request of the given kind is being evaluated, so it
 /// can be recorded by the stats reporter.
@@ -87,6 +87,6 @@ public:
 #include "polarphp/ast/ParseTypeIDZoneDef.h"
 #undef POLAR_REQUEST
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif // POLARPHP_AST_PARSE_REQUESTS_H

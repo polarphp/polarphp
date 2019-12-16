@@ -32,9 +32,9 @@ namespace clang {
 class DependencyCollector;
 }
 
-namespace polar::ast {
+namespace polar {
 
-using polar::basic::SourceLoc;
+using polar::SourceLoc;
 
 class AbstractFunctionDecl;
 class ClangImporterOptions;
@@ -157,6 +157,6 @@ public:
   virtual void verifyAllModules() { }
 };
 
-} // namespace polar::ast
+} // namespace polar
 
 #endif

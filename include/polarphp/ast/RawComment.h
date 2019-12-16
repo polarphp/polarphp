@@ -17,10 +17,10 @@
 #include "polarphp/basic/SourceLoc.h"
 #include "polarphp/basic/SourceMgr.h"
 
-namespace polar::ast {
+namespace polar {
 
-using polar::basic::CharSourceRange;
-using polar::basic::SourceManager;
+using polar::CharSourceRange;
+using polar::SourceManager;
 
 struct SingleRawComment {
    enum class CommentKind {
@@ -95,7 +95,7 @@ struct BasicDeclLocs {
    LineColumn EndLoc;
 };
 
-} // namespace polar::ast
+} // namespace polar
 
 #endif // POLARPHP_AST_RAW_COMMENT_H
 

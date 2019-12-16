@@ -13,13 +13,11 @@
 #include "llvm/ADT/StringRef.h"
 #include <cstring>
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 static const char sg_regexMetachars[] = "()^$|*+?.:[]\\{}";
 
-std::string regex_escape(StringRef str)
-{
+std::string regex_escape(StringRef str) {
    std::string regexStr;
    for (unsigned i = 0, e = str.size(); i != e; ++i) {
       if (strchr(sg_regexMetachars, str[i])) {
@@ -30,5 +28,4 @@ std::string regex_escape(StringRef str)
    return regexStr;
 }
 
-} // utils
-} // polar
+} // polar::utils

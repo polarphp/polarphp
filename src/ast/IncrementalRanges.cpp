@@ -27,7 +27,7 @@
 #include "polarphp/parser/Lexer.h"
 #include "llvm/Support/YAMLParser.h"
 
-namespace polar::ast {
+namespace polar {
 using namespace incremental_ranges;
 
 //==============================================================================
@@ -313,4 +313,4 @@ void PolarphpRangesFileContents::dump(const StringRef primaryInputFilename) cons
    dumper << *const_cast<PolarphpRangesFileContents *>(this);
 }
 
-} // polar::ast
+} // polar

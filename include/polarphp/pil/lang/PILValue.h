@@ -40,6 +40,8 @@ class DeadEndBlocks;
 class ValueBaseUseIterator;
 class ValueUseIterator;
 
+using polar::DowncastFilterRange;
+
 /// An enumeration which contains values for all the concrete ValueBase
 /// subclasses.
 enum class ValueKind : std::underlying_type<PILNodeKind>::type {
@@ -322,7 +324,7 @@ public:
    static bool classof(const PILInstruction *) = delete;
 };
 
-} // end namespace swift
+} // end namespace polar::pil
 
 namespace llvm {
 
@@ -342,7 +344,10 @@ public:
 
 } // end namespace llvm
 
-namespace swift {
+namespace polar::pil {
+
+using polar::ArrayRefView;
+using polar::makeDowncastFilterRange;
 
 /// PILValue - A PILValue is a wrapper around a ValueBase pointer.
 class PILValue {
@@ -583,8 +588,9 @@ public:
    }
 
    /// Operands are not copyable.
-   Operand(const Operand &use) = delete;
-   Operand &operator=(const Operand &use) = delete;
+   // @todo
+//   Operand(const Operand &use) = delete;
+//   Operand &operator=(const Operand &use) = delete;
 
    /// Return the current value being used by this operand.
    PILValue get() const { return TheValue; }

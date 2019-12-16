@@ -18,7 +18,7 @@
 #include "polarphp/basic/Debug.h"
 #include "llvm/ADT/PointerIntPair.h"
 
-namespace polar::ast {
+namespace polar {
 
 using llvm::None;
 
@@ -100,6 +100,6 @@ public:
 };
 
 
-} // polar::ast
+} // polar
 
 #endif // POLARPHP_AST_ACCESSSCOPE_H

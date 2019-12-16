@@ -23,7 +23,7 @@
 #include "polarphp/ast/TypeWalker.h"
 #include <map>
 
-using namespace polar::ast;
+using namespace polar;
 
 AvailabilityContext AvailabilityContext::forDeploymentTarget(AstContext &Ctx) {
    return AvailabilityContext(

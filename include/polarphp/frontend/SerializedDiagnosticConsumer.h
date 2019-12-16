@@ -30,13 +30,13 @@
 
 #include "polarphp/basic/LLVM.h"
 
-namespace polar::basic {
+namespace polar {
 class SourceManager;
-} // polar::basic
+} // polar
 
 namespace polar::frontend {
 
-using polar::basic::SourceManager;
+using polar::SourceManager;
 
 /// Set up the specified source manager so that diagnostics are captured
 /// instead of being printed.

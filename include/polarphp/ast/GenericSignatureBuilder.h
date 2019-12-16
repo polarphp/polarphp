@@ -42,11 +42,11 @@
 #include <functional>
 #include <memory>
 
-namespace polar::basic {
+namespace polar {
 class SourceLoc;
 }
 
-namespace polar::ast {
+namespace polar {
 
 class DeclContext;
 class DependentMemberType;
@@ -65,7 +65,7 @@ class TypeRepr;
 class AstContext;
 class DiagnosticEngine;
 
-using polar::basic::SourceLoc;
+using polar::SourceLoc;
 
 /// Determines how to resolve a dependent type to a potential archetype.
 enum class ArchetypeResolutionKind {
@@ -1744,6 +1744,6 @@ Type GenericSignatureBuilder::Constraint<T>::getSubjectDependentType(
    return subject.get<PotentialArchetype *>()->getDependentType(genericParams);
 }
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif

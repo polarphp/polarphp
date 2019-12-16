@@ -465,48 +465,6 @@ void AnnotateIgnoreWritesEnd(const char *file, int line);
 #define POLAR_ENABLE_EXCEPTIONS 1
 #endif
 
-namespace polar {
-
-/// Allocate a buffer of memory with the given size and alignment.
-///
-/// When the compiler supports aligned operator new, this will use it to to
-/// handle even over-aligned allocations.
-///
-/// However, this doesn't make any attempt to leverage the fancier techniques
-/// like posix_memalign due to portability. It is mostly intended to allow
-/// compatibility with platforms that, after aligned allocation was added, use
-/// reduced default alignment.
-inline void *allocate_buffer(size_t size, size_t alignment) {
-   return ::operator new(size
-                      #ifdef __cpp_aligned_new
-                         ,
-                         std::align_val_t(alignment)
-                      #endif
-                         );
-}
-
-/// Deallocate a buffer of memory with the given size and alignment.
-///
-/// If supported, this will used the sized delete operator. Also if supported,
-/// this will pass the alignment to the delete operator.
-///
-/// The pointer must have been allocated with the corresponding new operator,
-/// most likely using the above helper.
-inline void deallocate_buffer(void *ptr, size_t size, size_t alignment) {
-   ::operator delete(ptr
-      #ifdef __cpp_sized_deallocation
-         ,
-         size
-      #endif
-      #if __cpp_aligned_new
-         ,
-         std::align_val_t(alignment)
-      #endif
-         );
-}
-
-} // polar
-
 #ifdef POLAR_CC_GNU
 #define POLAR_BEGIN_DISABLE_ZENDVM_WARNING() \
    POLAR_WARNING_PUSH\

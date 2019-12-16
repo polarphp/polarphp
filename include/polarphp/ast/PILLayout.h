@@ -37,7 +37,7 @@ namespace polar::pil {
 class PILType;
 }
 
-namespace polar::ast {
+namespace polar {
 
 using polar::pil::PILType;
 
@@ -149,6 +149,6 @@ public:
   }
 };
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif // POLARPHP_AST_PIL_LAYOUT_H

@@ -20,16 +20,16 @@
 #include "llvm/ADT/ArrayRef.h"
 #include "polarphp/basic/SourceLoc.h"
 
-namespace polar::basic {
+namespace polar {
 class SourceLoc;
 }
 
-namespace polar::ast {
+namespace polar {
 class Expr;
 
 struct AstNode;
 
-using polar::basic::SourceLoc;
+using polar::SourceLoc;
 using llvm::ArrayRef;
 
 /// This represents one part of a #if block.  If the condition field is
@@ -55,6 +55,6 @@ struct IfConfigClause {
    }
 };
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif

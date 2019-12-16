@@ -21,7 +21,7 @@ namespace clang {
 class NamedDecl;
 }
 
-namespace polar::ast {
+namespace polar {
 
 class AbstractClosureExpr;
 class ConformanceAccessPath;
@@ -354,6 +354,6 @@ protected:
 };
 
 } // end namespace mangle
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif // POLARPHP_AST_ASTMANGLER_H

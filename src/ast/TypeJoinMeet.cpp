@@ -23,7 +23,7 @@
 #include "llvm/ADT/Optional.h"
 #include "llvm/ADT/SmallPtrSet.h"
 
-namespace polar::ast {
+namespace polar {
 
 namespace {
 
@@ -503,4 +503,4 @@ Optional<Type> Type::join(Type first, Type second) {
    return join;
 }
 
-} // polar::ast
+} // polar

@@ -31,7 +31,7 @@
 #include "llvm/Support/Signals.h"
 #include "llvm/Support/VirtualFileSystem.h"
 
-namespace polar::basic {
+namespace polar {
 
 namespace {
 class OpenFileRAII
@@ -250,4 +250,4 @@ vfs::get_file_or_stdin(llvm::vfs::FileSystem &fs,
                               requiresNullTerminator, isVolatile);
 }
 
-} // polar::basic
+} // polar

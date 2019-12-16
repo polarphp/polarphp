@@ -208,4 +208,4 @@ bool is_part_of_polarphp_compilation(FileTypeId id)
    llvm_unreachable("All switch cases are covered");
 }
 
-} // polar::basic
+} // polar

@@ -17,7 +17,7 @@
 #include "polarphp/ast/DeclNameLoc.h"
 #include "polarphp/ast/AstContext.h"
 
-namespace polar::ast {
+namespace polar {
 
 DeclNameLoc::DeclNameLoc(AstContext &ctx, SourceLoc baseNameLoc,
                          SourceLoc lParenLoc,
@@ -38,4 +38,4 @@ DeclNameLoc::DeclNameLoc(AstContext &ctx, SourceLoc baseNameLoc,
    LocationInfo = storedLocs.data();
 }
 
-} // polar::ast
+} // polar

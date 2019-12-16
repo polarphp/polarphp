@@ -65,9 +65,9 @@
 namespace polar::driver {
 
 using namespace llvm::opt;
-using namespace polar::ast;
+using namespace polar;
 using namespace polar::sys;
-using namespace polar::basic;
+using namespace polar;
 
 struct LogJob
 {

@@ -15,7 +15,7 @@
 #include "llvm/ADT/Hashing.h"
 #include <utility>
 
-namespace polar::basic {
+namespace polar {
 
 using llvm::hash_combine;
 using llvm::hash_code;
@@ -36,6 +36,6 @@ hash_code hash_value(const std::tuple<ArgTypes...> &tupleValue)
    return hash_value_impl(tupleValue, Indices{});
 }
 
-} // polar::basic
+} // polar
 
 #endif // POLARPHP_BASIC_HASING_H

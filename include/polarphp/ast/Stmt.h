@@ -28,7 +28,7 @@
 #include "llvm/ADT/TinyPtrVector.h"
 #include "llvm/Support/TrailingObjects.h"
 
-namespace polar::ast {
+namespace polar {
 
 class AnyPattern;
 class AstContext;
@@ -41,10 +41,10 @@ class PatternBindingDecl;
 class VarDecl;
 class CaseStmt;
 
-using polar::basic::count_bits_used;
-using polar::basic::bitmax;
-using polar::basic::NullablePtr;
-using polar::basic::OptionalTransformRange;
+using polar::count_bits_used;
+using polar::bitmax;
+using polar::NullablePtr;
+using polar::OptionalTransformRange;
 
 enum class StmtKind
 {
@@ -1350,6 +1350,6 @@ public:
    }
 };
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif // POLARPHP_AST_TMT_H

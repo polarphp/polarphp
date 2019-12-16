@@ -21,7 +21,7 @@
 #include "polarphp/ast/CanTypeVisitor.h"
 #include "polarphp/ast/Type.h"
 
-namespace polar::ast {
+namespace polar {
 
 /// Recursively match the structure of two types, calling out those places
 /// where the types are not structurally identical and allowing the
@@ -331,6 +331,6 @@ public:
   }
 };
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif // POLARPHP_AST_TYPE_MATCHER_H

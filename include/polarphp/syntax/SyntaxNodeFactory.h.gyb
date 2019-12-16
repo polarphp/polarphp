@@ -22,7 +22,7 @@
 
 namespace polar::syntax {
 
-using polar::basic::ArrayRef;
+using polar::ArrayRef;
 
 class SyntaxNodeFactory
 {

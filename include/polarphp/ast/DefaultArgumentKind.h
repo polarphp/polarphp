@@ -23,7 +23,7 @@ namespace llvm {
 class StringRef;
 }
 
-namespace polar::ast {
+namespace polar {
 
 class Expr;
 
@@ -59,7 +59,7 @@ enum class DefaultArgumentKind : uint8_t {
 };
 enum { NumDefaultArgumentKindBits = 4 };
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif // POLARPHP_AST_DEFAULTARGUMENTKIND_H
 

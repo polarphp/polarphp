@@ -22,7 +22,7 @@
 #include "polarphp/basic/Statistic.h"
 #include "llvm/ADT/PointerUnion.h"
 
-namespace polar::ast {
+namespace polar {
 
 #define STMT(Id, _) \
   static_assert(std::is_trivially_destructible_v<Id##Stmt>, \
@@ -529,11 +529,11 @@ struct StmtTraceFormatter : public UnifiedStatsReporter::TraceFormatter {
    }
 };
 
-} // polar::ast
+} // polar
 
-namespace polar::basic {
+namespace polar {
 
-using namespace polar::ast;
+using namespace polar;
 
 static StmtTraceFormatter TF;
 
@@ -543,4 +543,4 @@ FrontendStatsTracer::getTraceFormatter<const Stmt *>() {
   return &TF;
 }
 
-} // polar::basic
+} // polar

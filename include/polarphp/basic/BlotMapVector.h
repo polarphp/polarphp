@@ -18,7 +18,7 @@
 #include "polarphp/basic/Range.h"
 #include <vector>
 
-namespace polar::basic {
+namespace polar {
 
 template <typename KeyT, typename ValueT>
 bool compareKeyAgainstDefaultKey(const std::pair<KeyT, ValueT> &Pair) {
@@ -142,6 +142,6 @@ public:
    SmallBlotMapVector() {}
 };
 
-} // end namespace polar::basic
+} // end namespace polar
 
 #endif // POLARPHP_BASIC_BLOTMAPVECTOR_H

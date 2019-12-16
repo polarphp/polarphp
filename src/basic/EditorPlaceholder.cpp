@@ -31,7 +31,7 @@
 #include "polarphp/basic/EditorPlaceholder.h"
 #include "llvm/ADT/Optional.h"
 
-namespace polar::basic {
+namespace polar {
 
 using namespace llvm;
 
@@ -97,4 +97,4 @@ bool is_editor_placeholder(StringRef identifierText)
    return identifierText.startswith("<#");
 }
 
-} // polar::basic
+} // polar

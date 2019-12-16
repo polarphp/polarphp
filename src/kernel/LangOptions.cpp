@@ -18,7 +18,7 @@
 #include "llvm/Support/raw_ostream.h"
 #include <limits.h>
 
-namespace polar::kernel {
+namespace polar {
 
 static const StringRef SupportedConditionalCompilationOSs[] = {
   "OSX",
@@ -302,7 +302,7 @@ std::pair<bool, bool> LangOptions::setTarget(llvm::Triple triple) {
   // Set the "targetEnvironment" platform condition if targeting a simulator
   // environment. Otherwise _no_ value is present for targetEnvironment; it's
   // an optional disambiguating refinement of the triple.
-  if (polar::basic::triple_is_any_simulator(Target))
+  if (polar::triple_is_any_simulator(Target))
     addPlatformConditionValue(PlatformConditionKind::TargetEnvironment,
                               "simulator");
 
@@ -343,4 +343,4 @@ bool LangOptions::doesTargetSupportObjCClassStubs() const {
   return false;
 }
 
-} // polar::kernel
+} // polar

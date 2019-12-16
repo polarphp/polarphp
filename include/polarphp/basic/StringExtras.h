@@ -45,7 +45,7 @@ namespace llvm {
 class raw_ostream;
 } // llvm
 
-namespace polar::basic {
+namespace polar {
 
 using llvm::raw_ostream;
 using llvm::StringRef;
@@ -1092,6 +1092,6 @@ bool omitNeedlessWords(StringRef &baseName,
                        bool isProperty,
                        const InheritedNameSet *allPropertyNames,
                        StringScratchSpace &scratch);
-} // polar::basic
+} // polar
 
 #endif // POLARPHP_BASIC_STRING_EXTRAS_H

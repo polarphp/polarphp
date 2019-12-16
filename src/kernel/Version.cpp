@@ -57,8 +57,8 @@
 namespace polar::version {
 
 
-using polar::basic::SourceLoc;
-using polar::basic::SourceRange;
+using polar::SourceLoc;
+using polar::SourceRange;
 
 using llvm::raw_ostream;
 using llvm::raw_string_ostream;
@@ -119,7 +119,7 @@ std::optional<Version> Version::parseCompilerVersionString(
 //      if (Component > limit) {
 //         if (diags)
 //            diags->diagnose(range.start,
-//                            polar::ast::diag::compiler_version_component_out_of_range, limit);
+//                            polar::diag::compiler_version_component_out_of_range, limit);
 //         isValidVersion = false;
 //      }
 //   };

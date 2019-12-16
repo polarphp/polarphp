@@ -26,13 +26,13 @@
 #include "llvm/ADT/Hashing.h"
 #include "llvm/ADT/StringRef.h"
 
-namespace polar::ast {
+namespace polar {
 
 enum class AllocationArena;
 class AstContext;
 class AstPrinter;
-using polar::basic::SourceLoc;
-using polar::basic::SourceRange;
+using polar::SourceLoc;
+using polar::SourceRange;
 
 /// Describes a layout constraint information.
 enum class LayoutConstraintKind : uint8_t {
@@ -368,55 +368,55 @@ LayoutConstraint getLayoutConstraint(Identifier ID, AstContext &Ctx);
 
 } // end namespace swift
 
-LLVM_DECLARE_TYPE_ALIGNMENT(polar::ast::LayoutConstraintInfo, polar::ast::TypeAlignInBits)
+LLVM_DECLARE_TYPE_ALIGNMENT(polar::LayoutConstraintInfo, polar::TypeAlignInBits)
 
 namespace llvm {
 static inline raw_ostream &
-operator<<(raw_ostream &OS, polar::ast::LayoutConstraint LC) {
+operator<<(raw_ostream &OS, polar::LayoutConstraint LC) {
   LC->print(OS);
   return OS;
 }
 
 // A LayoutConstraint casts like a LayoutConstraintInfo*.
-template <> struct simplify_type<const ::polar::ast::LayoutConstraint> {
-  typedef ::polar::ast::LayoutConstraintInfo *SimpleType;
-  static SimpleType getSimplifiedValue(const ::polar::ast::LayoutConstraint &Val) {
+template <> struct simplify_type<const ::polar::LayoutConstraint> {
+  typedef ::polar::LayoutConstraintInfo *SimpleType;
+  static SimpleType getSimplifiedValue(const ::polar::LayoutConstraint &Val) {
     return Val.getPointer();
   }
 };
 
 template <>
-struct simplify_type<::polar::ast::LayoutConstraint>
-    : public simplify_type<const ::polar::ast::LayoutConstraint> {};
+struct simplify_type<::polar::LayoutConstraint>
+    : public simplify_type<const ::polar::LayoutConstraint> {};
 
 // LayoutConstraint hashes just like pointers.
-template <> struct DenseMapInfo<polar::ast::LayoutConstraint> {
-  static polar::ast::LayoutConstraint getEmptyKey() {
-    return llvm::DenseMapInfo<polar::ast::LayoutConstraintInfo *>::getEmptyKey();
+template <> struct DenseMapInfo<polar::LayoutConstraint> {
+  static polar::LayoutConstraint getEmptyKey() {
+    return llvm::DenseMapInfo<polar::LayoutConstraintInfo *>::getEmptyKey();
   }
-  static polar::ast::LayoutConstraint getTombstoneKey() {
-    return llvm::DenseMapInfo<polar::ast::LayoutConstraintInfo *>::getTombstoneKey();
+  static polar::LayoutConstraint getTombstoneKey() {
+    return llvm::DenseMapInfo<polar::LayoutConstraintInfo *>::getTombstoneKey();
   }
-  static unsigned getHashValue(polar::ast::LayoutConstraint Val) {
-    return DenseMapInfo<polar::ast::LayoutConstraintInfo *>::getHashValue(
+  static unsigned getHashValue(polar::LayoutConstraint Val) {
+    return DenseMapInfo<polar::LayoutConstraintInfo *>::getHashValue(
         Val.getPointer());
   }
-  static bool isEqual(polar::ast::LayoutConstraint LHS,
-                      polar::ast::LayoutConstraint RHS) {
+  static bool isEqual(polar::LayoutConstraint LHS,
+                      polar::LayoutConstraint RHS) {
     return LHS.getPointer() == RHS.getPointer();
   }
 };
 
 // A LayoutConstraint is "pointer like".
-template <> struct PointerLikeTypeTraits<polar::ast::LayoutConstraint> {
+template <> struct PointerLikeTypeTraits<polar::LayoutConstraint> {
 public:
-  static inline void *getAsVoidPointer(polar::ast::LayoutConstraint I) {
+  static inline void *getAsVoidPointer(polar::LayoutConstraint I) {
     return (void *)I.getPointer();
   }
-  static inline polar::ast::LayoutConstraint getFromVoidPointer(void *P) {
-    return (polar::ast::LayoutConstraintInfo *)P;
+  static inline polar::LayoutConstraint getFromVoidPointer(void *P) {
+    return (polar::LayoutConstraintInfo *)P;
   }
-  enum { NumLowBitsAvailable = polar::ast::TypeAlignInBits };
+  enum { NumLowBitsAvailable = polar::TypeAlignInBits };
 };
 } // end namespace llvm
 

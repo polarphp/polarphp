@@ -24,9 +24,7 @@
 #include "polarphp/basic/SourceLoc.h"
 #include "polarphp/basic/Range.h"
 
-namespace polar::ast {
-
-using polar::basic::SourceLoc;
+namespace polar {
 
 class ParsedAutoDiffParameter {
 public:
@@ -97,6 +95,6 @@ enum class DifferentiabilityKind : uint8_t {
   Linear = 2
 };
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif // POLARPHP_AST_AUTODIFF_H

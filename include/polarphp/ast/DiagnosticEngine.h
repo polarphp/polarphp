@@ -25,14 +25,9 @@
 #include "llvm/Support/Allocator.h"
 #include "llvm/Support/VersionTuple.h"
 
-namespace polar::basic {
+namespace polar {
+
 class SourceManager;
-}
-
-namespace polar::ast {
-
-using polar::basic::SourceManager;
-
 class Decl;
 class DeclAttribute;
 class DiagnosticEngine;
@@ -1102,6 +1097,6 @@ DiagnosticEngine::diagnoseWithNotes(InFlightDiagnostic parentDiag,
    builder();
 }
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif

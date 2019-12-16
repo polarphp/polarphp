@@ -52,7 +52,7 @@
 #include <algorithm>
 #include <iterator>
 
-namespace polar::basic {
+namespace polar {
 
 void print_opaque_prefix_map(raw_ostream &out, void *root,
                              void (*printNode)(raw_ostream &, void*));
@@ -803,6 +803,6 @@ public:
    static void print(raw_ostream &out, ArrayRef<unsigned char> key);
 };
 
-} //  polar::basic
+} //  polar
 
 #endif // POLARPHP_BASIC_PREFIXMAP_H

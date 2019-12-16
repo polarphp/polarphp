@@ -30,7 +30,8 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Support/MemoryBuffer.h"
 
-namespace polar::ast {
+namespace polar {
+
 void PrettyStackTraceDecl::print(llvm::raw_ostream &out) const {
   out << "While " << Action << ' ';
   if (!TheDecl) {
@@ -259,4 +260,4 @@ void PrettyStackTraceGenericSignature::print(llvm::raw_ostream &out) const {
   out << '\n';
 }
 
-} // polar::ast
+} // polar

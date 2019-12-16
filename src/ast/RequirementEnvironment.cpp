@@ -27,7 +27,7 @@
 
 #define DEBUG_TYPE "Interface conformance checking"
 
-namespace polar::ast {
+namespace polar {
 
 STATISTIC(NumRequirementEnvironments, "# of requirement environments");
 
@@ -219,4 +219,4 @@ RequirementEnvironment::RequirementEnvironment(
       GenericSignature());
    syntheticEnvironment = syntheticSignature->getGenericEnvironment();
 }
-} // polar::ast
+} // polar

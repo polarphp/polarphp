@@ -33,7 +33,7 @@
 
 namespace polar::driver {
 
-using polar::basic::interleave;
+using polar::interleave;
 
 StringRef CommandOutput::getOutputForInputAndType(StringRef primaryInputFile,
                                                   filetypes::FileTypeId type) const

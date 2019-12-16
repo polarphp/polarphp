@@ -20,7 +20,7 @@
 
 #include "polarphp/ast/DiagnosticsCommon.h"
 
-namespace polar::ast {
+namespace polar {
 namespace diag {
 // Declare common diagnostics objects with their appropriate types.
 #define DIAG(KIND,ID,Options,Text,Signature) \
@@ -29,6 +29,6 @@ namespace diag {
   extern internal::StructuredFixItWithArguments<void Signature>::type ID;
 #include "polarphp/ast/DiagnosticsParseDefs.h"
 }
-} // polar::ast
+} // polar
 
 #endif // POLARPHP_AST_DIAGNOSTICSPARSE_H

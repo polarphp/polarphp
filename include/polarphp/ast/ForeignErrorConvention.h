@@ -21,7 +21,7 @@
 
 #include "polarphp/ast/Type.h"
 
-namespace polar::ast {
+namespace polar {
 
 /// A small structure describing the error convention of a foreign declaration.
 class ForeignErrorConvention {
@@ -184,6 +184,6 @@ public:
   }
 };
 
-} // polar::ast
+} // polar
 
 #endif

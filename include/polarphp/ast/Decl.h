@@ -48,15 +48,15 @@ namespace polar::llparser {
 class Parser;
 }
 
-namespace polar::ast {
+namespace polar {
 
-using polar::basic::count_bits_used;
-using polar::basic::bitmax;
+using polar::count_bits_used;
+using polar::bitmax;
 using llvm::cast_or_null;
-using polar::basic::range;
-using polar::basic::OptionalEnum;
-using polar::basic::DowncastFilterRange;
-using polar::basic::NullablePtr;
+using polar::range;
+using polar::OptionalEnum;
+using polar::DowncastFilterRange;
+using polar::NullablePtr;
 using polar::llparser::Parser;
 
 enum class AccessSemantics : unsigned char;
@@ -7412,6 +7412,6 @@ inline SourceLoc extractNearestSourceLoc(const AbstractFunctionDecl *func) {
    return extractNearestSourceLoc(static_cast<const Decl *>(func));
 }
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif

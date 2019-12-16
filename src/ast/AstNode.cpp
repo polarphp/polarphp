@@ -20,7 +20,7 @@
 #include "polarphp/ast/Stmt.h"
 #include "polarphp/basic/SourceLoc.h"
 
-namespace polar::ast {
+namespace polar {
 
 SourceRange AstNode::getSourceRange() const {
   if (const auto *E = this->dyn_cast<Expr*>())
@@ -103,4 +103,4 @@ FUNC(Expr)
 FUNC(Decl)
 #undef FUNC
 
-} // polar::ast
+} // polar

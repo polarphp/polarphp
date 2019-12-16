@@ -25,7 +25,7 @@
 #include "llvm/ADT/SmallString.h"
 #include "llvm/Support/Compiler.h"
 
-namespace polar::basic {
+namespace polar {
 
 namespace {
 
@@ -150,4 +150,4 @@ void PrefixMapKeyPrinter<unsigned char>::print(raw_ostream &out,
    out << '\'';
 }
 
-} // polar::basic
+} // polar

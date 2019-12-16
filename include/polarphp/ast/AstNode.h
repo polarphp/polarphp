@@ -25,14 +25,9 @@ namespace llvm {
 class raw_ostream;
 }
 
-namespace polar::basic {
+namespace polar {
 class SourceLoc;
 class SourceRange;
-}
-
-namespace polar::ast {
-using polar::basic::SourceLoc;
-using polar::basic::SourceRange;
 class Expr;
 class Stmt;
 class Decl;
@@ -77,13 +72,13 @@ struct AstNode : public llvm::PointerUnion<Expr*, Stmt*, Decl*> {
 } // namespace swift
 
 namespace llvm {
-using polar::ast::AstNode;
+using polar::AstNode;
 template <> struct DenseMapInfo<AstNode> {
    static inline AstNode getEmptyKey() {
-      return DenseMapInfo<polar::ast::Expr *>::getEmptyKey();
+      return DenseMapInfo<polar::Expr *>::getEmptyKey();
    }
    static inline AstNode getTombstoneKey() {
-      return DenseMapInfo<polar::ast::Expr *>::getTombstoneKey();
+      return DenseMapInfo<polar::Expr *>::getTombstoneKey();
    }
    static unsigned getHashValue(const AstNode Val) {
       return DenseMapInfo<void *>::getHashValue(Val.getOpaqueValue());

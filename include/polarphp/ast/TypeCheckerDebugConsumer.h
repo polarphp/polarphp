@@ -16,7 +16,7 @@
 #include "llvm/Support/raw_ostream.h"
 #include <string>
 
-namespace polar::ast {
+namespace polar {
 
 using llvm::raw_ostream;
 using llvm::StringRef;
@@ -54,7 +54,7 @@ public:
   virtual void handleMessage(StringRef Message) = 0;
 };
 
-} // namespace polar::ast
+} // namespace polar
 
 #endif // POLARPHP_AST_TYPE_CHECKER_DEBUG_CONSUMER_H
 

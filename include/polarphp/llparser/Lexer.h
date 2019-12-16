@@ -26,20 +26,20 @@
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/Support/SaveAndRestore.h"
 
-namespace polar::kernel {
+namespace polar {
 class LangOptions;
 }
 
 namespace polar::llparser {
 
-using polar::basic::CharSourceRange;
-using polar::basic::SourceManager;
-using polar::basic::SourceRange;
-using polar::ast::Diagnostic;
-using polar::ast::DiagnosticEngine;
-using polar::ast::InFlightDiagnostic;
-using polar::ast::Diag;
-using polar::kernel::LangOptions;
+using polar::CharSourceRange;
+using polar::SourceManager;
+using polar::SourceRange;
+using polar::Diagnostic;
+using polar::DiagnosticEngine;
+using polar::InFlightDiagnostic;
+using polar::Diag;
+using polar::LangOptions;
 
 /// Given a pointer to the starting byte of a UTF8 character, validate it and
 /// advance the lexer past it.  This returns the encoded character or ~0U if

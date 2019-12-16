@@ -23,7 +23,7 @@
 #include "llvm/Support/raw_ostream.h"
 #include "polarphp/basic/QuotedString.h"
 
-namespace polar::basic {
+namespace polar {
 
 void print_as_quoted_string(raw_ostream &out, StringRef text) {
    out << '"';
@@ -54,4 +54,4 @@ void print_as_quoted_string(raw_ostream &out, StringRef text) {
    out << '"';
 }
 
-} // polar::basic
+} // polar

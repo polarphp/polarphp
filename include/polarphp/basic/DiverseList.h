@@ -25,7 +25,7 @@
 #include <cstring>
 #include <utility>
 
-namespace polar::basic {
+namespace polar {
 
 template <typename T>
 class DiverseListImpl;
@@ -396,6 +396,6 @@ public:
    }
 };
 
-} // polar::basic
+} // polar
 
 #endif // POLARPHP_BASIC_DIVERSE_LIST_H

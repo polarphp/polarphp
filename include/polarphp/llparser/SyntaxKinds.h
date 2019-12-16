@@ -16,7 +16,7 @@
 
 namespace polar::llparser {
 
-using polar::basic::count_bits_used;
+using polar::count_bits_used;
 
 enum class SyntaxKind {
    Decl, // Common Syntax

@@ -18,9 +18,9 @@
 #include "polarphp/ast/Decl.h"
 #include "polarphp/ast/Types.h"
 
-namespace polar::ast {
+namespace polar {
 
-using polar::basic::range;
+using polar::range;
 
 /// This helper function is typically used by the parser to
 /// map a type name to a corresponding layout constraint if possible.
@@ -360,4 +360,4 @@ LayoutConstraintInfo LayoutConstraintInfo::NativeClassConstraintInfo(
 LayoutConstraintInfo LayoutConstraintInfo::TrivialConstraintInfo(
    LayoutConstraintKind::Trivial);
 
-} // end namespace polar::ast
+} // end namespace polar

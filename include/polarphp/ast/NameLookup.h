@@ -26,7 +26,7 @@
 #include "polarphp/basic/NullablePtr.h"
 #include "polarphp/basic/SourceLoc.h"
 
-namespace polar::ast {
+namespace polar {
 class AstContext;
 class DeclName;
 class GenericSignatureBuilder;
@@ -36,7 +36,7 @@ class ValueDecl;
 struct SelfBounds;
 class NominalTypeDecl;
 
-using polar::basic::NullablePtr;
+using polar::NullablePtr;
 
 namespace ast_scope {
 class AstSourceFileScope;
@@ -701,6 +701,6 @@ private:
    void expandFunctionBodyImpl(AbstractFunctionDecl *);
 };
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif // POLARPHP_AST_NAME_LOOKUP_H

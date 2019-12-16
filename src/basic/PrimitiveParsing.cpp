@@ -28,7 +28,7 @@
 #include "polarphp/basic/PrimitiveParsing.h"
 #include "llvm/ADT/SmallVector.h"
 
-namespace polar::basic {
+namespace polar {
 
 unsigned measure_newline(const char *bufferPtr, const char *bufferEnd)
 {
@@ -85,4 +85,4 @@ void trim_leading_whitespace_from_lines(StringRef rawText,
    outLines.append(lines.begin(), lines.end());
 }
 
-} //  polar::basic
+} //  polar

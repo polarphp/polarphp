@@ -15,9 +15,13 @@
 
 #include "llvm/Support/ErrorHandling.h"
 
+namespace polar::ast {
+class ValueDecl;
+}
+
 namespace polar::pil {
 
-class ValueDecl;
+using polar::ast::ValueDecl;
 
 /// Linkage for a PIL object.  This concept combines the notions
 /// of symbol linkage and visibility.
@@ -168,7 +172,7 @@ inline PILLinkage addExternalToLinkage(PILLinkage linkage) {
 
 /// Return whether the linkage indicates that an object has a
 /// definition outside the current PILModule.
-inline bool isAvailableExternally(PILLinkage linkage) {
+inline bool is_available_externally(PILLinkage linkage) {
    return linkage >= PILLinkage::PublicExternal;
 }
 
@@ -255,7 +259,7 @@ inline PILLinkage effectiveLinkageForClassMember(PILLinkage linkage,
          break;
 
       case SubclassScope::Resilient:
-         if (isAvailableExternally(linkage))
+         if (is_available_externally(linkage))
             return PILLinkage::HiddenExternal;
          return PILLinkage::Hidden;
 

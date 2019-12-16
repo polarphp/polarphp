@@ -37,10 +37,10 @@
 // it is written to a file which is read by the driver in order to decide which
 // source files require recompilation.
 
-namespace polar::ast::fine_grained_dependencies {
+namespace polar::fine_grained_dependencies {
 
 using polar::demangling::Demangler;
-using namespace polar::ast::mangle;
+using namespace polar::mangle;
 
 //==============================================================================
 // MARK: Emitting and reading SourceFileDepGraph
@@ -720,4 +720,4 @@ bool emitReferenceDependencies(
    return hadError;
 }
 
-} // polar::ast
+} // polar

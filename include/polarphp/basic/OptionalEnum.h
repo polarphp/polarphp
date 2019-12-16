@@ -27,7 +27,7 @@
 #include <type_traits>
 #include "llvm/ADT/Optional.h"
 
-namespace polar::basic {
+namespace polar {
 template<typename T>
 class OptionalEnum {
    using underlying_type = typename std::underlying_type<T>::type;
@@ -94,6 +94,6 @@ public:
       return (intptr_t)Storage;
    }
 };
-} // end namespace polar::basic
+} // end namespace polar
 
 #endif // POLARPHP_BASIC_OPTIONAL_ENUM_H

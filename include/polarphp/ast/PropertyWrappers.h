@@ -25,7 +25,7 @@ namespace llvm {
 class raw_ostream;
 }
 
-namespace polar::ast {
+namespace polar {
 
 class ConstructorDecl;
 class CustomAttr;

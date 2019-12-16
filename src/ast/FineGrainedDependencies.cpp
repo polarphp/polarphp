@@ -31,9 +31,7 @@
 // These include the graph structures common to both programs and also
 // the frontend graph, which must be read by the driver.
 
-namespace polar::ast::fine_grained_dependencies {
-
-using polar::basic::indices;
+namespace polar::fine_grained_dependencies {
 
 //==============================================================================
 // MARK: SourceFileDepGraph access
@@ -261,7 +259,7 @@ void SourceFileDepGraph::verifySame(const SourceFileDepGraph &other) const {
    }
 #endif
 }
-} // polar::ast
+} // polar
 
 //==============================================================================
 // MARK: SourceFileDepGraph YAML reading & writing
@@ -270,8 +268,8 @@ void SourceFileDepGraph::verifySame(const SourceFileDepGraph &other) const {
 namespace llvm {
 namespace yaml {
 
-using namespace polar::ast::fine_grained_dependencies;
-using DepNodeKind = polar::ast::fine_grained_dependencies::NodeKind;
+using namespace polar::fine_grained_dependencies;
+using DepNodeKind = polar::fine_grained_dependencies::NodeKind;
 
 // This introduces a redefinition for Linux.
 #if !(defined(__linux__) || defined(_WIN64))

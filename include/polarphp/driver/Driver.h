@@ -60,10 +60,10 @@ using polar::ast::DiagnosticEngine;
 using llvm::opt::InputArgList;
 using llvm::opt::DerivedArgList;
 using polar::sys::TaskQueue;
-using polar::basic::OptionSet;
-using polar::basic::SanitizerKind;
-using polar::basic::TypeToPathMap;
-using polar::basic::OutputFileMap;
+using polar::OptionSet;
+using polar::SanitizerKind;
+using polar::TypeToPathMap;
+using polar::OutputFileMap;
 using polar::ast::IRGenDebugInfoLevel;
 using polar::ast::IRGenDebugInfoFormat;
 

@@ -37,22 +37,16 @@ class TargetOptions;
 class TargetMachine;
 }
 
-namespace polar::kernel {
-class LangOptions;
-class TypeCheckerOptions;
-}
-
-namespace polar::basic {
-class UnifiedStatsReporter;
-class SourceManager;
-}
-
 namespace polar::llparser {
 class Parser;
 class Token;
 }
 
-namespace polar::ast {
+namespace polar::pil {
+class PILModule;
+}
+
+namespace polar {
 class GenericSignatureBuilder;
 class AstContext;
 class CodeCompletionCallbacksFactory;
@@ -71,20 +65,20 @@ class PersistentParserState;
 class SerializationOptions;
 class SourceFile;
 class PILOptions;
-class PILModule;
 class PILParserTUState;
 class SyntaxParseActions;
 class SyntaxParsingCache;
 class TypeChecker;
 struct TypeLoc;
 enum class SourceFileKind;
-using polar::kernel::TypeCheckerOptions;
-using polar::kernel::LangOptions;
-using polar::basic::PrimarySpecificPaths;
-using polar::basic::UnifiedStatsReporter;
-using polar::basic::SourceManager;
+class TypeCheckerOptions;
+class LangOptions;
+class UnifiedStatsReporter;
+class SourceManager;
+using polar::PrimarySpecificPaths;
 using polar::llparser::Parser;
 using polar::llparser::Token;
+using polar::pil::PILModule;
 
 namespace Lowering {
 class TypeConverter;
@@ -158,8 +152,8 @@ void performCodeCompletionSecondPass(PersistentParserState &PersistentState,
 
 namespace polar::llparser {
 
-using polar::kernel::LangOptions;
-using polar::basic::SourceManager;
+using polar::LangOptions;
+using polar::SourceManager;
 using polar::ast::DiagnosticEngine;
 using llvm::ArrayRef;
 
@@ -173,7 +167,7 @@ std::vector<Token> tokenize(const LangOptions &LangOpts,
                             ArrayRef<Token> SplitTokens = ArrayRef<Token>());
 }
 
-namespace polar::ast {
+namespace polar {
 
 /// Once parsing is complete, this walks the AST to resolve imports, record
 /// operators, and do other top-level validation.
@@ -422,6 +416,6 @@ void registerIDERequestFunctions(Evaluator &evaluator);
 /// Calling registerIDERequestFunctions will invoke this function as well.
 void registerIDETypeCheckRequestFunctions(Evaluator &evaluator);
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif // POLARPHP_GLOBAL_SUBSYSTEMS_H

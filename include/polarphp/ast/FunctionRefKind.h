@@ -21,7 +21,7 @@ namespace llvm {
 class StringRef;
 } // llvm
 
-namespace polar::ast {
+namespace polar {
 
 using llvm::StringRef;
 

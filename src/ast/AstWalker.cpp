@@ -58,7 +58,7 @@
 #include "polarphp/ast/ParameterList.h"
 #include "polarphp/ast/PrettyStackTrace.h"
 
-using namespace polar::ast;
+using namespace polar;
 
 using llvm::SmallVector;
 

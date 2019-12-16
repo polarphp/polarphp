@@ -27,7 +27,7 @@
 #include "llvm/ADT/ArrayRef.h"
 #include "polarphp/ast/Type.h"
 
-namespace polar::ast {
+namespace polar {
 
 class GenericTypeParamDecl;
 class GenericTypeParamType;
@@ -119,31 +119,31 @@ struct GenericParamKey
    unsigned findIndexIn(TypeArrayView<GenericTypeParamType> genericParams) const;
 };
 
-} // polar::ast
+} // polar
 
 
 namespace llvm {
 
 template<>
-struct DenseMapInfo<polar::ast::GenericParamKey>
+struct DenseMapInfo<polar::GenericParamKey>
 {
-   static inline polar::ast::GenericParamKey getEmptyKey()
+   static inline polar::GenericParamKey getEmptyKey()
    {
       return {0xFFFF, 0xFFFF};
    }
 
-   static inline polar::ast::GenericParamKey getTombstoneKey()
+   static inline polar::GenericParamKey getTombstoneKey()
    {
       return {0xFFFE, 0xFFFE};
    }
 
-   static inline unsigned getHashValue(polar::ast::GenericParamKey key)
+   static inline unsigned getHashValue(polar::GenericParamKey key)
    {
       return DenseMapInfo<unsigned>::getHashValue(key.depth << 16 | key.index);
    }
 
-   static bool isEqual(polar::ast::GenericParamKey lhs,
-                       polar::ast::GenericParamKey rhs)
+   static bool isEqual(polar::GenericParamKey lhs,
+                       polar::GenericParamKey rhs)
    {
       return lhs.depth == rhs.depth && lhs.index == rhs.index;
    }

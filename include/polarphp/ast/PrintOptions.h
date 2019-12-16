@@ -22,7 +22,7 @@
 #include <limits.h>
 #include <vector>
 
-namespace polar::ast {
+namespace polar {
 class AstPrinter;
 class GenericEnvironment;
 class CanType;
@@ -594,6 +594,6 @@ struct PrintOptions {
       return PO;
    }
 };
-} // polar::ast
+} // polar
 
 #endif // POLARPHP_AST_PRINTOPTIONS_H

@@ -36,9 +36,9 @@ bool is_trivial_syntax_kind(SyntaxKind kind)
 void print_syntax_kind(SyntaxKind kind, raw_ostream &outStream,
                        SyntaxPrintOptions opts, bool open)
 {
-   std::unique_ptr<polar::basic::OsColor> color;
+   std::unique_ptr<polar::OsColor> color;
    if (opts.visual) {
-      color.reset(new polar::basic::OsColor(outStream, raw_ostream::Colors::GREEN));
+      color.reset(new polar::OsColor(outStream, raw_ostream::Colors::GREEN));
    }
    outStream << "<";
    if (!open) {

@@ -23,15 +23,15 @@
 #include "polarphp/basic/SourceLoc.h"
 #include "llvm/Support/SourceMgr.h"
 
-namespace polar::basic {
+namespace polar {
 class SourceManager;
 }
 
-namespace polar::ast {
+namespace polar {
 
-using polar::basic::SourceManager;
-using polar::basic::CharSourceRange;
-using polar::basic::SourceLoc;
+using polar::SourceManager;
+using polar::CharSourceRange;
+using polar::SourceLoc;
 class DiagnosticArgument;
 class DiagnosticEngine;
 enum class DiagID : uint32_t;

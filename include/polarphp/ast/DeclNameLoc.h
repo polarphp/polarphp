@@ -20,10 +20,10 @@
 #include "polarphp/basic/LLVM.h"
 #include "polarphp/basic/SourceLoc.h"
 
-namespace polar::ast {
+namespace polar {
 
-using polar::basic::SourceLoc;
-using polar::basic::SourceRange;
+using polar::SourceLoc;
+using polar::SourceRange;
 class AstContext;
 
 /// Source location information for a declaration name (\c DeclName)
@@ -123,6 +123,6 @@ public:
    }
 };
 
-} // polar::ast
+} // polar
 
 #endif // POLARPHP_AST_DECL_NAME_LOC_H

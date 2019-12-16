@@ -22,10 +22,9 @@
 #include "polarphp/ast/PlatformKind.h"
 #include "llvm/Support/VersionTuple.h"
 
-namespace polar::ast {
+namespace polar {
+
 class AstContext;
-using polar::basic::SourceRange;
-using polar::basic::SourceLoc;
 
 enum class VersionComparison { GreaterThanEqual };
 
@@ -189,6 +188,6 @@ public:
   }
 };
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif

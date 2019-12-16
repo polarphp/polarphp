@@ -16,7 +16,7 @@
 #include "llvm/ADT/PointerUnion.h"
 #include <utility>
 
-namespace polar::ast {
+namespace polar {
 
 class Decl;
 class Expr;

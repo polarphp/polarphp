@@ -22,7 +22,7 @@
 
 namespace llvm {
 
-using namespace polar::ast;
+using namespace polar;
 
 raw_ostream &operator<<(raw_ostream &OS, Identifier I) {
    if (I.get() == nullptr)
@@ -47,7 +47,7 @@ raw_ostream &operator<<(raw_ostream &OS, DeclName I) {
 }
 } // llvm
 
-namespace polar::ast {
+namespace polar {
 
 constexpr const Identifier::Aligner DeclBaseName::SubscriptIdentifierData{};
 constexpr const Identifier::Aligner DeclBaseName::ConstructorIdentifierData{};
@@ -181,4 +181,4 @@ llvm::raw_ostream &DeclName::printPretty(llvm::raw_ostream &os) const {
    return print(os, /*skipEmptyArgumentNames=*/!isSpecial());
 }
 
-} // polar::ast
+} // polar

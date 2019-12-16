@@ -22,7 +22,7 @@
 #include "polarphp/basic/OptionSet.h"
 #include "llvm/Support/TrailingObjects.h"
 
-namespace polar::ast {
+namespace polar {
 
 /// This describes a list of parameters.  Each parameter descriptor is tail
 /// allocated onto this list.
@@ -138,6 +138,6 @@ public:
   //  void print(raw_ostream &OS) const;
 };
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif // POLARPHP_AST_PARAMETERLIST_H

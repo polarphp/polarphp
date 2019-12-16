@@ -16,7 +16,7 @@
 #include "polarphp/ast/TypeWalker.h"
 #include "llvm/ADT/STLExtras.h"
 
-namespace polar::ast {
+namespace polar {
 
 class BoundGenericType;
 class ComponentIdentTypeRepr;
@@ -75,6 +75,6 @@ public:
     : Callback(callback) {}
 };
 
-} // polar::ast
+} // polar
 
 #endif // POLARPHP_AST_TYPEDECLFINDER_H

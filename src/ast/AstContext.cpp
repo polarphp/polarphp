@@ -60,14 +60,11 @@
 #include <algorithm>
 #include <memory>
 
-namespace polar::ast {
+namespace polar {
 
 using namespace llvm;
 using polar::syntax::SyntaxArena;
 using polar::syntax::RefCountPtr;
-using polar::basic::aligned_alloc;
-using polar::basic::aligned_free;
-using polar::basic::indices;
 
 #define DEBUG_TYPE "AstContext"
 STATISTIC(NumRegisteredGenericSignatureBuilders,
@@ -119,16 +116,16 @@ struct OverrideSignatureKey {
         derivedClassSig(derivedClassSignature), superclassTy(superclassType) {}
 };
 
-} // polar::ast
+} // polar
 
 namespace llvm {
 
-using polar::ast::OverrideSignatureKey;
+using polar::OverrideSignatureKey;
 
 template<>
 struct DenseMapInfo<OverrideSignatureKey> {
-   using Type = polar::ast::Type;
-   using GenericSignature = polar::ast::GenericSignature;
+   using Type = polar::Type;
+   using GenericSignature = polar::GenericSignature;
 
    static bool isEqual(const OverrideSignatureKey lhs,
                        const OverrideSignatureKey rhs) {
@@ -159,7 +156,7 @@ struct DenseMapInfo<OverrideSignatureKey> {
 };
 } // namespace llvm
 
-namespace polar::ast {
+namespace polar {
 
 struct AstContext::Implementation {
    Implementation();
@@ -4545,4 +4542,4 @@ IndexSubset::get(AstContext &ctx, const SmallBitVector &indices) {
    return newNode;
 }
 
-} // polar::ast
+} // polar

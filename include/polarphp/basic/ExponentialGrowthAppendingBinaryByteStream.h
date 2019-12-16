@@ -24,7 +24,7 @@
 #include "llvm/Support/BinaryByteStream.h"
 #include "llvm/Support/Endian.h"
 
-namespace polar::basic {
+namespace polar {
 
 using llvm::WritableBinaryStream;
 using llvm::BinaryStreamFlags;
@@ -113,6 +113,6 @@ private:
    endianness m_endian;
 };
 
-} // polar::basic
+} // polar
 
 #endif // POLARPHP_BASIC_EXPONENTIALGROWTHAPPENDINGBINARYBYTESTREAM_H

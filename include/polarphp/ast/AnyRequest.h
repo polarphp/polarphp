@@ -28,13 +28,10 @@ namespace llvm {
 class raw_ostream;
 }
 
-namespace polar::ast {
+namespace polar {
 
 using llvm::hash_code;
 using llvm::hash_value;
-using polar::basic::hash_value;
-using polar::basic::SourceLoc;
-
 class DiagnosticEngine;
 
 /// Stores a request (for the \c Evaluator class) of any kind.
@@ -53,7 +50,7 @@ class DiagnosticEngine;
 ///       void noteCycleStep(DiagnosticEngine &diags) const;
 ///
 class AnyRequest {
-  friend llvm::DenseMapInfo<polar::ast::AnyRequest>;
+  friend llvm::DenseMapInfo<polar::AnyRequest>;
 
   static hash_code hashForHolder(uint64_t typeID, hash_code requestHash) {
     return hash_combine(typeID, requestHash);
@@ -260,32 +257,32 @@ public:
   }
 };
 
-} // end namespace polar::ast
+} // end namespace polar
 
 namespace llvm {
   template<>
-  struct DenseMapInfo<polar::ast::AnyRequest> {
-    static inline polar::ast::AnyRequest getEmptyKey() {
-      return polar::ast::AnyRequest::getEmptyKey();
+  struct DenseMapInfo<polar::AnyRequest> {
+    static inline polar::AnyRequest getEmptyKey() {
+      return polar::AnyRequest::getEmptyKey();
     }
-    static inline polar::ast::AnyRequest getTombstoneKey() {
-      return polar::ast::AnyRequest::getTombstoneKey();
+    static inline polar::AnyRequest getTombstoneKey() {
+      return polar::AnyRequest::getTombstoneKey();
     }
-    static unsigned getHashValue(const polar::ast::AnyRequest &request) {
+    static unsigned getHashValue(const polar::AnyRequest &request) {
       return hash_value(request);
     }
     template <typename Request>
     static unsigned getHashValue(const Request &request) {
-      return polar::ast::AnyRequest::hashForHolder(polar::ast::TypeId<Request>::value,
+      return polar::AnyRequest::hashForHolder(polar::TypeId<Request>::value,
                                               hash_value(request));
     }
-    static bool isEqual(const polar::ast::AnyRequest &lhs,
-                        const polar::ast::AnyRequest &rhs) {
+    static bool isEqual(const polar::AnyRequest &lhs,
+                        const polar::AnyRequest &rhs) {
       return lhs == rhs;
     }
     template <typename Request>
     static bool isEqual(const Request &lhs,
-                        const polar::ast::AnyRequest &rhs) {
+                        const polar::AnyRequest &rhs) {
       if (rhs == getEmptyKey() || rhs == getTombstoneKey())
         return false;
       const Request *rhsRequest = rhs.getAs<Request>();

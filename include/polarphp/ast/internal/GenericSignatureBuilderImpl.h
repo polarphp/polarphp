@@ -10,7 +10,7 @@
 
 #include "polarphp/ast/GenericSignatureBuilder.h"
 
-namespace polar::ast {
+namespace polar {
 
 class GenericSignatureBuilder::ResolvedType {
    llvm::PointerUnion<PotentialArchetype *, Type> type;
@@ -102,6 +102,6 @@ public:
    }
 };
 
-} // end namepsace polar::ast
+} // end namepsace polar
 
 #endif // POLARPHP_AST_INTERNAL_GENERIC_SIGNATURE_BUILDER_IMPL_H

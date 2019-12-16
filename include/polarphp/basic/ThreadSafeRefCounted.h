@@ -28,7 +28,7 @@
 #include <cassert>
 #include "llvm/ADT/IntrusiveRefCntPtr.h"
 
-namespace polar::basic {
+namespace polar {
 
 /// A class that has the same function as \c ThreadSafeRefCountedBase, but with
 /// a virtual destructor.
@@ -61,6 +61,6 @@ public:
    }
 };
 
-} // polar::basic
+} // polar
 
 #endif // POLARPHP_BASIC_THREADSAFE_REFCOUNTED_H

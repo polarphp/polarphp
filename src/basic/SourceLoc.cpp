@@ -32,7 +32,7 @@
 
 #include <optional>
 
-namespace polar::basic {
+namespace polar {
 
 using llvm::errs;
 using LLVMSourceMgr = llvm::SourceMgr;
@@ -121,4 +121,4 @@ void CharSourceRange::dump(const SourceManager &SM) const {
   print(llvm::errs(), SM);
 }
 
-} // polar::basic
+} // polar

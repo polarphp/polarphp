@@ -118,7 +118,7 @@ parseDependencyFile(llvm::MemoryBuffer &buffer,
          return LoadResult::HadError;
       StringRef keyString = key->getValue(scratch);
 
-      using namespace polar::basic::referencedependencykeys;
+      using namespace polar::referencedependencykeys;
 
       if (keyString == interfaceHash) {
          auto *value = dyn_cast<yaml::ScalarNode>(i->getValue());

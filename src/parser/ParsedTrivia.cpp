@@ -27,7 +27,7 @@
 namespace polar::parser {
 
 using polar::syntax::TriviaPiece;
-using polar::basic::CharSourceRange;
+using polar::CharSourceRange;
 using llvm::StringRef;
 
 Trivia

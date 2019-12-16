@@ -23,7 +23,7 @@
 #include "llvm/ADT/FoldingSet.h"
 #include "polarphp/basic/TupleDenseMapInfo.h"
 
-namespace polar::ast {
+namespace polar {
 class DeclContext;
 
 namespace namelookup {
@@ -159,6 +159,6 @@ ArrayRef<ModuleDecl::ImportedModule> getAllImports(const DeclContext *dc);
 
 }  // namespace namelookup
 
-}  // namespace polar::ast
+}  // namespace polar
 
 #endif // POLARPHP_AST_IMPORT_CACHE_H

@@ -15,7 +15,7 @@
 #include "polarphp/basic/LLVM.h"
 #include "llvm/ADT/Optional.h"
 
-namespace polar::basic {
+namespace polar {
 
 struct SupplementaryOutputPaths
 {
@@ -126,6 +126,6 @@ struct SupplementaryOutputPaths
    }
 };
 
-} // polar::basic
+} // polar
 
 #endif // POLARPHP_BASIC_SUPPLEMENTARYOUTPUTPATHS_H

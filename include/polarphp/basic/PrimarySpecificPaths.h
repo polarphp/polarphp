@@ -29,7 +29,7 @@
 
 #include <string>
 
-namespace polar::basic {
+namespace polar {
 
 /// Holds all of the output paths, and debugging-info path that are
 /// specific to which primary file is being compiled at the moment.
@@ -64,7 +64,7 @@ public:
    }
 };
 
-} // polar::basic
+} // polar
 
 #endif // POLARPHP_BASIC_PRIMARYSPECIFICPATHS_H
 

@@ -27,7 +27,7 @@
 #include "polarphp/basic/StlExtras.h"
 #include "llvm/ADT/ArrayRef.h"
 
-namespace polar::basic {
+namespace polar {
 
 /// A transformation of an ArrayRef using a function of type FuncTy. This is
 /// different than ArrayRefView since the underlying function is stored instead
@@ -213,6 +213,6 @@ makeTransformArrayRef(llvm::ArrayRef<Orig> array, std::function<Proj (Orig)> fun
    return TransformArrayRef<decltype(func)>(array, func);
 }
 
-} // polar::basic
+} // polar
 
 #endif

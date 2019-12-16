@@ -23,11 +23,11 @@
 #include "polarphp/basic/Hashing.h"
 #include "llvm/ADT/TinyPtrVector.h"
 
-namespace polar::basic {
+namespace polar {
 class SourceLoc;
 }
 
-namespace polar::ast {
+namespace polar {
 
 class ClassDecl;
 class DeclContext;
@@ -40,12 +40,12 @@ class TypeAliasDecl;
 class TypeDecl;
 enum class UnqualifiedLookupFlags;
 
-using polar::basic::SourceLoc;
+using polar::SourceLoc;
 
 namespace ast_scope {
 class AstScopeImpl;
 class ScopeCreator;
-using polar::basic::hash_value;
+using polar::hash_value;
 } // namespace ast_scope
 
 /// Display a nominal type or extension thereof.
@@ -388,6 +388,6 @@ void reportEvaluatedRequest(UnifiedStatsReporter &stats,
 #include "polarphp/ast/NameLookupTypeIDZoneDef.h"
 #undef POLAR_REQUEST
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif // POLARPHP_NAME_LOOKUP_REQUESTS

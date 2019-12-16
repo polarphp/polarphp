@@ -20,10 +20,10 @@
 
 #include "polarphp/basic/Range.h"
 
-namespace polar::ast {
+namespace polar {
 
 using llvm::StringRef;
-using polar::basic::IntRange;
+using polar::IntRange;
 
 enum StorageIsMutable_t : bool {
    StorageIsNotMutable = false,
@@ -390,6 +390,6 @@ private:
 StringRef getAccessorLabel(AccessorKind kind);
 void simple_display(llvm::raw_ostream &out, AccessorKind kind);
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif

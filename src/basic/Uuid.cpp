@@ -40,7 +40,7 @@
 #include <uuid/uuid.h>
 #endif
 
-namespace polar::basic {
+namespace polar {
 
 UUID::UUID(FromRandom_t) {
 #if defined(_WIN32)
@@ -139,4 +139,4 @@ raw_ostream &operator<<(raw_ostream &os, UUID uuid)
   return os;
 }
 
-} // polar::basic
+} // polar

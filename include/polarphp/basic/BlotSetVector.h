@@ -18,7 +18,7 @@
 #include "llvm/ADT/SmallVector.h"
 #include <vector>
 
-namespace polar::basic {
+namespace polar {
 
 /// This is a set container with the following properties:
 ///
@@ -176,6 +176,6 @@ public:
    SmallBlotSetVector() {}
 };
 
-} // namespace polar::basic
+} // namespace polar
 
 #endif // POLARPHP_BASIC_BLOTSETVECTOR_H

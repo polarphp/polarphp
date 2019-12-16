@@ -32,7 +32,7 @@ namespace llvm {
 class StringRef;
 }
 
-namespace polar::basic {
+namespace polar {
 
 using llvm::StringRef;
 
@@ -93,6 +93,6 @@ public:
    bool skipRuntimeLibraryImportPath = false;
 };
 
-} // polar::basic
+} // polar
 
 #endif // POLARPHP_AST_SEARCHPATHOPTIONS_H

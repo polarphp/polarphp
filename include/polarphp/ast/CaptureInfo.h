@@ -24,22 +24,19 @@
 #include "llvm/Support/TrailingObjects.h"
 #include <vector>
 
-namespace polar::ast {
+namespace polar {
 class CapturedValue;
 }
 
 namespace llvm {
 class raw_ostream;
-template <> struct DenseMapInfo<polar::ast::CapturedValue>;
+template <> struct DenseMapInfo<polar::CapturedValue>;
 }
 
-namespace polar::ast {
+namespace polar {
 class ValueDecl;
 class FuncDecl;
 class OpaqueValueExpr;
-
-using polar::basic::SourceLoc;
-using polar::basic::OptionSet;
 
 /// CapturedValue includes both the declaration being captured, along with flags
 /// that indicate how it is captured.
@@ -224,7 +221,7 @@ public:
    void print(raw_ostream &OS) const;
 };
 
-} // namespace polar::ast
+} // namespace polar
 
 #endif // POLARPHP_AST_CAPTURE_INFO_H
 

@@ -26,8 +26,7 @@
 #include "llvm/ADT/DenseMap.h"
 #include "llvm/Support/raw_ostream.h"
 
-namespace polar::basic {
-
+namespace polar {
 
 /// / This class maps values to unique indices.
 template<class ValueTy, class IndexTy = size_t>
@@ -69,6 +68,6 @@ public:
    }
 };
 
-} // polar::basic
+} // polar
 
 #endif // POLARPHP_BASIC_VALUE_ENUMERATOR_H

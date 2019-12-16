@@ -22,9 +22,7 @@
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/FileSystem.h"
 
-namespace polar::ast {
-
-using polar::basic::indices;
+namespace polar {
 
 AnyRequest::HolderBase::~HolderBase() { }
 
@@ -358,4 +356,4 @@ void Evaluator::dumpDependenciesGraphviz() const {
    printDependenciesGraphviz(llvm::dbgs());
 }
 
-} // polar::ast
+} // polar

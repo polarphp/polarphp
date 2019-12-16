@@ -54,9 +54,7 @@ using llvm::SmallVector;
 using llvm::DenseMap;
 using llvm::SmallPtrSet;
 using llvm::raw_ostream;
-using namespace polar::ast;
-using polar::basic::indices;
-using polar::basic::interleave;
+using namespace polar;
 
 /// Define this to 1 to enable expensive assertions.
 #define POLAR_GSB_EXPENSIVE_ASSERTIONS 0
@@ -1725,10 +1723,10 @@ bool EquivalenceClass::recordConformanceConstraint(
    return inserted;
 }
 
-namespace polar::ast {
+namespace polar {
 
 template<typename T>
-bool GenericSignatureBuilder::Constraint<T>::isSubjectEqualTo(polar::ast::Type type) const {
+bool GenericSignatureBuilder::Constraint<T>::isSubjectEqualTo(polar::Type type) const {
    return getSubjectDependentType({})->isEqual(type);
 }
 
@@ -1743,7 +1741,7 @@ bool GenericSignatureBuilder::Constraint<T>::hasSameSubjectAs(const Constraint<T
       ->isEqual(other.getSubjectDependentType({}));
 }
 
-} // polar::ast
+} // polar
 
 Optional<ConcreteConstraint>
 EquivalenceClass::findAnyConcreteConstraintAsWritten(Type preferredType) const {
@@ -2220,7 +2218,7 @@ void DelayedRequirement::dump(llvm::raw_ostream &out) const {
    if (auto lhsPA = lhs.dyn_cast<PotentialArchetype *>())
       out << lhsPA->getDebugName();
    else
-      lhs.get<polar::ast::Type>().print(out);
+      lhs.get<polar::Type>().print(out);
 
    switch (kind) {
       case Type:
@@ -2236,7 +2234,7 @@ void DelayedRequirement::dump(llvm::raw_ostream &out) const {
    // Print RHS.
    if (auto rhsPA = rhs.dyn_cast<PotentialArchetype *>())
       out << rhsPA->getDebugName();
-   else if (auto rhsType = rhs.dyn_cast<polar::ast::Type>())
+   else if (auto rhsType = rhs.dyn_cast<polar::Type>())
       rhsType.print(out);
    else
       rhs.get<LayoutConstraint>().print(out);
@@ -2484,7 +2482,7 @@ auto PotentialArchetype::getRepresentative() const -> PotentialArchetype * {
    return result;
 }
 
-namespace polar::ast {
+namespace polar {
 /// Canonical ordering for dependent types.
 int compareDependentTypes(Type type1, Type type2) {
    // Fast-path check for equality.
@@ -2522,7 +2520,7 @@ int compareDependentTypes(Type type1, Type type2) {
 
    return 0;
 }
-} // polar::ast
+} // polar
 
 /// Compare two dependent paths to determine which is better.
 static int compareDependentPaths(ArrayRef<AssociatedTypeDecl *> path1,
@@ -5148,7 +5146,7 @@ void GenericSignatureBuilder::inferRequirements(
    }
 }
 
-namespace polar::ast {
+namespace polar {
 template<typename T>
 bool operator<(const Constraint<T> &lhs, const Constraint<T> &rhs) {
    // FIXME: Awful.
@@ -5176,7 +5174,7 @@ bool operator==(const Constraint<Type> &lhs, const Constraint<Type> &rhs) {
           lhs.value->isEqual(rhs.value) &&
           lhs.source == rhs.source;
 }
-} // namespace polar::ast
+} // namespace polar
 
 namespace {
 /// Retrieve the representative constraint that will be used for diagnostics.
@@ -5931,13 +5929,13 @@ void GenericSignatureBuilder::checkConformanceConstraints(
    }
 }
 
-namespace polar::ast {
+namespace polar {
 bool operator<(const DerivedSameTypeComponent &lhs,
                const DerivedSameTypeComponent &rhs) {
    return compareDependentTypes(getUnresolvedType(lhs.anchor, {}),
                                 getUnresolvedType(rhs.anchor, {})) < 0;
 }
-} // namespace polar::ast
+} // namespace polar
 
 /// Find the representative in a simple union-find data structure of
 /// integral values.

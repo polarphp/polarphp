@@ -16,7 +16,7 @@
 
 #include "polarphp/basic/AnyValue.h"
 
-namespace polar::ast {
+namespace polar {
 AnyValue::HolderBase::~HolderBase() { }
 
 std::string AnyValue::getAsString() const {
@@ -27,5 +27,5 @@ std::string AnyValue::getAsString() const {
    }
    return result;
 }
-} // polar::ast
+} // polar
 

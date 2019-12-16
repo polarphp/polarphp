@@ -26,7 +26,7 @@
 
 #include "llvm/ADT/Hashing.h"
 
-namespace polar::basic {
+namespace polar {
 
 /// Options for controlling diagnostics.
 class DiagnosticOptions
@@ -81,6 +81,6 @@ public:
   }
 };
 
-} // polar::basic
+} // polar
 
 #endif // POLARPHP_BASIC_DIAGNOSTICOPTIONS_H

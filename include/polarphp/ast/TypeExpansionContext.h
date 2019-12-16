@@ -20,9 +20,14 @@
 #include "polarphp/ast/ResilienceExpansion.h"
 #include "llvm/ADT/DenseMap.h"
 
-namespace polar::ast {
-class DeclContext;
+namespace polar::pil {
 class PILFunction;
+}
+
+namespace polar {
+
+using polar::pil::PILFunction;
+class DeclContext;
 
 /// Describes the context in which SIL types should eventually be expanded.
 /// Required for lowering resilient types and deciding whether to look through
@@ -111,25 +116,25 @@ public:
    }
 };
 
-} // namespace polar::ast
+} // namespace polar
 
 namespace llvm {
 template <>
-struct DenseMapInfo<polar::ast::TypeExpansionContext> {
-   using TypeExpansionContext = polar::ast::TypeExpansionContext;
+struct DenseMapInfo<polar::TypeExpansionContext> {
+   using TypeExpansionContext = polar::TypeExpansionContext;
 
    static TypeExpansionContext getEmptyKey() {
       return TypeExpansionContext(
-               polar::ast::ResilienceExpansion::Minimal,
-               reinterpret_cast<polar::ast::DeclContext *>(
-                  DenseMapInfo<polar::ast::DeclContext *>::getEmptyKey()),
+               polar::ResilienceExpansion::Minimal,
+               reinterpret_cast<polar::DeclContext *>(
+                  DenseMapInfo<polar::DeclContext *>::getEmptyKey()),
                false);
    }
    static TypeExpansionContext getTombstoneKey() {
       return TypeExpansionContext(
-               polar::ast::ResilienceExpansion::Minimal,
-               reinterpret_cast<polar::ast::DeclContext *>(
-                  DenseMapInfo<polar::ast::DeclContext *>::getTombstoneKey()),
+               polar::ResilienceExpansion::Minimal,
+               reinterpret_cast<polar::DeclContext *>(
+                  DenseMapInfo<polar::DeclContext *>::getTombstoneKey()),
                false);
    }
 

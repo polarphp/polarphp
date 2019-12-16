@@ -25,7 +25,7 @@
 #include "polarphp/markup/Markup.h"
 #include <queue>
 
-namespace polar::ast {
+namespace polar {
 
 void *DocComment::operator new(size_t Bytes, polar::markup::MarkupContext &MC,
                                unsigned Alignment) {
@@ -523,4 +523,4 @@ StringRef Decl::getBriefComment() const {
   return Result;
 }
 
-} // polar::ast
+} // polar

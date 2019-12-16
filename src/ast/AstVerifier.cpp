@@ -43,7 +43,7 @@
 #include <functional>
 #include <type_traits>
 
-namespace polar::ast {
+namespace polar {
 using namespace llvm;
 
 namespace {
@@ -1215,7 +1215,7 @@ public:
 
    void verifyChecked(TupleExpr *E) {
       const TupleType *exprTy = E->getType()->castTo<TupleType>();
-      polar::basic::for_each(exprTy->getElements().begin(), exprTy->getElements().end(),
+      polar::for_each(exprTy->getElements().begin(), exprTy->getElements().end(),
                              E->getElements().begin(),
                              [this](const TupleTypeElt &field, const Expr *elt) {
                                 if (!field.getType()->isEqual(elt->getType())) {
@@ -3721,4 +3721,4 @@ void verify(Decl *D) {
 #endif
 }
 
-} // polar::ast
+} // polar

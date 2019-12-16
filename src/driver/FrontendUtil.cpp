@@ -33,7 +33,7 @@
 
 namespace polar::driver {
 
-using namespace polar::ast;
+using namespace polar;
 
 bool get_single_frontend_invocation_from_driver_arguments(
       ArrayRef<const char *> argv, DiagnosticEngine &diags,

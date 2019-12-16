@@ -55,7 +55,7 @@
 #include <algorithm>
 #include <type_traits>
 
-namespace polar::basic {
+namespace polar {
 
 template <typename PtrTy>
 class ImmutablePointerSetFactory;
@@ -396,7 +396,7 @@ constexpr
 const unsigned ImmutablePointerSetFactory<T>::AllocAlignment =
       (alignof(PtrSet) > alignof(PtrTy)) ? alignof(PtrSet) : alignof(PtrTy);
 
-} // polar::basic
+} // polar
 
 #endif // POLARPHP_BASIC_IMMUTABLEPOINTERSET_H
 

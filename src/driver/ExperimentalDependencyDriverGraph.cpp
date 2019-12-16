@@ -45,7 +45,7 @@
 //namespace polar::driver {
 //namespace experimentaldependencies {
 
-//using polar::basic::FrontendStatsTracer;
+//using polar::FrontendStatsTracer;
 
 ////==============================================================================
 //// MARK: Interfacing to Compilation

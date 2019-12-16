@@ -19,7 +19,7 @@
 
 #include "polarphp/basic/LLVM.h"
 #include "polarphp/basic/TypeId.h"
-namespace polar::ast {
+namespace polar {
 
 class AbstractFunctionDecl;
 class BraceStmt;
@@ -67,6 +67,6 @@ enum class ImplicitMemberAction : uint8_t;
 #define POLAR_TYPEID_HEADER "polarphp/ast/AstTypeIdZoneDef.h"
 #include "polarphp/basic/DefineTypeIdZone.h"
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif // POLARPHP_AST_ASTTYPEIDS_H

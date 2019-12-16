@@ -24,7 +24,7 @@
 #include "llvm/ADT/DenseMap.h"
 #include "llvm/ADT/Optional.h"
 
-namespace polar::ast {
+namespace polar {
 
 using polar::syntax::RefCountPtr;
 
@@ -58,6 +58,6 @@ public:
    POLAR_DEBUG_DUMPER(dumpSyntaxMap());
 };
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif // POLARPHP_AST_SYNTAXASTMAP_H

@@ -25,8 +25,8 @@ using polar::syntax::Syntax;
 using polar::syntax::SyntaxKind;
 using polar::syntax::SourceFileSyntax;
 using polar::syntax::SyntaxNodeId;
-using polar::basic::SmallVector;
-using polar::basic::ArrayRef;
+using polar::SmallVector;
+using polar::ArrayRef;
 
 /// A single edit to the original source file in which a continuous range of
 /// characters have been replaced by a new string

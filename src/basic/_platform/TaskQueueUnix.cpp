@@ -60,7 +60,7 @@ extern char ***_NSGetEnviron(void);
 
 namespace polar::sys {
 
-using polar::basic::UnifiedStatsReporter;
+using polar::UnifiedStatsReporter;
 
 #if defined(HAVE_GETRUSAGE) && !defined(__HAIKU__)
 TaskProcessInformation::TaskProcessInformation(ProcessId pid, struct rusage Usage)

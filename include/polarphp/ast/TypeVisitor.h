@@ -20,7 +20,7 @@
 #include "polarphp/ast/Types.h"
 #include "llvm/Support/ErrorHandling.h"
 
-namespace polar::ast {
+namespace polar {
 
 /// TypeVisitor - This is a simple visitor class for Swift types.
 template<typename ImplClass, typename RetTy = void, typename... Args>
@@ -54,6 +54,6 @@ public:
 
 };
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif // POLARPHP_AST_TYPEVISITOR_H

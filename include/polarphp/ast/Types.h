@@ -53,9 +53,11 @@ struct fltSemantics;
 
 namespace polar::pil {
 class PILType;
+class PILModule;
+class PILFunctionConventions;
 }
 
-namespace polar::ast {
+namespace polar {
 
 enum class AllocationArena;
 class ArchetypeType;
@@ -75,7 +77,6 @@ class OpaqueTypeDecl;
 class OpenedArchetypeType;
 enum class ReferenceCounting : uint8_t;
 enum class ResilienceExpansion : unsigned;
-class PILModule;
 class TypeAliasDecl;
 class TypeDecl;
 class NominalTypeDecl;
@@ -92,11 +93,14 @@ class ModuleType;
 class InterfaceConformance;
 enum PointerTypeKind : unsigned;
 struct ValueOwnershipKind;
+class PILLayout; // From PIL
 
 using polar::pil::PILType;
-using polar::basic::count_bits_used;
-using polar::basic::bitmax;
-using polar::basic::UUID;
+using polar::pil::PILModule;
+using polar::pil::PILFunctionConventions;
+using polar::count_bits_used;
+using polar::bitmax;
+using polar::UUID;
 using llvm::dyn_cast;
 using llvm::cast;
 using llvm::isa;
@@ -1456,7 +1460,7 @@ class BuiltinIntegerWidth {
 
    unsigned RawValue;
 
-   friend struct llvm::DenseMapInfo<polar::ast::BuiltinIntegerWidth>;
+   friend struct llvm::DenseMapInfo<polar::BuiltinIntegerWidth>;
 
    /// Private constructor from a raw symbolic value.
    explicit BuiltinIntegerWidth(unsigned RawValue) : RawValue(RawValue) {}
@@ -1551,7 +1555,7 @@ DEFINE_EMPTY_CAN_TYPE_WRAPPER(AnyBuiltinIntegerType, BuiltinType)
 /// to LLVM IR integer types.  They lack signedness and have an arbitrary
 /// bitwidth.
 class BuiltinIntegerType : public AnyBuiltinIntegerType {
-   friend class polar::ast::AstContext;
+   friend class polar::AstContext;
 private:
    BuiltinIntegerWidth Width;
    BuiltinIntegerType(BuiltinIntegerWidth BitWidth, const AstContext &C)
@@ -3820,9 +3824,6 @@ enum class PILCoroutineKind : uint8_t {
       YieldMany,
 };
 
-class PILFunctionConventions;
-
-
 CanType substOpaqueTypesWithUnderlyingTypes(CanType type,
                                             TypeExpansionContext context,
                                             bool allowLoweredTypes = false);
@@ -4432,8 +4433,7 @@ public:
 DEFINE_EMPTY_CAN_TYPE_WRAPPER(PILFunctionType, Type)
 
 class PILBoxType;
-class PILLayout; // From PIL
-class PILModule; // From PIL
+
 typedef CanTypeWrapper<PILBoxType> CanPILBoxType;
 
 /// The PIL-only type for boxes, which represent a reference to a (non-class)
@@ -5926,14 +5926,14 @@ inline bool TypeBase::hasSimpleTypeRepr() const {
    }
 }
 
-} // end namespace polar::ast
+} // end namespace polar
 
 namespace llvm {
 
 // DenseMapInfo for BuiltinIntegerWidth.
 template<>
-struct DenseMapInfo<polar::ast::BuiltinIntegerWidth> {
-   using BuiltinIntegerWidth = polar::ast::BuiltinIntegerWidth;
+struct DenseMapInfo<polar::BuiltinIntegerWidth> {
+   using BuiltinIntegerWidth = polar::BuiltinIntegerWidth;
 
    static inline BuiltinIntegerWidth getEmptyKey() {
       return BuiltinIntegerWidth(BuiltinIntegerWidth::DenseMapEmpty);

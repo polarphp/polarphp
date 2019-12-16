@@ -55,9 +55,7 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Support/SaveAndRestore.h"
 
-namespace polar::ast {
-
-using polar::basic::interleave;
+namespace polar {
 
 static_assert(std::is_trivially_destructible_v<FileUnit>,
               "FileUnits are BumpPtrAllocated; the d'tor may not be called");
@@ -1959,11 +1957,11 @@ struct SourceFileTraceFormatter : public UnifiedStatsReporter::TraceFormatter {
    }
 };
 
-} // polar::ast
+} // polar
 
-namespace polar::basic {
+namespace polar {
 
-using polar::ast::SourceFileTraceFormatter;
+using polar::SourceFileTraceFormatter;
 static SourceFileTraceFormatter TF;
 
 template<>
@@ -1972,4 +1970,4 @@ FrontendStatsTracer::getTraceFormatter<const SourceFile *>() {
    return &TF;
 }
 
-} // polar::basic
+} // polar

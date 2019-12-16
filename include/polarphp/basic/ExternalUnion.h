@@ -26,7 +26,7 @@
 #include <utility>
 #include <assert.h>
 
-namespace polar::basic {
+namespace polar {
 
 namespace externalunionimpl {
 
@@ -631,6 +631,6 @@ public:
 };
 
 } // end namespace externalunionimpl
-} // end namespace polar::basic
+} // end namespace polar
 
 #endif // POLARPHP_BASIC_EXTERNALUNION_H

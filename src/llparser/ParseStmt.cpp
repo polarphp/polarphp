@@ -33,7 +33,7 @@
 
 namespace polar::llparser {
 
-using polar::basic::indices;
+using polar::indices;
 
 /// isStartOfStmt - Return true if the current token starts a statement.
 ///

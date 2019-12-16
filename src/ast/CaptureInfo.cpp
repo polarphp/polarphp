@@ -15,9 +15,7 @@
 #include "polarphp/ast/Decl.h"
 #include "llvm/Support/raw_ostream.h"
 
-namespace polar::ast {
-
-using polar::basic::interleave;
+namespace polar {
 
 CaptureInfo::CaptureInfo(AstContext &ctx, ArrayRef<CapturedValue> captures,
                          DynamicSelfType *dynamicSelf,
@@ -108,4 +106,4 @@ void CaptureInfo::print(raw_ostream &OS) const {
    OS << ')';
 }
 
-} // polar::ast
+} // polar

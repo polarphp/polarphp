@@ -31,7 +31,7 @@ namespace polar::llparser {
 
 using polar::ast::ValueDecl;
 using polar::ast::DeclName;
-using polar::basic::TreeScopedHashTable;
+using polar::TreeScopedHashTable;
 class Parser;
 class Scope;
 class SavedScope;

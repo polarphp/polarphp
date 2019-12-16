@@ -17,7 +17,7 @@
 
 namespace polar::parser {
 
-using polar::basic::FlagSet;
+using polar::FlagSet;
 
 class LexerFlags final : public FlagSet<std::uint16_t>
 {

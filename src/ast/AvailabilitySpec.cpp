@@ -18,7 +18,7 @@
 #include "polarphp/ast/AvailabilitySpec.h"
 #include "llvm/Support/raw_ostream.h"
 
-using namespace polar::ast;
+using namespace polar;
 
 SourceRange AvailabilitySpec::getSourceRange() const {
    switch (getKind()) {

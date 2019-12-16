@@ -15,7 +15,8 @@
 //===----------------------------------------------------------------------===//
 
 #include "polarphp/ast/DiagnosticsCommon.h"
-namespace polar::ast {
+
+namespace polar {
 
 enum class DiagID : uint32_t {
 #define DIAG(KIND,ID,Options,Text,Signature) ID,
@@ -40,4 +41,5 @@ namespace diag {
     internal::StructuredFixItWithArguments<void Signature>::type ID = {FixItID::ID};
 #include "polarphp/ast/DiagnosticsAllDefs.h"
 } // end namespace diag
-} // end namespace polar::ast
+
+} // end namespace polar

@@ -38,8 +38,8 @@ class DiagnosticEngine;
 
 namespace polar {
 
-using polar::basic::SanitizerKind;
-using polar::basic::OptionSet;
+using polar::SanitizerKind;
+using polar::OptionSet;
 using polar::ast::DiagnosticEngine;
 
 /// Parses a -sanitize= argument's values.

@@ -37,7 +37,7 @@
 #include <optional>
 #include <array>
 
-namespace polar::basic {
+namespace polar {
 
 using llvm::raw_ostream;
 using llvm::DenseMap;
@@ -111,7 +111,7 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &os, UUID uuid);
 } // polar
 
 namespace llvm {
-using polar::basic::UUID;
+using polar::UUID;
 template<>
 struct DenseMapInfo<UUID>
 {
@@ -141,6 +141,6 @@ struct DenseMapInfo<UUID>
       return a == b;
    }
 };
-} // polar::basic
+} // polar
 
 #endif // POLARPHP_BASIC_UUID_H

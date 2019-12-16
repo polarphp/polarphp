@@ -31,7 +31,7 @@
 #include "polarphp/global/CompilerFeature.h"
 #include <cstdint>
 
-namespace polar::basic {
+namespace polar {
 
 /// NOTE: When passing the bit count to these macros, please do NOT precompute
 /// the total. Instead, sum the bit counts in field order. This makes visually
@@ -169,6 +169,6 @@ constexpr unsigned count_bits_used(uint64_t arg)
          ) + 1;
 }
 
-} // polar::basic
+} // polar
 
 #endif // POLARPHP_BASIC_INLINE_BITFIELD_H

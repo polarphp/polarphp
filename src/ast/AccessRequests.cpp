@@ -25,9 +25,7 @@
 
 #include "llvm/Support/MathExtras.h"
 
-namespace polar::ast {
-
-using polar::basic::hash_value;
+namespace polar {
 
 // Implement the access-control type zone.
 #define POLAR_TYPEID_ZONE AccessControl
@@ -336,4 +334,4 @@ void registerAccessRequestFunctions(Evaluator &evaluator) {
                                      accessRequestFunctions);
 }
 
-} // polar::ast
+} // polar

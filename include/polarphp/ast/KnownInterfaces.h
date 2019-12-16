@@ -28,9 +28,9 @@ namespace llvm {
 class StringRef;
 }
 
-namespace polar::ast {
+namespace polar {
 
-using polar::basic::count_bits_used;
+using polar::count_bits_used;
 
 /// The set of known protocols.
 enum class KnownInterfaceKind : std::uint8_t
@@ -59,6 +59,6 @@ enum : unsigned
 /// Retrieve the name of the given known protocol.
 llvm::StringRef get_interface_name(KnownInterfaceKind kind);
 
-} // polar::ast
+} // polar
 
 #endif // POLARPHP_AST_KNOWNP_INTERFACES_H

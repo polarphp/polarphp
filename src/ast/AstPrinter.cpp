@@ -53,10 +53,7 @@
 #include <algorithm>
 #include <queue>
 
-namespace polar::ast {
-
-using polar::basic::trim_leading_whitespace_from_lines;
-using polar::basic::interleave;
+namespace polar {
 
 void PrintOptions::setBaseType(Type T) {
    TransformContext = TypeTransformContext(T);
@@ -2963,7 +2960,7 @@ void PrintAst::printEnumElement(EnumElementDecl *elt) {
          Printer.callPrintStructurePre(PrintStructureKind::StringLiteral);
          llvm::SmallString<32> str;
          llvm::raw_svector_ostream os(str);
-         os << polar::basic::QuotedString(cast<StringLiteralExpr>(raw)->getValue());
+         os << polar::QuotedString(cast<StringLiteralExpr>(raw)->getValue());
          Printer << str;
          Printer.printStructurePost(PrintStructureKind::StringLiteral);
          break;
@@ -4844,4 +4841,4 @@ void getInheritedForPrinting(const Decl *decl, const PrintOptions &options,
    }
 }
 
-} // polar::ast
+} // polar

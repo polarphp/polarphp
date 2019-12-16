@@ -57,8 +57,8 @@
 
 namespace polar::syntax {
 
-using polar::basic::ThreadSafeRefCountedBase;
-using polar::basic::TrailingObjects;
+using polar::ThreadSafeRefCountedBase;
+using polar::TrailingObjects;
 
 /// The class for holding parented syntax.
 ///

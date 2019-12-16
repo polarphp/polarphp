@@ -34,10 +34,10 @@
 #include "llvm/ADT/SetVector.h"
 #include "llvm/ADT/Twine.h"
 
-namespace polar::ast {
+namespace polar {
 
-using namespace polar::basic;
-using polar::basic::hash_value;
+using namespace polar;
+using polar::hash_value;
 
 #define EXPR(Id, _) \
   static_assert(std::is_trivially_destructible<Id##Expr>::value, \
@@ -2271,11 +2271,7 @@ struct ExprTraceFormatter : public UnifiedStatsReporter::TraceFormatter {
    }
 };
 
-} // polar::ast
-
-namespace polar::basic {
-
-static polar::ast::ExprTraceFormatter TF;
+static polar::ExprTraceFormatter TF;
 
 template<>
 const UnifiedStatsReporter::TraceFormatter*
@@ -2283,4 +2279,4 @@ FrontendStatsTracer::getTraceFormatter<const Expr *>() {
    return &TF;
 }
 
-} // polar::basic
+} // polar

@@ -23,6 +23,8 @@ namespace polar::pil {
 class PILBasicBlock;
 class TermInst;
 
+using polar::ProfileCounter;
+
 /// An edge in the control flow graph.
 ///
 /// A PILSuccessor is stored in the terminator instruction of the tail block of
@@ -80,8 +82,9 @@ public:
   ProfileCounter getCount() const { return Count; }
 
   // Do not copy or move these.
-  PILSuccessor(const PILSuccessor &) = delete;
-  PILSuccessor(PILSuccessor &&) = delete;
+    /// @todo
+//  PILSuccessor(const PILSuccessor &) = delete;
+//  PILSuccessor(PILSuccessor &&) = delete;
 
   /// This is an iterator for walking the predecessor list of a PILBasicBlock.
   class pred_iterator {

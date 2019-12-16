@@ -30,7 +30,7 @@
 #include "llvm/Support/Compiler.h"
 #include "llvm/Support/PointerLikeTypeTraits.h"
 
-namespace polar::basic {
+namespace polar {
 
 /// This class implements a pair of a pointer and boolean flag.
 /// Like PointerIntPair, it represents this by mangling a bit into the low part
@@ -182,30 +182,30 @@ public:
    }
 };
 
-} // polar::basic
+} // polar
 
 // Teach SmallPtrSet that FlaggedPointer is "basically a pointer".
 template <typename PointerTy, unsigned BitPosition, typename PtrTraits>
 struct llvm::PointerLikeTypeTraits<
-      polar::basic::FlaggedPointer<PointerTy, BitPosition, PtrTraits>>
+      polar::FlaggedPointer<PointerTy, BitPosition, PtrTraits>>
 {
 public:
    static inline void *
-   getAsVoidPointer(const polar::basic::FlaggedPointer<PointerTy, BitPosition> &pointer)
+   getAsVoidPointer(const polar::FlaggedPointer<PointerTy, BitPosition> &pointer)
    {
       return pointer.getOpaqueValue();
    }
 
-   static inline polar::basic::FlaggedPointer<PointerTy, BitPosition>
+   static inline polar::FlaggedPointer<PointerTy, BitPosition>
    getFromVoidPointer(void *pointer)
    {
-      return polar::basic::FlaggedPointer<PointerTy, BitPosition>::getFromOpaqueValue(pointer);
+      return polar::FlaggedPointer<PointerTy, BitPosition>::getFromOpaqueValue(pointer);
    }
 
-   static inline polar::basic::FlaggedPointer<PointerTy, BitPosition>
+   static inline polar::FlaggedPointer<PointerTy, BitPosition>
    getFromVoidPointer(const void *pointer)
    {
-      return polar::basic::FlaggedPointer<PointerTy, BitPosition>::getFromOpaqueValue(pointer);
+      return polar::FlaggedPointer<PointerTy, BitPosition>::getFromOpaqueValue(pointer);
    }
 
    enum {

@@ -42,15 +42,15 @@ namespace llvm {
 class MemoryBuffer;
 }
 
-namespace polar::basic {
+namespace polar {
 class UnifiedStatsReporter;
 }
 
 namespace polar::driver {
 
-using polar::basic::OptionSet;
-using polar::basic::UnifiedStatsReporter;
-using polar::ast::DiagnosticEngine;
+using polar::OptionSet;
+using polar::UnifiedStatsReporter;
+using polar::DiagnosticEngine;
 
 /// The non-templated implementation of DependencyGraph.
 ///

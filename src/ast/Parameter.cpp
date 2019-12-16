@@ -20,7 +20,7 @@
 #include "polarphp/ast/Expr.h"
 #include "polarphp/ast/Types.h"
 
-namespace polar::ast {
+namespace polar {
 
 /// TODO: unique and reuse the () parameter list in AstContext, it is common to
 /// many methods.  Other parameter lists cannot be uniqued because the decls
@@ -111,4 +111,4 @@ SourceRange ParameterList::getSourceRange() const {
    return SourceRange();
 }
 
-} // polar::ast
+} // polar

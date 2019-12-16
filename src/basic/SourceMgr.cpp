@@ -33,7 +33,7 @@
 
 #include <optional>
 
-namespace polar::basic {
+namespace polar {
 
 using llvm::PrettyStackTraceString;
 using llvm::SMLoc;
@@ -311,7 +311,7 @@ unsigned SourceManager::getExternalSourceBufferId(StringRef Path) {
     return It->getSecond();
   }
   unsigned Id = 0u;
-  auto InputFileOrErr = polar::basic::vfs::get_file_or_stdin(*getFileSystem(), Path);
+  auto InputFileOrErr = polar::vfs::get_file_or_stdin(*getFileSystem(), Path);
   if (InputFileOrErr) {
     // This assertion ensures we can look up from the map in the future when
     // using the same Path.
@@ -333,4 +333,4 @@ SourceManager::getLocFromExternalSource(StringRef Path, unsigned Line,
   return getLocForOffset(BufferId, *Offset);
 }
 
-} // polar::basic
+} // polar

@@ -40,10 +40,10 @@
 
 #define DEBUG_TYPE "namelookup"
 
-namespace polar::ast {
+namespace polar {
 
-using polar::basic::indices;
-using polar::basic::interleave;
+using polar::indices;
+using polar::interleave;
 using llvm::dyn_cast_or_null;
 
 void VisibleDeclConsumer::anchor() {}
@@ -2561,4 +2561,4 @@ void FindLocalVal::visitCatchStmt(CatchStmt *S) {
    visit(S->getBody());
 }
 } // namelookup
-} // polar::ast
+} // polar

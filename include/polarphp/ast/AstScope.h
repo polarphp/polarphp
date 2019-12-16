@@ -40,17 +40,13 @@
 #define ast_scope_unreachable(message)                                          \
   llvm_unreachable(message " Try compiling with '-disable-astscope-lookup'.")
 
-namespace polar::basic {
+namespace polar {
 class Syntax;
 }
 
-namespace polar::ast {
+namespace polar {
 
-using polar::basic::SourceRange;
-using polar::basic::SourceLoc;
-using polar::basic::Syntax;
-using polar::basic::NullablePtr;
-
+using polar::Syntax;
 class AbstractStorageDecl;
 class AstContext;
 class BraceStmt;
@@ -1935,6 +1931,6 @@ protected:
                              DeclConsumer) const override;
 };
 } // namespace ast_scope
-} // polar::ast
+} // polar
 
 #endif // POLARPHP_AST_AST_SCOPE_H

@@ -46,7 +46,7 @@
 namespace polar::driver::toolchains {
 
 using namespace llvm::opt;
-using namespace polar::basic;
+using namespace polar;
 
 std::string toolchains::Windows::sanitizerRuntimeLibName(StringRef sanitizer,
                                                          bool shared) const

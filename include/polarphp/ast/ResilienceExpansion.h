@@ -15,7 +15,7 @@
 
 #include "llvm/Support/raw_ostream.h"
 
-namespace polar::ast {
+namespace polar {
 
 /// A specification for how much to expand resilient types.
 ///
@@ -58,7 +58,7 @@ inline llvm::raw_ostream &operator<<(llvm::raw_ostream &os,
   llvm_unreachable("Unhandled ResilienceExpansion in switch");
 }
 
-} // namespace polar::ast
+} // namespace polar
 
 #endif // POLARPHP_AST_CAPTURE_INFO_H
 

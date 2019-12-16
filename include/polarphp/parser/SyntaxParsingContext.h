@@ -43,8 +43,8 @@ class Token;
 using polar::syntax::SyntaxKind;
 using polar::syntax::internal::TokenKindType;
 using polar::ast::DiagnosticEngine;
-using polar::basic::SourceManager;
-using polar::basic::SourceLoc;
+using polar::SourceManager;
+using polar::SourceLoc;
 
 enum class SyntaxContextKind
 {

@@ -19,7 +19,7 @@
 
 #include "polarphp/ast/NameLookup.h"
 
-namespace polar::ast {
+namespace polar {
 
 class PILDebuggerClient;
 

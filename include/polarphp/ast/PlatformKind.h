@@ -21,13 +21,9 @@
 #include "polarphp/global/Config.h"
 #include "llvm/ADT/StringRef.h"
 
-namespace polar::kernel {
+namespace polar {
+
 class LangOptions;
-}
-
-namespace polar::ast {
-
-using polar::kernel::LangOptions;
 
 /// Available platforms for the availability attribute.
 enum class PlatformKind {
@@ -60,6 +56,6 @@ bool isPlatformActive(PlatformKind Platform, LangOptions &LangOpts);
 /// Returns the target platform for the given language options.
 PlatformKind targetPlatform(LangOptions &LangOpts);
 
-} // end namespace polar::ast
+} // end namespace polar
 
 #endif // POLARPHP_AST_PLATFORM_KIND_H

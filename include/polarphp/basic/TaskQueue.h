@@ -37,7 +37,7 @@
 struct rusage;
 #endif
 
-namespace polar::basic {
+namespace polar {
 class UnifiedStatsReporter;
 }
 
@@ -45,7 +45,7 @@ namespace polar::sys {
 
 class Task; // forward declared to allow for platform-specific implementations
 
-using polar::basic::UnifiedStatsReporter;
+using polar::UnifiedStatsReporter;
 using ProcessId = llvm::sys::procid_t;
 
 /// Indicates how a TaskQueue should respond to the task finished event.

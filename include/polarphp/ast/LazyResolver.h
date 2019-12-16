@@ -21,7 +21,7 @@
 #include "polarphp/ast/TypeLoc.h"
 #include "llvm/ADT/PointerEmbeddedInt.h"
 
-namespace polar::ast {
+namespace polar {
 
 class AssociatedTypeDecl;
 class Decl;

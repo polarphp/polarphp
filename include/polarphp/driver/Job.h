@@ -32,7 +32,7 @@
 
 namespace polar::driver {
 
-using polar::basic::OutputFileMap;
+using polar::OutputFileMap;
 
 class Job;
 class JobAction;

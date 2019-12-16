@@ -18,7 +18,7 @@
 #include "polarphp/ast/Decl.h"
 
 
-namespace polar::ast {
+namespace polar {
 // Implement the name lookup type zone.
 #define POLAR_TYPEID_ZONE NameLookup
 #define POLAR_TYPEID_HEADER "polarphp/ast/NameLookupTypeIDZoneDef.h"
@@ -157,4 +157,4 @@ void registerNameLookupRequestFunctions(Evaluator &evaluator) {
                                       nameLookupRequestFunctions);
 }
 
-} // polar::ast
+} // polar

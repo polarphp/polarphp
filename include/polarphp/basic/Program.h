@@ -24,7 +24,7 @@
 #ifndef POLARPHP_BASIC_PROGRAM_H
 #define POLARPHP_BASIC_PROGRAM_H
 
-namespace polar::basic {
+namespace polar {
 
 /// This function executes the program using the arguments provided,
 /// preferring to reexecute the current process, if supported.
@@ -44,6 +44,6 @@ namespace polar::basic {
 int execute_in_place(const char *program, const char **args,
                      const char **env = nullptr);
 
-} // polar::basic
+} // polar
 
 #endif // POLARPHP_BASIC_PROGRAM_H

@@ -26,7 +26,7 @@
 #include "llvm/ADT/SmallBitVector.h"
 #include "llvm/Support/raw_ostream.h"
 
-namespace polar::ast {
+namespace polar {
 
 class AstContext;
 using llvm::iterator_range;
@@ -267,6 +267,6 @@ public:
    };
 };
 
-} // polar::ast
+} // polar
 
 #endif // POLARPHP_AST_INDEXSUBSET_H

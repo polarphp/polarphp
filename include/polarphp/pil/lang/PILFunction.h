@@ -21,23 +21,44 @@
 #include "polarphp/ast/Availability.h"
 #include "polarphp/ast/ResilienceExpansion.h"
 #include "polarphp/basic/ProfileCounter.h"
-#include "polarphp/pil/PILBasicBlock.h"
-#include "polarphp/pil/PILDebugScope.h"
-#include "polarphp/pil/PILDeclRef.h"
-#include "polarphp/pil/PILLinkage.h"
-#include "polarphp/pil/PILPrintContext.h"
+//#include "polarphp/pil/lang/PILBasicBlock.h"
+#include "polarphp/pil/lang/PILDebugScope.h"
+#include "polarphp/pil/lang/PILDeclRef.h"
+#include "polarphp/pil/lang/PILLinkage.h"
+#include "polarphp/pil/lang/PILPrintContext.h"
 #include "llvm/ADT/StringMap.h"
+#include "llvm/ADT/ilist.h"
 
 /// The symbol name used for the program entry point function.
-#define SWIFT_ENTRY_POINT_FUNCTION "main"
+#define POLAR_RENTRY_POINT_FUNCTION "main"
+
+namespace polar::ast {
+class AstContext;
+class GenericSignature;
+class GenericEnvironment;
+class GenericSpecializationInformation;
+class Identifier;
+class AvailabilityContext;
+}
 
 namespace polar::pil {
 
-class AstContext;
 class PILInstruction;
 class PILModule;
 class PILFunctionBuilder;
 class PILProfiler;
+
+using polar::ast::AstContext;
+using polar::ast::GenericSignature;
+using polar::ast::GenericEnvironment;
+using polar::ast::GenericSpecializationInformation;
+using polar::ast::Identifier;
+using polar::ast::AvailabilityContext;
+using polar::ast::AstNode;
+using polar::ast::ResilienceExpansion;
+using polar::ast::NumOptimizationModeBits;
+using polar::ast::NumEffectsKindBits;
+using polar::OptimizationMode;
 
 namespace lowering {
 class TypeLowering;
@@ -395,7 +416,7 @@ public:
       Profiler = InheritedProfiler;
    }
 
-   void createProfiler(ASTNode Root, PILDeclRef forDecl,
+   void createProfiler(AstNode Root, PILDeclRef forDecl,
                        ForDefinition_t forDefinition);
 
    void discardProfiler() { Profiler = nullptr; }
@@ -438,8 +459,9 @@ public:
    /// operation performable on this object after this is called is called the
    /// destructor or deallocation.
    void dropAllReferences() {
-      for (PILBasicBlock &BB : *this)
-         BB.dropAllReferences();
+      // @todo
+//      for (PILBasicBlock &BB : *this)
+//         BB.dropAllReferences();
    }
 
    /// Notify that this function was inlined. This implies that it is still
@@ -597,7 +619,7 @@ public:
 
    /// Helper method which returns true if this function has "external" linkage.
    bool isAvailableExternally() const {
-      return swift::isAvailableExternally(getLinkage());
+      return is_available_externally(getLinkage());
    }
 
    /// Helper method which returns true if the linkage of the PILFunction
@@ -931,51 +953,51 @@ public:
    /// Return the unique basic block containing a return inst if it
    /// exists. Otherwise, returns end.
    iterator findReturnBB() {
-      return std::find_if(begin(), end(),
-                          [](const PILBasicBlock &BB) -> bool {
-                             const TermInst *TI = BB.getTerminator();
-                             return isa<ReturnInst>(TI);
-                          });
+//      return std::find_if(begin(), end(),
+//                          [](const PILBasicBlock &BB) -> bool {
+//                             const TermInst *TI = BB.getTerminator();
+//                             return isa<ReturnInst>(TI);
+//                          });
    }
 
    /// Return the unique basic block containing a return inst if it
    /// exists. Otherwise, returns end.
    const_iterator findReturnBB() const {
-      return std::find_if(begin(), end(),
-                          [](const PILBasicBlock &BB) -> bool {
-                             const TermInst *TI = BB.getTerminator();
-                             return isa<ReturnInst>(TI);
-                          });
+//      return std::find_if(begin(), end(),
+//                          [](const PILBasicBlock &BB) -> bool {
+//                             const TermInst *TI = BB.getTerminator();
+//                             return isa<ReturnInst>(TI);
+//                          });
    }
 
    /// Return the unique basic block containing a throw inst if it
    /// exists. Otherwise, returns end.
    iterator findThrowBB() {
-      return std::find_if(begin(), end(),
-                          [](const PILBasicBlock &BB) -> bool {
-                             const TermInst *TI = BB.getTerminator();
-                             return isa<ThrowInst>(TI);
-                          });
+//      return std::find_if(begin(), end(),
+//                          [](const PILBasicBlock &BB) -> bool {
+//                             const TermInst *TI = BB.getTerminator();
+//                             return isa<ThrowInst>(TI);
+//                          });
    }
 
    /// Return the unique basic block containing a throw inst if it
    /// exists. Otherwise, returns end.
    const_iterator findThrowBB() const {
-      return std::find_if(begin(), end(),
-                          [](const PILBasicBlock &BB) -> bool {
-                             const TermInst *TI = BB.getTerminator();
-                             return isa<ThrowInst>(TI);
-                          });
+//      return std::find_if(begin(), end(),
+//                          [](const PILBasicBlock &BB) -> bool {
+//                             const TermInst *TI = BB.getTerminator();
+//                             return isa<ThrowInst>(TI);
+//                          });
    }
 
    /// Loop over all blocks in this function and add all function exiting blocks
    /// to output.
    void findExitingBlocks(llvm::SmallVectorImpl<PILBasicBlock *> &output) const {
-      for (auto &Block : const_cast<PILFunction &>(*this)) {
-         if (Block.getTerminator()->isFunctionExiting()) {
-            output.emplace_back(&Block);
-         }
-      }
+//      for (auto &Block : const_cast<PILFunction &>(*this)) {
+//         if (Block.getTerminator()->isFunctionExiting()) {
+//            output.emplace_back(&Block);
+//         }
+//      }
    }
 
    //===--------------------------------------------------------------------===//
@@ -983,30 +1005,30 @@ public:
    //===--------------------------------------------------------------------===//
 
    PILArgument *getArgument(unsigned i) {
-      assert(!empty() && "Cannot get argument of a function without a body");
-      return begin()->getArgument(i);
+//      assert(!empty() && "Cannot get argument of a function without a body");
+//      return begin()->getArgument(i);
    }
 
    const PILArgument *getArgument(unsigned i) const {
-      assert(!empty() && "Cannot get argument of a function without a body");
-      return begin()->getArgument(i);
+//      assert(!empty() && "Cannot get argument of a function without a body");
+//      return begin()->getArgument(i);
    }
 
    ArrayRef<PILArgument *> getArguments() const {
-      assert(!empty() && "Cannot get arguments of a function without a body");
-      return begin()->getArguments();
+//      assert(!empty() && "Cannot get arguments of a function without a body");
+//      return begin()->getArguments();
    }
 
    ArrayRef<PILArgument *> getIndirectResults() const {
-      assert(!empty() && "Cannot get arguments of a function without a body");
-      return begin()->getArguments().slice(
-         0, getConventions().getNumIndirectPILResults());
+//      assert(!empty() && "Cannot get arguments of a function without a body");
+//      return begin()->getArguments().slice(
+//         0, getConventions().getNumIndirectPILResults());
    }
 
    ArrayRef<PILArgument *> getArgumentsWithoutIndirectResults() const {
-      assert(!empty() && "Cannot get arguments of a function without a body");
-      return begin()->getArguments().slice(
-         getConventions().getNumIndirectPILResults());
+//      assert(!empty() && "Cannot get arguments of a function without a body");
+//      return begin()->getArguments().slice(
+//         getConventions().getNumIndirectPILResults());
    }
 
    const PILArgument *getSelfArgument() const {
@@ -1094,9 +1116,9 @@ inline llvm::raw_ostream &operator<<(llvm::raw_ostream &OS,
 namespace llvm {
 
 template <>
-struct ilist_traits<::swift::PILFunction> :
-   public ilist_node_traits<::swift::PILFunction> {
-   using PILFunction = ::swift::PILFunction;
+struct ilist_traits<::polar::pil::PILFunction> :
+   public ilist_node_traits<::polar::pil::PILFunction> {
+   using PILFunction = ::polar::pil::PILFunction;
 
 public:
    static void deleteNode(PILFunction *V) { V->~PILFunction(); }

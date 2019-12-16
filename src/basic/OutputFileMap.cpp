@@ -27,7 +27,7 @@
 #include "llvm/Support/raw_ostream.h"
 #include <system_error>
 
-namespace polar::basic {
+namespace polar {
 
 llvm::Expected<OutputFileMap>
 OutputFileMap::loadFromPath(StringRef path, StringRef workingDirectory)
@@ -254,4 +254,4 @@ OutputFileMap::parse(std::unique_ptr<llvm::MemoryBuffer> buffer,
    return outFileMap;
 }
 
-} // polar::basic
+} // polar

@@ -24,7 +24,7 @@
 namespace polar::llparser {
 class Lexer;
 
-using polar::basic::SourceLoc;
+using polar::SourceLoc;
 
 /// Lexer state can be saved/restored to/from objects of this class.
 class LexerState {
