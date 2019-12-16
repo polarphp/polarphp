@@ -28,7 +28,7 @@ namespace clang {
 namespace polar {
 class AstContext;
 class ModuleLoader;
-} // polar::ast
+} // polar
 
 namespace polar::clangimporter {
 

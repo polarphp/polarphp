@@ -20,6 +20,7 @@
 
 #include "llvm/Support/GenericDomTree.h"
 #include "polarphp/pil/lang/PILBasicBlockCFG.h"
+#include "polarphp/pil/lang/PILFunction.h"
 
 extern template class llvm::DominatorTreeBase<polar::PILBasicBlock, false>;
 extern template class llvm::DominatorTreeBase<polar::PILBasicBlock, true>;
@@ -178,7 +179,7 @@ public:
       return false;
    }
 
-   bool isValid(PILFunction *F) const { /*return getNode(&F->front()) != nullptr;*/ }
+   bool isValid(PILFunction *F) const { return getNode(&F->front()) != nullptr; }
 
    using super::properlyDominates;
 };

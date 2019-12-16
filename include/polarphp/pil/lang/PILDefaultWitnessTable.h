@@ -54,7 +54,7 @@ private:
    PILLinkage Linkage;
 
    /// The protocol declaration to which this default witness table applies.
-   const InterfaceDecl *INterface;
+   const InterfaceDecl *Interface;
 
    /// The minimum size of a valid witness table conforming to this protocol,
    /// with all resilient default requirements omitted.
@@ -70,11 +70,11 @@ private:
 
    /// Private constructor for making PILDefaultWitnessTable declarations.
    PILDefaultWitnessTable(PILModule &M, PILLinkage Linkage,
-                          const InterfaceDecl *INterface);
+                          const InterfaceDecl *Interface);
 
    /// Private constructor for making PILDefaultWitnessTable definitions.
    PILDefaultWitnessTable(PILModule &M, PILLinkage Linkage,
-                          const InterfaceDecl *INterface,
+                          const InterfaceDecl *Interface,
                           ArrayRef<Entry> entries);
 
    void addDefaultWitnessTable();
@@ -82,11 +82,11 @@ private:
 public:
    /// Create a new PILDefaultWitnessTable declaration.
    static PILDefaultWitnessTable *create(PILModule &M, PILLinkage Linkage,
-                                         const InterfaceDecl *INterface);
+                                         const InterfaceDecl *Interface);
 
    /// Create a new PILDefaultWitnessTable definition with the given entries.
    static PILDefaultWitnessTable *create(PILModule &M, PILLinkage Linkage,
-                                         const InterfaceDecl *INterface,
+                                         const InterfaceDecl *Interface,
                                          ArrayRef<Entry> entries);
 
    /// Get a name that uniquely identifies this default witness table.
@@ -109,7 +109,7 @@ public:
    bool isDeclaration() const { return IsDeclaration; }
 
    /// Return the AST InterfaceDecl this default witness table is associated with.
-   const InterfaceDecl *getINterface() const { return INterface; }
+   const InterfaceDecl *getInterface() const { return Interface; }
 
    /// Clears methods in witness entries.
    /// \p predicate Returns true if the passed entry should be set to null.

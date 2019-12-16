@@ -29,7 +29,7 @@ namespace polar {
 
 class PILFunction;
 
-namespace OptRemark {
+namespace optremark {
 
 /// Used in the streaming interface as the general argument type.  It
 /// internally converts everything into a key-value pair.
@@ -192,7 +192,7 @@ public:
 };
 
 #define REMARK_OR_DEBUG(...)                                                   \
-  OptRemark::Emitter::emitOrDebug(DEBUG_TYPE, __VA_ARGS__)
+  optremark::Emitter::emitOrDebug(DEBUG_TYPE, __VA_ARGS__)
 
 template <> inline bool Emitter::isEnabled<RemarkMissed>() {
   return MissedEnabled;
@@ -200,6 +200,6 @@ template <> inline bool Emitter::isEnabled<RemarkMissed>() {
 template <> inline bool Emitter::isEnabled<RemarkPassed>() {
   return PassedEnabled;
 }
-} // namespace OptRemark
+} // namespace optremark
 } // namespace polar
 #endif

@@ -179,20 +179,20 @@ protected:
    template <typename T>
    T *getNodeAs(AstNodeTy Node) const {
       using base = typename base_type<T>::type*;
-      return dyn_cast_or_null<T>(Node.dyn_cast<base>());
+      return llvm::dyn_cast_or_null<T>(Node.dyn_cast<base>());
    }
 
    template <typename T>
    bool isNode(AstNodeTy Node) const {
       assert(isAstNode());
       if (Loc.AstNode.Primary.is<typename base_type<T>::type*>())
-         return isa<T>(Node.get<typename base_type<T>::type*>());
+         return llvm::isa<T>(Node.get<typename base_type<T>::type*>());
       return false;
    }
 
    template <typename T>
    T *castNodeTo(AstNodeTy Node) const {
-      return cast<T>(Node.get<typename base_type<T>::type*>());
+      return llvm::cast<T>(Node.get<typename base_type<T>::type*>());
    }
 
    /// \defgroup PILLocation constructors.

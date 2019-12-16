@@ -691,10 +691,10 @@ public:
 
    LoadInst *createLoad(PILLocation Loc, PILValue LV,
                         LoadOwnershipQualifier Qualifier) {
-      assert((Qualifier != LoadOwnershipQualifier::Unqualified) ||
-             !hasOwnership() && "Unqualified inst in qualified function");
-      assert((Qualifier == LoadOwnershipQualifier::Unqualified) ||
-             hasOwnership() && "Qualified inst in unqualified function");
+      assert(((Qualifier != LoadOwnershipQualifier::Unqualified) ||
+                   !hasOwnership()) && "Unqualified inst in qualified function");
+      assert(((Qualifier == LoadOwnershipQualifier::Unqualified) ||
+                   hasOwnership()) && "Qualified inst in unqualified function");
       assert(isLoadableOrOpaque(LV->getType()));
       return insert(new (getModule())
                        LoadInst(getPILDebugLocation(Loc), LV, Qualifier));
@@ -784,10 +784,10 @@ public:
 
    StoreInst *createStore(PILLocation Loc, PILValue Src, PILValue DestAddr,
                           StoreOwnershipQualifier Qualifier) {
-      assert((Qualifier != StoreOwnershipQualifier::Unqualified) ||
-             !hasOwnership() && "Unqualified inst in qualified function");
-      assert((Qualifier == StoreOwnershipQualifier::Unqualified) ||
-             hasOwnership() && "Qualified inst in unqualified function");
+      assert(((Qualifier != StoreOwnershipQualifier::Unqualified) ||
+                   !hasOwnership()) && "Unqualified inst in qualified function");
+      assert(((Qualifier == StoreOwnershipQualifier::Unqualified) ||
+                   hasOwnership()) && "Qualified inst in unqualified function");
       return insert(new (getModule()) StoreInst(getPILDebugLocation(Loc), Src,
                                                 DestAddr, Qualifier));
    }

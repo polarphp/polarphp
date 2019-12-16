@@ -3823,7 +3823,7 @@ CanType substOpaqueTypesWithUnderlyingTypes(CanType type,
 InterfaceConformanceRef
 substOpaqueTypesWithUnderlyingTypes(InterfaceConformanceRef ref, Type origType,
                                     TypeExpansionContext context);
-namespace Lowering {
+namespace lowering {
 class TypeConverter;
 }
 
@@ -4394,7 +4394,7 @@ public:
                                        TypeSubstitutionFn subs,
                                        LookupConformanceFn conformances,
                                        TypeExpansionContext context);
-   CanPILFunctionType substituteOpaqueArchetypes(Lowering::TypeConverter &TC,
+   CanPILFunctionType substituteOpaqueArchetypes(lowering::TypeConverter &TC,
                                                  TypeExpansionContext context);
 
    PILType substInterfaceType(PILModule &M,

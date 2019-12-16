@@ -28,7 +28,7 @@ class PILLinkerVisitor : public PILInstructionVisitor<PILLinkerVisitor, void> {
    PILModule &Mod;
 
    /// Break cycles visiting recursive protocol conformances.
-   llvm::DenseSet<ProtocolConformance *> VisitedConformances;
+   llvm::DenseSet<InterfaceConformance *> VisitedConformances;
 
    /// Worklist of PILFunctions we are processing.
    llvm::SmallVector<PILFunction *, 128> Worklist;
@@ -68,11 +68,11 @@ public:
    void visitFunctionRefInst(FunctionRefInst *FRI);
    void visitDynamicFunctionRefInst(DynamicFunctionRefInst *FRI);
    void visitPreviousDynamicFunctionRefInst(PreviousDynamicFunctionRefInst *FRI);
-   void visitProtocolConformance(ProtocolConformanceRef C,
+   void visitInterfaceConformance(InterfaceConformanceRef C,
                                  const Optional<PILDeclRef> &Member);
    void visitApplySubstitutions(SubstitutionMap subs);
    void visitWitnessMethodInst(WitnessMethodInst *WMI) {
-      visitProtocolConformance(WMI->getConformance(), WMI->getMember());
+      visitInterfaceConformance(WMI->getConformance(), WMI->getMember());
    }
    void visitInitExistentialAddrInst(InitExistentialAddrInst *IEI);
    void visitInitExistentialRefInst(InitExistentialRefInst *IERI);

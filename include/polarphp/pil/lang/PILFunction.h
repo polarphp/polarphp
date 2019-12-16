@@ -314,8 +314,8 @@ private:
       }
       auto allowsInterestingScopes = thunkCanHaveSubclassScope && !genericInfo;
       assert(
-         allowsInterestingScopes ||
-         scope == SubclassScope::NotApplicable &&
+         (allowsInterestingScopes ||
+                  scope == SubclassScope::NotApplicable) &&
          "SubclassScope on specialization or non-signature-optimized thunk");
 #endif
    }

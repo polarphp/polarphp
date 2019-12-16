@@ -545,7 +545,7 @@ public:
 
    /// Returns true if this PILType could be potentially a lowering of the given
    /// formal type. Meant for verification purposes/assertions.
-   bool isloweringOf(TypeExpansionContext context, PILModule &M,
+   bool isLoweringOf(TypeExpansionContext context, PILModule &M,
                      CanType formalType);
 
    /// Returns the hash code for the PILType.

@@ -21,6 +21,8 @@ class DominanceInfo;
 class PILLoop;
 class PILPassManager;
 class PILBasicBlock;
+class PILInstruction;
+class PILFunction;
 }
 
 // Implementation in LoopInfoImpl.h
@@ -38,7 +40,7 @@ public:
    PILLoop() {}
    void dump() const;
 
-   iterator_range<iterator> getSubLoopRange() const {
+   llvm::iterator_range<iterator> getSubLoopRange() const {
       return make_range(begin(), end());
    }
 
@@ -78,7 +80,7 @@ public:
    iterator begin() const { return LI.begin(); }
    iterator end() const { return LI.end(); }
    bool empty() const { return LI.empty(); }
-   iterator_range<iterator> getTopLevelLoops() const {
+   llvm::iterator_range<iterator> getTopLevelLoops() const {
       return make_range(begin(), end());
    }
 

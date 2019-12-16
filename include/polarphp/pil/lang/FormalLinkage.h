@@ -13,18 +13,13 @@
 #ifndef POLARPHP_PIL_FORMALLINKAGE_H
 #define POLARPHP_PIL_FORMALLINKAGE_H
 
-namespace polar::ast {
-class ValueDecl;
-}
-
 namespace polar {
 
+class ValueDecl;
 class CanType;
 class RootInterfaceConformance;
 enum class PILLinkage : unsigned char;
 enum ForDefinition_t : bool;
-
-using polar::ast::ValueDecl;
 
 /// Formal linkage is a property of types and declarations that
 /// informs, but is not completely equivalent to, the linkage of
@@ -54,6 +49,6 @@ PILLinkage
 getLinkageForInterfaceConformance(const RootInterfaceConformance *C,
                                   ForDefinition_t definition);
 
-} // end swift namespace
+} // end polar namespace
 
 #endif

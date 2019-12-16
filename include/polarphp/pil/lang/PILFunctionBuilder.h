@@ -48,12 +48,12 @@ class PILFunctionBuilder {
    friend class PILParserFunctionBuilder;
    friend class PILSerializationFunctionBuilder;
    friend class PILOptFunctionBuilder;
-   friend class Lowering::PILGenFunctionBuilder;
+   friend class lowering::PILGenFunctionBuilder;
 
    PILFunctionBuilder(PILModule &mod)
       : PILFunctionBuilder(mod,
                            AvailabilityContext::forDeploymentTarget(
-                              mod.getASTContext())) {}
+                              mod.getAstContext())) {}
 
    PILFunctionBuilder(PILModule &mod, AvailabilityContext availCtx)
       : mod(mod), availCtx(availCtx) {}

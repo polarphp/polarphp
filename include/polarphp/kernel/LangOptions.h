@@ -167,8 +167,8 @@ public:
   /// Whether to dump debug info for request evaluator cycles.
   bool DebugDumpCycles = false;
 
-  /// Enable SIL type lowering
-  bool EnableSubstSILFunctionTypesForFunctionValues = false;
+  /// Enable PIL type lowering
+  bool EnableSubstPILFunctionTypesForFunctionValues = false;
 
   /// Whether to diagnose an ephemeral to non-ephemeral conversion as an
   /// error.
