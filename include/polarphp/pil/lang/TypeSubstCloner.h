@@ -98,7 +98,7 @@ class TypeSubstCloner : public PILClonerWithScopes<ImplClass> {
                // convention for parameters. E.g. some of former indirect parameters
                // may become direct. Some of indirect return values may become
                // direct. Do not replace the callee in that case.
-               if (SubstCalleePILType.getASTType() == RecursiveSubstCalleePILType) {
+               if (SubstCalleePILType.getAstType() == RecursiveSubstCalleePILType) {
                   Subs = RecursiveSubs;
                   Callee = Builder.createFunctionRef(
                      Cloner.getOpLocation(AI.getLoc()), &Builder.getFunction());
@@ -132,7 +132,7 @@ public:
    using PILClonerWithScopes<ImplClass>::getBuilder;
    using PILClonerWithScopes<ImplClass>::getOpLocation;
    using PILClonerWithScopes<ImplClass>::getOpValue;
-   using PILClonerWithScopes<ImplClass>::getASTTypeInClonedContext;
+   using PILClonerWithScopes<ImplClass>::getAstTypeInClonedContext;
    using PILClonerWithScopes<ImplClass>::getOpASTType;
    using PILClonerWithScopes<ImplClass>::getTypeInClonedContext;
    using PILClonerWithScopes<ImplClass>::getOpType;
@@ -170,7 +170,7 @@ protected:
       PILType &Sty = TypeCache[Ty];
       if (!Sty) {
          Sty = Ty.subst(Original.getModule(), SubsMap);
-         if (!Sty.getASTType()->hasOpaqueArchetype() ||
+         if (!Sty.getAstType()->hasOpaqueArchetype() ||
              !getBuilder()
                 .getTypeExpansionContext()
                 .shouldLookThroughOpaqueTypeArchetypes())

@@ -20,13 +20,9 @@
 #include "polarphp/ast/ResilienceExpansion.h"
 #include "llvm/ADT/DenseMap.h"
 
-namespace polar::pil {
-class PILFunction;
-}
-
 namespace polar {
 
-using polar::pil::PILFunction;
+class PILFunction;
 class DeclContext;
 
 /// Describes the context in which SIL types should eventually be expanded.

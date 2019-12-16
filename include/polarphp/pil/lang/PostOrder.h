@@ -14,10 +14,11 @@
 #define POLARPHP_PIL_POSTORDER_H
 
 #include "polarphp/basic/Range.h"
-#include "polarphp/pil/lang/CFG.h"
+#include "polarphp/pil/lang/PILBasicBlockCFG.h"
+#include "polarphp/pil/lang/PILFunctionCFG.h"
 #include "polarphp/pil/lang/PILBasicBlock.h"
 #include "polarphp/pil/lang/PILFunction.h"
-#include "polarphp/pil/langOptimizer/Analysis/Analysis.h"
+#include "polarphp/pil/optimizer/Analysis/analysis.h"
 #include "llvm/ADT/DenseMap.h"
 #include "llvm/ADT/PostOrderIterator.h"
 #include "llvm/ADT/iterator_range.h"

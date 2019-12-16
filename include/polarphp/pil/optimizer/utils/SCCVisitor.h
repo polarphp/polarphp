@@ -14,7 +14,7 @@
 #define POLARPHP_PIL_OPTIMIZER_UTILS_SCCVISITOR_H
 
 #include "polarphp/pil/optimizer/analysis/Analysis.h"
-#include "polarphp/pil/lang/CFG.h"
+#include "polarphp/pil/lang/PILBasicBlockCFG.h"
 #include "polarphp/pil/lang/PILArgument.h"
 #include "polarphp/pil/lang/PILBasicBlock.h"
 #include "polarphp/pil/lang/PILFunction.h"

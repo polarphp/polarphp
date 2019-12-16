@@ -76,7 +76,7 @@ public:
     return asImpl().visit##PARENT(I, std::forward<ArgTys>(args)...); \
   }
 #define ABSTRACT_VALUE(CLASS, PARENT) VALUE(CLASS, PARENT)
-#include "polarphp/pil/lang/PILNodes.def"
+#include "polarphp/pil/lang/PILNodesDef.h"
 };
 
 /// A visitor that should only visit PIL instructions.
@@ -100,7 +100,7 @@ public:
     case PILInstructionKind::CLASS:                                     \
       return asImpl().visit##CLASS(static_cast<CLASS*>(inst),           \
                                    std::forward<ArgTys>(args)...);
-#include "polarphp/pil/lang/PILNodes.def"
+#include "polarphp/pil/lang/PILNodesDef.h"
       }
       llvm_unreachable("Not reachable, all cases handled");
    }

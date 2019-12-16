@@ -14,7 +14,7 @@
 #define POLARPHP_PIL_OPTIMIZER_ANALYSIS_POSTORDERANALYSIS_H
 
 #include "polarphp/basic/Range.h"
-#include "polarphp/pil/lang/CFG.h"
+#include "polarphp/pil/lang/PILBasicBlockCFG.h"
 #include "polarphp/pil/lang/PostOrder.h"
 #include "polarphp/pil/lang/PILBasicBlock.h"
 #include "polarphp/pil/lang/PILFunction.h"
@@ -36,7 +36,7 @@ class PostOrderAnalysis : public FunctionAnalysisBase<PostOrderFunctionInfo> {
 protected:
    virtual std::unique_ptr<PostOrderFunctionInfo>
    newFunctionAnalysis(PILFunction *F) override {
-      return llvm::make_unique<PostOrderFunctionInfo>(F);
+      return std::make_unique<PostOrderFunctionInfo>(F);
    }
 
    virtual bool shouldInvalidate(PILAnalysis::InvalidationKind K) override {

@@ -76,7 +76,7 @@ public:
 
    // Allow a pass to override the current PIL module conventions. This should
    // only be done by a pass responsible for lowering PIL to a new stage
-   // (e.g. AddressLowering).
+   // (e.g. Addresslowering).
    void setPILConventions(PILModuleConventions silConv) {
       this->silConv = silConv;
    }
@@ -190,7 +190,7 @@ public:
 
    // Allow a pass to override the current PIL module conventions. This should
    // only be done by a pass responsible for lowering PIL to a new stage
-   // (e.g. AddressLowering).
+   // (e.g. Addresslowering).
    void setPILConventions(PILModuleConventions silConv) { C.silConv = silConv; }
 
    PILFunction &getFunction() const {
@@ -204,10 +204,10 @@ public:
 
    PILBuilderContext &getBuilderContext() const { return C; }
    PILModule &getModule() const { return C.Module; }
-   ASTContext &getASTContext() const { return getModule().getASTContext(); }
-   const Lowering::TypeLowering &getTypeLowering(PILType T) const {
+   AstContext &getAstContext() const { return getModule().getAstContext(); }
+   const lowering::TypeLowering &getTypeLowering(PILType T) const {
 
-      auto expansion = TypeExpansionContext::maximal(getModule().getSwiftModule(),
+      auto expansion = TypeExpansionContext::maximal(getModule().getPolarphpModule(),
                                                      getModule().isWholeModule());
       // If there's no current PILFunction, we're inserting into a global
       // variable initializer.
@@ -412,7 +412,7 @@ public:
                                     Optional<PILDebugVariable> Var = None,
                                     bool hasDynamicLifetime = false) {
       Loc.markAsPrologue();
-      assert((!dyn_cast_or_null<VarDecl>(Loc.getAsASTNode<Decl>()) || Var) &&
+      assert((!dyn_cast_or_null<VarDecl>(Loc.getAsAstNode<Decl>()) || Var) &&
              "location is a VarDecl, but PILDebugVariable is empty");
       return insert(AllocStackInst::create(getPILDebugLocation(Loc), elementType,
                                            getFunction(), C.OpenedArchetypes,
@@ -454,7 +454,7 @@ public:
                                 Optional<PILDebugVariable> Var = None,
                                 bool hasDynamicLifetime = false) {
       Loc.markAsPrologue();
-      assert((!dyn_cast_or_null<VarDecl>(Loc.getAsASTNode<Decl>()) || Var) &&
+      assert((!dyn_cast_or_null<VarDecl>(Loc.getAsAstNode<Decl>()) || Var) &&
              "location is a VarDecl, but PILDebugVariable is empty");
       return insert(AllocBoxInst::create(getPILDebugLocation(Loc), BoxType, *F,
                                          C.OpenedArchetypes, Var,
@@ -464,7 +464,7 @@ public:
    AllocExistentialBoxInst *
    createAllocExistentialBox(PILLocation Loc, PILType ExistentialType,
                              CanType ConcreteType,
-                             ArrayRef<ProtocolConformanceRef> Conformances) {
+                             ArrayRef<InterfaceConformanceRef> Conformances) {
       return insert(AllocExistentialBoxInst::create(
          getPILDebugLocation(Loc), ExistentialType, ConcreteType, Conformances,
          F, C.OpenedArchetypes));
@@ -529,7 +529,7 @@ public:
    BuiltinInst *createBuiltinBinaryFunction(PILLocation Loc, StringRef Name,
                                             PILType OpdTy, PILType ResultTy,
                                             ArrayRef<PILValue> Args) {
-      auto &C = getASTContext();
+      auto &C = getAstContext();
 
       llvm::SmallString<16> NameStr = Name;
       appendOperandTypeName(OpdTy, NameStr);
@@ -542,7 +542,7 @@ public:
    BuiltinInst *createBuiltinBinaryFunctionWithTwoOpTypes(
       PILLocation Loc, StringRef Name, PILType OpdTy1, PILType OpdTy2,
       PILType ResultTy, ArrayRef<PILValue> Args) {
-      auto &C = getASTContext();
+      auto &C = getAstContext();
 
       llvm::SmallString<16> NameStr = Name;
       appendOperandTypeName(OpdTy1, NameStr);
@@ -561,14 +561,14 @@ public:
       assert(Args[0]->getType() == Args[1]->getType() &&
              "Binary operands must match");
       assert(Args[2]->getType().is<BuiltinIntegerType>() &&
-             Args[2]->getType().getASTType()->isBuiltinIntegerType(1) &&
+             Args[2]->getType().getAstType()->isBuiltinIntegerType(1) &&
              "Must have a third Int1 operand");
 
       PILType OpdTy = Args[0]->getType();
       PILType Int1Ty = Args[2]->getType();
 
-      TupleTypeElt ResultElts[] = {OpdTy.getASTType(), Int1Ty.getASTType()};
-      Type ResultTy = TupleType::get(ResultElts, getASTContext());
+      TupleTypeElt ResultElts[] = {OpdTy.getAstType(), Int1Ty.getAstType()};
+      Type ResultTy = TupleType::get(ResultElts, getAstContext());
       PILType PILResultTy =
          PILType::getPrimitiveObjectType(ResultTy->getCanonicalType());
 
@@ -924,7 +924,7 @@ public:
   StrongCopy##Name##ValueInst *createStrongCopy##Name##Value(                  \
       PILLocation Loc, PILValue operand) {                                     \
     auto type = getFunction().getLoweredType(                                  \
-        operand->getType().getASTType().getReferenceStorageReferent());        \
+        operand->getType().getAstType().getReferenceStorageReferent());        \
     return insert(new (getModule()) StrongCopy##Name##ValueInst(               \
         getPILDebugLocation(Loc), operand, type));                             \
   }
@@ -953,7 +953,7 @@ public:
   ALWAYS_LOADABLE_CHECKED_REF_STORAGE(Name, "...")
 #define UNCHECKED_REF_STORAGE(Name, ...) \
   LOADABLE_REF_STORAGE_HELPER(Name)
-#include "swift/AST/ReferenceStorage.def"
+#include "polarphp/ast/ReferenceStorageDef.h"
 #undef LOADABLE_REF_STORAGE_HELPER
 
    CopyAddrInst *createCopyAddr(PILLocation Loc, PILValue srcAddr,
@@ -1053,7 +1053,7 @@ public:
 
    RefToBridgeObjectInst *createRefToBridgeObject(PILLocation Loc, PILValue Ref,
                                                   PILValue Bits) {
-      auto Ty = PILType::getBridgeObjectType(getASTContext());
+      auto Ty = PILType::getBridgeObjectType(getAstContext());
       return insert(new (getModule()) RefToBridgeObjectInst(
          getPILDebugLocation(Loc), Ref, Bits, Ty));
    }
@@ -1066,14 +1066,14 @@ public:
 
    ValueToBridgeObjectInst *createValueToBridgeObject(PILLocation Loc,
                                                       PILValue value) {
-      auto Ty = PILType::getBridgeObjectType(getASTContext());
+      auto Ty = PILType::getBridgeObjectType(getAstContext());
       return insert(new (getModule()) ValueToBridgeObjectInst(
          getPILDebugLocation(Loc), value, Ty));
    }
 
    BridgeObjectToWordInst *createBridgeObjectToWord(PILLocation Loc,
                                                     PILValue Op) {
-      auto Ty = PILType::getBuiltinWordType(getASTContext());
+      auto Ty = PILType::getBuiltinWordType(getAstContext());
       return createBridgeObjectToWord(Loc, Op, Ty);
    }
 
@@ -1113,7 +1113,7 @@ public:
          getPILDebugLocation(Loc), Op, Ty));
    }
 
-   ObjCProtocolInst *createObjCProtocol(PILLocation Loc, ProtocolDecl *P,
+   ObjCProtocolInst *createObjCInterface(PILLocation Loc, InterfaceDecl *P,
                                         PILType Ty) {
       return insert(new (getModule())
                        ObjCProtocolInst(getPILDebugLocation(Loc), P, Ty));
@@ -1269,14 +1269,14 @@ public:
    /// Inject a loadable value into the corresponding optional type.
    EnumInst *createOptionalSome(PILLocation Loc, PILValue operand, PILType ty) {
       assert(isLoadableOrOpaque(ty));
-      auto someDecl = getModule().getASTContext().getOptionalSomeDecl();
+      auto someDecl = getModule().getAstContext().getOptionalSomeDecl();
       return createEnum(Loc, operand, someDecl, ty);
    }
 
    /// Create the nil value of a loadable optional type.
    EnumInst *createOptionalNone(PILLocation Loc, PILType ty) {
       assert(isLoadableOrOpaque(ty));
-      auto noneDecl = getModule().getASTContext().getOptionalNoneDecl();
+      auto noneDecl = getModule().getAstContext().getOptionalNoneDecl();
       return createEnum(Loc, nullptr, noneDecl, ty);
    }
 
@@ -1308,7 +1308,7 @@ public:
    /// Return unchecked_enum_data %Operand, #Optional<T>.some.
    PILValue emitExtractOptionalPayloadOperation(PILLocation Loc,
                                                 PILValue Operand) {
-      auto *Decl = F->getASTContext().getOptionalSomeDecl();
+      auto *Decl = F->getAstContext().getOptionalSomeDecl();
       return createUncheckedEnumData(Loc, Operand, Decl);
    }
 
@@ -1499,7 +1499,7 @@ public:
    }
 
    WitnessMethodInst *createWitnessMethod(PILLocation Loc, CanType LookupTy,
-                                          ProtocolConformanceRef Conformance,
+                                          InterfaceConformanceRef Conformance,
                                           PILDeclRef Member, PILType MethodTy) {
       return insert(WitnessMethodInst::create(
          getPILDebugLocation(Loc), LookupTy, Conformance, Member, MethodTy,
@@ -1567,7 +1567,7 @@ public:
    createInitExistentialAddr(PILLocation Loc, PILValue Existential,
                              CanType FormalConcreteType,
                              PILType LoweredConcreteType,
-                             ArrayRef<ProtocolConformanceRef> Conformances) {
+                             ArrayRef<InterfaceConformanceRef> Conformances) {
       return insert(InitExistentialAddrInst::create(
          getPILDebugLocation(Loc), Existential, FormalConcreteType,
          LoweredConcreteType, Conformances, &getFunction(), C.OpenedArchetypes));
@@ -1576,7 +1576,7 @@ public:
    InitExistentialValueInst *
    createInitExistentialValue(PILLocation Loc, PILType ExistentialType,
                               CanType FormalConcreteType, PILValue Concrete,
-                              ArrayRef<ProtocolConformanceRef> Conformances) {
+                              ArrayRef<InterfaceConformanceRef> Conformances) {
       return insert(InitExistentialValueInst::create(
          getPILDebugLocation(Loc), ExistentialType, FormalConcreteType, Concrete,
          Conformances, &getFunction(), C.OpenedArchetypes));
@@ -1585,7 +1585,7 @@ public:
    InitExistentialMetatypeInst *
    createInitExistentialMetatype(PILLocation Loc, PILValue metatype,
                                  PILType existentialType,
-                                 ArrayRef<ProtocolConformanceRef> conformances) {
+                                 ArrayRef<InterfaceConformanceRef> conformances) {
       return insert(InitExistentialMetatypeInst::create(
          getPILDebugLocation(Loc), existentialType, metatype, conformances,
          &getFunction(), C.OpenedArchetypes));
@@ -1594,7 +1594,7 @@ public:
    InitExistentialRefInst *
    createInitExistentialRef(PILLocation Loc, PILType ExistentialType,
                             CanType FormalConcreteType, PILValue Concrete,
-                            ArrayRef<ProtocolConformanceRef> Conformances) {
+                            ArrayRef<InterfaceConformanceRef> Conformances) {
       return insert(InitExistentialRefInst::create(
          getPILDebugLocation(Loc), ExistentialType, FormalConcreteType, Concrete,
          Conformances, &getFunction(), C.OpenedArchetypes));
@@ -1715,14 +1715,14 @@ public:
          getPILDebugLocation(Loc), value, base));
    }
    IsUniqueInst *createIsUnique(PILLocation Loc, PILValue operand) {
-      auto Int1Ty = PILType::getBuiltinIntegerType(1, getASTContext());
+      auto Int1Ty = PILType::getBuiltinIntegerType(1, getAstContext());
       return insert(new (getModule()) IsUniqueInst(getPILDebugLocation(Loc),
                                                    operand, Int1Ty));
    }
    IsEscapingClosureInst *createIsEscapingClosure(PILLocation Loc,
                                                   PILValue operand,
                                                   unsigned VerificationType) {
-      auto Int1Ty = PILType::getBuiltinIntegerType(1, getASTContext());
+      auto Int1Ty = PILType::getBuiltinIntegerType(1, getAstContext());
       return insert(new (getModule()) IsEscapingClosureInst(
          getPILDebugLocation(Loc), operand, Int1Ty, VerificationType));
    }
@@ -1810,7 +1810,7 @@ public:
    }
 
    BuiltinInst *createBuiltinTrap(PILLocation Loc) {
-      ASTContext &AST = getASTContext();
+      AstContext &AST = getAstContext();
       auto Id_trap = AST.getIdentifier("int_trap");
       return createBuiltin(Loc, Id_trap, getModule().Types.getEmptyTupleType(),
                            {}, {});
@@ -2209,15 +2209,15 @@ private:
 
    void appendOperandTypeName(PILType OpdTy, llvm::SmallString<16> &Name) {
       if (auto BuiltinIntTy =
-         dyn_cast<BuiltinIntegerType>(OpdTy.getASTType())) {
-         if (BuiltinIntTy == BuiltinIntegerType::getWordType(getASTContext())) {
+         dyn_cast<BuiltinIntegerType>(OpdTy.getAstType())) {
+         if (BuiltinIntTy == BuiltinIntegerType::getWordType(getAstContext())) {
             Name += "_Word";
          } else {
             unsigned NumBits = BuiltinIntTy->getWidth().getFixedWidth();
             Name += "_Int" + llvm::utostr(NumBits);
          }
       } else if (auto BuiltinFloatTy =
-         dyn_cast<BuiltinFloatType>(OpdTy.getASTType())) {
+         dyn_cast<BuiltinFloatType>(OpdTy.getAstType())) {
          Name += "_FP";
          switch (BuiltinFloatTy->getFPKind()) {
             case BuiltinFloatType::IEEE16: Name += "IEEE16"; break;
@@ -2228,7 +2228,7 @@ private:
             case BuiltinFloatType::PPC128: Name += "PPC128"; break;
          }
       } else {
-         assert(OpdTy.getASTType() == getASTContext().TheRawPointerType);
+         assert(OpdTy.getAstType() == getAstContext().TheRawPointerType);
          Name += "_RawPointer";
       }
    }

@@ -13,7 +13,7 @@
 #ifndef POLARPHP_PIL_OPTIMIZER_ANALYSIS_LOOPINFOANALYSIS_H
 #define POLARPHP_PIL_OPTIMIZER_ANALYSIS_LOOPINFOANALYSIS_H
 
-#include "polarphp/pil/lang/CFG.h"
+#include "polarphp/pil/lang/PILBasicBlockCFG.h"
 #include "polarphp/pil/lang/LoopInfo.h"
 #include "polarphp/pil/lang/PILBasicBlock.h"
 #include "polarphp/pil/optimizer/analysis/Analysis.h"

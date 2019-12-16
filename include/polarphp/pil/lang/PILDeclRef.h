@@ -30,7 +30,8 @@ namespace llvm {
 class raw_ostream;
 }
 
-namespace polar::ast {
+namespace polar {
+
 class PILFunctionType;
 class ClassDecl;
 class AstContext;
@@ -42,28 +43,12 @@ class ClosureExpr;
 class AutoClosureExpr;
 class AnyFunctionRef;
 enum class EffectsKind : uint8_t;
-}
-
-namespace polar {
-
 enum class PILLinkage : unsigned char;
 enum IsSerialized_t : unsigned char;
 enum class SubclassScope : unsigned char;
 class PILModule;
 class PILLocation;
-
-using polar::ast::EffectsKind;
-using polar::ast::AbstractFunctionDecl;
-using polar::ast::AbstractClosureExpr;
-using polar::ast::ValueDecl;
-using polar::ast::ClassDecl;
-using polar::ast::FuncDecl;
-using polar::ast::ClosureExpr;
-using polar::ast::AutoClosureExpr;
-using polar::ast::PILFunctionType;
-using polar::ast::AstContext;
-using polar::ast::ClangNode;
-using polar::ast::AnyFunctionRef;
+class ClangNode;
 
 /// How a method is dispatched.
 enum class MethodDispatch {

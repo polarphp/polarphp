@@ -1,4 +1,4 @@
-//===--- SideEffectAnalysis.h - SIL Side Effect Analysis --------*- C++ -*-===//
+//===--- SideEffectAnalysis.h - PIL Side Effect Analysis --------*- C++ -*-===//
 //
 // This source file is part of the Swift.org open source project
 //
@@ -14,8 +14,8 @@
 #define POLARPHP_PIL_OPTIMIZER_ANALYSIS_SIDEEFFECTANALYSIS_H
 
 #include "polarphp/pil/lang/ApplySite.h"
-#include "polarphp/pil/lang/SILInstruction.h"
-#include "polarphp/pil/lang/SILFunction.h"
+#include "polarphp/pil/lang/PILInstruction.h"
+#include "polarphp/pil/lang/PILFunction.h"
 #include "polarphp/pil/optimizer/analysis/BottomUpIPAnalysis.h"
 #include "polarphp/pil/optimizer/analysis/ArraySemantic.h"
 #include "llvm/ADT/DenseMap.h"
@@ -42,11 +42,11 @@ enum class RetainObserveKind {
 /// FunctionEffects constraints:
 /// - void clear()
 /// - void setWorstEffects()
-/// - bool summarizeFunction(SILFunction *)
+/// - bool summarizeFunction(PILFunction *)
 /// - bool summarizeCall(FullApplySite)
 /// - bool mergeFrom(const FunctionSideEffects &)
 /// - bool mergeFromApply(const FunctionEffects &, FullApplySite)
-/// - void analyzeInstruction(SILInstruction *)
+/// - void analyzeInstruction(PILInstruction *)
 template <typename FunctionEffects>
 class GenericFunctionEffectAnalysis : public BottomUpIPAnalysis {
 
@@ -57,13 +57,13 @@ class GenericFunctionEffectAnalysis : public BottomUpIPAnalysis {
       FunctionEffects functionEffects;
 
       /// Back-link to the function.
-      SILFunction *F;
+      PILFunction *F;
 
       /// Used during recomputation to indicate if the side-effects of a caller
       /// must be updated.
       bool needUpdateCallers = false;
 
-      FunctionInfo(SILFunction *F) : F(F) {}
+      FunctionInfo(PILFunction *F) : F(F) {}
 
       /// Clears the analysis data on invalidation.
       void clear() { functionEffects.clear(); }
@@ -81,7 +81,7 @@ class GenericFunctionEffectAnalysis : public BottomUpIPAnalysis {
    };
 
    /// All the function effect information for the whole module.
-   llvm::DenseMap<SILFunction *, FunctionInfo *> functionInfoMap;
+   llvm::DenseMap<PILFunction *, FunctionInfo *> functionInfoMap;
 
    /// The allocator for the map of values in FunctionInfoMap.
    llvm::SpecificBumpPtrAllocator<FunctionInfo> allocator;
@@ -90,10 +90,10 @@ class GenericFunctionEffectAnalysis : public BottomUpIPAnalysis {
    BasicCalleeAnalysis *BCA;
 
 public:
-   GenericFunctionEffectAnalysis(SILAnalysisKind kind)
+   GenericFunctionEffectAnalysis(PILAnalysisKind kind)
       : BottomUpIPAnalysis(kind) {}
 
-   const FunctionEffects &getEffects(SILFunction *F) {
+   const FunctionEffects &getEffects(PILFunction *F) {
       FunctionInfo *functionInfo = getFunctionInfo(F);
       if (!functionInfo->isValid())
          recompute(functionInfo);
@@ -115,20 +115,20 @@ public:
       callEffects.mergeFromApply(calleeEffects, fullApply);
    }
 
-   virtual void initialize(SILPassManager *PM) override;
+   virtual void initialize(PILPassManager *PM) override;
 
    /// Invalidate all information in this analysis.
    virtual void invalidate() override;
 
    /// Invalidate all of the information for a specific function.
-   virtual void invalidate(SILFunction *F, InvalidationKind K) override;
+   virtual void invalidate(PILFunction *F, InvalidationKind K) override;
 
    /// Notify the analysis about a newly created function.
-   virtual void notifyAddedOrModifiedFunction(SILFunction *F) override {}
+   virtual void notifyAddedOrModifiedFunction(PILFunction *F) override {}
 
    /// Notify the analysis about a function which will be deleted from the
    /// module.
-   virtual void notifyWillDeleteFunction(SILFunction *F) override {
+   virtual void notifyWillDeleteFunction(PILFunction *F) override {
       invalidate(F, InvalidationKind::Nothing);
    }
 
@@ -137,7 +137,7 @@ public:
 
 private:
    /// Gets or creates FunctionEffects for \p F.
-   FunctionInfo *getFunctionInfo(SILFunction *F) {
+   FunctionInfo *getFunctionInfo(PILFunction *F) {
       FunctionInfo *&functionInfo = functionInfoMap[F];
       if (!functionInfo) {
          functionInfo = new (allocator.Allocate()) FunctionInfo(F);
@@ -173,7 +173,7 @@ static bool changedFlagByInPlaceOr(bool &dest, bool src) {
 /// parameter of the function. See FunctionSideEffects.
 class FunctionSideEffectFlags {
    friend class FunctionSideEffects;
-   using MemoryBehavior = SILInstruction::MemoryBehavior;
+   using MemoryBehavior = PILInstruction::MemoryBehavior;
 
    bool Reads = false;
    bool Writes = false;
@@ -273,7 +273,7 @@ public:
 ///    E.g. if a struct contains 2 references, a mayWrite effect means that
 ///    memory is written to one of the referenced objects (or to both).
 class FunctionSideEffects {
-   using MemoryBehavior = SILInstruction::MemoryBehavior;
+   using MemoryBehavior = PILInstruction::MemoryBehavior;
 
    /// Side-effects which can be associated to a parameter.
    llvm::SmallVector<FunctionSideEffectFlags, 6> ParamEffects;
@@ -300,7 +300,7 @@ class FunctionSideEffects {
    /// Returns the effects for an address or reference. This might be a
    /// parameter, the LocalEffects or, if the value cannot be associated to one
    /// of them, the GlobalEffects.
-   FunctionSideEffectFlags *getEffectsOn(SILValue Addr);
+   FunctionSideEffectFlags *getEffectsOn(PILValue Addr);
 
 public:
    /// Constructs "empty" function effects. This effects object can later be
@@ -339,7 +339,7 @@ public:
    //
    // Return true if the function's' effects have been fully summarized without
    // visiting it's body.
-   bool summarizeFunction(SILFunction *F);
+   bool summarizeFunction(PILFunction *F);
 
    /// Summarize the callee side effects of a call instruction using this
    /// FunctionSideEffects object without analyzing the callee function bodies or
@@ -366,10 +366,10 @@ public:
    bool mergeFromApply(const FunctionSideEffects &CalleeEffects,
                        FullApplySite FAS);
 
-   /// Analyze the side-effects of a single SIL instruction \p I.
+   /// Analyze the side-effects of a single PIL instruction \p I.
    /// Visited callees are added to \p BottomUpOrder until \p RecursionDepth
    /// reaches MaxRecursionDepth.
-   void analyzeInstruction(SILInstruction *I);
+   void analyzeInstruction(PILInstruction *I);
 
    /// Print the function effects.
    void dump() const;
@@ -410,7 +410,7 @@ public:
 protected:
    /// Set the side-effects of a function, which has an @_effects attribute.
    /// Returns true if \a F has an @_effects attribute which could be handled.
-   bool setDefinedEffects(SILFunction *F);
+   bool setDefinedEffects(PILFunction *F);
 
    /// Set the side-effects of a semantic call.
    /// Return true if \p ASC could be handled.
@@ -433,7 +433,7 @@ protected:
    }
 };
 
-/// The SideEffectAnalysis provides information about side-effects of SIL
+/// The SideEffectAnalysis provides information about side-effects of PIL
 /// functions. Side-effect information is provided per function and includes:
 /// Does the function read or write memory? Does the function retain or release
 /// objects? etc.
@@ -443,10 +443,10 @@ class SideEffectAnalysis
 public:
    SideEffectAnalysis()
       : GenericFunctionEffectAnalysis<FunctionSideEffects>(
-      SILAnalysisKind::SideEffect) {}
+      PILAnalysisKind::SideEffect) {}
 
-   static bool classof(const SILAnalysis *S) {
-      return S->getKind() == SILAnalysisKind::SideEffect;
+   static bool classof(const PILAnalysis *S) {
+      return S->getKind() == PILAnalysisKind::SideEffect;
    }
 };
 

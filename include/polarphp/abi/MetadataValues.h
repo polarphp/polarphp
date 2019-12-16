@@ -29,9 +29,6 @@
 
 namespace polar {
 
-using polar::ast::ValueOwnership;
-using polar::FlagSet;
-
 enum {
    /// The number of words (pointers) in a value buffer.
       NumWords_ValueBuffer = 3,

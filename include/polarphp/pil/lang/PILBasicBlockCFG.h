@@ -15,10 +15,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef POLARPHP_PIL_CFG_H
-#define POLARPHP_PIL_CFG_H
+#ifndef POLARPHP_PIL_PILBASIC_BLOCK_CFG_H
+#define POLARPHP_PIL_PILBASIC_BLOCK_CFG_H
 
-#include "polarphp/pil/lang/PILFunction.h"
+#include "polarphp/pil/lang/PILBasicBlock.h"
 #include "llvm/ADT/GraphTraits.h"
 
 namespace llvm {
@@ -84,42 +84,7 @@ template <> struct GraphTraits<Inverse<const ::polar::PILBasicBlock*> > {
    }
 };
 
-template <>
-struct GraphTraits<::polar::PILFunction *>
-   : public GraphTraits<polar::PILBasicBlock *> {
-   using GraphType = polar::PILFunction *;
-   using NodeRef = polar::PILBasicBlock *;
-
-   static NodeRef getEntryNode(GraphType F) { return &F->front(); }
-
-   using nodes_iterator = pointer_iterator<polar::PILFunction::iterator>;
-   static nodes_iterator nodes_begin(GraphType F) {
-      return nodes_iterator(F->begin());
-   }
-   static nodes_iterator nodes_end(GraphType F) {
-      return nodes_iterator(F->end());
-   }
-   static unsigned size(GraphType F) { return F->size(); }
-};
-
-template <> struct GraphTraits<Inverse<::polar::PILFunction*> >
-   : public GraphTraits<Inverse<polar::PILBasicBlock*> > {
-   using GraphType = Inverse<polar::PILFunction *>;
-   using NodeRef = NodeRef;
-
-   static NodeRef getEntryNode(GraphType F) { return &F.Graph->front(); }
-
-   using nodes_iterator = pointer_iterator<polar::PILFunction::iterator>;
-   static nodes_iterator nodes_begin(GraphType F) {
-      return nodes_iterator(F.Graph->begin());
-   }
-   static nodes_iterator nodes_end(GraphType F) {
-      return nodes_iterator(F.Graph->end());
-   }
-   static unsigned size(GraphType F) { return F.Graph->size(); }
-};
-
 } // end llvm namespace
 
-#endif
+#endif // POLARPHP_PIL_PILBASIC_BLOCK_CFG_H
 

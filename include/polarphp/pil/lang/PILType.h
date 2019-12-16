@@ -27,38 +27,27 @@
 #include "llvm/ADT/Hashing.h"
 #include "polarphp/pil/lang/PILDeclRef.h"
 
-namespace polar::ast {
-class AstContext;
-class VarDecl;
-
-}
-
 namespace polar {
 class PILFunction;
-using polar::ast::VarDecl;
-using polar::ast::AstContext;
-using polar::ast::TypeBase;
-using polar::ast::CanType;
-using polar::ast::CanTypeWrapperTraits;
-using polar::ast::PILFunctionTypeRepresentation;
-using polar::ast::StructDecl;
-using polar::ast::EnumDecl;
-using polar::ast::NominalTypeDecl;
-using polar::ast::CanGenericSignature;
-using polar::ast::TypeExpansionContext;
-using polar::ast::Type;
-using polar::ast::SubstitutionMap;
-using polar::ast::PILFunctionType;
-using polar::ast::AnyMetatypeType;
-using polar::ast::EnumElementDecl;
-using polar::ast::TupleType;
-using polar::ast::LookupConformanceFn;
-using polar::ast::TypeSubstitutionFn;
-using polar::ast::BuiltinFloatType;
-using polar::ast::CanPILFunctionType;
-using polar::ast::CanAnyFunctionType;
-using polar::ast::InterfaceConformanceRef;
-using polar::ast::PILBlockStorageType;
+class AstContext;
+class VarDecl;
+class TypeBase;
+class CanType;
+enum class PILFunctionTypeRepresentation : uint8_t;
+class StructDecl;
+class EnumDecl;
+class NominalTypeDecl;
+class CanGenericSignature;
+class TypeExpansionContext;
+class Type;
+class SubstitutionMap;
+class PILFunctionType;
+class AnyMetatypeType;
+class EnumElementDecl;
+class TupleType;
+class BuiltinFloatType;
+class InterfaceConformanceRef;
+class PILBlockStorageType;
 
 namespace lowering {
 class AbstractionPattern;
@@ -273,7 +262,7 @@ public:
    /// something of unknown size.
    ///
    /// This is equivalent to, but possibly faster than, calling
-   /// tc.getTypelowering(type).isAddressOnly().
+   /// tc.getTypeLowering(type).isAddressOnly().
    static bool isAddressOnly(CanType type,
                              lowering::TypeConverter &tc,
                              CanGenericSignature sig,
@@ -282,7 +271,7 @@ public:
    /// Return true if this type must be returned indirectly.
    ///
    /// This is equivalent to, but possibly faster than, calling
-   /// tc.getTypelowering(type).isReturnedIndirectly().
+   /// tc.getTypeLowering(type).isReturnedIndirectly().
    static bool isFormallyReturnedIndirectly(CanType type,
                                             lowering::TypeConverter &tc,
                                             CanGenericSignature sig) {
@@ -292,7 +281,7 @@ public:
    /// Return true if this type must be passed indirectly.
    ///
    /// This is equivalent to, but possibly faster than, calling
-   /// tc.getTypelowering(type).isPassedIndirectly().
+   /// tc.getTypeLowering(type).isPassedIndirectly().
    static bool isFormallyPassedIndirectly(CanType type,
                                           lowering::TypeConverter &tc,
                                           CanGenericSignature sig) {
@@ -629,13 +618,6 @@ public:
    void print(raw_ostream &OS) const;
 };
 
-using polar::ast::CanFunctionType;
-using polar::ast::FunctionType;
-using polar::ast::CanAnyFunctionType;
-using polar::ast::AnyFunctionType;
-using polar::ast::CanLValueType;
-using polar::ast::LValueType;
-
 // Statically prevent PILTypes from being directly cast to a type
 // that's not legal as a PIL value.
 #define NON_PIL_TYPE(ID)                                             \
@@ -662,10 +644,6 @@ inline llvm::raw_ostream &operator<<(llvm::raw_ostream &OS, PILType T) {
    return OS;
 }
 
-} // polar
-
-namespace polar::ast {
-using polar::PILType;
 inline PILType PILBlockStorageType::getCaptureAddressType() const {
    return PILType::getPrimitiveAddressType(getCaptureType());
 }
@@ -693,7 +671,7 @@ inline PILType getPILBoxFieldType(TypeExpansionContext context,
       getPILBoxFieldLoweredType(context, type, TC, index));
 }
 
-} // end polar::ast namespace
+} // end polar namespace
 
 namespace llvm {
 

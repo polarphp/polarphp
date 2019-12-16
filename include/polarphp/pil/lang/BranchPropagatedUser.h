@@ -126,9 +126,9 @@ private:
 
 namespace llvm {
 
-template <> struct PointerLikeTypeTraits<swift::BranchPropagatedUser> {
+template <> struct PointerLikeTypeTraits<polar::BranchPropagatedUser> {
 public:
-  using BranchPropagatedUser = swift::BranchPropagatedUser;
+  using BranchPropagatedUser = polar::BranchPropagatedUser;
 
   static void *getAsVoidPointer(BranchPropagatedUser v) {
     return v.getAsOpaqueValue();

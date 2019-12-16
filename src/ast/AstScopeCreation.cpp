@@ -1808,17 +1808,17 @@ GET_REFERRENT(AbstractStmtScope, getStmt())
 GET_REFERRENT(CaptureListScope, getExpr())
 GET_REFERRENT(WholeClosureScope, getExpr())
 GET_REFERRENT(SpecializeAttributeScope, specializeAttr)
-GET_REFERRENT(GenericTypeOrExtensionScope, portion->getReferrentOfScope(this));
+GET_REFERRENT(GenericTypeOrExtensionScope, portion->getReferrentOfScope(this))
 
 const Decl *
 Portion::getReferrentOfScope(const GenericTypeOrExtensionScope *s) const {
   return nullptr;
-};
+}
 
 const Decl *GenericTypeOrExtensionWholePortion::getReferrentOfScope(
     const GenericTypeOrExtensionScope *s) const {
   return s->getDecl();
-};
+}
 
 #undef GET_REFERRENT
 

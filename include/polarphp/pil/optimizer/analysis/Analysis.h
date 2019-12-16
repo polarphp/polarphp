@@ -278,7 +278,7 @@ public:
    /// void FunctionAnalysisBase::verify(FunctionInfoTy *fInfo).
    virtual void verify() const override final {
       for (auto &entry : storage) {
-         if (!entry.second)ARCAnalysis.h
+         if (!entry.second)
             continue;
          verify(entry.second.get());
       }
@@ -323,9 +323,9 @@ public:
 };
 
 #define ANALYSIS(NAME) PILAnalysis *create##NAME##Analysis(PILModule *);
-#include "Analysis.def"
+#include "polarphp/pil/optimizer/analysis/AnalysisDef.h"
 
-} // end namespace swift
+} // end namespace polar
 
 #endif
 

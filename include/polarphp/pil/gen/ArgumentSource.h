@@ -249,7 +249,7 @@ public:
 
    void forwardInto(SILGenFunction &SGF, Initialization *dest) &&;
    void forwardInto(SILGenFunction &SGF, AbstractionPattern origFormalType,
-                    Initialization *dest, const Typelowering &destTL) &&;
+                    Initialization *dest, const TypeLowering &destTL) &&;
 
    /// If we have an rvalue, borrow the rvalue into a new ArgumentSource and
    /// return the ArgumentSource. Otherwise, assert.

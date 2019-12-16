@@ -18,7 +18,7 @@
 #define POLARPHP_PIL_PILMODULE_H
 
 #include "polarphp/ast/AstContext.h"
-#include "polarphp/ast/Builtins.h"
+#include "polarphp/ast/BuiltinTypes.h"
 #include "polarphp/ast/PILLayout.h"
 #include "polarphp/ast/PILOptions.h"
 #include "polarphp/kernel/LangOptions.h"
@@ -69,7 +69,7 @@ class PILFunctionBuilder;
 
 namespace lowering {
 class PILGenModule;
-} // namespace Lowering
+} // namespace lowering
 
 /// A stage of PIL processing.
 enum class PILStage {
@@ -139,8 +139,8 @@ private:
   friend PILProperty;
   friend PILUndef;
   friend PILWitnessTable;
-  friend Lowering::PILGenModule;
-  friend Lowering::TypeConverter;
+  friend lowering::PILGenModule;
+  friend lowering::TypeConverter;
   class SerializationCallback;
 
   /// Allocator that manages the memory of all the pieces of the PILModule.
@@ -181,14 +181,14 @@ private:
       VTableEntryCache;
 
   /// Lookup table for PIL witness tables from conformances.
-  llvm::DenseMap<const RootProtocolConformance *, PILWitnessTable *>
+  llvm::DenseMap<const RootInterfaceConformance *, PILWitnessTable *>
   WitnessTableMap;
 
   /// The list of PILWitnessTables in the module.
   WitnessTableListType witnessTables;
 
   /// Lookup table for PIL default witness tables from protocols.
-  llvm::DenseMap<const ProtocolDecl *, PILDefaultWitnessTable *>
+  llvm::DenseMap<const InterfaceDecl *, PILDefaultWitnessTable *>
   DefaultWitnessTableMap;
 
   /// The list of PILDefaultWitnessTables in the module.
@@ -269,7 +269,7 @@ private:
 
   // Intentionally marked private so that we need to use 'constructPIL()'
   // to construct a PILModule.
-  PILModule(ModuleDecl *M, Lowering::TypeConverter &TC,
+  PILModule(ModuleDecl *M, lowering::TypeConverter &TC,
             PILOptions &Options, const DeclContext *associatedDC,
             bool wholeModule);
 
@@ -323,7 +323,7 @@ public:
   void serialize();
 
   /// This converts Swift types to PILTypes.
-  Lowering::TypeConverter &Types;
+  lowering::TypeConverter &Types;
 
   /// Invalidate cached entries in PIL Loader.
   void invalidatePILLoaderCaches();
@@ -350,18 +350,18 @@ public:
   /// If a source file is provided, PIL will only be emitted for decls in that
   /// source file.
   static std::unique_ptr<PILModule>
-  constructPIL(ModuleDecl *M, Lowering::TypeConverter &TC,
+  constructPIL(ModuleDecl *M, lowering::TypeConverter &TC,
                PILOptions &Options, FileUnit *sf = nullptr);
 
   /// Create and return an empty PIL module that we can
   /// later parse PIL bodies directly into, without converting from an AST.
   static std::unique_ptr<PILModule>
-  createEmptyModule(ModuleDecl *M, Lowering::TypeConverter &TC,
+  createEmptyModule(ModuleDecl *M, lowering::TypeConverter &TC,
                     PILOptions &Options,
                     bool WholeModule = false);
 
   /// Get the Swift module associated with this PIL module.
-  ModuleDecl *getSwiftModule() const { return TheSwiftModule; }
+  ModuleDecl *getPolarphpModule() const { return TheSwiftModule; }
   /// Get the AST context used for type uniquing etc. by this PIL module.
   AstContext &getAstContext() const;
   SourceManager &getSourceManager() const { return getAstContext().SourceMgr; }
@@ -564,23 +564,23 @@ public:
   /// \arg deserializeLazily If we cannot find the witness table should we
   ///                        attempt to lazily deserialize it.
   PILWitnessTable *
-  lookUpWitnessTable(ProtocolConformanceRef C, bool deserializeLazily=true);
+  lookUpWitnessTable(InterfaceConformanceRef C, bool deserializeLazily=true);
   PILWitnessTable *
-  lookUpWitnessTable(const ProtocolConformance *C, bool deserializeLazily=true);
+  lookUpWitnessTable(const InterfaceConformance *C, bool deserializeLazily=true);
 
   /// Attempt to lookup \p Member in the witness table for \p C.
   std::pair<PILFunction *, PILWitnessTable *>
-  lookUpFunctionInWitnessTable(ProtocolConformanceRef C,
+  lookUpFunctionInWitnessTable(InterfaceConformanceRef C,
                                PILDeclRef Requirement);
 
   /// Look up the PILDefaultWitnessTable representing the default witnesses
   /// of a resilient protocol, if any.
-  PILDefaultWitnessTable *lookUpDefaultWitnessTable(const ProtocolDecl *Protocol,
+  PILDefaultWitnessTable *lookUpDefaultWitnessTable(const InterfaceDecl *Interface,
                                                     bool deserializeLazily=true);
 
-  /// Attempt to lookup \p Member in the default witness table for \p Protocol.
+  /// Attempt to lookup \p Member in the default witness table for \p Interface.
   std::pair<PILFunction *, PILDefaultWitnessTable *>
-  lookUpFunctionInDefaultWitnessTable(const ProtocolDecl *Protocol,
+  lookUpFunctionInDefaultWitnessTable(const InterfaceDecl *Interface,
                                       PILDeclRef Requirement,
                                       bool deserializeLazily=true);
 
@@ -594,7 +594,7 @@ public:
   // Given a protocol, attempt to create a default witness table declaration
   // for it.
   PILDefaultWitnessTable *
-  createDefaultWitnessTableDeclaration(const ProtocolDecl *Protocol,
+  createDefaultWitnessTableDeclaration(const InterfaceDecl *Interface,
                                        PILLinkage Linkage);
 
   /// Deletes a dead witness table.

@@ -228,7 +228,7 @@ struct BorrowScopeOperandKind {
    }
 
    void print(llvm::raw_ostream &os) const;
-   SWIFT_DEBUG_DUMP;
+   POLAR_DEBUG_DUMP;
 };
 
 /// An operand whose user instruction introduces a new borrow scope for the
@@ -328,7 +328,7 @@ struct BorrowScopeIntroducingValueKind {
    }
 
    void print(llvm::raw_ostream &os) const;
-   SWIFT_DEBUG_DUMP;
+   POLAR_DEBUG_DUMP;
 };
 
 llvm::raw_ostream &operator<<(llvm::raw_ostream &os,

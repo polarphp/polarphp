@@ -222,9 +222,9 @@ inline llvm::raw_ostream &operator<<(llvm::raw_ostream &OS,
 namespace llvm {
 
 template <>
-struct ilist_traits<::swift::PILGlobalVariable> :
-   public ilist_node_traits<::swift::PILGlobalVariable> {
-   using PILGlobalVariable = ::swift::PILGlobalVariable;
+struct ilist_traits<::polar::PILGlobalVariable> :
+   public ilist_node_traits<::polar::PILGlobalVariable> {
+   using PILGlobalVariable = ::polar::PILGlobalVariable;
 
 public:
    static void deleteNode(PILGlobalVariable *V) {}
@@ -239,7 +239,7 @@ private:
 // Utilities for verification and optimization.
 //===----------------------------------------------------------------------===//
 
-namespace swift {
+namespace polar {
 
 /// Given an addressor, AddrF, return the global variable being addressed, or
 /// return nullptr if the addressor isn't a recognized pattern.

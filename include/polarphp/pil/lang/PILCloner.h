@@ -213,7 +213,7 @@ public:
    }
 
    PILType getTypeInClonedContext(PILType Ty) {
-      auto objectTy = Ty.getASTType();
+      auto objectTy = Ty.getAstType();
       // Do not substitute opened existential types, if we do not have any.
       if (!objectTy->hasOpenedExistential())
          return Ty;
@@ -234,7 +234,7 @@ public:
       return asImpl().remapType(Ty);
    }
 
-   CanType getASTTypeInClonedContext(Type ty) {
+   CanType getAstTypeInClonedContext(Type ty) {
       // Do not substitute opened existential types, if we do not have any.
       if (!ty->hasOpenedExistential())
          return ty->getCanonicalType();
@@ -251,7 +251,7 @@ public:
    }
 
    CanType getOpASTType(CanType ty) {
-      ty = getASTTypeInClonedContext(ty);
+      ty = getAstTypeInClonedContext(ty);
       return asImpl().remapASTType(ty);
    }
 
@@ -261,8 +261,8 @@ public:
       registerOpenedExistentialRemapping(archetypeTy, replacementTy);
    }
 
-   ProtocolConformanceRef getOpConformance(Type ty,
-                                           ProtocolConformanceRef conformance) {
+   InterfaceConformanceRef getOpConformance(Type ty,
+                                           InterfaceConformanceRef conformance) {
       // If we have open existentials to substitute, do so now.
       if (ty->hasOpenedExistential() && !OpenedExistentialSubs.empty()) {
          conformance =
@@ -272,17 +272,17 @@ public:
                               MakeAbstractConformanceForGenericType());
       }
 
-      return asImpl().remapConformance(getASTTypeInClonedContext(ty),
+      return asImpl().remapConformance(getAstTypeInClonedContext(ty),
                                        conformance);
    }
 
-   ArrayRef<ProtocolConformanceRef>
+   ArrayRef<InterfaceConformanceRef>
    getOpConformances(Type ty,
-                     ArrayRef<ProtocolConformanceRef> conformances) {
-      SmallVector<ProtocolConformanceRef, 4> newConformances;
+                     ArrayRef<InterfaceConformanceRef> conformances) {
+      SmallVector<InterfaceConformanceRef, 4> newConformances;
       for (auto conformance : conformances)
          newConformances.push_back(getOpConformance(ty, conformance));
-      return ty->getASTContext().AllocateCopy(newConformances);
+      return ty->getAstContext().AllocateCopy(newConformances);
    }
 
    bool isValueCloned(PILValue OrigValue) const {
@@ -329,7 +329,7 @@ protected:
    /// MARK: CRTP visitors and other CRTP overrides.
 
 #define INST(CLASS, PARENT) void visit##CLASS(CLASS *I);
-#include "polarphp/pil/lang/PILNodes.def"
+#include "polarphp/pil/lang/PILNodesDef.h"
 
    // Visit the instructions in a single basic block, not including the block
    // terminator.
@@ -363,7 +363,7 @@ protected:
       return Ty;
    }
 
-   ProtocolConformanceRef remapConformance(Type Ty, ProtocolConformanceRef C) {
+   InterfaceConformanceRef remapConformance(Type Ty, InterfaceConformanceRef C) {
       return C;
    }
    /// Get the value that takes the place of the given `Value` within the cloned
@@ -2115,8 +2115,8 @@ void
 PILCloner<ImplClass>::
 visitOpenExistentialMetatypeInst(OpenExistentialMetatypeInst *Inst) {
    // Create a new archetype for this opened existential type.
-   auto openedType = Inst->getType().getASTType();
-   auto exType = Inst->getOperand()->getType().getASTType();
+   auto openedType = Inst->getType().getAstType();
+   auto exType = Inst->getOperand()->getType().getAstType();
    while (auto exMetatype = dyn_cast<ExistentialMetatypeType>(exType)) {
       exType = exMetatype.getInstanceType();
       openedType = cast<MetatypeType>(openedType).getInstanceType();
@@ -2803,14 +2803,14 @@ void PILCloner<ImplClass>::visitObjCExistentialMetatypeToObjectInst(
          getOpType(Inst->getType())));
 }
 
-template <typename ImplClass>
-void PILCloner<ImplClass>::visitObjCProtocolInst(ObjCProtocolInst *Inst) {
-   getBuilder().setCurrentDebugScope(getOpScope(Inst->getDebugScope()));
-   recordClonedInstruction(
-      Inst, getBuilder().createObjCProtocol(getOpLocation(Inst->getLoc()),
-                                            Inst->getProtocol(),
-                                            getOpType(Inst->getType())));
-}
+//template <typename ImplClass>
+//void PILCloner<ImplClass>::visitObjCInterfaceInst(ObjCInterfaceInst *Inst) {
+//   getBuilder().setCurrentDebugScope(getOpScope(Inst->getDebugScope()));
+//   recordClonedInstruction(
+//      Inst, getBuilder().createObjCInterface(getOpLocation(Inst->getLoc()),
+//                                            Inst->getInterface(),
+//                                            getOpType(Inst->getType())));
+//}
 
 template <typename ImplClass>
 void PILCloner<ImplClass>::visitKeyPathInst(KeyPathInst *Inst) {

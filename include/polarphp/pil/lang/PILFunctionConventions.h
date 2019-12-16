@@ -38,11 +38,11 @@
 
 namespace polar {
 
-using polar::ast::PILParameterInfo;
-using polar::ast::PILResultInfo;
-using polar::ast::PILFunctionConventions;
-using polar::ast::PILYieldInfo;
-using polar::ast::ResultConvention;
+class PILParameterInfo;
+class PILResultInfo;
+class PILFunctionConventions;
+class PILYieldInfo;
+enum class ResultConvention;
 using llvm::iterator_range;
 
 template<bool _, template<typename...> class T, typename...Args>
@@ -523,10 +523,6 @@ inline PILType PILModuleConventions::getPILResultInterfaceType(
           : PILType::getPrimitiveObjectType(result.getInterfaceType());
 }
 
-} // end polar namespace
-
-namespace polar::ast {
-
 using namespace polar;
 
 inline PILType
@@ -551,6 +547,6 @@ PILResultInfo::getPILStorageType(PILModule &M,
    return funcTy->substInterfaceType(M, getPILStorageInterfaceType());
 }
 
-}
+} // polar
 
 #endif

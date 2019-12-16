@@ -15,13 +15,9 @@
 
 #include "llvm/Support/ErrorHandling.h"
 
-namespace polar::ast {
-class ValueDecl;
-}
-
 namespace polar {
 
-using polar::ast::ValueDecl;
+class ValueDecl;
 
 /// Linkage for a PIL object.  This concept combines the notions
 /// of symbol linkage and visibility.

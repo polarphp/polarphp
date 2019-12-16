@@ -42,10 +42,6 @@ class Parser;
 class Token;
 }
 
-namespace polar::pil {
-class PILModule;
-}
-
 namespace polar {
 class GenericSignatureBuilder;
 class AstContext;
@@ -75,12 +71,12 @@ class TypeCheckerOptions;
 class LangOptions;
 class UnifiedStatsReporter;
 class SourceManager;
+class PILModule;
 using polar::PrimarySpecificPaths;
 using polar::llparser::Parser;
 using polar::llparser::Token;
-using polar::pil::PILModule;
 
-namespace Lowering {
+namespace lowering {
 class TypeConverter;
 }
 
@@ -258,12 +254,12 @@ GenericEnvironment *handlePILGenericParams(GenericParamList *genericParams,
 /// The module must contain source files. The optimizer will assume that the
 /// PIL of all files in the module is present in the PILModule.
 std::unique_ptr<PILModule>
-performPILGeneration(ModuleDecl *M, Lowering::TypeConverter &TC,
+performPILGeneration(ModuleDecl *M, lowering::TypeConverter &TC,
                      PILOptions &options);
 
 /// Turn a source file into PIL IR.
 std::unique_ptr<PILModule>
-performPILGeneration(FileUnit &SF, Lowering::TypeConverter &TC,
+performPILGeneration(FileUnit &SF, lowering::TypeConverter &TC,
                      PILOptions &options);
 
 using ModuleOrSourceFile = PointerUnion<ModuleDecl *, SourceFile *>;

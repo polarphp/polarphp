@@ -114,7 +114,7 @@ public:
       Yield,
       Nested,
       Unidentified,
-      NumKindBits = countBitsUsed(static_cast<unsigned>(Unidentified))
+      NumKindBits = count_bits_used(static_cast<unsigned>(Unidentified))
    };
 
    static const char *getKindName(Kind k);
@@ -154,13 +154,13 @@ protected:
       // elementIndex can overflow while gracefully degrading analysis. For now,
       // reserve an absurd number of bits at a nice alignment boundary, but this
       // can be reduced.
-      SWIFT_INLINE_BITFIELD_BASE(AccessedStorage, 32, kind
+      POLAR_INLINE_BITFIELD_BASE(AccessedStorage, 32, kind
          : ReservedKindBits,
          elementIndex : 32 - ReservedKindBits);
 
       // Define bits for use in AccessedStorageAnalysis. Each identified storage
       // object is mapped to one instance of this subclass.
-      SWIFT_INLINE_BITFIELD_FULL(StorageAccessInfo, AccessedStorage,
+      POLAR_INLINE_BITFIELD_FULL(StorageAccessInfo, AccessedStorage,
       64 - NumAccessedStorageBits,
       accessKind : NumPILAccessKindBits,
          noNestedConflict : 1,
@@ -176,7 +176,7 @@ protected:
       //
       // `AccessedStorage` refers to the AccessedStorageBitfield defined above,
       // setting aside enough bits for common data.
-      SWIFT_INLINE_BITFIELD_FULL(AccessEnforcementOptsInfo, AccessedStorage,
+      POLAR_INLINE_BITFIELD_FULL(AccessEnforcementOptsInfo, AccessedStorage,
       64 - NumAccessedStorageBits,
       seenNestedConflict : 1,
          seenIdenticalStorage : 1,
@@ -184,7 +184,7 @@ protected:
 
       // Define data flow bits for use in the AccessEnforcementDom pass. Each
       // begin_access in the function is mapped to one instance of this subclass.
-      SWIFT_INLINE_BITFIELD(DomAccessedStorage, AccessedStorage, 1 + 1,
+      POLAR_INLINE_BITFIELD(DomAccessedStorage, AccessedStorage, 1 + 1,
       isInner : 1, containsRead : 1);
    } Bits;
 
@@ -361,33 +361,33 @@ namespace llvm {
 
 /// Enable using AccessedStorage as a key in DenseMap.
 /// Do *not* include any extra pass data in key equality.
-template <> struct DenseMapInfo<swift::AccessedStorage> {
-   static swift::AccessedStorage getEmptyKey() {
-      return swift::AccessedStorage(swift::PILValue::getFromOpaqueValue(
+template <> struct DenseMapInfo<polar::AccessedStorage> {
+   static polar::AccessedStorage getEmptyKey() {
+      return polar::AccessedStorage(polar::PILValue::getFromOpaqueValue(
          llvm::DenseMapInfo<void *>::getEmptyKey()),
-                                    swift::AccessedStorage::Unidentified);
+                                    polar::AccessedStorage::Unidentified);
    }
 
-   static swift::AccessedStorage getTombstoneKey() {
-      return swift::AccessedStorage(
-         swift::PILValue::getFromOpaqueValue(
+   static polar::AccessedStorage getTombstoneKey() {
+      return polar::AccessedStorage(
+         polar::PILValue::getFromOpaqueValue(
             llvm::DenseMapInfo<void *>::getTombstoneKey()),
-         swift::AccessedStorage::Unidentified);
+         polar::AccessedStorage::Unidentified);
    }
 
-   static unsigned getHashValue(swift::AccessedStorage storage) {
+   static unsigned getHashValue(polar::AccessedStorage storage) {
       switch (storage.getKind()) {
-         case swift::AccessedStorage::Box:
-         case swift::AccessedStorage::Stack:
-         case swift::AccessedStorage::Nested:
-         case swift::AccessedStorage::Yield:
-         case swift::AccessedStorage::Unidentified:
-            return DenseMapInfo<swift::PILValue>::getHashValue(storage.getValue());
-         case swift::AccessedStorage::Argument:
+         case polar::AccessedStorage::Box:
+         case polar::AccessedStorage::Stack:
+         case polar::AccessedStorage::Nested:
+         case polar::AccessedStorage::Yield:
+         case polar::AccessedStorage::Unidentified:
+            return DenseMapInfo<polar::PILValue>::getHashValue(storage.getValue());
+         case polar::AccessedStorage::Argument:
             return storage.getParamIndex();
-         case swift::AccessedStorage::Global:
+         case polar::AccessedStorage::Global:
             return DenseMapInfo<void *>::getHashValue(storage.getGlobal());
-         case swift::AccessedStorage::Class: {
+         case polar::AccessedStorage::Class: {
             return llvm::hash_combine(storage.getObject(),
                                       storage.getPropertyIndex());
          }
@@ -395,7 +395,7 @@ template <> struct DenseMapInfo<swift::AccessedStorage> {
       llvm_unreachable("Unhandled AccessedStorageKind");
    }
 
-   static bool isEqual(swift::AccessedStorage LHS, swift::AccessedStorage RHS) {
+   static bool isEqual(polar::AccessedStorage LHS, polar::AccessedStorage RHS) {
       return LHS.hasIdenticalBase(RHS);
    }
 };
@@ -579,8 +579,8 @@ Result AccessUseDefChainVisitor<Impl, Result>::visit(PILValue sourceAddr) {
       // If the sourceAddr producer cannot immediately be classified, follow the
       // use-def chain of sourceAddr, box, or RawPointer producers.
       assert(sourceAddr->getType().isAddress()
-             || isa<PILBoxType>(sourceAddr->getType().getASTType())
-             || isa<BuiltinRawPointerType>(sourceAddr->getType().getASTType()));
+             || isa<PILBoxType>(sourceAddr->getType().getAstType())
+             || isa<BuiltinRawPointerType>(sourceAddr->getType().getAstType()));
 
       // Handle other unidentified address sources.
       switch (sourceAddr->getKind()) {
@@ -704,6 +704,6 @@ Result AccessUseDefChainVisitor<Impl, Result>::visit(PILValue sourceAddr) {
    };
 }
 
-} // end namespace polar::pilMemoryLifetime.h
+} // end namespace polar
 
 #endif

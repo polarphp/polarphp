@@ -34,23 +34,23 @@ namespace clang {
 
 namespace polar::lowering {
 
-using polar::ast::CanGenericSignature;
-using polar::ast::CanType;
-using polar::ast::Type;
-using polar::ast::AnyFunctionType;
-using polar::ast::ImportAsMemberStatus;
-using polar::ast::ForeignErrorConvention;
-using polar::ast::GenericFunctionType;
-using polar::ast::AbstractFunctionDecl;
-using polar::ast::ValueDecl;
-using polar::ast::DependentMemberType;
-using polar::ast::GenericTypeParamType;
-using polar::ast::ArchetypeType;
-using polar::ast::OpaqueTypeArchetypeType;
-using polar::ast::LayoutConstraint;
-using polar::ast::CanTypeWrapperTraits;
-using polar::ast::TupleType;
-using polar::ast::CanTupleType;
+using polar::CanGenericSignature;
+using polar::CanType;
+using polar::Type;
+using polar::AnyFunctionType;
+using polar::ImportAsMemberStatus;
+using polar::ForeignErrorConvention;
+using polar::GenericFunctionType;
+using polar::AbstractFunctionDecl;
+using polar::ValueDecl;
+using polar::DependentMemberType;
+using polar::GenericTypeParamType;
+using polar::ArchetypeType;
+using polar::OpaqueTypeArchetypeType;
+using polar::LayoutConstraint;
+using polar::CanTypeWrapperTraits;
+using polar::TupleType;
+using polar::CanTupleType;
 
 /// A pattern for the abstraction of a value.
 ///

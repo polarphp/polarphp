@@ -1,12 +1,12 @@
 //===--- DynamicCasts.h - PIL dynamic-cast utilities ------------*- C++ -*-===//
 //
-// This source file is part of the Swift.org open source project
+// This source file is part of the Polarphp.org open source project
 //
-// Copyright (c) 2014 - 2017 Apple Inc. and the Swift project authors
+// Copyright (c) 2014 - 2017 Apple Inc. and the Polarphp project authors
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://swift.org/LICENSE.txt for license information
-// See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
+// See https://swift.org/CONTRIBUTORS.txt for the list of Polarphp project authors
 //
 //===----------------------------------------------------------------------===//
 //
@@ -421,7 +421,7 @@ public:
 
   DynamicCastFeasibility classifyFeasibility(bool allowWholeModule) const {
     return polar::classifyDynamicCast(
-        getModule().getSwiftModule(),
+        getModule().getPolarphpModule(),
         getSourceFormalType(), getTargetFormalType(),
         isSourceTypeExact(), allowWholeModule && getModule().isWholeModule());
   }
@@ -433,36 +433,37 @@ public:
     return TargetIsBridgeable != SourceIsBridgeable;
   }
 
-  /// If getSourceType() is a Swift type that can bridge to an ObjC type, return
+  /// If getSourceType() is a Polarphp type that can bridge to an ObjC type, return
   /// the ObjC type it bridges to. If the source type is an objc type, an empty
   /// CanType() is returned.
-  CanType getBridgedSourceType() const {
-    PILModule &mod = getModule();
-    Type t = mod.getASTContext().getBridgedToObjC(mod.getSwiftModule(),
-                                                  getSourceFormalType());
-    if (!t)
-      return CanType();
-    return t->getCanonicalType();
-  }
+//  CanType getBridgedSourceType() const {
+//    PILModule &mod = getModule();
+//    Type t = mod.getAstContext().getBridgedToObjC(mod.getPolarphpModule(),
+//                                                  getSourceFormalType());
+//    if (!t)
+//      return CanType();
+//    return t->getCanonicalType();
+//  }
 
-  /// If getTargetType() is a Swift type that can bridge to an ObjC type, return
+   /// @todo
+  /// If getTargetType() is a Polarphp type that can bridge to an ObjC type, return
   /// the ObjC type it bridges to. If the target type is an objc type, an empty
   /// CanType() is returned.
-  CanType getBridgedTargetType() const {
-    PILModule &mod = getModule();
-    Type t = mod.getASTContext().getBridgedToObjC(mod.getSwiftModule(),
-                                                  getTargetFormalType());
-    if (!t)
-      return CanType();
-    return t->getCanonicalType();
-  }
+//  CanType getBridgedTargetType() const {
+//    PILModule &mod = getModule();
+//    Type t = mod.getAstContext().getBridgedToObjC(mod.getPolarphpModule(),
+//                                                  getTargetFormalType());
+//    if (!t)
+//      return CanType();
+//    return t->getCanonicalType();
+//  }
 
-  Optional<PILType> getLoweredBridgedTargetObjectType() const {
-    CanType t = getBridgedTargetType();
-    if (!t)
-      return None;
-    return PILType::getPrimitiveObjectType(t);
-  }
+//  Optional<PILType> getLoweredBridgedTargetObjectType() const {
+//    CanType t = getBridgedTargetType();
+//    if (!t)
+//      return None;
+//    return PILType::getPrimitiveObjectType(t);
+//  }
 
   bool isConditional() const {
     switch (getKind()) {
@@ -493,7 +494,7 @@ public:
   }
 };
 
-} // end namespace polar:pil
+} // end namespace polar
 
 #endif
 

@@ -25,15 +25,12 @@ namespace clang {
   class Module;
 }
 
-namespace polar::ast {
+namespace polar {
 class AstContext;
 class ModuleLoader;
 } // polar::ast
 
 namespace polar::clangimporter {
-
-using polar::ast::AstContext;
-using polar::ast::ModuleLoader;
 
 /// Represents a Clang module that has been imported into Swift.
 class ClangModuleUnit final : public LoadedFile {
@@ -87,9 +84,10 @@ public:
   lookupClassMember(ModuleDecl::AccessPathTy accessPath, DeclName name,
                     SmallVectorImpl<ValueDecl*> &decls) const override;
 
-  void lookupObjCMethods(
-         ObjCSelector selector,
-         SmallVectorImpl<AbstractFunctionDecl *> &results) const override;
+   // @todo
+//  void lookupObjCMethods(
+//         ObjCSelector selector,
+//         SmallVectorImpl<AbstractFunctionDecl *> &results) const override;
 
   virtual void getTopLevelDecls(SmallVectorImpl<Decl*> &results) const override;
 

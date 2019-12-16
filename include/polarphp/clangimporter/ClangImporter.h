@@ -71,7 +71,6 @@ class ClangImporterOptions;
 using polar::ClangTypeKind;
 using polar::AstContext;
 using polar::CompilerInvocation;
-using polar::ClangModuleUnit;
 using polar::ClangNode;
 using polar::Decl;
 using polar::DeclContext;

@@ -13,7 +13,7 @@
 #ifndef POLARPHP_PIL_UNDEF_H
 #define POLARPHP_PIL_UNDEF_H
 
-#include "polarphp/global/CompilerFeature.h.h"
+#include "polarphp/global/CompilerFeature.h"
 #include "polarphp/pil/lang/PILValue.h"
 
 namespace polar {
@@ -29,7 +29,7 @@ class PILUndef : public ValueBase {
 
 public:
   void operator=(const PILArgument &) = delete;
-  void operator delete(void *, size_t) SWIFT_DELETE_OPERATOR_DELETED;
+  void operator delete(void *, size_t) POLAR_DELETE_OPERATOR_DELETED;
 
   static PILUndef *get(PILType ty, PILModule &m, ValueOwnershipKind ownershipKind);
   static PILUndef *get(PILType ty, const PILFunction &f);

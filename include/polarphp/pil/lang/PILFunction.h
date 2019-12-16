@@ -17,48 +17,45 @@
 #ifndef POLARPHP_PIL_PILFUNCTION_H
 #define POLARPHP_PIL_PILFUNCTION_H
 
+#include "polarphp/ast/Decl.h"
 #include "polarphp/ast/AstNode.h"
 #include "polarphp/ast/Availability.h"
 #include "polarphp/ast/ResilienceExpansion.h"
 #include "polarphp/basic/ProfileCounter.h"
-//#include "polarphp/pil/lang/PILBasicBlock.h"
+#include "polarphp/pil/lang/PILFunctionConventions.h"
 #include "polarphp/pil/lang/PILDebugScope.h"
 #include "polarphp/pil/lang/PILDeclRef.h"
 #include "polarphp/pil/lang/PILLinkage.h"
 #include "polarphp/pil/lang/PILPrintContext.h"
+#include "polarphp/pil/lang/PILInstruction.h"
+#include "polarphp/pil/lang/PILBasicBlock.h"
 #include "llvm/ADT/StringMap.h"
 #include "llvm/ADT/ilist.h"
+#include "llvm/ADT/ilist_node.h"
 
 /// The symbol name used for the program entry point function.
 #define POLAR_RENTRY_POINT_FUNCTION "main"
 
-namespace polar::ast {
+/// @todo cycle dependency
+
+namespace polar {
+
 class AstContext;
 class GenericSignature;
 class GenericEnvironment;
 class GenericSpecializationInformation;
 class Identifier;
 class AvailabilityContext;
-}
-
-namespace polar {
-
 class PILInstruction;
 class PILModule;
 class PILFunctionBuilder;
 class PILProfiler;
-
-using polar::ast::AstContext;
-using polar::ast::GenericSignature;
-using polar::ast::GenericEnvironment;
-using polar::ast::GenericSpecializationInformation;
-using polar::ast::Identifier;
-using polar::ast::AvailabilityContext;
-using polar::ast::AstNode;
-using polar::ast::ResilienceExpansion;
-using polar::ast::NumOptimizationModeBits;
-using polar::ast::NumEffectsKindBits;
-using polar::OptimizationMode;
+class PILArgument;
+class AstNode;
+enum class ResilienceExpansion : unsigned;
+class NumOptimizationModeBits;
+class NumEffectsKindBits;
+enum class OptimizationMode : uint8_t;
 
 namespace lowering {
 class TypeLowering;
@@ -953,51 +950,51 @@ public:
    /// Return the unique basic block containing a return inst if it
    /// exists. Otherwise, returns end.
    iterator findReturnBB() {
-//      return std::find_if(begin(), end(),
-//                          [](const PILBasicBlock &BB) -> bool {
-//                             const TermInst *TI = BB.getTerminator();
-//                             return isa<ReturnInst>(TI);
-//                          });
+      return std::find_if(begin(), end(),
+                          [](const PILBasicBlock &BB) -> bool {
+                             const TermInst *TI = BB.getTerminator();
+                             return isa<ReturnInst>(TI);
+                          });
    }
 
    /// Return the unique basic block containing a return inst if it
    /// exists. Otherwise, returns end.
    const_iterator findReturnBB() const {
-//      return std::find_if(begin(), end(),
-//                          [](const PILBasicBlock &BB) -> bool {
-//                             const TermInst *TI = BB.getTerminator();
-//                             return isa<ReturnInst>(TI);
-//                          });
+      return std::find_if(begin(), end(),
+                          [](const PILBasicBlock &BB) -> bool {
+                             const TermInst *TI = BB.getTerminator();
+                             return isa<ReturnInst>(TI);
+                          });
    }
 
    /// Return the unique basic block containing a throw inst if it
    /// exists. Otherwise, returns end.
    iterator findThrowBB() {
-//      return std::find_if(begin(), end(),
-//                          [](const PILBasicBlock &BB) -> bool {
-//                             const TermInst *TI = BB.getTerminator();
-//                             return isa<ThrowInst>(TI);
-//                          });
+      return std::find_if(begin(), end(),
+                          [](const PILBasicBlock &BB) -> bool {
+                             const TermInst *TI = BB.getTerminator();
+                             return isa<ThrowInst>(TI);
+                          });
    }
 
    /// Return the unique basic block containing a throw inst if it
    /// exists. Otherwise, returns end.
    const_iterator findThrowBB() const {
-//      return std::find_if(begin(), end(),
-//                          [](const PILBasicBlock &BB) -> bool {
-//                             const TermInst *TI = BB.getTerminator();
-//                             return isa<ThrowInst>(TI);
-//                          });
+      return std::find_if(begin(), end(),
+                          [](const PILBasicBlock &BB) -> bool {
+                             const TermInst *TI = BB.getTerminator();
+                             return isa<ThrowInst>(TI);
+                          });
    }
 
    /// Loop over all blocks in this function and add all function exiting blocks
    /// to output.
    void findExitingBlocks(llvm::SmallVectorImpl<PILBasicBlock *> &output) const {
-//      for (auto &Block : const_cast<PILFunction &>(*this)) {
-//         if (Block.getTerminator()->isFunctionExiting()) {
-//            output.emplace_back(&Block);
-//         }
-//      }
+      for (auto &Block : const_cast<PILFunction &>(*this)) {
+         if (Block.getTerminator()->isFunctionExiting()) {
+            output.emplace_back(&Block);
+         }
+      }
    }
 
    //===--------------------------------------------------------------------===//
@@ -1005,30 +1002,30 @@ public:
    //===--------------------------------------------------------------------===//
 
    PILArgument *getArgument(unsigned i) {
-//      assert(!empty() && "Cannot get argument of a function without a body");
-//      return begin()->getArgument(i);
+      assert(!empty() && "Cannot get argument of a function without a body");
+      return begin()->getArgument(i);
    }
 
    const PILArgument *getArgument(unsigned i) const {
-//      assert(!empty() && "Cannot get argument of a function without a body");
-//      return begin()->getArgument(i);
+      assert(!empty() && "Cannot get argument of a function without a body");
+      return begin()->getArgument(i);
    }
 
    ArrayRef<PILArgument *> getArguments() const {
-//      assert(!empty() && "Cannot get arguments of a function without a body");
-//      return begin()->getArguments();
+      assert(!empty() && "Cannot get arguments of a function without a body");
+      return begin()->getArguments();
    }
 
    ArrayRef<PILArgument *> getIndirectResults() const {
-//      assert(!empty() && "Cannot get arguments of a function without a body");
-//      return begin()->getArguments().slice(
-//         0, getConventions().getNumIndirectPILResults());
+      assert(!empty() && "Cannot get arguments of a function without a body");
+      return begin()->getArguments().slice(
+         0, getConventions().getNumIndirectPILResults());
    }
 
    ArrayRef<PILArgument *> getArgumentsWithoutIndirectResults() const {
-//      assert(!empty() && "Cannot get arguments of a function without a body");
-//      return begin()->getArguments().slice(
-//         getConventions().getNumIndirectPILResults());
+      assert(!empty() && "Cannot get arguments of a function without a body");
+      return begin()->getArguments().slice(
+         getConventions().getNumIndirectPILResults());
    }
 
    const PILArgument *getSelfArgument() const {

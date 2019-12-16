@@ -21,13 +21,9 @@
 #include "polarphp/pil/lang/PILLocation.h"
 #include "llvm/Support/PrettyStackTrace.h"
 
-namespace polar::ast {
-class AstContext;
-}
-
 namespace polar {
 
-using polar::ast::AstContext;
+class AstContext;
 class PILFunction;
 class PILNode;
 

@@ -16,6 +16,7 @@
 #include "polarphp/global/CompilerFeature.h"
 #include "polarphp/pil/lang/PILArgumentConvention.h"
 #include "polarphp/pil/lang/PILFunction.h"
+#include "polarphp/pil/lang/PILBasicBlock.h"
 #include "polarphp/pil/lang/PILValue.h"
 
 namespace polar {
@@ -89,7 +90,7 @@ protected:
 
 public:
    void operator=(const PILArgument &) = delete;
-   void operator delete(void *, size_t) SWIFT_DELETE_OPERATOR_DELETED;
+   void operator delete(void *, size_t) POLAR_DELETE_OPERATOR_DELETED;
 
    ValueOwnershipKind getOwnershipKind() const {
       return static_cast<ValueOwnershipKind>(Bits.PILArgument.VOKind);

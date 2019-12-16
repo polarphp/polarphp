@@ -43,8 +43,8 @@ class ArchetypeType;
 class GenericSignatureBuilder;
 class AstContext;
 class GenericTypeParamType;
-class SILModule;
-class SILType;
+class PILModule;
+class PILType;
 
 /// Query function suitable for use as a \c TypeSubstitutionFn that queries
 /// the mapping of interface types to archetypes.
@@ -141,11 +141,11 @@ Type mapTypeIntoContext(Type type,
 /// Map a generic parameter type to a contextual type.
 Type mapTypeIntoContext(GenericTypeParamType *type) const;
 
-/// Map the given SIL interface type to a contextual type.
+/// Map the given PIL interface type to a contextual type.
 ///
 /// This operation will also reabstract dependent types according to the
 /// abstraction level of their associated type requirements.
-SILType mapTypeIntoContext(SILModule &M, SILType type) const;
+PILType mapTypeIntoContext(PILModule &M, PILType type) const;
 
 /// Map an interface type's protocol conformance into the corresponding
 /// conformance for the contextual type.

@@ -21,7 +21,7 @@
 #include <cstddef>
 #include <type_traits>
 
-namespace polar::ast {
+namespace polar {
 class ReturnStmt;
 class BraceStmt;
 class AbstractClosureExpr;
@@ -30,22 +30,10 @@ class Decl;
 class Expr;
 class Stmt;
 class Pattern;
-}
-
-namespace polar {
-
-using polar::ast::ReturnStmt;
-using polar::ast::BraceStmt;
-using polar::ast::AbstractClosureExpr;
-using polar::ast::AbstractFunctionDecl;
-using polar::ast::DeclContext;
+class DeclContext;
 using polar::SourceLoc;
 using polar::SourceManager;
 using polar::SourceRange;
-using polar::ast::Decl;
-using polar::ast::Expr;
-using polar::ast::Stmt;
-using polar::ast::Pattern;
 
 /// This is a pointer to the AST node that a PIL instruction was
 /// derived from. This may be null if AST information is unavailable or

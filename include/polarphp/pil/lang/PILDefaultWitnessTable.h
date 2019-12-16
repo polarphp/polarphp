@@ -149,9 +149,9 @@ public:
 namespace llvm {
 
 template <>
-struct ilist_traits<::swift::PILDefaultWitnessTable> :
-   public ilist_node_traits<::swift::PILDefaultWitnessTable> {
-   using PILDefaultWitnessTable = ::swift::PILDefaultWitnessTable;
+struct ilist_traits<::polar::PILDefaultWitnessTable> :
+   public ilist_node_traits<::polar::PILDefaultWitnessTable> {
+   using PILDefaultWitnessTable = ::polar::PILDefaultWitnessTable;
 
 public:
    static void deleteNode(PILDefaultWitnessTable *WT) { WT->~PILDefaultWitnessTable(); }

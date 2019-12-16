@@ -19,7 +19,7 @@
 #define POLARPHP_PIL_DOMINANCE_H
 
 #include "llvm/Support/GenericDomTree.h"
-#include "polarphp/pil/lang/CFG.h"
+#include "polarphp/pil/lang/PILBasicBlockCFG.h"
 
 extern template class llvm::DominatorTreeBase<polar::PILBasicBlock, false>;
 extern template class llvm::DominatorTreeBase<polar::PILBasicBlock, true>;
@@ -80,7 +80,7 @@ public:
    using DominatorTreeBase::dominates;
 
    bool isValid(PILFunction *F) const {
-      return getNode(&F->front()) != nullptr;
+//      return getNode(&F->front()) != nullptr;
    }
    void reset() {
       super::reset();
@@ -178,7 +178,7 @@ public:
       return false;
    }
 
-   bool isValid(PILFunction *F) const { return getNode(&F->front()) != nullptr; }
+   bool isValid(PILFunction *F) const { /*return getNode(&F->front()) != nullptr;*/ }
 
    using super::properlyDominates;
 };
@@ -189,18 +189,18 @@ namespace llvm {
 
 /// DominatorTree GraphTraits specialization so the DominatorTree can be
 /// iterable by generic graph iterators.
-template <> struct GraphTraits<polar::pilDominanceInfoNode *> {
-   using ChildIteratorType = polar::pilDominanceInfoNode::iterator;
-   using NodeRef = polar::pilDominanceInfoNode *;
+template <> struct GraphTraits<polar::DominanceInfoNode *> {
+   using ChildIteratorType = polar::DominanceInfoNode::iterator;
+   using NodeRef = polar::DominanceInfoNode *;
 
    static NodeRef getEntryNode(NodeRef N) { return N; }
    static inline ChildIteratorType child_begin(NodeRef N) { return N->begin(); }
    static inline ChildIteratorType child_end(NodeRef N) { return N->end(); }
 };
 
-template <> struct GraphTraits<const polar::pilDominanceInfoNode *> {
-   using ChildIteratorType = polar::pilDominanceInfoNode::const_iterator;
-   using NodeRef = const polar::pilDominanceInfoNode *;
+template <> struct GraphTraits<const polar::DominanceInfoNode *> {
+   using ChildIteratorType = polar::DominanceInfoNode::const_iterator;
+   using NodeRef = const polar::DominanceInfoNode *;
 
    static NodeRef getEntryNode(NodeRef N) { return N; }
    static inline ChildIteratorType child_begin(NodeRef N) { return N->begin(); }

@@ -17,8 +17,6 @@
 
 namespace polar {
 
-using polar::ast::ParameterConvention;
-
 /// Conventions for apply operands and function-entry arguments in PIL.
 ///
 /// This is simply a union of ParameterConvention and ResultConvention

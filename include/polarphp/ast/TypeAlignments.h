@@ -24,10 +24,6 @@
 
 #include <cstddef>
 
-namespace polar::pil {
-class PILFunction;
-}
-
 namespace polar {
 
 class AbstractClosureExpr;
@@ -55,8 +51,7 @@ class TypeVariableType;
 class TypeBase;
 class TypeDecl;
 class ValueDecl;
-
-using polar::pil::PILFunction;
+class PILFunction;
 
 /// We frequently use three tag bits on all of these types.
 constexpr size_t AttrAlignInBits = 3;

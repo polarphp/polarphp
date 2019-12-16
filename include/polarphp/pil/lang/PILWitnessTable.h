@@ -30,18 +30,13 @@
 #include "llvm/ADT/ilist.h"
 #include <string>
 
-namespace polar::ast {
-class InterfaceConformance;
-class RootInterfaceConformance;
-}
-
 namespace polar {
 
 class PILFunction;
 class PILModule;
 enum IsSerialized_t : unsigned char;
-using polar::ast::InterfaceConformance
-using polar::ast::RootInterfaceConformance;
+class InterfaceConformance;
+class RootInterfaceConformance;
 
 /// A mapping from each requirement of a protocol to the PIL-level entity
 /// satisfying the requirement for a concrete type.
@@ -339,9 +334,9 @@ public:
 namespace llvm {
 
 template <>
-struct ilist_traits<::swift::PILWitnessTable> :
-   public ilist_node_traits<::swift::PILWitnessTable> {
-   using PILWitnessTable = ::swift::PILWitnessTable;
+struct ilist_traits<::polar::PILWitnessTable> :
+   public ilist_node_traits<::polar::PILWitnessTable> {
+   using PILWitnessTable = ::polar::PILWitnessTable;
 
 public:
    static void deleteNode(PILWitnessTable *WT) { WT->~PILWitnessTable(); }

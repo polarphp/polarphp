@@ -35,7 +35,6 @@
 #include "polarphp/pil/lang/PILSuccessor.h"
 #include "polarphp/pil/lang/PILValue.h"
 #include "polarphp/pil/lang/ValueUtils.h"
-#include "polarphp/pil/lang/PILFunction.h"
 #include "polarphp/global/NameStrings.h"
 #include "llvm/ADT/APFloat.h"
 #include "llvm/ADT/APInt.h"
@@ -45,15 +44,12 @@
 
 #include <type_traits>
 
-namespace polar::ast {
+namespace polar {
+
 class Stmt;
 class ValueDecl;
 class FuncDecl;
 class VarDecl;
-}
-
-namespace polar {
-
 class AllocationInst;
 class DeclRefExpr;
 class FloatLiteralExpr;
@@ -81,28 +77,17 @@ class TermInst;
 class StringLiteralExpr;
 class FunctionRefBaseInst;
 
-using polar::IntRange;
-using polar::OptionalTransformRange;
-using polar::range;
-using polar::indices;
-using polar::NullablePtr;
-using polar::TransformIterator;
-using polar::ast::Stmt;
-using polar::ast::ValueDecl;
-using polar::ast::FuncDecl;
-using polar::ast::VarDecl;
-using polar::ast::CanPILBoxType;
-using polar::ast::PILBoxType;
-using polar::ast::AbstractStorageDecl;
-using polar::ast::Identifier;
-using polar::ast::IntrinsicInfo;
-using polar::ast::BuiltinInfo;
-using polar::ast::BuiltinValueKind;
-using polar::ast::ReferenceStorageType;
-using polar::ast::InterfaceDecl;
-using polar::ast::AccessKind;
-using polar::ast::ExistentialMetatypeType;
-using polar::ast::MetatypeType;
+class PILBoxType;
+class AbstractStorageDecl;
+class Identifier;
+class IntrinsicInfo;
+class BuiltinInfo;
+enum class BuiltinValueKind;
+class ReferenceStorageType;
+class InterfaceDecl;
+enum class AccessKind : uint8_t;
+class ExistentialMetatypeType;
+class MetatypeType;
 
 template <typename ImplClass> class PILClonerWithScopes;
 
@@ -348,7 +333,6 @@ class PILInstruction
 
    PILInstruction() = delete;
    void operator=(const PILInstruction &) = delete;
-   void operator delete(void *Ptr, size_t) POLAR_DELETE_OPERATOR_DELETED;
 
    /// Check any special state of instructions that are not represented in the
    /// instructions operands/type.
@@ -387,8 +371,9 @@ protected:
    ~PILInstruction() {
       NumDeletedInstructions++;
    }
-
 public:
+   /// @todo
+   void operator delete(void *Ptr, size_t) POLAR_DELETE_OPERATOR_DELETED;
    /// Instructions should be allocated using a dedicated instruction allocation
    /// function from the ContextTy.
    template <typename ContextTy>

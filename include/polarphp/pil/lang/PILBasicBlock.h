@@ -21,6 +21,7 @@
 #include "polarphp/basic/Range.h"
 #include "polarphp/pil/lang/PILArgumentArrayRef.h"
 #include "polarphp/pil/lang/PILInstruction.h"
+#include "llvm/ADT/ilist_node.h"
 #include "llvm/ADT/ilist.h"
 
 namespace polar {
@@ -443,17 +444,16 @@ namespace llvm {
 //===----------------------------------------------------------------------===//
 // ilist_traits for PILBasicBlock
 //===----------------------------------------------------------------------===//
-
 template <>
-struct ilist_traits<::swift::PILBasicBlock>
-   : ilist_node_traits<::swift::PILBasicBlock> {
-   using SelfTy = ilist_traits<::swift::PILBasicBlock>;
-   using PILBasicBlock = ::swift::PILBasicBlock;
-   using PILFunction = ::swift::PILFunction;
-   using FunctionPtrTy = ::swift::NullablePtr<PILFunction>;
+struct ilist_traits<polar::PILBasicBlock>
+   : ilist_node_traits<polar::PILBasicBlock> {
+   using SelfTy = ilist_traits<polar::PILBasicBlock>;
+   using PILBasicBlock = polar::PILBasicBlock;
+   using PILFunction = polar::PILFunction;
+   using FunctionPtrTy = polar::NullablePtr<PILFunction>;
 
 private:
-   friend class ::swift::PILFunction;
+   friend class polar::PILFunction;
 
    PILFunction *Parent;
    using block_iterator = simple_ilist<PILBasicBlock>::iterator;

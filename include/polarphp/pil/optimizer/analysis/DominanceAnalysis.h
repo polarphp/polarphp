@@ -1,4 +1,4 @@
-//===--- DominanceAnalysis.h - SIL Dominance Analysis -----------*- C++ -*-===//
+//===--- DominanceAnalysis.h - PIL Dominance Analysis -----------*- C++ -*-===//
 //
 // This source file is part of the Swift.org open source project
 //
@@ -13,15 +13,15 @@
 #ifndef POLARPHP_PIL_OPTIMIZER_ANALYSIS_DOMINANCEANALYSIS_H
 #define POLARPHP_PIL_OPTIMIZER_ANALYSIS_DOMINANCEANALYSIS_H
 
-#include "polarphp/pil/lang/SILInstruction.h"
+#include "polarphp/pil/lang/PILInstruction.h"
 #include "polarphp/pil/lang/Dominance.h"
 #include "polarphp/pil/optimizer/analysis/Analysis.h"
 #include "llvm/ADT/DenseMap.h"
 
 namespace polar {
 
-class SILModule;
-class SILInstruction;
+class PILModule;
+class PILInstruction;
 
 class DominanceAnalysis : public FunctionAnalysisBase<DominanceInfo> {
 protected:
@@ -33,20 +33,20 @@ protected:
 
 public:
   DominanceAnalysis()
-      : FunctionAnalysisBase<DominanceInfo>(SILAnalysisKind::Dominance) {}
+      : FunctionAnalysisBase<DominanceInfo>(PILAnalysisKind::Dominance) {}
 
   DominanceAnalysis(const DominanceAnalysis &) = delete;
   DominanceAnalysis &operator=(const DominanceAnalysis &) = delete;
 
-  static bool classof(const SILAnalysis *S) {
-    return S->getKind() == SILAnalysisKind::Dominance;
+  static bool classof(const PILAnalysis *S) {
+    return S->getKind() == PILAnalysisKind::Dominance;
   }
 
-  std::unique_ptr<DominanceInfo> newFunctionAnalysis(SILFunction *F) override {
-    return llvm::make_unique<DominanceInfo>(F);
+  std::unique_ptr<DominanceInfo> newFunctionAnalysis(PILFunction *F) override {
+    return std::make_unique<DominanceInfo>(F);
   }
 
-  virtual bool shouldInvalidate(SILAnalysis::InvalidationKind K) override {
+  virtual bool shouldInvalidate(PILAnalysis::InvalidationKind K) override {
     return K & InvalidationKind::Branches;
   }
 };
@@ -62,21 +62,21 @@ protected:
 public:
   PostDominanceAnalysis()
       : FunctionAnalysisBase<PostDominanceInfo>(
-            SILAnalysisKind::PostDominance) {}
+            PILAnalysisKind::PostDominance) {}
 
   PostDominanceAnalysis(const PostDominanceAnalysis &) = delete;
   PostDominanceAnalysis &operator=(const PostDominanceAnalysis &) = delete;
 
-  static bool classof(const SILAnalysis *S) {
-    return S->getKind() == SILAnalysisKind::PostDominance;
+  static bool classof(const PILAnalysis *S) {
+    return S->getKind() == PILAnalysisKind::PostDominance;
   }
 
   std::unique_ptr<PostDominanceInfo>
-  newFunctionAnalysis(SILFunction *F) override {
-    return llvm::make_unique<PostDominanceInfo>(F);
+  newFunctionAnalysis(PILFunction *F) override {
+    return std::make_unique<PostDominanceInfo>(F);
   }
 
-  virtual bool shouldInvalidate(SILAnalysis::InvalidationKind K) override {
+  virtual bool shouldInvalidate(PILAnalysis::InvalidationKind K) override {
     return K & InvalidationKind::Branches;
   }
 };

@@ -37,10 +37,6 @@ class LoopRegionFunctionInfo;
 class PILLoopInfo;
 class PILFunction;
 
-} // end namespace swift
-
-namespace swift {
-
 /// Return true if this is a retain instruction.
 bool isRetainInstruction(PILInstruction *II);
 
@@ -175,7 +171,7 @@ public:
 
    unsigned size() const { return EpilogueRetainInsts.size(); }
 
-   iterator_range<iterator> getRange() { return swift::make_range(begin(), end()); }
+   iterator_range<iterator> getRange() { return polar::make_range(begin(), end()); }
 
 private:
    /// Return true if all the successors of the EpilogueRetainInsts do not have

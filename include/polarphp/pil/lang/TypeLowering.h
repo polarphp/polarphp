@@ -1,4 +1,4 @@
-//===--- Typelowering.h - Convert Polarphp Types to PILTypes -------*- C++ -*-===//
+//===--- TypeLowering.h - Convert Polarphp Types to PILTypes -------*- C++ -*-===//
 //
 // This source file is part of the Polarphp.org open source project
 //
@@ -30,32 +30,26 @@ namespace clang {
 class Type;
 }
 
-namespace polar::ast {
-class ValueDecl;
-class ModuleDecl;
-class AnyFunctionRef;
-}
-
 namespace polar {
 
 enum class Bridgeability : unsigned;
 class ForeignErrorConvention;
 enum IsInitialization_t : bool;
 enum IsTake_t : bool;
+enum class ResilienceExpansion : unsigned;
+enum class InterfaceDispatchStrategy: uint8_t;
 class PILBuilder;
 class PILLocation;
 class PILModule;
-using polar::ast::ValueDecl;
-using polar::ast::ModuleDecl;
-using polar::ast::AnyFunctionRef;
-using polar::ast::ResilienceExpansion;
-using polar::ast::CaptureInfo;
-using polar::ast::CapturedValue;
-using polar::ast::SubscriptDecl;
-using polar::ast::GenericSignature;
-using polar::ast::GenericEnvironment;
-using polar::abi::InterfaceDispatchStrategy;
-using polar::abi::InterfaceDescriptorFlags;
+class ValueDecl;
+class ModuleDecl;
+class AnyFunctionRef;
+class CaptureInfo;
+class CapturedValue;
+class SubscriptDecl;
+class GenericSignature;
+class GenericEnvironment;
+class InterfaceDescriptorFlags;
 
 namespace lowering {
 
@@ -165,7 +159,7 @@ enum IsResilient_t : bool {
 };
 
 /// Extended type information used by PIL.
-class Typelowering {
+class TypeLowering {
 public:
    class RecursiveProperties {
       // These are chosen so that bitwise-or merges the flags properly.
@@ -249,20 +243,20 @@ private:
 
    /// A single linked list of lowerings for different resilience expansions.
    /// The first lowering is always for ResilientExpansion::Minimal.
-   mutable const Typelowering *NextExpansion = nullptr;
+   mutable const TypeLowering *NextExpansion = nullptr;
 
 protected:
-   Typelowering(PILType type, RecursiveProperties properties,
+   TypeLowering(PILType type, RecursiveProperties properties,
                 IsReferenceCounted_t isRefCounted,
                 TypeExpansionContext expansionContext)
       : LoweredType(type), Properties(properties),
         expansionContext(expansionContext), ReferenceCounted(isRefCounted) {}
 
 public:
-   Typelowering(const Typelowering &) = delete;
-   Typelowering &operator=(const Typelowering &) = delete;
+   TypeLowering(const TypeLowering &) = delete;
+   TypeLowering &operator=(const TypeLowering &) = delete;
 
-   virtual ~Typelowering() {}
+   virtual ~TypeLowering() {}
 
    /// Print out the internal state of this type lowering into \p os.
    void print(llvm::raw_ostream &os) const;
@@ -513,11 +507,11 @@ public:
       llvm_unreachable("unhandled style");
    }
 
-   /// Allocate a new Typelowering using the TypeConverter's allocator.
+   /// Allocate a new TypeLowering using the TypeConverter's allocator.
    void *operator new(size_t size, TypeConverter &tc);
    void *operator new[](size_t size, TypeConverter &tc);
 
-   // Forbid 'new FooTypelowering' and try to forbid 'delete tl'.
+   // Forbid 'new FooTypeLowering' and try to forbid 'delete tl'.
    // The latter is made challenging because the existence of the
    // virtual destructor requires an accessible 'operator delete'.
    void *operator new(size_t) = delete;
@@ -579,11 +573,11 @@ enum class CaptureKind {
 };
 
 
-/// TypeConverter - helper class for creating and managing Typelowerings.
+/// TypeConverter - helper class for creating and managing TypeLowerings.
 class TypeConverter {
-   friend class Typelowering;
+   friend class TypeLowering;
 
-   llvm::BumpPtrAllocator TypeloweringBPA;
+   llvm::BumpPtrAllocator TypeLoweringBPA;
 
    struct CachingTypeKey {
       CanGenericSignature Sig;
@@ -656,18 +650,18 @@ class TypeConverter {
 
    friend struct llvm::DenseMapInfo<OverrideKey>;
 
-   /// Find a cached Typelowering by TypeKey, or return null if one doesn't
+   /// Find a cached TypeLowering by TypeKey, or return null if one doesn't
    /// exist.
-   const Typelowering *find(TypeKey k);
+   const TypeLowering *find(TypeKey k);
    /// Insert a mapping into the cache.
-   void insert(TypeKey k, const Typelowering *tl);
+   void insert(TypeKey k, const TypeLowering *tl);
 #ifndef NDEBUG
    /// Remove the nullptr entry from the type map.
    void removeNullEntry(TypeKey k);
 #endif
 
    /// Mapping for types independent on contextual generic parameters.
-   llvm::DenseMap<CachingTypeKey, const Typelowering *> LoweredTypes;
+   llvm::DenseMap<CachingTypeKey, const TypeLowering *> LoweredTypes;
 
    llvm::DenseMap<std::pair<TypeExpansionContext, PILDeclRef>, PILConstantInfo *>
       ConstantTypes;
@@ -690,16 +684,16 @@ class TypeConverter {
   Optional<CanType> BridgedType##Ty;
 #include "polarphp/pil/lang/BridgedTypesDef.h"
 
-   const Typelowering &
-   getTypeloweringForLoweredType(AbstractionPattern origType,
+   const TypeLowering &
+   getTypeLoweringForLoweredType(AbstractionPattern origType,
                                  CanType loweredType,
                                  TypeExpansionContext forExpansion,
                                  bool origHadOpaqueTypeArchetype);
 
-   const Typelowering *
-   getTypeloweringForExpansion(TypeKey key,
+   const TypeLowering *
+   getTypeLoweringForExpansion(TypeKey key,
                                TypeExpansionContext forExpansion,
-                               const Typelowering *lowering,
+                               const TypeLowering *lowering,
                                bool origHadOpaqueTypeArchetype);
 
 public:
@@ -762,55 +756,55 @@ public:
       return isIndirectPlusZeroSelfParameter(T.getAstType());
    }
 
-   /// Lowers a context-independent Polarphp type to a PILType, and returns the PIL Typelowering
+   /// Lowers a context-independent Polarphp type to a PILType, and returns the PIL TypeLowering
    /// for that type.
    ///
    /// If `t` contains generic parameters, then the overload that also takes an
    /// `AbstractionPattern` must be used.
-   const Typelowering &
-   getTypelowering(Type t, TypeExpansionContext forExpansion) {
+   const TypeLowering &
+   getTypeLowering(Type t, TypeExpansionContext forExpansion) {
       AbstractionPattern pattern(t->getCanonicalType());
-      return getTypelowering(pattern, t, forExpansion);
+      return getTypeLowering(pattern, t, forExpansion);
    }
 
    /// Lowers a Polarphp type to a PILType according to the abstraction
    /// patterns of the given original type.
-   const Typelowering &getTypelowering(AbstractionPattern origType,
+   const TypeLowering &getTypeLowering(AbstractionPattern origType,
                                        Type substType,
                                        TypeExpansionContext forExpansion);
 
-   /// Returns the PIL Typelowering for an already lowered PILType. If the
-   /// PILType is an address, returns the Typelowering for the pointed-to
+   /// Returns the PIL TypeLowering for an already lowered PILType. If the
+   /// PILType is an address, returns the TypeLowering for the pointed-to
    /// type.
    ///
    /// If `t` contains type parameters, then the generic signature for its context
    /// must be provided.
-   const Typelowering &
-   getTypelowering(PILType t, TypeExpansionContext forExpansion,
+   const TypeLowering &
+   getTypeLowering(PILType t, TypeExpansionContext forExpansion,
                    CanGenericSignature signature = nullptr);
 
-   /// Returns the PIL Typelowering for an already lowered PILType. If the
-   /// PILType is an address, returns the Typelowering for the pointed-to
+   /// Returns the PIL TypeLowering for an already lowered PILType. If the
+   /// PILType is an address, returns the TypeLowering for the pointed-to
    /// type in the context of the given PILFunction.
-   const Typelowering &
-   getTypelowering(PILType t, PILFunction &F);
+   const TypeLowering &
+   getTypeLowering(PILType t, PILFunction &F);
 
    // Returns the lowered PIL type for a Polarphp type.
    PILType getLoweredType(Type t, TypeExpansionContext forExpansion) {
-      return getTypelowering(t, forExpansion).getLoweredType();
+      return getTypeLowering(t, forExpansion).getLoweredType();
    }
 
    // Returns the lowered PIL type for a Polarphp type.
    PILType getLoweredType(AbstractionPattern origType, Type substType,
                           TypeExpansionContext forExpansion) {
-      return getTypelowering(origType, substType, forExpansion)
+      return getTypeLowering(origType, substType, forExpansion)
          .getLoweredType();
    }
 
    PILType getLoweredLoadableType(Type t,
                                   TypeExpansionContext forExpansion,
                                   PILModule &M) {
-      const Typelowering &ti = getTypelowering(t, forExpansion);
+      const TypeLowering &ti = getTypeLowering(t, forExpansion);
       assert(
          (ti.isLoadable() || !PILModuleConventions(M).useLoweredAddresses()) &&
          "unexpected address-only type");

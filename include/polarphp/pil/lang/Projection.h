@@ -1016,16 +1016,16 @@ private:
 } // end polar namespace
 
 namespace llvm {
-using swift::ProjectionPath;
+using polar::ProjectionPath;
 /// Allow ProjectionPath to be used in DenseMap.
 template <> struct DenseMapInfo<ProjectionPath> {
    static inline ProjectionPath getEmptyKey() {
-      return ProjectionPath(DenseMapInfo<swift::PILType>::getEmptyKey(),
-                            DenseMapInfo<swift::PILType>::getEmptyKey());
+      return ProjectionPath(DenseMapInfo<polar::PILType>::getEmptyKey(),
+                            DenseMapInfo<polar::PILType>::getEmptyKey());
    }
    static inline ProjectionPath getTombstoneKey() {
-      return ProjectionPath(DenseMapInfo<swift::PILType>::getTombstoneKey(),
-                            DenseMapInfo<swift::PILType>::getTombstoneKey());
+      return ProjectionPath(DenseMapInfo<polar::PILType>::getTombstoneKey(),
+                            DenseMapInfo<polar::PILType>::getTombstoneKey());
    }
    static inline unsigned getHashValue(const ProjectionPath &Val) {
       return hash_value(Val);

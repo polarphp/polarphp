@@ -390,6 +390,6 @@ inline FileUnit &ModuleDecl::getMainFile(FileUnitKind expectedKind) const {
    return *Files.front();
 }
 
-} // end namespace swift
+} // end namespace polar
 
 #endif

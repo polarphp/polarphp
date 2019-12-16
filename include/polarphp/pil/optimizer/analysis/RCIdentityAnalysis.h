@@ -25,7 +25,7 @@
 #include "polarphp/pil/optimizer/analysis/DominanceAnalysis.h"
 #include "polarphp/pil/optimizer/passmgr/PassManager.h"
 
-namespace swift {
+namespace polar {
 
 /// Limit the size of the rc identity cache. We keep a cache per function.
 constexpr unsigned MaxRCIdentityCacheSize = 64;
@@ -120,7 +120,7 @@ public:
 
    virtual std::unique_ptr<RCIdentityFunctionInfo>
    newFunctionAnalysis(PILFunction *F) override {
-      return llvm::make_unique<RCIdentityFunctionInfo>(DA);
+      return std::make_unique<RCIdentityFunctionInfo>(DA);
    }
 
    virtual bool shouldInvalidate(PILAnalysis::InvalidationKind K) override {

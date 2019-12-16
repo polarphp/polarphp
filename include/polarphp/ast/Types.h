@@ -51,12 +51,6 @@ namespace llvm {
 struct fltSemantics;
 } // namespace llvm
 
-namespace polar::pil {
-class PILType;
-class PILModule;
-class PILFunctionConventions;
-}
-
 namespace polar {
 
 enum class AllocationArena;
@@ -94,10 +88,9 @@ class InterfaceConformance;
 enum PointerTypeKind : unsigned;
 struct ValueOwnershipKind;
 class PILLayout; // From PIL
-
-using polar::pil::PILType;
-using polar::pil::PILModule;
-using polar::pil::PILFunctionConventions;
+class PILType;
+class PILModule;
+class PILFunctionConventions;
 using polar::count_bits_used;
 using polar::bitmax;
 using polar::UUID;

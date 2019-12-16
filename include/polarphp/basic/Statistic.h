@@ -26,7 +26,7 @@
 #define POLAR_FUNC_STAT_NAMED(DEBUG_TYPE)                               \
    do {                                                                  \
    static llvm::Statistic FStat =                                      \
-{DEBUG_TYPE, __func__, __func__, {0}, {false}};                   \
+{DEBUG_TYPE, __func__, __func__};                   \
    ++FStat;                                                            \
    } while (0)
 
@@ -57,11 +57,9 @@ class Decl;
 class SourceManager;
 }
 
-namespace polar::pil {
-class PILFunction;
-}
-
 namespace polar {
+
+class PILFunction;
 class Pattern;
 class Decl;
 class InterfaceConformance;
@@ -69,21 +67,8 @@ class Expr;
 class SourceFile;
 class Stmt;
 class TypeRepr;
-}
-
-namespace polar {
-
 class SourceManager;
 class FrontendStatsTracer;
-
-using polar::Pattern;
-using polar::Decl;
-using polar::InterfaceConformance;
-using polar::Expr;
-using polar::SourceFile;
-using polar::Stmt;
-using polar::TypeRepr;
-using polar::pil::PILFunction;
 
 // There are a handful of cases where the polarphp compiler can introduce
 // counter-measurement noise via nondeterminism, especially via

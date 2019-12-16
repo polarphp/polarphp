@@ -132,9 +132,9 @@ namespace llvm {
 //===----------------------------------------------------------------------===//
 
 template <>
-struct ilist_traits<::swift::PILCoverageMap>
-   : public ilist_node_traits<::swift::PILCoverageMap> {
-   using PILCoverageMap = ::swift::PILCoverageMap;
+struct ilist_traits<::polar::PILCoverageMap>
+   : public ilist_node_traits<::polar::PILCoverageMap> {
+   using PILCoverageMap = ::polar::PILCoverageMap;
 
 public:
    static void deleteNode(PILCoverageMap *VT) { VT->~PILCoverageMap(); }
