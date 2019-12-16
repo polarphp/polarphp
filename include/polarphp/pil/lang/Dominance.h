@@ -21,24 +21,24 @@
 #include "llvm/Support/GenericDomTree.h"
 #include "polarphp/pil/lang/CFG.h"
 
-extern template class llvm::DominatorTreeBase<polar::pil::PILBasicBlock, false>;
-extern template class llvm::DominatorTreeBase<polar::pil::PILBasicBlock, true>;
-extern template class llvm::DomTreeNodeBase<polar::pil::PILBasicBlock>;
+extern template class llvm::DominatorTreeBase<polar::PILBasicBlock, false>;
+extern template class llvm::DominatorTreeBase<polar::PILBasicBlock, true>;
+extern template class llvm::DomTreeNodeBase<polar::PILBasicBlock>;
 
 namespace llvm {
 namespace DomTreeBuilder {
-using PILDomTree = llvm::DomTreeBase<polar::pil::PILBasicBlock>;
-using PILPostDomTree = llvm::PostDomTreeBase<polar::pil::PILBasicBlock>;
+using PILDomTree = llvm::DomTreeBase<polar::PILBasicBlock>;
+using PILPostDomTree = llvm::PostDomTreeBase<polar::PILBasicBlock>;
 
 extern template void Calculate<PILDomTree>(PILDomTree &DT);
 extern template void Calculate<PILPostDomTree>(PILPostDomTree &DT);
 } // namespace DomTreeBuilder
 } // namespace llvm
 
-namespace polar::pil {
+namespace polar {
 
-using DominatorTreeBase = llvm::DominatorTreeBase<polar::pil::PILBasicBlock, false>;
-using PostDominatorTreeBase = llvm::DominatorTreeBase<polar::pil::PILBasicBlock, true>;
+using DominatorTreeBase = llvm::DominatorTreeBase<polar::PILBasicBlock, false>;
+using PostDominatorTreeBase = llvm::DominatorTreeBase<polar::PILBasicBlock, true>;
 using DominanceInfoNode = llvm::DomTreeNodeBase<PILBasicBlock>;
 
 /// A class for computing basic dominance information.
@@ -183,7 +183,7 @@ public:
    using super::properlyDominates;
 };
 
-} // end namespace polar::pil
+} // end namespace polar
 
 namespace llvm {
 

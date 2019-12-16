@@ -25,7 +25,7 @@
 #include "polarphp/pil/lang/PILModule.h"
 #include "llvm/ADT/StringRef.h"
 
-namespace polar::pil {
+namespace polar {
 
 class PILFunction;
 
@@ -201,5 +201,5 @@ template <> inline bool Emitter::isEnabled<RemarkPassed>() {
   return PassedEnabled;
 }
 } // namespace OptRemark
-} // namespace polar::pil
+} // namespace polar
 #endif

@@ -22,7 +22,7 @@
 #include "polarphp/pil/lang/PILValue.h"
 #include "llvm/Support/CommandLine.h"
 
-namespace polar::pil {
+namespace polar {
 
 class SingleValueInstruction;
 class PILValue;
@@ -725,6 +725,6 @@ public:
    SubstitutionMap getCallSubstitutionMap() { return substitutionMap; }
 };
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif

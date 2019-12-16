@@ -26,7 +26,7 @@
 #include "llvm/ADT/DenseMap.h"
 #include "llvm/ADT/SmallVector.h"
 
-namespace polar::pil {
+namespace polar {
 
 class AccessSummaryAnalysis : public BottomUpIPAnalysis {
 public:
@@ -258,7 +258,7 @@ private:
                     FunctionOrder &order);
 };
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif
 

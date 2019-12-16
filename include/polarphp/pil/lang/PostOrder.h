@@ -23,7 +23,7 @@
 #include "llvm/ADT/iterator_range.h"
 #include <vector>
 
-namespace polar::pil {
+namespace polar {
 
 class PostOrderFunctionInfo {
    std::vector<PILBasicBlock *> PostOrder;
@@ -87,6 +87,6 @@ public:
    }
 };
 
-} // end polar::pil namespace
+} // end polar namespace
 
 #endif

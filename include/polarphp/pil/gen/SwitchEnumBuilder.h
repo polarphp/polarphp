@@ -15,7 +15,7 @@
 
 #include "polarphp/pil/gen/Scope.h"
 
-namespace polar::pil::lowering {
+namespace polar::lowering {
 
 class PILGenFunction;
 
@@ -193,6 +193,6 @@ private:
   PILGenFunction &getSGF() const { return builder.getPILGenFunction(); }
 };
 
-} // end polar::pil::lowering  namespace
+} // end polar::lowering  namespace
 
 #endif // POLARPHP_PIL_GEN_PILGEN_SWITCHENUMBUILDER_H

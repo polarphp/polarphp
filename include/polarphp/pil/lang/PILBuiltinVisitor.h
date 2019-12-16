@@ -23,7 +23,7 @@
 #include "polarphp/pil/lang/PILInstruction.h"
 #include <type_traits>
 
-namespace polar::pil {
+namespace polar {
 
 template <typename ImplClass, typename ValueRetTy = void>
 class PILBuiltinVisitor {
@@ -77,6 +77,6 @@ public:
 #include "polarphp/ast/BuiltinsDef.h"
 };
 
-} // end polar::pil namespace
+} // end polar namespace
 
 #endif

@@ -30,7 +30,7 @@
 #include "polarphp/pil/optimizer/utils/InstOptUtils.h"
 #include "llvm/ADT/ArrayRef.h"
 
-namespace polar::pil {
+namespace polar {
 namespace optremark {
 class Emitter;
 }

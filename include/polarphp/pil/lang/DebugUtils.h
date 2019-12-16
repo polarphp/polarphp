@@ -39,7 +39,7 @@
 #include "polarphp/pil/lang/PILBasicBlock.h"
 #include "polarphp/pil/lang/PILInstruction.h"
 
-namespace polar::pil {
+namespace polar {
 
 class PILInstruction;
 
@@ -218,6 +218,6 @@ inline PILBasicBlock::iterator eraseFromParentWithDebugInsts(
 bool hasNonTrivialNonDebugTransitiveUsers(
    PointerUnion<PILInstruction *, PILArgument *> V);
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif // POLARPHP_PIL_DEBUGUTILS_H

@@ -24,7 +24,7 @@
 #include "polarphp/pil/lang/PILArgument.h"
 #include "polarphp/pil/lang/PILUndef.h"
 
-namespace polar::pil {
+namespace polar {
 
 class PILInstruction;
 
@@ -693,6 +693,6 @@ m_CheckedTrunc(const T0 &Op0) {
 }
 
 } // end namespace patternmatch
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif

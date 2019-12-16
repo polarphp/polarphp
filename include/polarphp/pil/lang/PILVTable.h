@@ -34,7 +34,7 @@
 #include "llvm/ADT/Optional.h"
 #include <algorithm>
 
-namespace polar::pil {
+namespace polar {
 
 class ClassDecl;
 enum IsSerialized_t : unsigned char;
@@ -154,7 +154,7 @@ private:
    void removeFromVTableCache(Entry &entry);
 };
 
-} // end polar::pil namespace
+} // end polar namespace
 
 //===----------------------------------------------------------------------===//
 // ilist_traits for PILVTable
@@ -163,9 +163,9 @@ private:
 namespace llvm {
 
 template <>
-struct ilist_traits<::polar::pil::PILVTable> :
-   public ilist_node_traits<::polar::pil::PILVTable> {
-   using PILVTable = ::polar::pil::PILVTable;
+struct ilist_traits<::polar::PILVTable> :
+   public ilist_node_traits<::polar::PILVTable> {
+   using PILVTable = ::polar::PILVTable;
 
    static void deleteNode(PILVTable *VT) { VT->~PILVTable(); }
 

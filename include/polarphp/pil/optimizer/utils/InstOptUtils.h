@@ -30,7 +30,7 @@
 #include <functional>
 #include <utility>
 
-namespace polar::pil {
+namespace polar {
 
 class DominanceInfo;
 template <class T> class NullablePtr;
@@ -391,6 +391,6 @@ findLocalApplySites(FunctionRefBaseInst *fri);
 /// Gets the base implementation of a method.
 AbstractFunctionDecl *getBaseMethod(AbstractFunctionDecl *FD);
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif // POLARPHP_PIL_OPTIMIZER_UTILS_INSTOPTUTILS_H

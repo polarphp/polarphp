@@ -21,7 +21,7 @@
 #include "polarphp/pil/lang/PILArgument.h"
 #include "polarphp/pil/lang/PILInstruction.h"
 
-namespace polar::pil {
+namespace polar {
 
 /// Returns true if \p V is a function argument which may not alias to
 /// any other pointer in the function.
@@ -75,6 +75,6 @@ Optional<bool> computeSignBit(PILValue Value);
 /// Returns true of an overflow can happen. Otherwise returns false.
 bool canOverflow(BuiltinInst *BI);
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif // POLARPHP_PIL_OPTIMIZER_ANALYSIS_VALUETRACKING_H

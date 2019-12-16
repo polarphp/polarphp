@@ -21,7 +21,7 @@
 #include "swift/AST/Identifier.h"
 #include "swift/AST/Types.h"
 
-namespace polar::pil {
+namespace polar {
 
 class Expr;
 struct PILDeclRef;
@@ -114,6 +114,6 @@ public:
 };
 
 } // end namespace lowering
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif // POLARPHP_PIL_GEN_SPECIALIZEDEMITTER_H

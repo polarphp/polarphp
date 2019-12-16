@@ -22,7 +22,7 @@
 #include "llvm/Support/Casting.h"
 #include <vector>
 
-namespace polar::pil {
+namespace polar {
 
 class PILModule;
 class PILFunction;

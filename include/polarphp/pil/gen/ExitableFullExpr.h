@@ -21,7 +21,7 @@
 #include "polarphp/pil/gen/JumpDest.h"
 #include "polarphp/pil/gen/Scope.h"
 
-namespace polar::pil::lowering {
+namespace polar::lowering {
 
 /// A cleanup scope RAII object, like FullExpr, that comes with a
 /// JumpDest for a continuation block.
@@ -55,6 +55,6 @@ public:
    }
 };
 
-} // end namespace polar::pil::lowering
+} // end namespace polar::lowering
 
 #endif

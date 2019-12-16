@@ -24,7 +24,7 @@
 #include "polarphp/pil/gen/Scope.h"
 #include "llvm/Support/Compiler.h"
 
-namespace polar::pil {
+namespace polar {
 
 class PatternBindingDecl;
 class PILBasicBlock;
@@ -141,6 +141,6 @@ public:
 };
 
 } // end namespace lowering
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif // POLARPHP_PIL_GEN_CONDITION_H

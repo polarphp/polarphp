@@ -18,7 +18,7 @@
 #include "polarphp/pil/lang/PILFunction.h"
 #include "polarphp/pil/lang/PILUndef.h"
 
-namespace polar::pil {
+namespace polar {
 
 /// PILOpenedArchetypesTracker is a helper class that can be used to create
 /// and maintain a mapping from opened archetypes to instructions
@@ -182,6 +182,6 @@ CanArchetypeType getOpenedArchetypeOf(const PILInstruction *I);
 /// \returns The found archetype or empty type otherwise.
 CanArchetypeType getOpenedArchetypeOf(CanType Ty);
 
-} // end polar::pil namespace
+} // end polar namespace
 
 #endif // POLARPHP_PIL_PILOPENEDARCHETYPESTRACKER_H

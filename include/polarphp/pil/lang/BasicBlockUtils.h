@@ -17,7 +17,7 @@
 #include "llvm/ADT/SetVector.h"
 #include "llvm/ADT/SmallVector.h"
 
-namespace polar::pil {
+namespace polar {
 
 class PILFunction;
 class PILBasicBlock;
@@ -81,6 +81,6 @@ public:
   }
 };
 
-} // namespace polar::pil
+} // namespace polar
 
 #endif

@@ -19,7 +19,7 @@
 
 #include <stdlib.h>
 
-namespace polar::abi {
+namespace polar {
 
 struct EnumTagCounts {
    unsigned numTags, numTagBytes;
@@ -48,6 +48,6 @@ getEnumTagCounts(size_t size, unsigned emptyCases, unsigned payloadCases) {
    return {numTags, numTagBytes};
 }
 
-} // namespace polar::abi
+} // namespace polar
 
 #endif // POLARPHP_ABI_ENUM_H

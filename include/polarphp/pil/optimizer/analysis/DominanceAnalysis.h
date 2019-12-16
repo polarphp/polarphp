@@ -18,7 +18,7 @@
 #include "polarphp/pil/optimizer/analysis/Analysis.h"
 #include "llvm/ADT/DenseMap.h"
 
-namespace polar::pil {
+namespace polar {
 
 class SILModule;
 class SILInstruction;
@@ -81,6 +81,6 @@ public:
   }
 };
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif

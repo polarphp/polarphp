@@ -17,7 +17,7 @@
 #include "llvm/ADT/SmallVector.h"
 #include <algorithm>
 
-namespace polar::pil {
+namespace polar {
 
 // Trie node representing a sequence of unsigned integer indices.
 class IndexTrieNode {
@@ -79,6 +79,6 @@ public:
   }
 };
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif // POLARPHP_PIL_OPTIMIZER_UTILS_INDEXTREE_H

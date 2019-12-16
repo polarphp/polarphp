@@ -20,7 +20,7 @@
 #include "polarphp/pil/optimizer/analysis/SideEffectAnalysis.h"
 #include "llvm/ADT/DenseMap.h"
 
-using polar::pil::RetainObserveKind;
+using polar::RetainObserveKind;
 
 namespace {
 
@@ -51,7 +51,7 @@ struct MemBehaviorKeyTy {
 };
 }
 
-namespace polar::pil {
+namespace polar {
 
 class PILInstruction;
 class ValueBase;
@@ -303,7 +303,7 @@ PILType computeTBAAType(PILValue V);
 /// Nobody can write into let members.
 bool isLetPointer(PILValue V);
 
-} // end namespace polar::pil
+} // end namespace polar
 
 namespace llvm {
 template <> struct DenseMapInfo<AliasKeyTy> {

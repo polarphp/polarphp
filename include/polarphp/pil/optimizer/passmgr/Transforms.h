@@ -15,7 +15,7 @@
 #include "polarphp/pil/lang/Notifications.h"
 #include "polarphp/pil/optimizer/passmgr/PassManager.h"
 
-namespace polar::pil {
+namespace polar {
 
 class PILModule;
 class PILFunction;
@@ -170,6 +170,6 @@ public:
       PM->notifyWillDeleteFunction(F);
    }
 };
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif // POLARPHP_PIL_OPTIMIZER_PASSMANAGER_TRANSFORMS_H

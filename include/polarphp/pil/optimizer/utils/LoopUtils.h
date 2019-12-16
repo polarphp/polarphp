@@ -20,7 +20,7 @@
 
 #include "llvm/ADT/SmallVector.h"
 
-namespace polar::pil {
+namespace polar {
 
 class PILFunction;
 class PILBasicBlock;
@@ -85,6 +85,6 @@ public:
   }
 };
 
-} // end polar::pil namespace
+} // end polar namespace
 
 #endif // POLARPHP_PIL_OPTIMIZER_UTILS_LOOPUTILS_H

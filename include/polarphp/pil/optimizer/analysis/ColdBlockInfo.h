@@ -16,7 +16,7 @@
 #include "llvm/ADT/DenseMap.h"
 #include "swift/PIL/PILValue.h"
 
-namespace polar::pil {
+namespace polar {
 class DominanceAnalysis;
 class PILBasicBlock;
 
@@ -63,6 +63,6 @@ public:
   bool isCold(const PILBasicBlock *BB) { return isCold(BB, 0); }
 };
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif // POLARPHP_PIL_OPTIMIZER_ANALYSIS_COLDBLOCKS_H

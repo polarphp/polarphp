@@ -36,7 +36,7 @@
 #include "llvm/ADT/SetVector.h"
 #include "llvm/Support/Allocator.h"
 
-namespace polar::pil {
+namespace polar {
 
 class PILBuilder;
 class ProjectionPath;
@@ -1013,7 +1013,7 @@ private:
    }
 };
 
-} // end polar::pil namespace
+} // end polar namespace
 
 namespace llvm {
 using swift::ProjectionPath;

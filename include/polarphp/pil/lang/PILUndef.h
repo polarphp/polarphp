@@ -16,7 +16,7 @@
 #include "polarphp/global/CompilerFeature.h.h"
 #include "polarphp/pil/lang/PILValue.h"
 
-namespace polar::pil {
+namespace polar {
 
 class PILArgument;
 class PILInstruction;
@@ -50,7 +50,7 @@ public:
   }
 };
 
-} // end polar::pil namespace
+} // end polar namespace
 
 #endif
 

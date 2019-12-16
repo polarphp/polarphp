@@ -27,9 +27,9 @@ namespace llvm {
 // GraphTraits for PILBasicBlock
 //===----------------------------------------------------------------------===//
 
-template <> struct GraphTraits<::polar::pil::PILBasicBlock *> {
-   using ChildIteratorType = polar::pil::PILBasicBlock::succblock_iterator;
-   using Node = polar::pil::PILBasicBlock;
+template <> struct GraphTraits<::polar::PILBasicBlock *> {
+   using ChildIteratorType = polar::PILBasicBlock::succblock_iterator;
+   using Node = polar::PILBasicBlock;
    using NodeRef = Node *;
 
    static NodeRef getEntryNode(NodeRef BB) { return BB; }
@@ -40,9 +40,9 @@ template <> struct GraphTraits<::polar::pil::PILBasicBlock *> {
    static ChildIteratorType child_end(NodeRef N) { return N->succblock_end(); }
 };
 
-template <> struct GraphTraits<const ::polar::pil::PILBasicBlock*> {
-   using ChildIteratorType = polar::pil::PILBasicBlock::const_succblock_iterator;
-   using Node = const polar::pil::PILBasicBlock;
+template <> struct GraphTraits<const ::polar::PILBasicBlock*> {
+   using ChildIteratorType = polar::PILBasicBlock::const_succblock_iterator;
+   using Node = const polar::PILBasicBlock;
    using NodeRef = Node *;
 
    static NodeRef getEntryNode(NodeRef BB) { return BB; }
@@ -53,11 +53,11 @@ template <> struct GraphTraits<const ::polar::pil::PILBasicBlock*> {
    static ChildIteratorType child_end(NodeRef N) { return N->succblock_end(); }
 };
 
-template <> struct GraphTraits<Inverse<::polar::pil::PILBasicBlock*> > {
-   using ChildIteratorType = polar::pil::PILBasicBlock::pred_iterator;
-   using Node = polar::pil::PILBasicBlock;
+template <> struct GraphTraits<Inverse<::polar::PILBasicBlock*> > {
+   using ChildIteratorType = polar::PILBasicBlock::pred_iterator;
+   using Node = polar::PILBasicBlock;
    using NodeRef = Node *;
-   static NodeRef getEntryNode(Inverse<polar::pil::PILBasicBlock *> G) {
+   static NodeRef getEntryNode(Inverse<polar::PILBasicBlock *> G) {
       return G.Graph;
    }
    static inline ChildIteratorType child_begin(NodeRef N) {
@@ -68,12 +68,12 @@ template <> struct GraphTraits<Inverse<::polar::pil::PILBasicBlock*> > {
    }
 };
 
-template <> struct GraphTraits<Inverse<const ::polar::pil::PILBasicBlock*> > {
-   using ChildIteratorType = polar::pil::PILBasicBlock::pred_iterator;
-   using Node = const polar::pil::PILBasicBlock;
+template <> struct GraphTraits<Inverse<const ::polar::PILBasicBlock*> > {
+   using ChildIteratorType = polar::PILBasicBlock::pred_iterator;
+   using Node = const polar::PILBasicBlock;
    using NodeRef = Node *;
 
-   static NodeRef getEntryNode(Inverse<const polar::pil::PILBasicBlock *> G) {
+   static NodeRef getEntryNode(Inverse<const polar::PILBasicBlock *> G) {
       return G.Graph;
    }
    static inline ChildIteratorType child_begin(NodeRef N) {
@@ -85,14 +85,14 @@ template <> struct GraphTraits<Inverse<const ::polar::pil::PILBasicBlock*> > {
 };
 
 template <>
-struct GraphTraits<::polar::pil::PILFunction *>
-   : public GraphTraits<polar::pil::PILBasicBlock *> {
-   using GraphType = polar::pil::PILFunction *;
-   using NodeRef = polar::pil::PILBasicBlock *;
+struct GraphTraits<::polar::PILFunction *>
+   : public GraphTraits<polar::PILBasicBlock *> {
+   using GraphType = polar::PILFunction *;
+   using NodeRef = polar::PILBasicBlock *;
 
    static NodeRef getEntryNode(GraphType F) { return &F->front(); }
 
-   using nodes_iterator = pointer_iterator<polar::pil::PILFunction::iterator>;
+   using nodes_iterator = pointer_iterator<polar::PILFunction::iterator>;
    static nodes_iterator nodes_begin(GraphType F) {
       return nodes_iterator(F->begin());
    }
@@ -102,14 +102,14 @@ struct GraphTraits<::polar::pil::PILFunction *>
    static unsigned size(GraphType F) { return F->size(); }
 };
 
-template <> struct GraphTraits<Inverse<::polar::pil::PILFunction*> >
-   : public GraphTraits<Inverse<polar::pil::PILBasicBlock*> > {
-   using GraphType = Inverse<polar::pil::PILFunction *>;
+template <> struct GraphTraits<Inverse<::polar::PILFunction*> >
+   : public GraphTraits<Inverse<polar::PILBasicBlock*> > {
+   using GraphType = Inverse<polar::PILFunction *>;
    using NodeRef = NodeRef;
 
    static NodeRef getEntryNode(GraphType F) { return &F.Graph->front(); }
 
-   using nodes_iterator = pointer_iterator<polar::pil::PILFunction::iterator>;
+   using nodes_iterator = pointer_iterator<polar::PILFunction::iterator>;
    static nodes_iterator nodes_begin(GraphType F) {
       return nodes_iterator(F.Graph->begin());
    }

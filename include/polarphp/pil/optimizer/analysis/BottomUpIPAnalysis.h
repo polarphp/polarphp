@@ -22,7 +22,7 @@
 #include "polarphp/pil/lang/ApplySite.h"
 #include "llvm/ADT/SmallVector.h"
 
-namespace polar::pil {
+namespace polar {
 
 /// An abstract base class for interprocedural analysis which are computed in
 /// bottom-up order of the call-graph.
@@ -316,6 +316,6 @@ protected:
    }
 };
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif // POLARPHP_PIL_OPTIMIZER_ANALYSIS_BOTTOMUPIPANALYSIS_H

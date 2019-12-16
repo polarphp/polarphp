@@ -27,7 +27,7 @@
 #include "polarphp/pil/lang/PILInstruction.h"
 #include "polarphp/pil/optimizer/utils/InstOptUtils.h"
 
-namespace polar::pil {
+namespace polar {
 
 class BasicBlockCloner;
 class PILLoop;
@@ -318,6 +318,6 @@ protected:
    }
 };
 
-} // namespace polar::pil
+} // namespace polar
 
 #endif

@@ -29,7 +29,7 @@
 #include "polarphp/pil/lang/PILBasicBlock.h"
 #include "llvm/ADT/SmallPtrSet.h"
 
-namespace polar::pil {
+namespace polar {
 
 class AstContext;
 class Operand;
@@ -221,6 +221,6 @@ bool isKnownConstantEvaluableFunction(PILFunction *fun);
 /// that produces such errors is not a valid behavior.
 bool isFailStopError(SymbolicValue errorVal);
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif // POLARPHP_PIL_OPTIMIZER_UTILS_CONSTEXPR_H

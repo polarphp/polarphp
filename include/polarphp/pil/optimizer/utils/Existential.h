@@ -19,7 +19,7 @@
 #include "polarphp/pil/optimizer/analysis/ClassHierarchyAnalysis.h"
 #include "polarphp/pil/optimizer/analysis/InterfaceConformanceAnalysis.h"
 
-namespace polar::pil {
+namespace polar {
 
 /// Record information about an opened archetype.
 ///
@@ -133,6 +133,6 @@ struct ConcreteOpenedExistentialInfo {
   }
 };
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif // POLARPHP_PIL_OPTIMIZER_UTILS_EXISTENTIAL_H

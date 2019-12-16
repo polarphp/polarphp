@@ -21,7 +21,7 @@
 #include "llvm/Support/Compiler.h"
 #include "polarphp/pil/gen/Cleanup.h"
 
-namespace polar::pil {
+namespace polar {
 class PILBasicBlock;
 class CaseStmt;
 
@@ -70,6 +70,6 @@ public:
 };
 
 } // lowering
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif // POLARPHP_PIL_GEN_JUMPDEST_H

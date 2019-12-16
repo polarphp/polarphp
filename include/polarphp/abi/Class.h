@@ -20,7 +20,7 @@
 
 #include <stdint.h>
 
-namespace polar::abi {
+namespace polar {
 
 /// Objective-C class flags, stored in the ro-data.
 enum class ObjCClassFlags : uint32_t {
@@ -64,6 +64,6 @@ inline ObjCClassFlags &operator|=(ObjCClassFlags &lhs, ObjCClassFlags rhs) {
 inline ObjCClassFlags operator|(ObjCClassFlags lhs, ObjCClassFlags rhs) {
    return (lhs |= rhs);
 }
-} // polar::abi
+} // polar
 
 #endif // POLARPHP_ABI_CLASS_H

@@ -28,7 +28,7 @@
 #include "llvm/ADT/PointerUnion.h"
 #include "llvm/Support/raw_ostream.h"
 
-namespace polar::pil {
+namespace polar {
 
 class DominanceInfo;
 class PostOrderFunctionInfo;
@@ -149,7 +149,7 @@ struct ValueOwnershipKind {
 
    operator innerty() const { return Value; }
 
-   bool operator==(const polar::pil::ValueOwnershipKind::innerty& b) {
+   bool operator==(const polar::ValueOwnershipKind::innerty& b) {
       return Value == b;
    }
 
@@ -250,7 +250,7 @@ public:
    bool isResultOf(PILInstruction *I) const;
 
    /// Returns true if this value has no uses.
-   /// To ignore debug-info instructions use polar::pil::onlyHaveDebugUses instead
+   /// To ignore debug-info instructions use polar::onlyHaveDebugUses instead
    /// (see comment in DebugUtils.h).
    bool use_empty() const { return FirstUse == nullptr; }
 
@@ -261,12 +261,12 @@ public:
    inline use_iterator use_end() const;
 
    /// Returns a range of all uses, which is useful for iterating over all uses.
-   /// To ignore debug-info instructions use polar::pil::getNonDebugUses instead
+   /// To ignore debug-info instructions use polar::getNonDebugUses instead
    /// (see comment in DebugUtils.h).
    inline use_range getUses() const;
 
    /// Returns true if this value has exactly one use.
-   /// To ignore debug-info instructions use polar::pil::hasOneNonDebugUse instead
+   /// To ignore debug-info instructions use polar::hasOneNonDebugUse instead
    /// (see comment in DebugUtils.h).
    inline bool hasOneUse() const;
 
@@ -324,27 +324,27 @@ public:
    static bool classof(const PILInstruction *) = delete;
 };
 
-} // end namespace polar::pil
+} // end namespace polar
 
 namespace llvm {
 
 /// ValueBase * is always at least eight-byte aligned; make the three tag bits
 /// available through PointerLikeTypeTraits.
 template<>
-struct PointerLikeTypeTraits<polar::pil::ValueBase *> {
+struct PointerLikeTypeTraits<polar::ValueBase *> {
 public:
-   static inline void *getAsVoidPointer(polar::pil::ValueBase *I) {
+   static inline void *getAsVoidPointer(polar::ValueBase *I) {
       return (void*)I;
    }
-   static inline polar::pil::ValueBase *getFromVoidPointer(void *P) {
-      return (polar::pil::ValueBase *)P;
+   static inline polar::ValueBase *getFromVoidPointer(void *P) {
+      return (polar::ValueBase *)P;
    }
    enum { NumLowBitsAvailable = 3 };
 };
 
 } // end namespace llvm
 
-namespace polar::pil {
+namespace polar {
 
 using polar::ArrayRefView;
 using polar::makeDowncastFilterRange;
@@ -847,40 +847,40 @@ inline llvm::raw_ostream &operator<<(llvm::raw_ostream &OS, PILValue V) {
    return OS;
 }
 
-} // end namespace polar::pil
+} // end namespace polar
 
 namespace llvm {
 /// A PILValue casts like a ValueBase *.
-template<> struct simplify_type<const ::polar::pil::PILValue> {
-   using SimpleType = ::polar::pil::ValueBase *;
-   static SimpleType getSimplifiedValue(::polar::pil::PILValue Val) {
+template<> struct simplify_type<const ::polar::PILValue> {
+   using SimpleType = ::polar::ValueBase *;
+   static SimpleType getSimplifiedValue(::polar::PILValue Val) {
       return Val;
    }
 };
-template<> struct simplify_type< ::polar::pil::PILValue>
-   : public simplify_type<const ::polar::pil::PILValue> {};
+template<> struct simplify_type< ::polar::PILValue>
+   : public simplify_type<const ::polar::PILValue> {};
 
 // Values hash just like pointers.
-template<> struct DenseMapInfo<polar::pil::PILValue> {
-   static polar::pil::PILValue getEmptyKey() {
-      return polar::pil::PILValue::getFromOpaqueValue(
+template<> struct DenseMapInfo<polar::PILValue> {
+   static polar::PILValue getEmptyKey() {
+      return polar::PILValue::getFromOpaqueValue(
          llvm::DenseMapInfo<void*>::getEmptyKey());
    }
-   static polar::pil::PILValue getTombstoneKey() {
-      return polar::pil::PILValue::getFromOpaqueValue(
+   static polar::PILValue getTombstoneKey() {
+      return polar::PILValue::getFromOpaqueValue(
          llvm::DenseMapInfo<void*>::getTombstoneKey());
    }
-   static unsigned getHashValue(polar::pil::PILValue V) {
-      return DenseMapInfo<polar::pil::ValueBase *>::getHashValue(V);
+   static unsigned getHashValue(polar::PILValue V) {
+      return DenseMapInfo<polar::ValueBase *>::getHashValue(V);
    }
-   static bool isEqual(polar::pil::PILValue LHS, polar::pil::PILValue RHS) {
+   static bool isEqual(polar::PILValue LHS, polar::PILValue RHS) {
       return LHS == RHS;
    }
 };
 
 /// PILValue is a PointerLikeType.
-template<> struct PointerLikeTypeTraits<::polar::pil::PILValue> {
-   using PILValue = ::polar::pil::PILValue;
+template<> struct PointerLikeTypeTraits<::polar::PILValue> {
+   using PILValue = ::polar::PILValue;
 public:
    static void *getAsVoidPointer(PILValue v) {
       return v.getOpaqueValue();
@@ -889,7 +889,7 @@ public:
       return PILValue::getFromOpaqueValue(p);
    }
 
-   enum { NumLowBitsAvailable = polar::pil::PILValue::NumLowBitsAvailable };
+   enum { NumLowBitsAvailable = polar::PILValue::NumLowBitsAvailable };
 };
 
 } // end namespace llvm

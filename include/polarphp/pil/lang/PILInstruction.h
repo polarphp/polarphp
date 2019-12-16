@@ -52,7 +52,7 @@ class FuncDecl;
 class VarDecl;
 }
 
-namespace polar::pil {
+namespace polar {
 
 class AllocationInst;
 class DeclRefExpr;
@@ -8166,7 +8166,7 @@ inline bool Operand::isTypeDependent() const {
    return getUser()->isTypeDependentOperand(*this);
 }
 
-} // end polar::pil namespace
+} // end polar namespace
 
 //===----------------------------------------------------------------------===//
 // ilist_traits for PILInstruction
@@ -8175,12 +8175,12 @@ inline bool Operand::isTypeDependent() const {
 namespace llvm {
 
 template <>
-struct ilist_traits<::polar::pil::PILInstruction> :
-   public ilist_node_traits<::polar::pil::PILInstruction> {
-   using PILInstruction = ::polar::pil::PILInstruction;
+struct ilist_traits<::polar::PILInstruction> :
+   public ilist_node_traits<::polar::PILInstruction> {
+   using PILInstruction = ::polar::PILInstruction;
 
 private:
-   polar::pil::PILBasicBlock *getContainingBlock();
+   polar::PILBasicBlock *getContainingBlock();
 
    using instr_iterator = simple_ilist<PILInstruction>::iterator;
 

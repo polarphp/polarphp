@@ -16,7 +16,7 @@
 #include "polarphp/pil/lang/PrettyStackTrace.h"
 #include "llvm/Support/PrettyStackTrace.h"
 
-namespace polar::pil {
+namespace polar {
 
 class PILFunctionTransform;
 class PILModuleTransform;
@@ -44,6 +44,6 @@ public:
    virtual void print(llvm::raw_ostream &OS) const;
 };
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif

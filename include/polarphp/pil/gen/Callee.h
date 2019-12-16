@@ -17,7 +17,7 @@
 #include "polarphp/ast/Types.h"
 #include "polarphp/pil/AbstractionPattern.h"
 
-namespace polar::pil::lowering {
+namespace polar::lowering {
 
 class CalleeTypeInfo {
 public:
@@ -54,6 +54,6 @@ public:
    }
 };
 
-} // namespace polar::pil::lowering
+} // namespace polar::lowering
 
 #endif // POLARPHP_PIL_GEN_CALLEE_H

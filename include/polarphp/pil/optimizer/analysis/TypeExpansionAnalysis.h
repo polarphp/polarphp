@@ -19,7 +19,7 @@
 #include "polarphp/pil/optimizer/analysis/Analysis.h"
 #include "llvm/ADT/DenseMap.h"
 
-namespace polar::pil {
+namespace polar {
 
 /// This analysis determines memory effects during destruction.
 class TypeExpansionAnalysis : public PILAnalysis {
@@ -58,6 +58,6 @@ public:
    virtual void invalidateFunctionTables() override { }
 };
 
-} // polar::pil
+} // polar
 
 #endif // POLARPHP_PIL_OPTIMIZER_ANALYSIS_TYPEEXPANSIONANALYSIS_H

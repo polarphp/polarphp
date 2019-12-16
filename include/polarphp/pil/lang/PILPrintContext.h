@@ -18,7 +18,7 @@
 #include "llvm/ADT/DenseMap.h"
 #include "llvm/Support/raw_ostream.h"
 
-namespace polar::pil {
+namespace polar {
 
 class PILDebugScope;
 class PILInstruction;
@@ -123,6 +123,6 @@ public:
 
 raw_ostream &operator<<(raw_ostream &OS, PILPrintContext::ID i);
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif // POLARPHP_PIL_PRINTCONTEXT_H

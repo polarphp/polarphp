@@ -36,7 +36,7 @@
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/ADT/iterator_range.h"
 
-namespace polar::pil {
+namespace polar {
 
 using polar::ast::PILParameterInfo;
 using polar::ast::PILResultInfo;
@@ -523,11 +523,11 @@ inline PILType PILModuleConventions::getPILResultInterfaceType(
           : PILType::getPrimitiveObjectType(result.getInterfaceType());
 }
 
-} // end polar::pil namespace
+} // end polar namespace
 
 namespace polar::ast {
 
-using namespace polar::pil;
+using namespace polar;
 
 inline PILType
 PILParameterInfo::getPILStorageInterfaceType() const {

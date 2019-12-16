@@ -15,7 +15,7 @@
 
 #include "polarphp/pil/gen/PILGenFunction.h"
 
-namespace polar::pil::lowering {
+namespace polar::lowering {
 
 RValue emitUnconditionalCheckedCast(PILGenFunction &SGF,
                                     PILLocation loc,
@@ -34,6 +34,6 @@ PILValue emitIsa(PILGenFunction &SGF, PILLocation loc,
                  Expr *operand, Type targetType,
                  CheckedCastKind castKind);
 
-} // polar::pil::lowering
+} // polar::lowering
 
 #endif // POLARPHP_PIL_GEN_PILGEN_DYNAMIC_CAST_H

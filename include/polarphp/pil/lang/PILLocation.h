@@ -32,7 +32,7 @@ class Stmt;
 class Pattern;
 }
 
-namespace polar::pil {
+namespace polar {
 
 using polar::ast::ReturnStmt;
 using polar::ast::BraceStmt;
@@ -782,6 +782,6 @@ public:
    const PILDebugScope *getScope() const { return Scope; }
 };
 
-} // end polar::pil namespace
+} // end polar namespace
 
 #endif

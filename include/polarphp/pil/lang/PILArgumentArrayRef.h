@@ -23,7 +23,7 @@
 #include "polarphp/basic/LLVM.h"
 #include "polarphp/basic/StlExtras.h"
 
-namespace polar::pil {
+namespace polar {
 
 using polar::TransformRange;
 
@@ -35,6 +35,6 @@ class PILArgument;
       TransformRange<ArrayRef<PILArgument *>, NAME *(*)(PILArgument *)>;
 #include "polarphp/pil/lang/PILNodesDef.h"
 
-} // namespace polar::pil
+} // namespace polar
 
 #endif // POLARPHP_PIL_PILARGUMENTARRAYREF_H

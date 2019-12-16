@@ -19,7 +19,7 @@
 
 #include "polarphp/pil/lang/PILModule.h"
 
-namespace polar::pil {
+namespace polar {
 class PILOptions;
 class PILTransform;
 class PILModuleTransform;
@@ -78,6 +78,6 @@ StringRef PassKindTag(PassKind Kind);
 #define IRGEN_PASS(ID, TAG, NAME)
 #include "polarphp/pil/optimizer/passmgr/PassesDef.h"
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif

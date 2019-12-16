@@ -21,7 +21,7 @@
 #include "polarphp/pil/lang/PILLocation.h"
 #include "llvm/ADT/SmallVector.h"
 
-namespace polar::pil {
+namespace polar {
 
 class PILBasicBlock;
 class PILFunction;
@@ -289,7 +289,7 @@ public:
 };
 
 } // end namespace lowering
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif
 

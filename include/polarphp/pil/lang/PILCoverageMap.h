@@ -33,7 +33,7 @@ struct Counter;
 } // namespace coverage
 } // namespace llvm
 
-namespace polar::pil {
+namespace polar {
 
 /// A mapping from source locations to expressions made up of profiling
 /// counters. This is used to embed information in build products for use with
@@ -123,7 +123,7 @@ public:
    void dump() const;
 };
 
-} // namespace polar::pil
+} // namespace polar
 
 namespace llvm {
 

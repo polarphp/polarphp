@@ -175,16 +175,16 @@ typedef InlineRefCountsPlaceholder InlineRefCounts;
   The object and its side table are gone.
 */
 
-namespace polar::abi {
+namespace polar {
 struct HeapObject;
 class HeapObjectSideTableEntry;
 }
 
 // FIXME: HACK: copied from HeapObject.cpp
 extern "C" LLVM_LIBRARY_VISIBILITY LLVM_ATTRIBUTE_NOINLINE LLVM_ATTRIBUTE_USED
-void _polarphp_release_dealloc(polar::abi::HeapObject *object);
+void _polarphp_release_dealloc(polar::HeapObject *object);
 
-namespace polar::abi {
+namespace polar {
 
 // RefCountIsInline: refcount stored in an object
 // RefCountNotInline: refcount stored in an object's side table entry
@@ -1469,10 +1469,10 @@ HeapObject* RefCounts<SideTableRefCountBits>::getHeapObject() {
 
 
 
-} // namespace polar::abi
+} // namespace polar
 
 // for use by SWIFT_HEAPOBJECT_NON_OBJC_MEMBERS
-typedef polar::abi::InlineRefCounts InlineRefCounts;
+typedef polar::InlineRefCounts InlineRefCounts;
 
 // __cplusplus
 #endif

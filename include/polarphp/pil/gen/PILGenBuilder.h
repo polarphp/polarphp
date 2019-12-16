@@ -29,7 +29,7 @@
 #include "swift/PIL/PILBuilder.h"
 #include "swift/Basic/ProfileCounter.h"
 
-namespace polar::pil::lowering {
+namespace polar::lowering {
 
 class PILGenFunction;
 class SGFContext;
@@ -365,6 +365,6 @@ public:
                                  unsigned index);
 };
 
-} // namespace polar::pil::lowering
+} // namespace polar::lowering
 
 #endif // POLARPHP_PIL_GEN_PILGENBUILDER_H

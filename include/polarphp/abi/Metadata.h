@@ -43,7 +43,7 @@
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/Support/Casting.h"
 
-namespace polar::abi {
+namespace polar {
 template <unsigned PointerSize>
 struct RuntimeTarget;
 
@@ -4464,7 +4464,7 @@ public:
    uint32_t getFlags() { return flags; }
 };
 
-} // end namespace polar::abi
+} // end namespace polar
 
 #pragma clang diagnostic pop
 

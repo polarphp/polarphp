@@ -18,7 +18,7 @@
 #include <cstddef>
 #include <iterator>
 
-namespace polar::pil {
+namespace polar {
 
 class PILBasicBlock;
 class TermInst;
@@ -138,6 +138,6 @@ public:
   };
 };
 
-} // end polar::pil namespace
+} // end polar namespace
 
 #endif

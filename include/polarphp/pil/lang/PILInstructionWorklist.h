@@ -37,7 +37,7 @@
 #include "llvm/ADT/DenseMap.h"
 #include "llvm/ADT/SmallVector.h"
 
-namespace polar::pil {
+namespace polar {
 
 class PILInstructionWorklistBase {
    const char *loggingName;
@@ -337,4 +337,4 @@ public:
       : PILInstructionWorklist<VectorT, MapT>(loggingName) {}
 };
 
-} // end namespace polar::pil
+} // end namespace polar

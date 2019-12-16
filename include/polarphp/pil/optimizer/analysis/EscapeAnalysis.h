@@ -159,7 +159,7 @@
 
 struct CGForDotView;
 
-namespace polar::pil {
+namespace polar {
 
 class BasicCalleeAnalysis;
 
@@ -1121,6 +1121,6 @@ public:
 
 };
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif

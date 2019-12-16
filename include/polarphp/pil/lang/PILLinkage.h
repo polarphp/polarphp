@@ -19,7 +19,7 @@ namespace polar::ast {
 class ValueDecl;
 }
 
-namespace polar::pil {
+namespace polar {
 
 using polar::ast::ValueDecl;
 
@@ -283,6 +283,6 @@ fixmeWitnessHasLinkageThatNeedsToBePublic(PILLinkage witnessLinkage) {
           !hasSharedVisibility(witnessLinkage);
 }
 
-} // end polar::pil namespace
+} // end polar namespace
 
 #endif

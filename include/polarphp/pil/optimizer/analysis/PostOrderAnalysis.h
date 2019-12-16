@@ -24,7 +24,7 @@
 #include "llvm/ADT/iterator_range.h"
 #include <vector>
 
-namespace polar::pil {
+namespace polar {
 
 class PILBasicBlock;
 class PILFunction;
@@ -57,6 +57,6 @@ public:
    }
 };
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif

@@ -129,6 +129,6 @@ public:
 
 };
 
-} // end polar::pil namespace
+} // end polar namespace
 
 #endif // POLARPHP_PIL_OPTIMIZER_ANALYSIS_RCIDENTITYANALYSIS_H

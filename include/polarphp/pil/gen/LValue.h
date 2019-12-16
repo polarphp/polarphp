@@ -25,7 +25,7 @@
 #include "polarphp/pil/gen/PILGenFunction.h"
 #include "polarphp/pil/gen/Scope.h"
 
-namespace polar::pil::lowering {
+namespace polar::lowering {
 
 class ArgumentSource;
 class LogicalPathComponent;
@@ -603,6 +603,6 @@ struct LLVM_LIBRARY_VISIBILITY UnenforcedFormalAccess : FormalAccess {
    void finishImpl(PILGenFunction &SGF) override;
 };
 
-} // namespace polar::pil::lowering
+} // namespace polar::lowering
 
 #endif

@@ -21,7 +21,7 @@
 #include "polarphp/pil/lang/PILDebugScope.h"
 #include "polarphp/pil/gen/Cleanup.h"
 
-namespace polar::pil::lowering {
+namespace polar::lowering {
 
 /// A Scope is a RAII object recording that a scope (e.g. a brace
 /// statement) has been entered.
@@ -138,6 +138,6 @@ public:
    ~DebugScope() { SGF.leaveDebugScope(); }
 };
 
-} // polar::pil::lowering
+} // polar::lowering
 
 #endif // POLARPHP_PIL_GEN_SCOPE_H

@@ -23,7 +23,7 @@
 #include "polarphp/pil/lang/PILInstruction.h"
 #include "llvm/ADT/ilist.h"
 
-namespace polar::pil {
+namespace polar {
 
 class PILFunction;
 class PILArgument;
@@ -436,7 +436,7 @@ inline llvm::raw_ostream &operator<<(llvm::raw_ostream &OS,
    BB.print(OS);
    return OS;
 }
-} // end polar::pil namespace
+} // end polar namespace
 
 namespace llvm {
 

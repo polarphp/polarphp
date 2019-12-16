@@ -18,7 +18,7 @@
 
 #include <vector>
 
-namespace polar::pil {
+namespace polar {
 
 /// A utility to correct the nesting of stack allocating/deallocating
 /// instructions.
@@ -164,6 +164,6 @@ private:
    bool adaptDeallocs();
 };
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif // POLARPHP_PIL_OPTIMIZER_UTILS_STACKNESTING_H

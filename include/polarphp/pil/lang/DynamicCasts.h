@@ -24,7 +24,7 @@
 #include "polarphp/pil/lang/PILModule.h"
 #include "polarphp/pil/lang/PILValue.h"
 
-namespace polar::pil {
+namespace polar {
 
 class CanType;
 class ModuleDecl;
@@ -420,7 +420,7 @@ public:
   PILFunction *getFunction() const { return inst->getFunction(); }
 
   DynamicCastFeasibility classifyFeasibility(bool allowWholeModule) const {
-    return polar::pil::classifyDynamicCast(
+    return polar::classifyDynamicCast(
         getModule().getSwiftModule(),
         getSourceFormalType(), getTargetFormalType(),
         isSourceTypeExact(), allowWholeModule && getModule().isWholeModule());
@@ -488,7 +488,7 @@ public:
   }
 
   bool canUseScalarCheckedCastInstructions() const {
-    return polar::pil::canUseScalarCheckedCastInstructions(
+    return polar::canUseScalarCheckedCastInstructions(
         getModule(), getSourceFormalType(), getTargetFormalType());
   }
 };

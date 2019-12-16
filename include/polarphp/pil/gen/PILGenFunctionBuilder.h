@@ -15,7 +15,7 @@
 
 #include "polarphp/pil/lang/PILFunctionBuilder.h"
 
-namespace polar::pil::lowering {
+namespace polar::lowering {
 
 class LLVM_LIBRARY_VISIBILITY PILGenFunctionBuilder {
    PILFunctionBuilder builder;
@@ -39,6 +39,6 @@ class LLVM_LIBRARY_VISIBILITY PILGenFunctionBuilder {
    }
 };
 
-} // namespace polar::pil::lowering
+} // namespace polar::lowering
 
 #endif // POLARPHP_PIL_GEN_PILGEN_PILGENFUNCTIONBUILDER_H

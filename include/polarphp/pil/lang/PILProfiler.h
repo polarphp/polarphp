@@ -24,7 +24,7 @@
 #include "polarphp/pil/lang/PILDeclRef.h"
 #include "llvm/ADT/DenseMap.h"
 
-namespace polar::pil {
+namespace polar {
 
 class AbstractFunctionDecl;
 class PILCoverageMap;
@@ -102,6 +102,6 @@ private:
   void assignRegionCounters();
 };
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif // POLARPHP_PIL_PROFILER_H

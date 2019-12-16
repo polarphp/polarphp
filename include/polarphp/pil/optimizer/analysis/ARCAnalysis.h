@@ -26,7 +26,7 @@
 #include "llvm/ADT/SmallPtrSet.h"
 #include "llvm/ADT/TinyPtrVector.h"
 
-namespace polar::pil {
+namespace polar {
 
 class PILInstruction;
 class AliasAnalysis;
@@ -465,6 +465,6 @@ PILInstruction *findReleaseToMatchUnsafeGuaranteedValue(
    PILValue UnsafeGuaranteedValue, PILBasicBlock &BB,
    RCIdentityFunctionInfo &RCFI);
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif

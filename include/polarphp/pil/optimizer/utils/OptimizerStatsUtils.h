@@ -13,7 +13,7 @@
 #ifndef POLARPHP_PIL_OPTIMIZER_UTILS_STATS_UTILS_H
 #define POLARPHP_PIL_OPTIMIZER_UTILS_STATS_UTILS_H
 
-namespace polar::pil {
+namespace polar {
 
 class PILModule;
 class PILTransform;
@@ -37,6 +37,6 @@ void updatePILModuleStatsAfterTransform(PILModule &M, PILTransform *Transform,
                                         PILPassManager &PM, int PassNumber,
                                         int Duration);
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif

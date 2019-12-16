@@ -18,7 +18,7 @@
 #include "llvm/Analysis/LoopInfo.h"
 #include "llvm/ADT/iterator_range.h"
 
-namespace polar::pil {
+namespace polar {
   class DominanceInfo;
   class PILLoop;
   class PILPassManager;
@@ -27,12 +27,12 @@ namespace polar::pil {
 // Implementation in LoopInfoImpl.h
 #ifdef __GNUC__
 __extension__ extern template
-class llvm::LoopBase<polar::pil::PILBasicBlock, swift::PILLoop>;
+class llvm::LoopBase<polar::PILBasicBlock, swift::PILLoop>;
 __extension__ extern template
-class llvm::LoopInfoBase<polar::pil::PILBasicBlock, swift::PILLoop>;
+class llvm::LoopInfoBase<polar::PILBasicBlock, swift::PILLoop>;
 #endif
 
-namespace polar::pil {
+namespace polar {
 
 class PILLoop;
 
@@ -136,6 +136,6 @@ public:
   }
 };
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif

@@ -18,7 +18,7 @@
 #include "llvm/ADT/DenseSet.h"
 #include "llvm/ADT/StringSet.h"
 
-namespace polar::pil {
+namespace polar {
 
 /// An analysis that validates that the pass manager properly sends add/delete
 /// messages as functions are added/deleted from the module.
@@ -64,6 +64,6 @@ public:
   void verifyFull() const override final;
 };
 
-} // namespace polar::pil
+} // namespace polar
 
 #endif // POLARPHP_PIL_OPTIMIZER_ANALYSIS_PASSMANAGERVERIFIERANALYSIS_H

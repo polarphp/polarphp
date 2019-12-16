@@ -24,7 +24,7 @@
 #include "llvm/ADT/ilist_node.h"
 #include "llvm/ADT/ilist.h"
 
-namespace polar::pil {
+namespace polar {
 
 class AstContext;
 class PILFunction;
@@ -267,6 +267,6 @@ PILFunction *findInitializer(PILModule *Module, PILFunction *AddrF,
 PILGlobalVariable *getVariableOfStaticInitializer(
    PILFunction *InitFunc, SingleValueInstruction *&InitVal);
 
-} // namespace polar::pil
+} // namespace polar
 
 #endif

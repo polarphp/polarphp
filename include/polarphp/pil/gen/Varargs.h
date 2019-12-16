@@ -23,7 +23,7 @@
 #include "ManagedValue.h"
 #include "swift/PIL/AbstractionPattern.h"
 
-namespace polar::pil::lowering {
+namespace polar::lowering {
 
 class PILGenFunction;
 class TypeLowering;
@@ -70,6 +70,6 @@ VarargsInfo emitBeginVarargs(PILGenFunction &SGF, PILLocation loc,
 ManagedValue emitEndVarargs(PILGenFunction &SGF, PILLocation loc,
                             VarargsInfo &&varargs);
 
-} // end namespace polar::pil::lowering
+} // end namespace polar::lowering
 
 #endif // POLARPHP_PIL_GEN_VARARGS_H

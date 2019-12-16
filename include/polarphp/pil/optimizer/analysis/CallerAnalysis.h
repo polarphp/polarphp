@@ -23,7 +23,7 @@
 #include "llvm/ADT/SmallSet.h"
 #include "llvm/ADT/TinyPtrVector.h"
 
-namespace polar::pil {
+namespace polar {
 
 /// A lazy caller analysis that works by only recomputing its state upon
 /// an ask for information.
@@ -351,6 +351,6 @@ public:
    void print(llvm::raw_ostream &os) const;
 };
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif

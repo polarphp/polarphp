@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-namespace polar::abi {
+namespace polar {
 
 using polar::ast::ValueOwnership;
 using polar::FlagSet;
@@ -1753,6 +1753,6 @@ public:
    }
 };
 
-} // end namespace polar::abi
+} // end namespace polar
 
 #endif // POLARPHP_ABI_METADATAVALUES_H

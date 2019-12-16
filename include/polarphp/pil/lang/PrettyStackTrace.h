@@ -25,7 +25,7 @@ namespace polar::ast {
 class AstContext;
 }
 
-namespace polar::pil {
+namespace polar {
 
 using polar::ast::AstContext;
 class PILFunction;
@@ -72,6 +72,6 @@ public:
    virtual void print(llvm::raw_ostream &OS) const;
 };
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif

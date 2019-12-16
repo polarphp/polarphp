@@ -15,7 +15,7 @@
 
 #include "polarphp/pil/lang/PILInstruction.h"
 
-namespace polar::pil {
+namespace polar {
 
 //===----------------------------------------------------------------------===//
 //                         SSA Use-Def Helpers
@@ -185,6 +185,6 @@ private:
 /// return PILValue().
 PILValue getStaticOverloadForSpecializedPolymorphicBuiltin(BuiltinInst *bi);
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif

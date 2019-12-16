@@ -28,7 +28,7 @@
 #include "polarphp/pil/lang/optimizer/utils/SpecializationMangler.h"
 #include "llvm/Support/Debug.h"
 
-namespace polar::pil {
+namespace polar {
 
 /// A utility class for cloning code while remapping types.
 ///
@@ -418,6 +418,6 @@ protected:
    SmallVector<ApplyInst *, 16> noReturnApplies;
 };
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif

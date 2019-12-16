@@ -33,7 +33,7 @@
 #include "polarphp/pil/lang/PILInstruction.h"
 #include "polarphp/pil/optimizer/analysis/SideEffectAnalysis.h"
 
-namespace polar::pil {
+namespace polar {
 
 /// Information about a formal access within a function pertaining to a
 /// particular AccessedStorage location.
@@ -96,7 +96,7 @@ public:
    void print(raw_ostream &os) const;
    void dump() const;
 };
-} // namespace swift
+} // namespace polar
 
 namespace llvm {
 // Use the same DenseMapInfo for StorageAccessInfo as for AccessedStorage. None
@@ -355,6 +355,6 @@ public:
    }
 };
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif // POLARPHP_PIL_OPTIMIZER_ANALYSIS_ACCESSED_STORAGE_ANALYSIS_H

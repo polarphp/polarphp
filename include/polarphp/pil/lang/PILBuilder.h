@@ -22,7 +22,7 @@
 #include "llvm/ADT/PointerUnion.h"
 #include "llvm/ADT/StringExtras.h"
 
-namespace polar::pil {
+namespace polar {
 
 using Atomicity = RefCountingInst::Atomicity;
 
@@ -2394,6 +2394,6 @@ public:
    DebugLocOverrideRAII &operator=(DebugLocOverrideRAII &&) = delete;
 };
 
-} // end polar::pil namespace
+} // end polar namespace
 
 #endif

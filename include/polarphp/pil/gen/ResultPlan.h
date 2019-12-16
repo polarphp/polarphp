@@ -20,7 +20,7 @@
 #include "polarphp/pil/lang/PILLocation.h"
 #include <memory>
 
-namespace polar::pil {
+namespace polar {
 
 class CanType;
 class PILValue;
@@ -90,6 +90,6 @@ private:
 };
 
 } // end namespace lowering
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif

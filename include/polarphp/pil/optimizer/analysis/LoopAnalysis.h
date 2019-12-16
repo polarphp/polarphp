@@ -19,7 +19,7 @@
 #include "polarphp/pil/optimizer/analysis/Analysis.h"
 #include "llvm/ADT/DenseMap.h"
 
-namespace polar::pil {
+namespace polar {
 
 class DominanceInfo;
 class PILLoop;
@@ -48,6 +48,6 @@ public:
    virtual void initialize(PILPassManager *PM) override;
 };
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif // POLARPHP_PIL_OPTIMIZER_ANALYSIS_LOOPINFOANALYSIS_H

@@ -56,7 +56,7 @@
 #include "llvm/ADT/SmallSet.h"
 #include "llvm/ADT/iterator.h"
 
-namespace polar::pil {
+namespace polar {
 
 /// Return true if this function is known to be non-escaping.
 ///
@@ -180,6 +180,6 @@ public:
    void visitFunctions(llvm::function_ref<void(PILFunction *)> visitor);
 };
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif

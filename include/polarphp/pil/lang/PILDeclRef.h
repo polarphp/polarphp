@@ -44,7 +44,7 @@ class AnyFunctionRef;
 enum class EffectsKind : uint8_t;
 }
 
-namespace polar::pil {
+namespace polar {
 
 enum class PILLinkage : unsigned char;
 enum IsSerialized_t : unsigned char;
@@ -421,7 +421,7 @@ struct PILDeclRef {
    bool canBeDynamicReplacement() const;
 
 private:
-   friend struct llvm::DenseMapInfo<polar::pil::PILDeclRef>;
+   friend struct llvm::DenseMapInfo<polar::PILDeclRef>;
    /// Produces a PILDeclRef from an opaque value.
    explicit PILDeclRef(void *opaqueLoc,
                        Kind kind,
@@ -448,8 +448,8 @@ inline llvm::raw_ostream &operator<<(llvm::raw_ostream &OS, PILDeclRef C) {
 namespace llvm {
 
 // DenseMap key support for PILDeclRef.
-template<> struct DenseMapInfo<polar::pil::PILDeclRef> {
-   using PILDeclRef = polar::pil::PILDeclRef;
+template<> struct DenseMapInfo<polar::PILDeclRef> {
+   using PILDeclRef = polar::PILDeclRef;
    using Kind = PILDeclRef::Kind;
    using Loc = PILDeclRef::Loc;
    using PointerInfo = DenseMapInfo<void*>;
@@ -463,7 +463,7 @@ template<> struct DenseMapInfo<polar::pil::PILDeclRef> {
       return PILDeclRef(PointerInfo::getTombstoneKey(), Kind::Func,
                         false, false, false, 0);
    }
-   static unsigned getHashValue(polar::pil::PILDeclRef Val) {
+   static unsigned getHashValue(polar::PILDeclRef Val) {
       unsigned h1 = PointerInfo::getHashValue(Val.loc.getOpaqueValue());
       unsigned h2 = UnsignedInfo::getHashValue(unsigned(Val.kind));
       unsigned h3 = (Val.kind == Kind::DefaultArgGenerator)
@@ -473,8 +473,8 @@ template<> struct DenseMapInfo<polar::pil::PILDeclRef> {
       unsigned h5 = UnsignedInfo::getHashValue(Val.isDirectReference);
       return h1 ^ (h2 << 4) ^ (h3 << 9) ^ (h4 << 7) ^ (h5 << 11);
    }
-   static bool isEqual(polar::pil::PILDeclRef const &LHS,
-                       polar::pil::PILDeclRef const &RHS) {
+   static bool isEqual(polar::PILDeclRef const &LHS,
+                       polar::PILDeclRef const &RHS) {
       return LHS == RHS;
    }
 };

@@ -15,7 +15,7 @@
 
 #include "polarphp/pil/lang/PILValue.h"
 
-namespace polar::pil {
+namespace polar {
 
 /// Attempt to merge the ValueOwnershipKind of the passed in range's
 /// PILValues. Returns Optional<None> if we found an incompatibility.
@@ -24,6 +24,6 @@ namespace polar::pil {
 /// dependent operands.
 Optional<ValueOwnershipKind> mergePILValueOwnership(ArrayRef<PILValue> values);
 
-} // namespace polar::pil
+} // namespace polar
 
 #endif

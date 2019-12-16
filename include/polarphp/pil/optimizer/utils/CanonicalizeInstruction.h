@@ -30,7 +30,7 @@
 #include "polarphp/pil/lang/PILInstruction.h"
 #include "llvm/Support/Debug.h"
 
-namespace polar::pil {
+namespace polar {
 
 /// Abstract base class. Implements all canonicalization transforms. Extended by
 /// passes to be notified of each PIL modification.
@@ -82,6 +82,6 @@ struct CanonicalizeInstruction {
    virtual void notifyHasNewUsers(PILValue value) = 0;
 };
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif // POLARPHP_PIL_OPTIMIZER_UTILS_CANONICALIZEINSTRUCTION_H

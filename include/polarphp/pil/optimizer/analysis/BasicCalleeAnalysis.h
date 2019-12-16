@@ -25,7 +25,7 @@
 #include "llvm/ADT/TinyPtrVector.h"
 #include "llvm/Support/Allocator.h"
 
-namespace polar::pil {
+namespace polar {
 
 class ClassDecl;
 class PILFunction;
@@ -186,6 +186,6 @@ public:
    }
 };
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif

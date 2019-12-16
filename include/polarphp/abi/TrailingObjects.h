@@ -62,7 +62,7 @@
 #include <new>
 #include <type_traits>
 
-namespace polar::abi {
+namespace polar {
 
 namespace trailing_objects_internal {
 /// Helper template to calculate the max alignment requirement for a set of
@@ -385,6 +385,6 @@ public:
    };
 };
 
-} // end namespace polar::abi
+} // end namespace polar
 
 #endif

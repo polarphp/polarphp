@@ -128,7 +128,7 @@
 #include "polarphp/pil/lang/PILFunction.h"
 #include "llvm/Support/raw_ostream.h"
 
-namespace polar::pil {
+namespace polar {
 
 /// A loop region is a data structure which represents one of a basic block,
 /// loop, or function.
@@ -1091,6 +1091,6 @@ public:
    }
 };
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif

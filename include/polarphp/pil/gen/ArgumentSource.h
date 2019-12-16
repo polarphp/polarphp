@@ -26,7 +26,7 @@
 #include "polarphp/pil/gen/RValue.h"
 #include "polarphp/pil/gen/LValue.h"
 
-namespace polar::pil {
+namespace polar {
 namespace lowering {
 class Conversion;
 
@@ -366,6 +366,6 @@ public:
 };
 
 } // end namespace lowering
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif // POLARPHP_PIL_GEN_ARGUMENTSOURCE_H

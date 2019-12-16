@@ -25,7 +25,7 @@
 #include "polarphp/pil/lang/PILAllocated.h"
 #include "polarphp/pil/lang//PILLocation.h"
 
-namespace polar::pil {
+namespace polar {
 
 class PILDebugLocation;
 class PILDebugScope;
@@ -89,6 +89,6 @@ public:
    const PILDebugScope *getOrCreateClonedScope(const PILDebugScope *OrigScope);
 };
 
-} // polar::pil
+} // polar
 
 #endif

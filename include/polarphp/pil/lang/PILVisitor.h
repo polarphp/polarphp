@@ -22,7 +22,7 @@
 #include "polarphp/pil/lang/PILUndef.h"
 #include "llvm/Support/ErrorHandling.h"
 
-namespace polar::pil {
+namespace polar {
 
 /// A helper class for all the PIL visitors.
 /// You probably shouldn't use this directly.
@@ -157,6 +157,6 @@ public:
    }
 };
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif

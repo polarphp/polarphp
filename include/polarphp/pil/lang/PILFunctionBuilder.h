@@ -16,7 +16,7 @@
 #include "polarphp/ast/Availability.h"
 #include "polarphp/pil/lang/PILModule.h"
 
-namespace polar::pil {
+namespace polar {
 
 class PILParserFunctionBuilder;
 class PILSerializationFunctionBuilder;
@@ -115,6 +115,6 @@ class PILFunctionBuilder {
    }
 };
 
-} // namespace polar::pil
+} // namespace polar
 
 #endif

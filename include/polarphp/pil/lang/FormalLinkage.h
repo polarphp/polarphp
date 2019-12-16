@@ -17,7 +17,7 @@ namespace polar::ast {
 class ValueDecl;
 }
 
-namespace polar::pil {
+namespace polar {
 
 class CanType;
 class RootInterfaceConformance;

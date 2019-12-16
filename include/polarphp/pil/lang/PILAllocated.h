@@ -18,7 +18,7 @@
 #include "llvm/Support/ErrorHandling.h"
 #include <stddef.h>
 
-namespace polar::pil {
+namespace polar {
 
 class PILModule;
 
@@ -45,6 +45,6 @@ public:
    }
 };
 
-} // end polar::pil namespace
+} // end polar namespace
 
 #endif

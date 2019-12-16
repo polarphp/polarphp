@@ -18,7 +18,7 @@
 #include "polarphp/pil/lang/PILFunction.h"
 #include "polarphp/pil/lang/PILValue.h"
 
-namespace polar::pil {
+namespace polar {
 
 class PILBasicBlock;
 class PILModule;
@@ -403,6 +403,6 @@ inline bool PILArgument::getSingleTerminatorOperands(
    llvm_unreachable("Covered switch is not covered?!");
 }
 
-} // end polar::pil namespace
+} // end polar namespace
 
 #endif

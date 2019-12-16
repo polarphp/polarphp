@@ -41,7 +41,7 @@ class Identifier;
 class AvailabilityContext;
 }
 
-namespace polar::pil {
+namespace polar {
 
 class PILInstruction;
 class PILModule;
@@ -1107,7 +1107,7 @@ inline llvm::raw_ostream &operator<<(llvm::raw_ostream &OS,
    return OS;
 }
 
-} // end polar::pil namespace
+} // end polar namespace
 
 //===----------------------------------------------------------------------===//
 // ilist_traits for PILFunction
@@ -1116,9 +1116,9 @@ inline llvm::raw_ostream &operator<<(llvm::raw_ostream &OS,
 namespace llvm {
 
 template <>
-struct ilist_traits<::polar::pil::PILFunction> :
-   public ilist_node_traits<::polar::pil::PILFunction> {
-   using PILFunction = ::polar::pil::PILFunction;
+struct ilist_traits<::polar::PILFunction> :
+   public ilist_node_traits<::polar::PILFunction> {
+   using PILFunction = ::polar::PILFunction;
 
 public:
    static void deleteNode(PILFunction *V) { V->~PILFunction(); }

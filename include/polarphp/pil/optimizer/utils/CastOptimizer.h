@@ -27,7 +27,7 @@
 #include <functional>
 #include <utility>
 
-namespace polar::pil {
+namespace polar {
 
 class PILOptFunctionBuilder;
 struct PILDynamicCastInst;
@@ -148,6 +148,6 @@ public:
                                        MetatypeRepresentation representation);
 };
 
-} // namespace polar::pil
+} // namespace polar
 
 #endif // POLARPHP_PIL_OPTIMIZER_UTILS_CASTOPTIMIZER_H

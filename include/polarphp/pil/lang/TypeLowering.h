@@ -36,7 +36,7 @@ class ModuleDecl;
 class AnyFunctionRef;
 }
 
-namespace polar::pil {
+namespace polar {
 
 enum class Bridgeability : unsigned;
 class ForeignErrorConvention;
@@ -1083,32 +1083,32 @@ private:
 } // namespace swift
 
 namespace llvm {
-template<> struct DenseMapInfo<polar::pil::lowering::TypeConverter::CachingTypeKey> {
-   using CachingTypeKey = polar::pil::lowering::TypeConverter::CachingTypeKey;
+template<> struct DenseMapInfo<polar::lowering::TypeConverter::CachingTypeKey> {
+   using CachingTypeKey = polar::lowering::TypeConverter::CachingTypeKey;
 
-   using APCachingKey = polar::pil::lowering::AbstractionPattern::CachingKey;
+   using APCachingKey = polar::lowering::AbstractionPattern::CachingKey;
    using CachingKeyInfo = DenseMapInfo<APCachingKey>;
 
-   using CanTypeInfo = DenseMapInfo<polar::pil::CanType>;
+   using CanTypeInfo = DenseMapInfo<polar::CanType>;
 
    // Use the second field because the first field can validly be null.
    static CachingTypeKey getEmptyKey() {
       return {nullptr, APCachingKey(), CanTypeInfo::getEmptyKey(),
-              polar::pil::TypeExpansionContext::minimal()};
+              polar::TypeExpansionContext::minimal()};
    }
    static CachingTypeKey getTombstoneKey() {
       return {nullptr, APCachingKey(), CanTypeInfo::getTombstoneKey(),
-              polar::pil::TypeExpansionContext::minimal()};
+              polar::TypeExpansionContext::minimal()};
    }
    static unsigned getHashValue(CachingTypeKey val) {
       auto hashSig =
-         DenseMapInfo<polar::pil::GenericSignature>::getHashValue(val.Sig);
+         DenseMapInfo<polar::GenericSignature>::getHashValue(val.Sig);
       auto hashOrig =
          CachingKeyInfo::getHashValue(val.OrigType);
       auto hashSubst =
-         DenseMapInfo<polar::pil::CanType>::getHashValue(val.SubstType);
+         DenseMapInfo<polar::CanType>::getHashValue(val.SubstType);
       auto hashContext =
-         DenseMapInfo<polar::pil::TypeExpansionContext>::getHashValue(
+         DenseMapInfo<polar::TypeExpansionContext>::getHashValue(
             val.expansionContext);
       return hash_combine(hashSig, hashOrig, hashSubst, hashContext);
    }
@@ -1117,10 +1117,10 @@ template<> struct DenseMapInfo<polar::pil::lowering::TypeConverter::CachingTypeK
    }
 };
 
-template<> struct DenseMapInfo<polar::pil::lowering::TypeConverter::OverrideKey> {
-   using OverrideKey = polar::pil::lowering::TypeConverter::OverrideKey;
+template<> struct DenseMapInfo<polar::lowering::TypeConverter::OverrideKey> {
+   using OverrideKey = polar::lowering::TypeConverter::OverrideKey;
 
-   using PILDeclRefInfo = DenseMapInfo<polar::pil::PILDeclRef>;
+   using PILDeclRefInfo = DenseMapInfo<polar::PILDeclRef>;
 
    static OverrideKey getEmptyKey() {
       return {PILDeclRefInfo::getEmptyKey(), PILDeclRefInfo::getEmptyKey()};

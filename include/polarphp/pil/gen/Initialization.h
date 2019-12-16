@@ -23,7 +23,7 @@
 #include "llvm/ADT/TinyPtrVector.h"
 #include <memory>
 
-namespace polar::pil::lowering {
+namespace polar::lowering {
 
 class PILGenFunction;
 class Initialization;
@@ -300,6 +300,6 @@ public:
    void finishUninitialized(PILGenFunction &SGF) override;
 };
 
-} // end namespace polar::pil::lowering
+} // end namespace polar::lowering
 
 #endif // POLARPHP_PIL_GEN_INITIALIZATION_H

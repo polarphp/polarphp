@@ -41,7 +41,7 @@
 #include "llvm/Support/Debug.h"
 #include <utility>
 
-namespace polar::pil {
+namespace polar {
 
 class LSBase;
 class LSLocation;
@@ -387,7 +387,7 @@ static inline llvm::hash_code hash_value(const LSLocation &L) {
    return llvm::hash_combine(hash_value((LSBase)L));
 }
 
-} // end polar::pil namespace
+} // end polar namespace
 
 /// LSLocation and LSValue are used in DenseMap.
 namespace llvm {

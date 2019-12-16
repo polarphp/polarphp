@@ -44,7 +44,7 @@
 #include "polarphp/pil/lang/PILInstruction.h"
 #include "llvm/ADT/DenseMap.h"
 
-namespace polar::pil {
+namespace polar {
 
 // stripAddressAccess() is declared in InstructionUtils.h.
 
@@ -402,7 +402,7 @@ template <> struct DenseMapInfo<swift::AccessedStorage> {
 
 } // end namespace llvm
 
-namespace polar::pil {
+namespace polar {
 
 /// Abstract CRTP class for a visitor passed to \c visitAccessUseDefChain.
 template<typename Impl, typename Result = void>

@@ -21,7 +21,7 @@
 #include "swift/PIL/PILLocation.h"
 #include "swift/PIL/PILValue.h"
 
-namespace polar::pil {
+namespace polar {
 
 class PILBuilder;
 

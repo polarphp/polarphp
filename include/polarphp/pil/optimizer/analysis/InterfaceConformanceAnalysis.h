@@ -25,7 +25,7 @@
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/Support/Debug.h"
 
-namespace polar::pil {
+namespace polar {
 
 class PILModule;
 class NominalTypeDecl;
@@ -97,5 +97,5 @@ private:
    SoleConformingTypeMap SoleConformingTypeCache;
 };
 
-} // namespace polar::pil
+} // namespace polar
 #endif

@@ -27,7 +27,7 @@
 #include <algorithm>
 #include <tuple>
 
-namespace polar::pil {
+namespace polar {
 
 /// A visitor class for visiting the instructions and basic block
 /// arguments of a PIL function one strongly connected component at a
@@ -213,6 +213,6 @@ private:
    }
 };
 
-} // polar::pil
+} // polar
 
 #endif // POLARPHP_PIL_OPTIMIZER_UTILS_SCCVISITOR_H

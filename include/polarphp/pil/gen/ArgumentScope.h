@@ -17,7 +17,7 @@
 #include "polarphp/pil/gen/PILGenFunction.h"
 #include "polarphp/pil/gen/Scope.h"
 
-namespace polar::pil::lowering {
+namespace polar::lowering {
 
 /// A scope that is created before arguments are emitted for an apply and is
 /// popped manually immediately after the raw apply is emitted and before the
@@ -70,6 +70,6 @@ private:
   }
 };
 
-} // end namespace polar::pil::lowering
+} // end namespace polar::lowering
 
 #endif // POLARPHP_PIL_GEN_ARGUMENTSCOPE_HScope.h

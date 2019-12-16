@@ -54,7 +54,7 @@ class Output;
 } // end namespace yaml
 } // end namespace llvm
 
-namespace polar::pil {
+namespace polar {
 
 class AnyFunctionType;
 class AstContext;
@@ -726,6 +726,6 @@ namespace lowering {
 LLVM_LIBRARY_VISIBILITY bool usesObjCAllocator(ClassDecl *theClass);
 } // namespace lowering
 
-} // namespace polar::pil
+} // namespace polar
 
 #endif

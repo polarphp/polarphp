@@ -32,7 +32,7 @@ namespace clang {
   class ValueDecl;
 }
 
-namespace polar::pil::lowering {
+namespace polar::lowering {
 
 using polar::ast::CanGenericSignature;
 using polar::ast::CanType;
@@ -1047,6 +1047,6 @@ inline llvm::raw_ostream &operator<<(llvm::raw_ostream &out,
   return out;
 }
 
-} // polar::pil::lowering
+} // polar::lowering
 
 #endif

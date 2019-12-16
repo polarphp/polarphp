@@ -27,7 +27,7 @@
 
 extern llvm::cl::opt<bool> EnablePILInliningOfGenerics;
 
-namespace polar::pil {
+namespace polar {
 class SideEffectAnalysis;
 
 // Controls the decision to inline functions with @_semantics, @effect and
@@ -459,6 +459,6 @@ public:
   void dump();
 };
 
-} // end polar::pil namespace
+} // end polar namespace
 
 #endif // POLARPHP_PIL_OPTIMIZER_UTILS_PERFORMANCE_INLINER_UTILS_H

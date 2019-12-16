@@ -22,7 +22,7 @@
 #include "llvm/ADT/SetVector.h"
 #include <functional>
 
-namespace polar::pil {
+namespace polar {
 
 class PILOptFunctionBuilder;
 
@@ -106,6 +106,6 @@ public:
    PILAnalysis::InvalidationKind processWorkList();
 };
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif // POLARPHP_PIL_OPTIMIZER_UTILS_CONSTANTFOLDING_H

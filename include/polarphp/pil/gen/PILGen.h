@@ -25,7 +25,7 @@
 #include "llvm/ADT/DenseMap.h"
 #include <deque>
 
-namespace polar::pil {
+namespace polar {
   class PILBasicBlock;
 
 namespace lowering {
@@ -462,6 +462,6 @@ private:
 };
 
 } // end namespace lowering
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif // POLARPHP_PIL_GEN_PILGEN_H

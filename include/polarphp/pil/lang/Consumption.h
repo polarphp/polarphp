@@ -18,7 +18,7 @@
 #ifndef POLARPHP_PIL_CONSUMPTION_H
 #define POLARPHP_PIL_CONSUMPTION_H
 
-namespace polar::pil {
+namespace polar {
 
 /// Is an operation a "take"?  A take consumes the original value,
 /// leaving it uninitialized.
@@ -82,6 +82,6 @@ inline IsTake_t shouldTakeOnSuccess(CastConsumptionKind kind) {
    llvm_unreachable("covered switch");
 }
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif

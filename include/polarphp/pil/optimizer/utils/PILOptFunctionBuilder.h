@@ -17,7 +17,7 @@
 #include "polarphp/pil/optimizer/passmgr/PassManager.h"
 #include "polarphp/pil/optimizer/passmgr/Transforms.h"
 
-namespace polar::pil {
+namespace polar {
 
 class PILOptFunctionBuilder {
    PILTransform &transform;
@@ -69,6 +69,6 @@ private:
    }
 };
 
-} // namespace polar::pil
+} // namespace polar
 
 #endif

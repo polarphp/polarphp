@@ -15,7 +15,7 @@
 
 #include "polarphp/pil/gen/Initialization.h"
 
-namespace polar::pil::lowering {
+namespace polar::lowering {
 
 /// Internal context information for the PILGenFunction visitor.
 ///
@@ -172,6 +172,6 @@ using ValueProducerRef =
   llvm::function_ref<ManagedValue(PILGenFunction &SGF, PILLocation loc,
                                   SGFContext context)>;
 
-} // end namespace polar::pil::lowering
+} // end namespace polar::lowering
 
 #endif // POLARPHP_PIL_GEN_SGFCONTEXT_H

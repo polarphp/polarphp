@@ -21,7 +21,7 @@
 #include "llvm/ADT/DenseMap.h"
 #include "llvm/Support/Debug.h"
 
-namespace polar::pil {
+namespace polar {
 
 class PILModule;
 class ClassDecl;

@@ -22,7 +22,7 @@
 #include "llvm/ADT/SmallPtrSet.h"
 #include "llvm/ADT/SmallVector.h"
 
-namespace polar::pil {
+namespace polar {
 
 class PILBasicBlock;
 class PILInstruction;
@@ -427,6 +427,6 @@ private:
 bool getUnderlyingBorrowIntroducingValues(
    PILValue inputValue, SmallVectorImpl<BorrowScopeIntroducingValue> &out);
 
-} // namespace polar::pil
+} // namespace polar
 
 #endif

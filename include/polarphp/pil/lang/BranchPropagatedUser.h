@@ -19,7 +19,7 @@
 #include "llvm/ADT/DenseMap.h"
 #include "llvm/Support/PointerLikeTypeTraits.h"
 
-namespace polar::pil {
+namespace polar {
 
 /// This is a class that models normal users and also cond_br users that are
 /// associated with the block in the target block. This is safe to do since in
@@ -122,7 +122,7 @@ private:
   }
 };
 
-} // namespace polar::pil
+} // namespace polar
 
 namespace llvm {
 

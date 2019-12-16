@@ -21,7 +21,7 @@
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/Support/Debug.h"
 
-namespace polar::pil {
+namespace polar {
 
 class IVInfo : public SCCVisitor<IVInfo> {
 public:
@@ -100,6 +100,6 @@ public:
    }
 };
 
-} // polar::pil
+} // polar
 
 #endif // POLARPHP_PIL_OPTIMIZER_ANALYSIS_IVANALYSIS_H

@@ -52,6 +52,6 @@ PILBasicBlock::iterator replaceAllSimplifiedUsesAndErase(
 /// In case when a simplification is not possible, a null PILValue is returned.
 PILValue simplifyOverflowBuiltinInstruction(BuiltinInst *BI);
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif // POLARPHP_PIL_OPTIMIZER_ANALYSIS_SIMPLIFYINSTRUCTION_H

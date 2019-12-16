@@ -35,7 +35,7 @@ class InterfaceConformance;
 class RootInterfaceConformance;
 }
 
-namespace polar::pil {
+namespace polar {
 
 class PILFunction;
 class PILModule;

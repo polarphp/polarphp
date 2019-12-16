@@ -23,7 +23,7 @@
 #include "polarphp/basic/LLVM.h"
 #include <type_traits>
 
-namespace polar::pil {
+namespace polar {
 
 class PILBasicBlock;
 class PILFunction;
@@ -533,43 +533,43 @@ struct cast_sil_node<To, /*single value*/ false, /*unambiguous*/ false> {
    }
 };
 
-} // end namespace polar::pil
+} // end namespace polar
 
 namespace llvm {
 
 /// Completely take over cast<>'ing from PILNode*.  A static_cast to
 /// ValueBase* or PILInstruction* can be quite wrong.
 template <class To>
-struct cast_convert_val<To, polar::pil::PILNode*, polar::pil::PILNode*> {
-   using ret_type = typename cast_retty<To, polar::pil::PILNode*>::ret_type;
-   static ret_type doit(polar::pil::PILNode *node) {
-      return polar::pil::cast_sil_node<To>::doit(node);
+struct cast_convert_val<To, polar::PILNode*, polar::PILNode*> {
+   using ret_type = typename cast_retty<To, polar::PILNode*>::ret_type;
+   static ret_type doit(polar::PILNode *node) {
+      return polar::cast_sil_node<To>::doit(node);
    }
 };
 template <class To>
-struct cast_convert_val<To, const polar::pil::PILNode *, const polar::pil::PILNode *> {
-   using ret_type = typename cast_retty<To, const polar::pil::PILNode*>::ret_type;
-   static ret_type doit(const polar::pil::PILNode *node) {
-      return polar::pil::cast_sil_node<To>::doit(const_cast<polar::pil::PILNode*>(node));
+struct cast_convert_val<To, const polar::PILNode *, const polar::PILNode *> {
+   using ret_type = typename cast_retty<To, const polar::PILNode*>::ret_type;
+   static ret_type doit(const polar::PILNode *node) {
+      return polar::cast_sil_node<To>::doit(const_cast<polar::PILNode*>(node));
    }
 };
 
 // We don't support casting from PILNode references yet.
 template <class To, class From>
-struct cast_convert_val<To, polar::pil::PILNode, From>;
+struct cast_convert_val<To, polar::PILNode, From>;
 template <class To, class From>
-struct cast_convert_val<To, const polar::pil::PILNode, From>;
+struct cast_convert_val<To, const polar::PILNode, From>;
 
 /// ValueBase * is always at least eight-byte aligned; make the three tag bits
 /// available through PointerLikeTypeTraits.
 template<>
-struct PointerLikeTypeTraits<polar::pil::PILNode *> {
+struct PointerLikeTypeTraits<polar::PILNode *> {
 public:
-   static inline void *getAsVoidPointer(polar::pil::PILNode *I) {
+   static inline void *getAsVoidPointer(polar::PILNode *I) {
       return (void*)I;
    }
-   static inline polar::pil::PILNode *getFromVoidPointer(void *P) {
-      return (polar::pil::PILNode *)P;
+   static inline polar::PILNode *getFromVoidPointer(void *P) {
+      return (polar::PILNode *)P;
    }
    enum { NumLowBitsAvailable = 3 };
 };

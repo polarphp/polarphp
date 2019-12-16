@@ -19,7 +19,7 @@
 #include "llvm/ADT/SmallVector.h"
 #include <memory>
 
-namespace polar::pil {
+namespace polar {
 
 class PILNode;
 class ModuleDecl;
@@ -260,6 +260,6 @@ struct DeleteNotificationHandler {
   virtual bool needsNotifications() { return false; }
 };
 
-} // namespace polar::pil
+} // namespace polar
 
 #endif

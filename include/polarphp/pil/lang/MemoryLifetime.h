@@ -20,7 +20,7 @@
 #include "polarphp/pil/lang/PILBasicBlock.h"
 #include "polarphp/pil/lang/PILFunction.h"
 
-namespace polar::pil {
+namespace polar {
 
 void printBitsAsArray(llvm::raw_ostream &OS, const SmallBitVector &bits);
 
@@ -422,6 +422,6 @@ public:
 /// Verifies the lifetime of memory locations in a function.
 void verifyMemoryLifetime(PILFunction *function);
 
-} // end polar::pil namespace
+} // end polar namespace
 
 #endif

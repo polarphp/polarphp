@@ -20,7 +20,7 @@
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/ADT/TinyPtrVector.h"
 
-namespace polar::pil {
+namespace polar {
 
 class BasicCalleeAnalysis;
 class PILFunction;
@@ -74,6 +74,6 @@ private:
    void FindSCCs(PILModule &M);
 };
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif

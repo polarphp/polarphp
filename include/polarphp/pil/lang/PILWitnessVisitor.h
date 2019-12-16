@@ -26,7 +26,7 @@
 #include "polarphp/pil/lang/TypeLowering.h"
 #include "llvm/Support/ErrorHandling.h"
 
-namespace polar::pil {
+namespace polar {
 
 using namespace polar::ast;
 
@@ -170,6 +170,6 @@ public:
   }
 };
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif

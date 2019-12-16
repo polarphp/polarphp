@@ -30,7 +30,7 @@
 #include "polarphp/pil/optimizer/passmgr/Passes.h"
 #include <vector>
 
-namespace polar::pil {
+namespace polar {
 
 class PILPassPipelinePlan;
 struct PILPassPipeline;
@@ -127,6 +127,6 @@ PILPassPipelinePlan::getPipelinePasses(const PILPassPipeline &P) const {
           std::next(Kinds.begin(), PipelineStages[ID + 1].KindOffset)};
 }
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif

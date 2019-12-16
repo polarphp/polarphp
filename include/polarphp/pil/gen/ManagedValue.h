@@ -25,7 +25,7 @@
 #include "polarphp/pil/lang/Consumption.h"
 #include "polarphp/pil/lang/PILValue.h"
 
-namespace polar::pil {
+namespace polar {
 
 enum class CastConsumptionKind : unsigned char;
 
@@ -442,11 +442,11 @@ public:
 };
 
 } // namespace lowering
-} // namespace polar::pil
+} // namespace polar
 
 namespace polar {
 
-template <typename To> inline bool isa(const polar::pil::lowering::ManagedValue &M) {
+template <typename To> inline bool isa(const polar::lowering::ManagedValue &M) {
    return isa<To>(M.getValue());
 }
 

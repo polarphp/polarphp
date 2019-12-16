@@ -24,7 +24,7 @@
 #include "polarphp/pil/lang/PILBasicBlock.h"
 #include "polarphp/pil/lang/PILInstruction.h"
 
-namespace polar::pil {
+namespace polar {
 
 //===----------------------------------------------------------------------===//
 //                                 ApplySite
@@ -540,59 +540,59 @@ public:
    }
 };
 
-} // namespace polar::pil
+} // namespace polar
 
 namespace llvm {
 
 // An ApplySite casts like a PILInstruction*.
-template <> struct simplify_type<const ::polar::pil::ApplySite> {
-   using SimpleType = ::polar::pil::PILInstruction *;
-   static SimpleType getSimplifiedValue(const ::polar::pil::ApplySite &Val) {
+template <> struct simplify_type<const ::polar::ApplySite> {
+   using SimpleType = ::polar::PILInstruction *;
+   static SimpleType getSimplifiedValue(const ::polar::ApplySite &Val) {
       return Val.getInstruction();
    }
 };
 template <>
-struct simplify_type<::polar::pil::ApplySite>
-   : public simplify_type<const ::polar::pil::ApplySite> {};
+struct simplify_type<::polar::ApplySite>
+   : public simplify_type<const ::polar::ApplySite> {};
 template <>
-struct simplify_type<::polar::pil::FullApplySite>
-   : public simplify_type<const ::polar::pil::ApplySite> {};
+struct simplify_type<::polar::FullApplySite>
+   : public simplify_type<const ::polar::ApplySite> {};
 template <>
-struct simplify_type<const ::polar::pil::FullApplySite>
-   : public simplify_type<const ::polar::pil::ApplySite> {};
+struct simplify_type<const ::polar::FullApplySite>
+   : public simplify_type<const ::polar::ApplySite> {};
 
-template <> struct DenseMapInfo<::polar::pil::ApplySite> {
-   static ::polar::pil::ApplySite getEmptyKey() {
-      return ::polar::pil::ApplySite::getFromOpaqueValue(
+template <> struct DenseMapInfo<::polar::ApplySite> {
+   static ::polar::ApplySite getEmptyKey() {
+      return ::polar::ApplySite::getFromOpaqueValue(
          llvm::DenseMapInfo<void *>::getEmptyKey());
    }
-   static ::polar::pil::ApplySite getTombstoneKey() {
-      return ::polar::pil::ApplySite::getFromOpaqueValue(
+   static ::polar::ApplySite getTombstoneKey() {
+      return ::polar::ApplySite::getFromOpaqueValue(
          llvm::DenseMapInfo<void *>::getTombstoneKey());
    }
-   static unsigned getHashValue(::polar::pil::ApplySite AS) {
+   static unsigned getHashValue(::polar::ApplySite AS) {
       auto *I = AS.getInstruction();
-      return DenseMapInfo<::polar::pil::PILInstruction *>::getHashValue(I);
+      return DenseMapInfo<::polar::PILInstruction *>::getHashValue(I);
    }
-   static bool isEqual(::polar::pil::ApplySite LHS, ::polar::pil::ApplySite RHS) {
+   static bool isEqual(::polar::ApplySite LHS, ::polar::ApplySite RHS) {
       return LHS == RHS;
    }
 };
 
-template <> struct DenseMapInfo<::polar::pil::FullApplySite> {
-   static ::polar::pil::FullApplySite getEmptyKey() {
-      return ::polar::pil::FullApplySite::getFromOpaqueValue(
+template <> struct DenseMapInfo<::polar::FullApplySite> {
+   static ::polar::FullApplySite getEmptyKey() {
+      return ::polar::FullApplySite::getFromOpaqueValue(
          llvm::DenseMapInfo<void *>::getEmptyKey());
    }
-   static ::polar::pil::FullApplySite getTombstoneKey() {
-      return ::polar::pil::FullApplySite::getFromOpaqueValue(
+   static ::polar::FullApplySite getTombstoneKey() {
+      return ::polar::FullApplySite::getFromOpaqueValue(
          llvm::DenseMapInfo<void *>::getTombstoneKey());
    }
-   static unsigned getHashValue(::polar::pil::FullApplySite AS) {
+   static unsigned getHashValue(::polar::FullApplySite AS) {
       auto *I = AS.getInstruction();
-      return DenseMapInfo<::polar::pil::PILInstruction *>::getHashValue(I);
+      return DenseMapInfo<::polar::PILInstruction *>::getHashValue(I);
    }
-   static bool isEqual(::polar::pil::FullApplySite LHS, ::polar::pil::FullApplySite RHS) {
+   static bool isEqual(::polar::FullApplySite LHS, ::polar::FullApplySite RHS) {
       return LHS == RHS;
    }
 };

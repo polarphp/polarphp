@@ -16,7 +16,7 @@
 #include "polarphp/pil/optimizer/analysis/Analysis.h"
 #include "llvm/ADT/DenseMap.h"
 
-namespace polar::pil {
+namespace polar {
 
 /// This analysis determines memory effects during destruction.
 class DestructorAnalysis : public SILAnalysis {
@@ -63,6 +63,6 @@ protected:
    ASTContext &getASTContext();
 };
 
-} // polar::pil
+} // polar
 
 #endif // POLARPHP_PIL_OPTIMIZER_ANALYSIS_DESTRUCTORANALYSIS_H

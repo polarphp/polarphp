@@ -24,7 +24,7 @@
 #ifndef POLARPHP_PIL_OPTIMIZER_PASSMANAGER_PASSMANAGER_H
 #define POLARPHP_PIL_OPTIMIZER_PASSMANAGER_PASSMANAGER_H
 
-namespace polar::pil {
+namespace polar {
 
 class PILFunction;
 class PILFunctionTransform;
@@ -317,6 +317,6 @@ private:
    void viewCallGraph();
 };
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif // POLARPHP_PIL_OPTIMIZER_PASSMANAGER_PASSMANAGER_H

@@ -23,7 +23,7 @@
 #include "polarphp/pil/lang/PILDebugScope.h"
 #include "polarphp/pil/lang/PILVisitor.h"
 
-namespace polar::pil {
+namespace polar {
 
 /// PILCloner - Abstract PIL visitor which knows how to clone instructions and
 /// whose behavior can be customized by subclasses via the CRTP. This is meant
@@ -2826,6 +2826,6 @@ void PILCloner<ImplClass>::visitKeyPathInst(KeyPathInst *Inst) {
                               opValues, getOpType(Inst->getType())));
 }
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif

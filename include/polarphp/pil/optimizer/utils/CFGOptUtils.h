@@ -30,7 +30,7 @@ namespace llvm {
 template <typename T> class TinyPtrVector;
 }
 
-namespace polar::pil {
+namespace polar {
 
 class DominanceInfo;
 class PILLoop;
@@ -179,6 +179,6 @@ bool mergeBasicBlocks(PILFunction *f);
 bool findAllNonFailureExitBBs(PILFunction *f,
                               llvm::TinyPtrVector<PILBasicBlock *> &bbs);
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif // POLARPHP_PIL_OPTIMIZER_UTILS_CFGOPTUTILS_H

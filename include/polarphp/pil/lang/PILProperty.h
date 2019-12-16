@@ -25,7 +25,7 @@
 #include "llvm/ADT/ilist_node.h"
 #include "llvm/ADT/ilist.h"
 
-namespace polar::pil {
+namespace polar {
 
 class PILPrintContext;
 
@@ -74,7 +74,7 @@ public:
    void verify(const PILModule &M) const;
 };
 
-} // end namespace polar::pil
+} // end namespace polar
 
 namespace llvm {
 
@@ -83,9 +83,9 @@ namespace llvm {
 //===----------------------------------------------------------------------===//
 
 template <>
-struct ilist_traits<::polar::pil::PILProperty>
-   : public ilist_node_traits<::polar::pil::PILProperty> {
-   using PILProperty = ::polar::pil::PILProperty;
+struct ilist_traits<::polar::PILProperty>
+   : public ilist_node_traits<::polar::PILProperty> {
+   using PILProperty = ::polar::PILProperty;
 
 public:
    static void deleteNode(PILProperty *VT) { VT->~PILProperty(); }

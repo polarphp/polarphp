@@ -19,7 +19,7 @@
 
 #include "polarphp/ast/AstVisitor.h"
 
-namespace polar::pil::lowering {
+namespace polar::lowering {
 
 /// Lowering::AstVisitor - This is a specialization of
 /// swift::AstVisitor which works only on resolved nodes and
@@ -85,6 +85,6 @@ template <typename ImplClass,
    typename... Args>
 using ExprVisitor = AstVisitor<ImplClass, ExprRetTy, void, void, void, Args...>;
 
-} // end namespace polar::pil::lowering
+} // end namespace polar::lowering
 
 #endif

@@ -20,7 +20,7 @@
 #include "polarphp/pil/lang/PILInstruction.h"
 #include "polarphp/pil/lang/PILBuilder.h"
 
-namespace polar::pil {
+namespace polar {
 
 /// Computes the lifetime frontier for a given value with respect to a
 /// given set of uses. The lifetime frontier is the list of instructions
@@ -132,6 +132,6 @@ private:
    PILInstruction *findLastUserInBlock(PILBasicBlock *bb);
 };
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif

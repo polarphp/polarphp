@@ -20,7 +20,7 @@
 
 #include "polarphp/basic/LLVM.h"
 
-namespace polar::abi {
+namespace polar {
 
 template <class> class TargetTypeContextDescriptor;
 struct InProcess;
@@ -214,6 +214,6 @@ public:
    static ParsedTypeIdentity parse(const TypeContextDescriptor *type);
 };
 
-} // end namespace polar::abi
+} // end namespace polar
 
 #endif // POLARPHP_ABI_TYPEIDENTITY_H

@@ -29,7 +29,7 @@
 #include "llvm/ADT/ilist.h"
 #include <string>
 
-namespace polar::pil {
+namespace polar {
 
 class InterfaceDecl;
 class PILFunction;
@@ -140,7 +140,7 @@ public:
    void dump() const;
 };
 
-} // end polar::pil namespace
+} // end polar namespace
 
 //===----------------------------------------------------------------------===//
 // ilist_traits for PILDefaultWitnessTable

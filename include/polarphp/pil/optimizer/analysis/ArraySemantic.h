@@ -15,7 +15,7 @@
 
 #include "polarphp/pil/lang/PILInstruction.h"
 
-namespace polar::pil {
+namespace polar {
 
 class DominanceInfo;
 
@@ -193,6 +193,6 @@ protected:
                           bool LeaveOriginal);
 };
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif

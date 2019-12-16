@@ -24,7 +24,7 @@
 #include <cassert>
 #include "polarphp/abi/shims/KeyPath.h
 
-namespace polar::abi {
+namespace polar {
 
 /// Header layout for a key path's data buffer header.
 class KeyPathBufferHeader {
@@ -233,6 +233,6 @@ public:
    constexpr uint32_t getData() const { return Data; }
 };
 
-} // polar::abi
+} // polar
 
 #endif // POLARPHP_ABI_KEYPATH_H

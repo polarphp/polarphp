@@ -20,7 +20,7 @@
 #include "polarphp/abi/shims/PhpStdint.h"
 
 #ifdef __cplusplus
-namespace polar::abi {
+namespace polar {
 extern "C" {
 #endif
 
@@ -117,7 +117,7 @@ static inline const void *_Nonnull __polarphp_keyPathGenericWitnessTable_addr(vo
 
 #ifdef __cplusplus
 } // extern "C"
-} // namespace polar::abi
+} // namespace polar
 #endif
 
 #endif // POLARPHP_ABI_SHIMS_KEYPATH_H

@@ -27,7 +27,7 @@
 #include "polarphp/basic/NullablePtr.h"
 #include "llvm/ADT/SmallVector.h"
 
-namespace polar::pil::lowering {
+namespace polar::lowering {
 
 class ArgumentSource;
 class Initialization;
@@ -335,6 +335,6 @@ public:
    void verify(PILGenFunction &SGF) const &;
 };
 
-} // end namespace polar::pil::lowering
+} // end namespace polar::lowering
 
 #endif // POLARPHP_PIL_GEN_RVALUE_H

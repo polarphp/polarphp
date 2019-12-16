@@ -25,7 +25,7 @@
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Support/Debug.h"
 
-namespace polar::pil {
+namespace polar {
 
    class FunctionSignaturePartialSpecializer;
    class PILOptFunctionBuilder;
@@ -344,6 +344,6 @@ public:
 /// body is not required for further optimization or inlining (-Onone).
    PILFunction *lookupPrespecializedSymbol(PILModule &M, StringRef FunctionName);
 
-} // end namespace polar::pil
+} // end namespace polar
 
 #endif

@@ -18,7 +18,7 @@
 #include "polarphp/pil/lang/PILValue.h"
 #include "llvm/ADT/Optional.h"
 
-namespace polar::pil::lowering {
+namespace polar::lowering {
 
 class PILGenFunction;
 class LogicalPathComponent;
@@ -246,6 +246,6 @@ FormalEvaluationContext::checkCleanupDeactivation(CleanupHandle handle) {
 }
 #endif
 
-} // namespace polar::pil::lowering
+} // namespace polar::lowering
 
 #endif // POLARPHP_PIL_GEN_FORMALEVALUATION_H

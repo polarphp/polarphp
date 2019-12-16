@@ -24,7 +24,7 @@
 #include "polarphp/ast/Types.h"
 #include "polarphp/ast/AstMangler.h"
 
-namespace polar::pil {
+namespace polar {
 
 using polar::ast::AbstractFunctionDecl;
 using polar::ast::ConstructorDecl;
@@ -192,6 +192,6 @@ protected:
   }
 };
 
-} // polar::pil
+} // polar
 
 #endif // POLARPHP_PIL_PILVTABLEVISITOR_H

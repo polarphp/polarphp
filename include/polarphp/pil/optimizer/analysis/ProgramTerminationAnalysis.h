@@ -31,7 +31,7 @@
 #include "polarphp/pil/optimizer/analysis/ARCAnalysis.h"
 #include "llvm/ADT/SmallPtrSet.h"
 
-namespace polar::pil {
+namespace polar {
 
 class ProgramTerminationFunctionInfo {
    llvm::SmallPtrSet<const SILBasicBlock *, 4> ProgramTerminatingBlocks;
@@ -50,6 +50,6 @@ public:
    }
 };
 
-} // end polar::pil namespace
+} // end polar namespace
 
 #endif // POLARPHP_PIL_OPTIMIZER_ANALYSIS_PROGRAMTERMINATIONANALYSIS_HProtocolConformanceAnalysis.h

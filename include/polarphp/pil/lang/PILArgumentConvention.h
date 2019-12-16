@@ -15,7 +15,7 @@
 
 #include "polarphp/ast/Types.h"
 
-namespace polar::pil {
+namespace polar {
 
 using polar::ast::ParameterConvention;
 
@@ -152,6 +152,6 @@ struct PILArgumentConvention {
   }
 };
 
-} // namespace polar::pil
+} // namespace polar
 
 #endif

@@ -33,7 +33,7 @@ class VarDecl;
 
 }
 
-namespace polar::pil {
+namespace polar {
 class PILFunction;
 using polar::ast::VarDecl;
 using polar::ast::AstContext;
@@ -65,9 +65,9 @@ class AbstractionPattern;
 class TypeConverter;
 }
 
-} // end namespace polar::pil
+} // end namespace polar
 
-namespace polar::pil {
+namespace polar {
 
 /// How an existential type container is represented.
 enum class ExistentialRepresentation {
@@ -662,10 +662,10 @@ inline llvm::raw_ostream &operator<<(llvm::raw_ostream &OS, PILType T) {
    return OS;
 }
 
-} // polar::pil
+} // polar
 
 namespace polar::ast {
-using polar::pil::PILType;
+using polar::PILType;
 inline PILType PILBlockStorageType::getCaptureAddressType() const {
    return PILType::getPrimitiveAddressType(getCaptureType());
 }
@@ -683,11 +683,11 @@ inline PILType PILField::getObjectType() const {
 }
 
 CanType getPILBoxFieldLoweredType(TypeExpansionContext context,
-                                  PILBoxType *type, polar::pil::lowering::TypeConverter &TC,
+                                  PILBoxType *type, polar::lowering::TypeConverter &TC,
                                   unsigned index);
 
 inline PILType getPILBoxFieldType(TypeExpansionContext context,
-                                  PILBoxType *type, polar::pil::lowering::TypeConverter &TC,
+                                  PILBoxType *type, polar::lowering::TypeConverter &TC,
                                   unsigned index) {
    return PILType::getPrimitiveAddressType(
       getPILBoxFieldLoweredType(context, type, TC, index));
@@ -700,24 +700,24 @@ namespace llvm {
 // Allow the low bit of PILType to be used for nefarious purposes, e.g. putting
 // a PILType into a PointerUnion.
 template<>
-struct PointerLikeTypeTraits<polar::pil::PILType> {
+struct PointerLikeTypeTraits<polar::PILType> {
 public:
-   static inline void *getAsVoidPointer(polar::pil::PILType T) {
+   static inline void *getAsVoidPointer(polar::PILType T) {
       return T.getOpaqueValue();
    }
-   static inline polar::pil::PILType getFromVoidPointer(void *P) {
-      return polar::pil::PILType::getFromOpaqueValue(P);
+   static inline polar::PILType getFromVoidPointer(void *P) {
+      return polar::PILType::getFromOpaqueValue(P);
    }
    // PILType is just a wrapper around its ValueType, so it has a bit available.
    enum { NumLowBitsAvailable =
-      PointerLikeTypeTraits<polar::pil::PILType::ValueType>::NumLowBitsAvailable };
+      PointerLikeTypeTraits<polar::PILType::ValueType>::NumLowBitsAvailable };
 };
 
 
 // Allow PILType to be used as a DenseMap key.
 template<>
-struct DenseMapInfo<polar::pil::PILType> {
-   using PILType = polar::pil::PILType;
+struct DenseMapInfo<polar::PILType> {
+   using PILType = polar::PILType;
    using PointerMapInfo = DenseMapInfo<void*>;
 public:
    static PILType getEmptyKey() {

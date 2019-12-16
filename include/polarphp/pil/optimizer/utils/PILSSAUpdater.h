@@ -22,7 +22,7 @@ template<typename T> class SSAUpdaterTraits;
 template<typename T> class SmallVectorImpl;
 }
 
-namespace polar::pil {
+namespace polar {
 
 class PILPhiArgument;
 class PILBasicBlock;
@@ -139,5 +139,5 @@ public:
    operator Operand*() { return getOperand(); }
 };
 
-} // end namespace polar::pil
+} // end namespace polar
 #endif
