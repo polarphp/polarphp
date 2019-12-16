@@ -21,13 +21,13 @@
 #include "llvm/ADT/DenseMap.h"
 #include <cassert>
 
-namespace polar::ast {
+namespace polar {
 class Identifier;
 }
 
 namespace polar::llparser {
 
-using polar::ast::Identifier;
+using polar::Identifier;
 
 /// Information associated with parsing a local context.
 class LocalContext {

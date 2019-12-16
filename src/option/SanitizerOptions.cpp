@@ -39,8 +39,6 @@
 
 namespace polar {
 
-using namespace polar;
-using namespace polar;
 using namespace llvm::opt;
 
 static StringRef to_string_ref(const SanitizerKind kind)

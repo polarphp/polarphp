@@ -154,7 +154,7 @@ namespace polar::llparser {
 
 using polar::LangOptions;
 using polar::SourceManager;
-using polar::ast::DiagnosticEngine;
+using polar::DiagnosticEngine;
 using llvm::ArrayRef;
 
 /// Lex and return a vector of tokens for the given buffer.

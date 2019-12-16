@@ -32,15 +32,9 @@
 // split the header upstream so we don't include so much.
 #include "llvm/Transforms/Instrumentation.h"
 
-namespace polar::ast {
-class DiagnosticEngine;
-} // polar::ast
-
 namespace polar {
 
-using polar::SanitizerKind;
-using polar::OptionSet;
-using polar::ast::DiagnosticEngine;
+class DiagnosticEngine;
 
 /// Parses a -sanitize= argument's values.
 ///

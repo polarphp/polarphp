@@ -23,7 +23,7 @@
 #include "polarphp/llparser/Scope.h"
 #include "llvm/ADT/DenseMap.h"
 
-namespace polar::ast {
+namespace polar {
 class SourceFile;
 class DeclContext;
 class IterableDeclContext;
@@ -32,10 +32,10 @@ class IterableDeclContext;
 namespace polar::llparser {
 
 using polar::SourceRange;
-using polar::ast::AstContext;
-using polar::ast::SourceFile;
-using polar::ast::DeclContext;
-using polar::ast::IterableDeclContext;
+using polar::AstContext;
+using polar::SourceFile;
+using polar::DeclContext;
+using polar::IterableDeclContext;
 
 /// Parser state persistent across multiple parses.
 class PersistentParserState {

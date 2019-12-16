@@ -41,7 +41,7 @@ namespace llvm {
 template <typename...  PTs> class PointerUnion;
 }
 
-namespace polar::ast {
+namespace polar {
 class DiagnosticEngine;
 class Expr;
 class DefaultArgumentInitializer;
@@ -50,9 +50,6 @@ struct TypeLoc;
 class ScopeInfo;
 struct EnumElementInfo;
 class SourceFile;
-}
-
-namespace polar {
 class SourceManager;
 }
 
@@ -67,9 +64,6 @@ enum class SyntaxKind;
 //class ParsedTypeSyntax;
 class PersistentParserState;
 class PILParserTUStateBase;
-
-using polar::OptionSet;
-using namespace polar::ast;
 
 // @todo
 //namespace syntax {

@@ -40,9 +40,7 @@
 
 /// forward declare class with namespace
 namespace polar {
-namespace ast {
 class DiagnosticEngine;
-} // ast
 class SourceLoc;
 } // polar
 namespace llvm {
@@ -51,7 +49,7 @@ class raw_ostream;
 
 namespace polar::version {
 
-using polar::ast::DiagnosticEngine;
+using polar::DiagnosticEngine;
 using polar::SourceLoc;
 using llvm::SmallVector;
 using llvm::StringRef;

@@ -31,7 +31,7 @@
 
 namespace polar::llparser {
 
-using polar::kernel::PlatformConditionKind;
+using polar::PlatformConditionKind;
 
 namespace {
 

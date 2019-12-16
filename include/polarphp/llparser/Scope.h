@@ -23,14 +23,14 @@
 #include "polarphp/basic/TreeScopedHashTable.h"
 #include "llvm/ADT/SmallVector.h"
 
-namespace polar::ast {
+namespace polar {
 class ValueDecl;
 }
 
 namespace polar::llparser {
 
-using polar::ast::ValueDecl;
-using polar::ast::DeclName;
+using polar::ValueDecl;
+using polar::DeclName;
 using polar::TreeScopedHashTable;
 class Parser;
 class Scope;

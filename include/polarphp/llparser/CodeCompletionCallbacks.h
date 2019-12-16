@@ -18,7 +18,7 @@
 
 namespace polar::llparser {
 
-using polar::ast::AstContext;
+using polar::AstContext;
 
 enum class ObjCSelectorContext {
    /// Code completion is not performed inside #selector
