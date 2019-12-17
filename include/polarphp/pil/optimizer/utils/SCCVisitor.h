@@ -15,6 +15,7 @@
 
 #include "polarphp/pil/optimizer/analysis/Analysis.h"
 #include "polarphp/pil/lang/PILBasicBlockCFG.h"
+#include "polarphp/pil/lang/PILFunctionCFG.h"
 #include "polarphp/pil/lang/PILArgument.h"
 #include "polarphp/pil/lang/PILBasicBlock.h"
 #include "polarphp/pil/lang/PILFunction.h"

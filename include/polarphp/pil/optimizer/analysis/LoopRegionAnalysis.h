@@ -122,7 +122,7 @@
 #include "polarphp/basic/StlExtras.h"
 #include "polarphp/pil/optimizer/analysis/PostOrderAnalysis.h"
 #include "polarphp/pil/optimizer/analysis/LoopAnalysis.h"
-#include "polarphp/pil/optimizer/PassManager/PassManager.h"
+#include "polarphp/pil/optimizer/passmgr/PassManager.h"
 #include "polarphp/pil/lang/LoopInfo.h"
 #include "polarphp/pil/lang/PILBasicBlock.h"
 #include "polarphp/pil/lang/PILFunction.h"
@@ -160,7 +160,7 @@ class LoopRegion {
       bool operator<(const SubregionID &Other) const { return ID < Other.ID; }
    };
    /// These checks are just for performance.
-   static_assert(IsTriviallyCopyable<SubregionID>::value,
+   static_assert(std::is_trivially_copyable_v<SubregionID>,
                  "Expected trivially copyable type");
 
    struct SubregionData;
@@ -232,7 +232,7 @@ public:
       };
    };
    // These checks are just for performance.
-   static_assert(IsTriviallyCopyable<SuccessorID>::value,
+   static_assert(std::is_trivially_copyable_v<SuccessorID>,
                  "Expected trivially copyable type");
 
    /// An iterator that knows how to iterate over the subregion indices of a
@@ -818,15 +818,15 @@ private:
    }
 };
 
-} // end swift namespace
+} // end polar namespace
 
 namespace llvm {
 
-raw_ostream &operator<<(raw_ostream &os, swift::LoopRegion &LR);
-raw_ostream &operator<<(raw_ostream &os, swift::LoopRegion::SuccessorID &S);
+raw_ostream &operator<<(raw_ostream &os, polar::LoopRegion &LR);
+raw_ostream &operator<<(raw_ostream &os, polar::LoopRegion::SuccessorID &S);
 
-template <> struct DenseMapInfo<swift::LoopRegion::SuccessorID> {
-   using Type = swift::LoopRegion::SuccessorID;
+template <> struct DenseMapInfo<polar::LoopRegion::SuccessorID> {
+   using Type = polar::LoopRegion::SuccessorID;
 
    static_assert(sizeof(Type) == sizeof(unsigned),
                  "Expected SuccessorID to be the size of an unsigned!");
@@ -836,18 +836,18 @@ template <> struct DenseMapInfo<swift::LoopRegion::SuccessorID> {
    static inline Type getTombstoneKey() {
       return Type(DenseMapInfo<unsigned>::getTombstoneKey());
    }
-   static unsigned getHashValue(const swift::LoopRegion::SuccessorID Val) {
+   static unsigned getHashValue(const polar::LoopRegion::SuccessorID Val) {
       return DenseMapInfo<unsigned>::getHashValue(Val.asInt());
    }
-   static bool isEqual(const swift::LoopRegion::SuccessorID LHS,
-                       const swift::LoopRegion::SuccessorID RHS) {
+   static bool isEqual(const polar::LoopRegion::SuccessorID LHS,
+                       const polar::LoopRegion::SuccessorID RHS) {
       return LHS == RHS;
    }
 };
 
 } // end llvm namespace
 
-namespace swift {
+namespace polar {
 
 class LoopRegionFunctionInfo {
    using RegionTy = LoopRegion;
@@ -1082,8 +1082,8 @@ public:
 
    virtual std::unique_ptr<LoopRegionFunctionInfo>
    newFunctionAnalysis(PILFunction *F) override {
-      return llvm::make_unique<LoopRegionFunctionInfo>(F, POA->get(F),
-                                                       SLA->get(F));
+      return std::make_unique<LoopRegionFunctionInfo>(F, POA->get(F),
+                                                      SLA->get(F));
    }
 
    virtual bool shouldInvalidate(PILAnalysis::InvalidationKind K) override {

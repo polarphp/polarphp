@@ -51,7 +51,7 @@
 #define POLARPHP_PIL_OPTIMIZER_ANALYSIS_CLOSURESCOPE_H
 
 #include "polarphp/basic/BlotSetVector.h"
-#include "polarphp/pil/PILFunction.h"
+#include "polarphp/pil/lang/PILFunction.h"
 #include "polarphp/pil/optimizer/analysis/Analysis.h"
 #include "llvm/ADT/SmallSet.h"
 #include "llvm/ADT/iterator.h"

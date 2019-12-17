@@ -14,7 +14,7 @@
 #define POLARPHP_PIL_OPTIMIZER_ANALYSIS_COLDBLOCKS_H
 
 #include "llvm/ADT/DenseMap.h"
-#include "swift/PIL/PILValue.h"
+#include "polarphp/pil/lang/PILValue.h"
 
 namespace polar {
 class DominanceAnalysis;

@@ -28,7 +28,7 @@
 #include "polarphp/pil/optimizer/analysis/RCIdentityAnalysis.h"
 #include "polarphp/pil/optimizer/passmgr/PassManager.h"
 
-namespace swift {
+namespace polar {
 
 /// EpilogueARCBlockState - Keep track of whether an epilogue ARC instruction
 /// has been found.
@@ -302,7 +302,7 @@ public:
 
   virtual std::unique_ptr<EpilogueARCFunctionInfo>
   newFunctionAnalysis(PILFunction *F) override {
-    return llvm::make_unique<EpilogueARCFunctionInfo>(F, PO, AA, RC);
+    return std::make_unique<EpilogueARCFunctionInfo>(F, PO, AA, RC);
   }
 
   virtual bool shouldInvalidate(PILAnalysis::InvalidationKind K) override {
@@ -311,6 +311,6 @@ public:
 
  };
 
-} // end swift namespace
+} // end polar namespace
 
 #endif

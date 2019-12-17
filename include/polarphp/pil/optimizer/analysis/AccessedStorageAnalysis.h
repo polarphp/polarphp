@@ -101,27 +101,27 @@ public:
 namespace llvm {
 // Use the same DenseMapInfo for StorageAccessInfo as for AccessedStorage. None
 // of the subclass bitfields participate in the Key.
-template <> struct DenseMapInfo<swift::StorageAccessInfo> {
-   static swift::StorageAccessInfo getEmptyKey() {
-      auto key = DenseMapInfo<swift::AccessedStorage>::getEmptyKey();
-      return static_cast<swift::StorageAccessInfo &>(key);
+template <> struct DenseMapInfo<polar::StorageAccessInfo> {
+   static polar::StorageAccessInfo getEmptyKey() {
+      auto key = DenseMapInfo<polar::AccessedStorage>::getEmptyKey();
+      return static_cast<polar::StorageAccessInfo &>(key);
    }
 
-   static swift::StorageAccessInfo getTombstoneKey() {
-      auto key = DenseMapInfo<swift::AccessedStorage>::getTombstoneKey();
-      return static_cast<swift::StorageAccessInfo &>(key);
+   static polar::StorageAccessInfo getTombstoneKey() {
+      auto key = DenseMapInfo<polar::AccessedStorage>::getTombstoneKey();
+      return static_cast<polar::StorageAccessInfo &>(key);
    }
-   static unsigned getHashValue(swift::StorageAccessInfo storage) {
-      return DenseMapInfo<swift::AccessedStorage>::getHashValue(storage);
+   static unsigned getHashValue(polar::StorageAccessInfo storage) {
+      return DenseMapInfo<polar::AccessedStorage>::getHashValue(storage);
    }
-   static bool isEqual(swift::StorageAccessInfo LHS,
-                       swift::StorageAccessInfo RHS) {
-      return DenseMapInfo<swift::AccessedStorage>::isEqual(LHS, RHS);
+   static bool isEqual(polar::StorageAccessInfo LHS,
+                       polar::StorageAccessInfo RHS) {
+      return DenseMapInfo<polar::AccessedStorage>::isEqual(LHS, RHS);
    }
 };
 }
 
-namespace swift {
+namespace polar {
 using AccessedStorageSet = llvm::SmallDenseSet<StorageAccessInfo, 8>;
 
 /// Records each unique AccessedStorage in a set of StorageAccessInfo
@@ -223,9 +223,9 @@ protected:
 
    template <typename B> void visitBeginAccess(B *beginAccess);
 };
-} // namespace swift
+} // namespace polar
 
-namespace swift {
+namespace polar {
 /// The per-function result of AccessedStorageAnalysis.
 class FunctionAccessedStorage {
    AccessedStorageResult accessResult;

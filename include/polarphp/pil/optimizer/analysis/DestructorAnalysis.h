@@ -12,45 +12,45 @@
 #ifndef POLARPHP_PIL_OPTIMIZER_ANALYSIS_DESTRUCTORANALYSIS_H
 #define POLARPHP_PIL_OPTIMIZER_ANALYSIS_DESTRUCTORANALYSIS_H
 
-#include "polarphp/pil/lang/SILValue.h"
+#include "polarphp/pil/lang/PILValue.h"
 #include "polarphp/pil/optimizer/analysis/Analysis.h"
 #include "llvm/ADT/DenseMap.h"
 
 namespace polar {
 
 /// This analysis determines memory effects during destruction.
-class DestructorAnalysis : public SILAnalysis {
-   SILModule *Mod;
+class DestructorAnalysis : public PILAnalysis {
+   PILModule *Mod;
    llvm::DenseMap<CanType, bool> Cached;
 public:
-   DestructorAnalysis(SILModule *M)
-      : SILAnalysis(SILAnalysisKind::Destructor), Mod(M) {}
+   DestructorAnalysis(PILModule *M)
+      : PILAnalysis(PILAnalysisKind::Destructor), Mod(M) {}
 
-   static bool classof(const SILAnalysis *S) {
-      return S->getKind() == SILAnalysisKind::Destructor;
+   static bool classof(const PILAnalysis *S) {
+      return S->getKind() == PILAnalysisKind::Destructor;
    }
 
    /// Returns true if destruction of T may store to memory.
-   bool mayStoreToMemoryOnDestruction(SILType T);
+   bool mayStoreToMemoryOnDestruction(PILType T);
 
    /// No invalidation is needed.
    virtual void invalidate() override {
       // Nothing can invalidate, because types are static and cannot be changed
-      // during the SIL pass pipeline.
+      // during the PIL pass pipeline.
    }
 
    /// No invalidation is needed.
-   virtual void invalidate(SILFunction *F, InvalidationKind K)  override {
+   virtual void invalidate(PILFunction *F, InvalidationKind K)  override {
       // Nothing can invalidate, because types are static and cannot be changed
-      // during the SIL pass pipeline.
+      // during the PIL pass pipeline.
    }
 
    /// Notify the analysis about a newly created function.
-   virtual void notifyAddedOrModifiedFunction(SILFunction *F) override {}
+   virtual void notifyAddedOrModifiedFunction(PILFunction *F) override {}
 
    /// Notify the analysis about a function which will be deleted from the
    /// module.
-   virtual void notifyWillDeleteFunction(SILFunction *F) override {}
+   virtual void notifyWillDeleteFunction(PILFunction *F) override {}
 
    /// Notify the analysis about changed witness or vtables.
    virtual void invalidateFunctionTables() override { }
@@ -58,9 +58,9 @@ public:
 protected:
    bool cacheResult(CanType Type, bool Result);
    bool isSafeType(CanType Ty);
-   bool implementsDestructorSafeContainerProtocol(NominalTypeDecl *NomDecl);
+   bool implementsDestructorSafeContainerInterface(NominalTypeDecl *NomDecl);
    bool areTypeParametersSafe(CanType Ty);
-   ASTContext &getASTContext();
+   AstContext &getAstContext();
 };
 
 } // polar

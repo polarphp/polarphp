@@ -1,4 +1,77 @@
+//===--- FunctionOrder.cpp - Utility for function ordering ----------------===//
 //
-// Created by polarboy on 12/17/19.
+// This source file is part of the Swift.org open source project
 //
+// Copyright (c) 2014 - 2017 Apple Inc. and the Swift project authors
+// Licensed under Apache License v2.0 with Runtime Library Exception
+//
+// See https://swift.org/LICENSE.txt for license information
+// See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
+//
+//===----------------------------------------------------------------------===//
 
+#include "polarphp/pil/optimizer/analysis/FunctionOrder.h"
+#include "polarphp/pil/lang/PILFunction.h"
+#include "polarphp/pil/lang/PILInstruction.h"
+#include "llvm/ADT/SmallVector.h"
+#include <algorithm>
+
+using namespace polar;
+
+/// Use Tarjan's strongly connected components (SCC) algorithm to find
+/// the SCCs in the call graph.
+void BottomUpFunctionOrder::DFS(PILFunction *Start) {
+   // Set the DFSNum for this node if we haven't already, and if we
+   // have, which indicates it's already been visited, return.
+   if (!DFSNum.insert(std::make_pair(Start, NextDFSNum)).second)
+      return;
+
+   assert(MinDFSNum.find(Start) == MinDFSNum.end() &&
+          "Function should not already have a minimum DFS number!");
+
+   MinDFSNum[Start] = NextDFSNum;
+   ++NextDFSNum;
+
+   DFSStack.insert(Start);
+
+   // Visit all the instructions, looking for apply sites.
+   for (auto &B : *Start) {
+      for (auto &I : B) {
+         auto FAS = FullApplySite::isa(&I);
+         if (!FAS && !isa<StrongReleaseInst>(&I) && !isa<ReleaseValueInst>(&I))
+            continue;
+         auto Callees = FAS ? BCA->getCalleeList(FAS) : BCA->getCalleeList(&I);
+         for (auto *CalleeFn : Callees) {
+            // If not yet visited, visit the callee.
+            if (DFSNum.find(CalleeFn) == DFSNum.end()) {
+               DFS(CalleeFn);
+               MinDFSNum[Start] = std::min(MinDFSNum[Start], MinDFSNum[CalleeFn]);
+            } else if (DFSStack.count(CalleeFn)) {
+               // If the callee is on the stack, it update our minimum DFS
+               // number based on it's DFS number.
+               MinDFSNum[Start] = std::min(MinDFSNum[Start], DFSNum[CalleeFn]);
+            }
+         }
+      }
+   }
+
+   // If our DFS number is the minimum found, we've found a
+   // (potentially singleton) SCC, so pop the nodes off the stack and
+   // push the new SCC on our stack of SCCs.
+   if (DFSNum[Start] == MinDFSNum[Start]) {
+      SCC CurrentSCC;
+
+      PILFunction *Popped;
+      do {
+         Popped = DFSStack.pop_back_val();
+         CurrentSCC.push_back(Popped);
+      } while (Popped != Start);
+
+      TheSCCs.push_back(CurrentSCC);
+   }
+}
+
+void BottomUpFunctionOrder::FindSCCs(PILModule &M) {
+   for (auto &F : M)
+      DFS(&F);
+}

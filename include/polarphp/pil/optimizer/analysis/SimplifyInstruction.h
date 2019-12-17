@@ -22,7 +22,7 @@
 #include "polarphp/pil/lang/PILBasicBlock.h"
 #include "polarphp/pil/lang/PILInstruction.h"
 
-namespace swift {
+namespace polar {
 
 class PILInstruction;
 

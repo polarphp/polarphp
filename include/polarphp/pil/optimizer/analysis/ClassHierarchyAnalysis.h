@@ -30,8 +30,8 @@ public:
   typedef SmallVector<ClassDecl *, 8> ClassList;
   typedef SmallPtrSet<ClassDecl *, 32> ClassSet;
   typedef SmallVector<NominalTypeDecl *, 8> NominalTypeList;
-  typedef llvm::DenseMap<ProtocolDecl *, NominalTypeList>
-      ProtocolImplementations;
+  typedef llvm::DenseMap<InterfaceDecl *, NominalTypeList>
+      InterfaceImplementations;
 
   ClassHierarchyAnalysis(PILModule *Mod)
       : PILAnalysis(PILAnalysisKind::ClassHierarchy), M(Mod) {
