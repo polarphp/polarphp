@@ -1601,27 +1601,27 @@ visitThinToThickFunctionInst(ThinToThickFunctionInst *Inst) {
       getOpType(Inst->getType())));
 }
 
-template<typename ImplClass>
-void
-PILCloner<ImplClass>::
-visitThickToObjCMetatypeInst(ThickToObjCMetatypeInst *Inst) {
-   getBuilder().setCurrentDebugScope(getOpScope(Inst->getDebugScope()));
-   recordClonedInstruction(Inst, getBuilder().createThickToObjCMetatype(
-      getOpLocation(Inst->getLoc()),
-      getOpValue(Inst->getOperand()),
-      getOpType(Inst->getType())));
-}
-
-template<typename ImplClass>
-void
-PILCloner<ImplClass>::
-visitObjCToThickMetatypeInst(ObjCToThickMetatypeInst *Inst) {
-   getBuilder().setCurrentDebugScope(getOpScope(Inst->getDebugScope()));
-   recordClonedInstruction(Inst, getBuilder().createObjCToThickMetatype(
-      getOpLocation(Inst->getLoc()),
-      getOpValue(Inst->getOperand()),
-      getOpType(Inst->getType())));
-}
+//template<typename ImplClass>
+//void
+//PILCloner<ImplClass>::
+//visitThickToObjCMetatypeInst(ThickToObjCMetatypeInst *Inst) {
+//   getBuilder().setCurrentDebugScope(getOpScope(Inst->getDebugScope()));
+//   recordClonedInstruction(Inst, getBuilder().createThickToObjCMetatype(
+//      getOpLocation(Inst->getLoc()),
+//      getOpValue(Inst->getOperand()),
+//      getOpType(Inst->getType())));
+//}
+//
+//template<typename ImplClass>
+//void
+//PILCloner<ImplClass>::
+//visitObjCToThickMetatypeInst(ObjCToThickMetatypeInst *Inst) {
+//   getBuilder().setCurrentDebugScope(getOpScope(Inst->getDebugScope()));
+//   recordClonedInstruction(Inst, getBuilder().createObjCToThickMetatype(
+//      getOpLocation(Inst->getLoc()),
+//      getOpValue(Inst->getOperand()),
+//      getOpType(Inst->getType())));
+//}
 
 template<typename ImplClass>
 void
@@ -2782,26 +2782,26 @@ void PILCloner<ImplClass>::visitInitBlockStorageHeaderInst(
          getOpValue(Inst->getInvokeFunction()), getOpType(Inst->getType()),
          getOpSubstitutionMap(Inst->getSubstitutions())));
 }
-
-template <typename ImplClass>
-void PILCloner<ImplClass>::visitObjCMetatypeToObjectInst(
-   ObjCMetatypeToObjectInst *Inst) {
-   getBuilder().setCurrentDebugScope(getOpScope(Inst->getDebugScope()));
-   recordClonedInstruction(Inst, getBuilder().createObjCMetatypeToObject(
-      getOpLocation(Inst->getLoc()),
-      getOpValue(Inst->getOperand()),
-      getOpType(Inst->getType())));
-}
-
-template <typename ImplClass>
-void PILCloner<ImplClass>::visitObjCExistentialMetatypeToObjectInst(
-   ObjCExistentialMetatypeToObjectInst *Inst) {
-   getBuilder().setCurrentDebugScope(getOpScope(Inst->getDebugScope()));
-   recordClonedInstruction(
-      Inst, getBuilder().createObjCExistentialMetatypeToObject(
-         getOpLocation(Inst->getLoc()), getOpValue(Inst->getOperand()),
-         getOpType(Inst->getType())));
-}
+// @todo
+//template <typename ImplClass>
+//void PILCloner<ImplClass>::visitObjCMetatypeToObjectInst(
+//   ObjCMetatypeToObjectInst *Inst) {
+//   getBuilder().setCurrentDebugScope(getOpScope(Inst->getDebugScope()));
+//   recordClonedInstruction(Inst, getBuilder().createObjCMetatypeToObject(
+//      getOpLocation(Inst->getLoc()),
+//      getOpValue(Inst->getOperand()),
+//      getOpType(Inst->getType())));
+//}
+//
+//template <typename ImplClass>
+//void PILCloner<ImplClass>::visitObjCExistentialMetatypeToObjectInst(
+//   ObjCExistentialMetatypeToObjectInst *Inst) {
+//   getBuilder().setCurrentDebugScope(getOpScope(Inst->getDebugScope()));
+//   recordClonedInstruction(
+//      Inst, getBuilder().createObjCExistentialMetatypeToObject(
+//         getOpLocation(Inst->getLoc()), getOpValue(Inst->getOperand()),
+//         getOpType(Inst->getType())));
+//}
 
 //template <typename ImplClass>
 //void PILCloner<ImplClass>::visitObjCInterfaceInst(ObjCInterfaceInst *Inst) {

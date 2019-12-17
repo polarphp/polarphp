@@ -26,8 +26,6 @@
 
 namespace polar {
 
-using polar::ast::AbstractFunctionDecl;
-using polar::ast::ConstructorDecl;
 using llvm::SmallVector;
 
 // Utility class for deterministically ordering vtable entries for
@@ -38,7 +36,7 @@ struct SortedFuncList {
   bool sorted = false;
 
   void add(AbstractFunctionDecl *afd) {
-    Mangle::ASTMangler mangler;
+    mangle::AstMangler mangler;
     std::string mangledName;
     if (auto *cd = dyn_cast<ConstructorDecl>(afd))
       mangledName = mangler.mangleConstructorEntity(cd, 0, 0);

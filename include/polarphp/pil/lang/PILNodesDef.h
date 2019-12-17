@@ -523,14 +523,6 @@ ABSTRACT_VALUE_AND_INST(SingleValueInstruction, ValueBase, PILInstruction)
                       ConversionInst, None, DoesNotRelease)
     SINGLE_VALUE_INST(ThinToThickFunctionInst, thin_to_thick_function,
                       ConversionInst, None, DoesNotRelease)
-    SINGLE_VALUE_INST(ThickToObjCMetatypeInst, thick_to_objc_metatype,
-                      ConversionInst, None, DoesNotRelease)
-    SINGLE_VALUE_INST(ObjCToThickMetatypeInst, objc_to_thick_metatype,
-                      ConversionInst, None, DoesNotRelease)
-    SINGLE_VALUE_INST(ObjCMetatypeToObjectInst, objc_metatype_to_object,
-                      ConversionInst, None, DoesNotRelease)
-    SINGLE_VALUE_INST(ObjCExistentialMetatypeToObjectInst, objc_existential_metatype_to_object,
-                      ConversionInst, None, DoesNotRelease)
     // unconditional_checked_cast_value reads the source value and produces
     // a new value with a potentially different representation.
     DYNAMICCAST_SINGLE_VALUE_INST(UnconditionalCheckedCastValueInst, unconditional_checked_cast_value,
@@ -621,8 +613,6 @@ ABSTRACT_VALUE_AND_INST(SingleValueInstruction, ValueBase, PILInstruction)
                     SingleValueInstruction, MayRead, DoesNotRelease)
   SINGLE_VALUE_INST(ExistentialMetatypeInst, existential_metatype,
                     SingleValueInstruction, MayRead, DoesNotRelease)
-  SINGLE_VALUE_INST(ObjCProtocolInst, objc_protocol,
-                    SingleValueInstruction, None, DoesNotRelease)
 
   // Aggregate Types
   SINGLE_VALUE_INST(ObjectInst, object,

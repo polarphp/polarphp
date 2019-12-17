@@ -39,17 +39,17 @@ using namespace polar::lowering;
 PILLocation PILInstruction::getLoc() const { return Location.getLocation(); }
 
 const PILDebugScope *PILInstruction::getDebugScope() const {
-  return Location.getScope();
+   return Location.getScope();
 }
 
 void PILInstruction::setDebugScope(const PILDebugScope *DS) {
-  if (getDebugScope() && getDebugScope()->InlinedCallSite)
-    assert(DS->InlinedCallSite && "throwing away inlined scope info");
+   if (getDebugScope() && getDebugScope()->InlinedCallSite)
+      assert(DS->InlinedCallSite && "throwing away inlined scope info");
 
-  assert(DS->getParentFunction() == getFunction() &&
-         "scope belongs to different function");
+   assert(DS->getParentFunction() == getFunction() &&
+          "scope belongs to different function");
 
-  Location = PILDebugLocation(getLoc(), DS);
+   Location = PILDebugLocation(getLoc(), DS);
 }
 
 //===----------------------------------------------------------------------===//
@@ -59,38 +59,38 @@ void PILInstruction::setDebugScope(const PILDebugScope *DS) {
 // The trait object is embedded into a basic block.  Use dirty hacks to
 // reconstruct the BB from the 'self' pointer of the trait.
 PILBasicBlock *llvm::ilist_traits<PILInstruction>::getContainingBlock() {
-  size_t Offset(
+   size_t Offset(
       size_t(&((PILBasicBlock *)nullptr->*PILBasicBlock::getSublistAccess())));
-  iplist<PILInstruction> *Anchor(static_cast<iplist<PILInstruction> *>(this));
-  return reinterpret_cast<PILBasicBlock *>(reinterpret_cast<char *>(Anchor) -
-                                           Offset);
+   iplist<PILInstruction> *Anchor(static_cast<iplist<PILInstruction> *>(this));
+   return reinterpret_cast<PILBasicBlock *>(reinterpret_cast<char *>(Anchor) -
+                                            Offset);
 }
 
 
 void llvm::ilist_traits<PILInstruction>::addNodeToList(PILInstruction *I) {
-  assert(I->ParentBB == nullptr && "Already in a list!");
-  I->ParentBB = getContainingBlock();
+   assert(I->ParentBB == nullptr && "Already in a list!");
+   I->ParentBB = getContainingBlock();
 }
 
 void llvm::ilist_traits<PILInstruction>::removeNodeFromList(PILInstruction *I) {
-  // When an instruction is removed from a BB, clear the parent pointer.
-  assert(I->ParentBB && "Not in a list!");
-  I->ParentBB = nullptr;
+   // When an instruction is removed from a BB, clear the parent pointer.
+   assert(I->ParentBB && "Not in a list!");
+   I->ParentBB = nullptr;
 }
 
 void llvm::ilist_traits<PILInstruction>::
 transferNodesFromList(llvm::ilist_traits<PILInstruction> &L2,
                       instr_iterator first, instr_iterator last) {
-  // If transferring instructions within the same basic block, no reason to
-  // update their parent pointers.
-  PILBasicBlock *ThisParent = getContainingBlock();
-  if (ThisParent == L2.getContainingBlock()) return;
+   // If transferring instructions within the same basic block, no reason to
+   // update their parent pointers.
+   PILBasicBlock *ThisParent = getContainingBlock();
+   if (ThisParent == L2.getContainingBlock()) return;
 
-  // Update the parent fields in the instructions.
-  for (; first != last; ++first) {
-    POLAR_FUNC_STAT_NAMED("sil");
-    first->ParentBB = ThisParent;
-  }
+   // Update the parent fields in the instructions.
+   for (; first != last; ++first) {
+      POLAR_FUNC_STAT_NAMED("sil");
+      first->ParentBB = ThisParent;
+   }
 }
 
 //===----------------------------------------------------------------------===//
@@ -103,14 +103,14 @@ transferNodesFromList(llvm::ilist_traits<PILInstruction> &L2,
 #include "polarphp/pil/lang/PILNodesDef.h"
 
 PILFunction *PILInstruction::getFunction() {
-  return getParent()->getParent();
+   return getParent()->getParent();
 }
 const PILFunction *PILInstruction::getFunction() const {
-  return getParent()->getParent();
+   return getParent()->getParent();
 }
 
 PILModule &PILInstruction::getModule() const {
-  return getFunction()->getModule();
+   return getFunction()->getModule();
 }
 
 /// eraseFromParent - This method unlinks 'self' from the containing basic
@@ -118,69 +118,69 @@ PILModule &PILInstruction::getModule() const {
 ///
 void PILInstruction::eraseFromParent() {
 #ifndef NDEBUG
-  for (auto result : getResults()) {
-    assert(result->use_empty() && "Uses of PILInstruction remain at deletion.");
-  }
+   for (auto result : getResults()) {
+      assert(result->use_empty() && "Uses of PILInstruction remain at deletion.");
+   }
 #endif
-  getParent()->erase(this);
+   getParent()->erase(this);
 }
 
 void PILInstruction::moveFront(PILBasicBlock *Block) {
-  getParent()->remove(this);
-  Block->push_front(this);
+   getParent()->remove(this);
+   Block->push_front(this);
 }
 
 /// Unlink this instruction from its current basic block and insert it into
 /// the basic block that Later lives in, right before Later.
 void PILInstruction::moveBefore(PILInstruction *Later) {
-  if (this == Later)
-    return;
+   if (this == Later)
+      return;
 
-  getParent()->remove(this);
-  Later->getParent()->insert(Later, this);
+   getParent()->remove(this);
+   Later->getParent()->insert(Later, this);
 }
 
 /// Unlink this instruction from its current basic block and insert it into
 /// the basic block that Earlier lives in, right after Earlier.
 void PILInstruction::moveAfter(PILInstruction *Earlier) {
-  // Since MovePos is an instruction, we know that there is always a valid
-  // iterator after it.
-  auto Later = std::next(PILBasicBlock::iterator(Earlier));
-  moveBefore(&*Later);
+   // Since MovePos is an instruction, we know that there is always a valid
+   // iterator after it.
+   auto Later = std::next(PILBasicBlock::iterator(Earlier));
+   moveBefore(&*Later);
 }
 
 void PILInstruction::dropAllReferences() {
-  MutableArrayRef<Operand> PossiblyDeadOps = getAllOperands();
-  for (auto OpI = PossiblyDeadOps.begin(),
-            OpE = PossiblyDeadOps.end(); OpI != OpE; ++OpI) {
-    OpI->drop();
-  }
+   MutableArrayRef<Operand> PossiblyDeadOps = getAllOperands();
+   for (auto OpI = PossiblyDeadOps.begin(),
+           OpE = PossiblyDeadOps.end(); OpI != OpE; ++OpI) {
+      OpI->drop();
+   }
 
-  // If we have a function ref inst, we need to especially drop its function
-  // argument so that it gets a proper ref decrement.
-  if (auto *FRI = dyn_cast<FunctionRefBaseInst>(this)) {
-    if (!FRI->getInitiallyReferencedFunction())
+   // If we have a function ref inst, we need to especially drop its function
+   // argument so that it gets a proper ref decrement.
+   if (auto *FRI = dyn_cast<FunctionRefBaseInst>(this)) {
+      if (!FRI->getInitiallyReferencedFunction())
+         return;
+      FRI->dropReferencedFunction();
       return;
-    FRI->dropReferencedFunction();
-    return;
-  }
+   }
 
-  // If we have a KeyPathInst, drop its pattern reference so that we can
-  // decrement refcounts on referenced functions.
-  if (auto *KPI = dyn_cast<KeyPathInst>(this)) {
-    if (!KPI->hasPattern())
+   // If we have a KeyPathInst, drop its pattern reference so that we can
+   // decrement refcounts on referenced functions.
+   if (auto *KPI = dyn_cast<KeyPathInst>(this)) {
+      if (!KPI->hasPattern())
+         return;
+
+      KPI->dropReferencedPattern();
       return;
-
-    KPI->dropReferencedPattern();
-    return;
-  }
+   }
 }
 
 namespace {
 
 class AllResultsAccessor
-    : public PILInstructionVisitor<AllResultsAccessor,
-                                   PILInstructionResultArray> {
+   : public PILInstructionVisitor<AllResultsAccessor,
+      PILInstructionResultArray> {
 public:
 // Make sure we hit a linker error if we ever miss an instruction.
 #define INST(ID, NAME) PILInstructionResultArray visit##ID(ID *I);
@@ -203,7 +203,7 @@ public:
 } // end anonymous namespace
 
 PILInstructionResultArray PILInstruction::getResultsImpl() const {
-  return AllResultsAccessor().visit(const_cast<PILInstruction *>(this));
+   return AllResultsAccessor().visit(const_cast<PILInstruction *>(this));
 }
 
 // Initialize the static members of PILInstruction.
@@ -218,522 +218,522 @@ PILInstructionKind polar::getPILInstructionKind(StringRef name) {
 #include "polarphp/pil/lang/PILNodesDef.h"
 
 #ifdef NDEBUG
-  llvm::errs() << "Unknown PIL instruction name\n";
+      llvm::errs() << "Unknown PIL instruction name\n";
   abort();
 #endif
-  llvm_unreachable("Unknown PIL insruction name");
+   llvm_unreachable("Unknown PIL insruction name");
 }
 
 /// Map PILInstructionKind to a corresponding PILInstruction name.
 StringRef polar::getPILInstructionName(PILInstructionKind kind) {
-  switch (kind) {
+   switch (kind) {
 #define FULL_INST(ID, NAME, PARENT, MEMBEHAVIOR, MAYRELEASE)  \
   case PILInstructionKind::ID:                                \
     return #NAME;
 #include "polarphp/pil/lang/PILNodesDef.h"
-  }
-  llvm_unreachable("bad kind");
+   }
+   llvm_unreachable("bad kind");
 }
 
 void PILInstruction::replaceAllUsesOfAllResultsWithUndef() {
-  for (auto result : getResults()) {
-    result->replaceAllUsesWithUndef();
-  }
+   for (auto result : getResults()) {
+      result->replaceAllUsesWithUndef();
+   }
 }
 
 void PILInstruction::replaceAllUsesPairwiseWith(PILInstruction *other) {
-  auto results = getResults();
+   auto results = getResults();
 
-  // If we don't have any results, fast-path out without asking the other
-  // instruction for its results.
-  if (results.empty()) {
-    assert(other->getResults().empty());
-    return;
-  }
+   // If we don't have any results, fast-path out without asking the other
+   // instruction for its results.
+   if (results.empty()) {
+      assert(other->getResults().empty());
+      return;
+   }
 
-  // Replace values with the corresponding values of the other instruction.
-  auto otherResults = other->getResults();
-  assert(results.size() == otherResults.size());
-  for (auto i : indices(results)) {
-    results[i]->replaceAllUsesWith(otherResults[i]);
-  }
+   // Replace values with the corresponding values of the other instruction.
+   auto otherResults = other->getResults();
+   assert(results.size() == otherResults.size());
+   for (auto i : indices(results)) {
+      results[i]->replaceAllUsesWith(otherResults[i]);
+   }
 }
 
 void PILInstruction::replaceAllUsesPairwiseWith(
-    const llvm::SmallVectorImpl<PILValue> &NewValues) {
-  auto Results = getResults();
+   const llvm::SmallVectorImpl<PILValue> &NewValues) {
+   auto Results = getResults();
 
-  // If we don't have any results, fast-path out without asking the other
-  // instruction for its results.
-  if (Results.empty()) {
-    assert(NewValues.empty());
-    return;
-  }
+   // If we don't have any results, fast-path out without asking the other
+   // instruction for its results.
+   if (Results.empty()) {
+      assert(NewValues.empty());
+      return;
+   }
 
-  // Replace values with the corresponding values of the list. Make sure they
-  // are all the same type.
-  assert(Results.size() == NewValues.size());
-  for (unsigned i : indices(Results)) {
-    assert(Results[i]->getType() == NewValues[i]->getType() &&
-           "Can only replace results with new values of the same type");
-    Results[i]->replaceAllUsesWith(NewValues[i]);
-  }
+   // Replace values with the corresponding values of the list. Make sure they
+   // are all the same type.
+   assert(Results.size() == NewValues.size());
+   for (unsigned i : indices(Results)) {
+      assert(Results[i]->getType() == NewValues[i]->getType() &&
+             "Can only replace results with new values of the same type");
+      Results[i]->replaceAllUsesWith(NewValues[i]);
+   }
 }
 
 Operand *BeginBorrowInst::getSingleNonEndingUse() const {
-  Operand *singleUse = nullptr;
-  for (auto *use : getUses()) {
-    if (isa<EndBorrowInst>(use->getUser()))
-      continue;
+   Operand *singleUse = nullptr;
+   for (auto *use : getUses()) {
+      if (isa<EndBorrowInst>(use->getUser()))
+         continue;
 
-    if (singleUse)
-      return nullptr;
+      if (singleUse)
+         return nullptr;
 
-    singleUse = use;
-  }
-  return singleUse;
+      singleUse = use;
+   }
+   return singleUse;
 }
 
 namespace {
 class InstructionDestroyer
-    : public PILInstructionVisitor<InstructionDestroyer> {
+   : public PILInstructionVisitor<InstructionDestroyer> {
 public:
 #define INST(CLASS, PARENT) \
   void visit##CLASS(CLASS *I) { I->~CLASS(); }
 #include "polarphp/pil/lang/PILNodesDef.h"
-  };
+};
 } // end anonymous namespace
 
 void PILInstruction::destroy(PILInstruction *I) {
-  InstructionDestroyer().visit(I);
+   InstructionDestroyer().visit(I);
 }
 
 namespace {
-  /// Given a pair of instructions that are already known to have the same kind,
-  /// type, and operands check any special state in the two instructions that
-  /// could disrupt equality.
-  class InstructionIdentityComparer :
-    public PILInstructionVisitor<InstructionIdentityComparer, bool> {
-  public:
+/// Given a pair of instructions that are already known to have the same kind,
+/// type, and operands check any special state in the two instructions that
+/// could disrupt equality.
+class InstructionIdentityComparer :
+   public PILInstructionVisitor<InstructionIdentityComparer, bool> {
+public:
 
-    InstructionIdentityComparer(const PILInstruction *L) : LHS(L) { }
+   InstructionIdentityComparer(const PILInstruction *L) : LHS(L) { }
 
-    /// Make sure we only process instructions we know how to process.
-    bool visitPILInstruction(const PILInstruction *RHS) {
+   /// Make sure we only process instructions we know how to process.
+   bool visitPILInstruction(const PILInstruction *RHS) {
       return false;
-    }
+   }
 
-    bool visitInjectEnumAddrInst(const InjectEnumAddrInst *RHS) {
-        auto *X = cast<InjectEnumAddrInst>(LHS);
-        return X->getElement() == RHS->getElement();
-    }
+   bool visitInjectEnumAddrInst(const InjectEnumAddrInst *RHS) {
+      auto *X = cast<InjectEnumAddrInst>(LHS);
+      return X->getElement() == RHS->getElement();
+   }
 
-    bool visitDestroyAddrInst(const DestroyAddrInst *RHS) {
+   bool visitDestroyAddrInst(const DestroyAddrInst *RHS) {
       return true;
-    }
+   }
 
-    bool visitReleaseValueInst(const ReleaseValueInst *RHS) {
+   bool visitReleaseValueInst(const ReleaseValueInst *RHS) {
       return true;
-    }
+   }
 
-    bool visitReleaseValueAddrInst(const ReleaseValueAddrInst *RHS) {
+   bool visitReleaseValueAddrInst(const ReleaseValueAddrInst *RHS) {
       return true;
-    }
+   }
 
-    bool visitRetainValueInst(const RetainValueInst *RHS) {
+   bool visitRetainValueInst(const RetainValueInst *RHS) {
       return true;
-    }
+   }
 
-    bool visitRetainValueAddrInst(const RetainValueAddrInst *RHS) {
+   bool visitRetainValueAddrInst(const RetainValueAddrInst *RHS) {
       return true;
-    }
+   }
 
-    bool visitDeallocStackInst(const DeallocStackInst *RHS) {
+   bool visitDeallocStackInst(const DeallocStackInst *RHS) {
       return true;
-    }
+   }
 
-    bool visitAllocStackInst(const AllocStackInst *RHS) {
+   bool visitAllocStackInst(const AllocStackInst *RHS) {
       return true;
-    }
+   }
 
-    bool visitDeallocBoxInst(const DeallocBoxInst *RHS) {
+   bool visitDeallocBoxInst(const DeallocBoxInst *RHS) {
       return true;
-    }
+   }
 
-    bool visitAllocBoxInst(const AllocBoxInst *RHS) {
+   bool visitAllocBoxInst(const AllocBoxInst *RHS) {
       return true;
-    }
+   }
 
-    bool visitDeallocRefInst(const DeallocRefInst *RHS) {
+   bool visitDeallocRefInst(const DeallocRefInst *RHS) {
       return true;
-    }
+   }
 
-    bool visitDeallocPartialRefInst(const DeallocPartialRefInst *RHS) {
+   bool visitDeallocPartialRefInst(const DeallocPartialRefInst *RHS) {
       return true;
-    }
+   }
 
-    bool visitAllocRefInst(const AllocRefInst *RHS) {
+   bool visitAllocRefInst(const AllocRefInst *RHS) {
       auto *LHSInst = cast<AllocRefInst>(LHS);
       auto LHSTypes = LHSInst->getTailAllocatedTypes();
       auto RHSTypes = RHS->getTailAllocatedTypes();
       unsigned NumTypes = LHSTypes.size();
       assert(NumTypes == RHSTypes.size());
       for (unsigned Idx = 0; Idx < NumTypes; ++Idx) {
-        if (LHSTypes[Idx] != RHSTypes[Idx])
-          return false;
+         if (LHSTypes[Idx] != RHSTypes[Idx])
+            return false;
       }
       return true;
-    }
+   }
 
-    bool visitAllocRefDynamicInst(const AllocRefDynamicInst *RHS) {
+   bool visitAllocRefDynamicInst(const AllocRefDynamicInst *RHS) {
       return true;
-    }
+   }
 
-    bool visitProjectValueBufferInst(const ProjectValueBufferInst *RHS) {
+   bool visitProjectValueBufferInst(const ProjectValueBufferInst *RHS) {
       auto *X = cast<ProjectValueBufferInst>(LHS);
       return X->getValueType() == RHS->getValueType();
-    }
+   }
 
-    bool visitProjectBoxInst(const ProjectBoxInst *RHS) {
+   bool visitProjectBoxInst(const ProjectBoxInst *RHS) {
       return true;
-    }
+   }
 
-    bool visitProjectExistentialBoxInst(const ProjectExistentialBoxInst *RHS) {
+   bool visitProjectExistentialBoxInst(const ProjectExistentialBoxInst *RHS) {
       return true;
-    }
+   }
 
-    bool visitBeginAccessInst(const BeginAccessInst *right) {
+   bool visitBeginAccessInst(const BeginAccessInst *right) {
       auto left = cast<BeginAccessInst>(LHS);
       return left->getAccessKind() == right->getAccessKind()
-          && left->getEnforcement() == right->getEnforcement()
-          && left->hasNoNestedConflict() == right->hasNoNestedConflict()
-          && left->isFromBuiltin() == right->isFromBuiltin();
-    }
+             && left->getEnforcement() == right->getEnforcement()
+             && left->hasNoNestedConflict() == right->hasNoNestedConflict()
+             && left->isFromBuiltin() == right->isFromBuiltin();
+   }
 
-    bool visitEndAccessInst(const EndAccessInst *right) {
+   bool visitEndAccessInst(const EndAccessInst *right) {
       auto left = cast<EndAccessInst>(LHS);
       return left->isAborting() == right->isAborting();
-    }
+   }
 
-    bool visitBeginUnpairedAccessInst(const BeginUnpairedAccessInst *right) {
+   bool visitBeginUnpairedAccessInst(const BeginUnpairedAccessInst *right) {
       auto left = cast<BeginUnpairedAccessInst>(LHS);
       return left->getAccessKind() == right->getAccessKind()
-          && left->getEnforcement() == right->getEnforcement()
-          && left->hasNoNestedConflict() == right->hasNoNestedConflict()
-          && left->isFromBuiltin() == right->isFromBuiltin();
-    }
+             && left->getEnforcement() == right->getEnforcement()
+             && left->hasNoNestedConflict() == right->hasNoNestedConflict()
+             && left->isFromBuiltin() == right->isFromBuiltin();
+   }
 
-    bool visitEndUnpairedAccessInst(const EndUnpairedAccessInst *right) {
+   bool visitEndUnpairedAccessInst(const EndUnpairedAccessInst *right) {
       auto left = cast<EndUnpairedAccessInst>(LHS);
       return left->getEnforcement() == right->getEnforcement()
              && left->isAborting() == right->isAborting()
              && left->isFromBuiltin() == right->isFromBuiltin();
-    }
+   }
 
-    bool visitStrongReleaseInst(const StrongReleaseInst *RHS) {
+   bool visitStrongReleaseInst(const StrongReleaseInst *RHS) {
       return true;
-    }
+   }
 
-    bool visitStrongRetainInst(const StrongRetainInst *RHS) {
+   bool visitStrongRetainInst(const StrongRetainInst *RHS) {
       return true;
-    }
+   }
 
-    bool visitLoadInst(const LoadInst *RHS) {
+   bool visitLoadInst(const LoadInst *RHS) {
       auto LHSQualifier = cast<LoadInst>(LHS)->getOwnershipQualifier();
       return LHSQualifier == RHS->getOwnershipQualifier();
-    }
+   }
 
-    bool visitLoadBorrowInst(const LoadBorrowInst *RHS) { return true; }
+   bool visitLoadBorrowInst(const LoadBorrowInst *RHS) { return true; }
 
-    bool visitEndBorrowInst(const EndBorrowInst *RHS) { return true; }
-    bool visitBeginBorrowInst(const BeginBorrowInst *BBI) { return true; }
+   bool visitEndBorrowInst(const EndBorrowInst *RHS) { return true; }
+   bool visitBeginBorrowInst(const BeginBorrowInst *BBI) { return true; }
 
-    bool visitStoreBorrowInst(const StoreBorrowInst *RHS) {
+   bool visitStoreBorrowInst(const StoreBorrowInst *RHS) {
       auto *X = cast<StoreBorrowInst>(LHS);
       return X->getSrc() == RHS->getSrc() && X->getDest() == RHS->getDest();
-    }
+   }
 
-    bool visitStoreInst(const StoreInst *RHS) {
+   bool visitStoreInst(const StoreInst *RHS) {
       auto *X = cast<StoreInst>(LHS);
       return X->getSrc() == RHS->getSrc() && X->getDest() == RHS->getDest() &&
-        X->getOwnershipQualifier() == RHS->getOwnershipQualifier();
-    }
+             X->getOwnershipQualifier() == RHS->getOwnershipQualifier();
+   }
 
-    bool visitBindMemoryInst(const BindMemoryInst *RHS) {
+   bool visitBindMemoryInst(const BindMemoryInst *RHS) {
       auto *X = cast<BindMemoryInst>(LHS);
       return X->getBoundType() == RHS->getBoundType();
-    }
+   }
 
-    bool visitFunctionRefInst(const FunctionRefInst *RHS) {
+   bool visitFunctionRefInst(const FunctionRefInst *RHS) {
       auto *X = cast<FunctionRefInst>(LHS);
       return X->getInitiallyReferencedFunction() ==
              RHS->getInitiallyReferencedFunction();
-    }
-    bool visitDynamicFunctionRefInst(const DynamicFunctionRefInst *RHS) {
+   }
+   bool visitDynamicFunctionRefInst(const DynamicFunctionRefInst *RHS) {
       auto *X = cast<DynamicFunctionRefInst>(LHS);
       return X->getInitiallyReferencedFunction() ==
              RHS->getInitiallyReferencedFunction();
-    }
-    bool visitPreviousDynamicFunctionRefInst(
-        const PreviousDynamicFunctionRefInst *RHS) {
+   }
+   bool visitPreviousDynamicFunctionRefInst(
+      const PreviousDynamicFunctionRefInst *RHS) {
       auto *X = cast<PreviousDynamicFunctionRefInst>(LHS);
       return X->getInitiallyReferencedFunction() ==
              RHS->getInitiallyReferencedFunction();
-    }
+   }
 
-    bool visitAllocGlobalInst(const AllocGlobalInst *RHS) {
+   bool visitAllocGlobalInst(const AllocGlobalInst *RHS) {
       auto *X = cast<AllocGlobalInst>(LHS);
       return X->getReferencedGlobal() == RHS->getReferencedGlobal();
-    }
+   }
 
-    bool visitGlobalAddrInst(const GlobalAddrInst *RHS) {
+   bool visitGlobalAddrInst(const GlobalAddrInst *RHS) {
       auto *X = cast<GlobalAddrInst>(LHS);
       return X->getReferencedGlobal() == RHS->getReferencedGlobal();
-    }
+   }
 
-    bool visitIntegerLiteralInst(const IntegerLiteralInst *RHS) {
+   bool visitIntegerLiteralInst(const IntegerLiteralInst *RHS) {
       APInt X = cast<IntegerLiteralInst>(LHS)->getValue();
       APInt Y = RHS->getValue();
       return X.getBitWidth() == Y.getBitWidth() &&
-        X == Y;
-    }
+             X == Y;
+   }
 
-    bool visitFloatLiteralInst(const FloatLiteralInst *RHS) {
+   bool visitFloatLiteralInst(const FloatLiteralInst *RHS) {
       // Avoid floating point comparison issues by doing a bitwise comparison.
       APInt X = cast<FloatLiteralInst>(LHS)->getBits();
       APInt Y = RHS->getBits();
       return X.getBitWidth() == Y.getBitWidth() &&
-        X == Y;
-    }
+             X == Y;
+   }
 
-    bool visitStringLiteralInst(const StringLiteralInst *RHS) {
+   bool visitStringLiteralInst(const StringLiteralInst *RHS) {
       auto LHS_ = cast<StringLiteralInst>(LHS);
       return LHS_->getEncoding() == RHS->getEncoding()
-        && LHS_->getValue().equals(RHS->getValue());
-    }
+             && LHS_->getValue().equals(RHS->getValue());
+   }
 
-    bool visitStructInst(const StructInst *RHS) {
+   bool visitStructInst(const StructInst *RHS) {
       // We have already checked the operands. Make sure that the StructDecls
       // match up.
       StructDecl *S1 = cast<StructInst>(LHS)->getStructDecl();
       return S1 == RHS->getStructDecl();
-    }
+   }
 
-    bool visitStructExtractInst(const StructExtractInst *RHS) {
+   bool visitStructExtractInst(const StructExtractInst *RHS) {
       // We have already checked that the operands of our struct_extracts
       // match. Thus we need to check the field/struct decl which are not
       // operands.
       auto *X = cast<StructExtractInst>(LHS);
       if (X->getStructDecl() != RHS->getStructDecl())
-        return false;
+         return false;
       if (X->getField() != RHS->getField())
-        return false;
+         return false;
       return true;
-    }
+   }
 
-    bool visitRefElementAddrInst(RefElementAddrInst *RHS) {
+   bool visitRefElementAddrInst(RefElementAddrInst *RHS) {
       auto *X = cast<RefElementAddrInst>(LHS);
       if (X->getField() != RHS->getField())
-        return false;
+         return false;
       if (X->getOperand() != RHS->getOperand())
-        return false;
+         return false;
       return true;
-    }
+   }
 
-    bool visitRefTailAddrInst(RefTailAddrInst *RHS) {
+   bool visitRefTailAddrInst(RefTailAddrInst *RHS) {
       auto *X = cast<RefTailAddrInst>(LHS);
       return X->getTailType() == RHS->getTailType();
-    }
+   }
 
-    bool visitStructElementAddrInst(const StructElementAddrInst *RHS) {
+   bool visitStructElementAddrInst(const StructElementAddrInst *RHS) {
       // We have already checked that the operands of our struct_element_addrs
       // match. Thus we only need to check the field/struct decl which are not
       // operands.
       auto *X = cast<StructElementAddrInst>(LHS);
       if (X->getStructDecl() != RHS->getStructDecl())
-        return false;
+         return false;
       if (X->getField() != RHS->getField())
-        return false;
+         return false;
       return true;
-    }
+   }
 
-    bool visitTupleInst(const TupleInst *RHS) {
+   bool visitTupleInst(const TupleInst *RHS) {
       // We have already checked the operands. Make sure that the tuple types
       // match up.
       TupleType *TT1 = cast<TupleInst>(LHS)->getTupleType();
       return TT1 == RHS->getTupleType();
-    }
+   }
 
-    bool visitTupleExtractInst(const TupleExtractInst *RHS) {
+   bool visitTupleExtractInst(const TupleExtractInst *RHS) {
       // We have already checked that the operands match. Thus we only need to
       // check the field no and tuple type which are not represented as operands.
       auto *X = cast<TupleExtractInst>(LHS);
       if (X->getTupleType() != RHS->getTupleType())
-        return false;
+         return false;
       if (X->getFieldNo() != RHS->getFieldNo())
-        return false;
+         return false;
       return true;
-    }
+   }
 
-    bool visitTupleElementAddrInst(const TupleElementAddrInst *RHS) {
+   bool visitTupleElementAddrInst(const TupleElementAddrInst *RHS) {
       // We have already checked that the operands match. Thus we only need to
       // check the field no and tuple type which are not represented as operands.
       auto *X = cast<TupleElementAddrInst>(LHS);
       if (X->getTupleType() != RHS->getTupleType())
-        return false;
+         return false;
       if (X->getFieldNo() != RHS->getFieldNo())
-        return false;
+         return false;
       return true;
-    }
+   }
 
-    bool visitMetatypeInst(const MetatypeInst *RHS) {
+   bool visitMetatypeInst(const MetatypeInst *RHS) {
       // We have already compared the operands/types, so we should have equality
       // at this point.
       return true;
-    }
+   }
 
-    bool visitValueMetatypeInst(const ValueMetatypeInst *RHS) {
+   bool visitValueMetatypeInst(const ValueMetatypeInst *RHS) {
       // We have already compared the operands/types, so we should have equality
       // at this point.
       return true;
-    }
+   }
 
-    bool visitExistentialMetatypeInst(const ExistentialMetatypeInst *RHS) {
+   bool visitExistentialMetatypeInst(const ExistentialMetatypeInst *RHS) {
       // We have already compared the operands/types, so we should have equality
       // at this point.
       return true;
-    }
+   }
 
-    bool visitIndexRawPointerInst(IndexRawPointerInst *RHS) {
+   bool visitIndexRawPointerInst(IndexRawPointerInst *RHS) {
       // We have already compared the operands/types, so we should have equality
       // at this point.
       return true;
-    }
+   }
 
-    bool visitIndexAddrInst(IndexAddrInst *RHS) {
+   bool visitIndexAddrInst(IndexAddrInst *RHS) {
       // We have already compared the operands/types, so we should have equality
       // at this point.
       return true;
-    }
+   }
 
-    bool visitTailAddrInst(TailAddrInst *RHS) {
+   bool visitTailAddrInst(TailAddrInst *RHS) {
       auto *X = cast<TailAddrInst>(LHS);
       return X->getTailType() == RHS->getTailType();
-    }
+   }
 
-    bool visitCondFailInst(CondFailInst *RHS) {
+   bool visitCondFailInst(CondFailInst *RHS) {
       // We have already compared the operands/types, so we should have equality
       // at this point.
       return true;
-    }
+   }
 
-    bool visitApplyInst(ApplyInst *RHS) {
+   bool visitApplyInst(ApplyInst *RHS) {
       auto *X = cast<ApplyInst>(LHS);
       return X->getSubstitutionMap() == RHS->getSubstitutionMap();
-    }
+   }
 
-    bool visitBuiltinInst(BuiltinInst *RHS) {
+   bool visitBuiltinInst(BuiltinInst *RHS) {
       auto *X = cast<BuiltinInst>(LHS);
       if (X->getName() != RHS->getName())
-        return false;
+         return false;
       return X->getSubstitutions() == RHS->getSubstitutions();
-    }
+   }
 
-    bool visitEnumInst(EnumInst *RHS) {
+   bool visitEnumInst(EnumInst *RHS) {
       // We already checked operands and types. Only thing we need to check is
       // that the element is the same.
       auto *X = cast<EnumInst>(LHS);
       return X->getElement() == RHS->getElement();
-    }
+   }
 
-    bool visitUncheckedEnumDataInst(UncheckedEnumDataInst *RHS) {
+   bool visitUncheckedEnumDataInst(UncheckedEnumDataInst *RHS) {
       // We already checked operands and types. Only thing we need to check is
       // that the element is the same.
       auto *X = cast<UncheckedEnumDataInst>(LHS);
       return X->getElement() == RHS->getElement();
-    }
+   }
 
-    bool visitSelectEnumInstBase(const SelectEnumInstBase *RHS) {
+   bool visitSelectEnumInstBase(const SelectEnumInstBase *RHS) {
       // Check that the instructions match cases in the same order.
       auto *X = cast<SelectEnumInstBase>(LHS);
 
       if (X->getNumCases() != RHS->getNumCases())
-        return false;
+         return false;
       if (X->hasDefault() != RHS->hasDefault())
-        return false;
+         return false;
 
       for (unsigned i = 0, e = X->getNumCases(); i < e; ++i) {
-        if (X->getCase(i).first != RHS->getCase(i).first)
-          return false;
+         if (X->getCase(i).first != RHS->getCase(i).first)
+            return false;
       }
 
       return true;
-    }
+   }
 
-    bool visitSelectEnumInst(const SelectEnumInst *RHS) {
+   bool visitSelectEnumInst(const SelectEnumInst *RHS) {
       return visitSelectEnumInstBase(RHS);
-    }
-    bool visitSelectEnumAddrInst(const SelectEnumAddrInst *RHS) {
+   }
+   bool visitSelectEnumAddrInst(const SelectEnumAddrInst *RHS) {
       return visitSelectEnumInstBase(RHS);
-    }
+   }
 
-    bool visitSelectValueInst(const SelectValueInst *RHS) {
+   bool visitSelectValueInst(const SelectValueInst *RHS) {
       // Check that the instructions match cases in the same order.
       auto *X = cast<SelectValueInst>(LHS);
 
       if (X->getNumCases() != RHS->getNumCases())
-        return false;
+         return false;
       if (X->hasDefault() != RHS->hasDefault())
-        return false;
+         return false;
 
       for (unsigned i = 0, e = X->getNumCases(); i < e; ++i) {
-        if (X->getCase(i).first != RHS->getCase(i).first)
-          return false;
-        if (X->getCase(i).second != RHS->getCase(i).second)
-          return false;
+         if (X->getCase(i).first != RHS->getCase(i).first)
+            return false;
+         if (X->getCase(i).second != RHS->getCase(i).second)
+            return false;
       }
 
       return true;
-    }
+   }
 
-    // Conversion instructions.
-    // All of these just return true as they have already had their
-    // operands and types checked
-    bool visitUncheckedRefCastInst(UncheckedRefCastInst *RHS) {
+   // Conversion instructions.
+   // All of these just return true as they have already had their
+   // operands and types checked
+   bool visitUncheckedRefCastInst(UncheckedRefCastInst *RHS) {
       return true;
-    }
+   }
 
-    bool visitUncheckedAddrCastInst(UncheckedAddrCastInst *RHS) {
+   bool visitUncheckedAddrCastInst(UncheckedAddrCastInst *RHS) {
       return true;
-    }
+   }
 
-    bool visitUncheckedTrivialBitCastInst(UncheckedTrivialBitCastInst *RHS) {
+   bool visitUncheckedTrivialBitCastInst(UncheckedTrivialBitCastInst *RHS) {
       return true;
-    }
+   }
 
-    bool visitUncheckedBitwiseCastInst(UncheckedBitwiseCastInst *RHS) {
+   bool visitUncheckedBitwiseCastInst(UncheckedBitwiseCastInst *RHS) {
       return true;
-    }
+   }
 
-    bool visitUpcastInst(UpcastInst *RHS) {
+   bool visitUpcastInst(UpcastInst *RHS) {
       return true;
-    }
+   }
 
-    bool visitAddressToPointerInst(AddressToPointerInst *RHS) {
+   bool visitAddressToPointerInst(AddressToPointerInst *RHS) {
       return true;
-    }
+   }
 
-    bool visitPointerToAddressInst(PointerToAddressInst *RHS) {
+   bool visitPointerToAddressInst(PointerToAddressInst *RHS) {
       return cast<PointerToAddressInst>(LHS)->isStrict() == RHS->isStrict();
-    }
+   }
 
-    bool visitRefToRawPointerInst(RefToRawPointerInst *RHS) {
+   bool visitRefToRawPointerInst(RefToRawPointerInst *RHS) {
       return true;
-    }
+   }
 
-    bool visitRawPointerToRefInst(RawPointerToRefInst *RHS) {
+   bool visitRawPointerToRefInst(RawPointerToRefInst *RHS) {
       return true;
-    }
+   }
 
 #define LOADABLE_REF_STORAGE_HELPER(Name)                                      \
   bool visit##Name##ToRefInst(Name##ToRefInst *RHS) { return true; }           \
@@ -751,129 +751,133 @@ namespace {
 #include "polarphp/ast/ReferenceStorageDef.h"
 #undef LOADABLE_REF_STORAGE_HELPER
 
-    bool visitThinToThickFunctionInst(ThinToThickFunctionInst *RHS) {
+   bool visitThinToThickFunctionInst(ThinToThickFunctionInst *RHS) {
       return true;
-    }
+   }
 
-    bool visitThickToObjCMetatypeInst(ThickToObjCMetatypeInst *RHS) {
-      return true;
-    }
+   // @todo
+//    bool visitThickToObjCMetatypeInst(ThickToObjCMetatypeInst *RHS) {
+//      return true;
+//    }
+//
+//    bool visitObjCToThickMetatypeInst(ObjCToThickMetatypeInst *RHS) {
+//      return true;
+//    }
 
-    bool visitObjCToThickMetatypeInst(ObjCToThickMetatypeInst *RHS) {
+   bool visitConvertFunctionInst(ConvertFunctionInst *RHS) {
       return true;
-    }
+   }
 
-    bool visitConvertFunctionInst(ConvertFunctionInst *RHS) {
+   bool visitConvertEscapeToNoEscapeInst(ConvertEscapeToNoEscapeInst *RHS) {
       return true;
-    }
+   }
 
-    bool visitConvertEscapeToNoEscapeInst(ConvertEscapeToNoEscapeInst *RHS) {
-      return true;
-    }
+   // @todo
+//   bool visitObjCMetatypeToObjectInst(ObjCMetatypeToObjectInst *RHS) {
+//      return true;
+//   }
+//
+//   bool visitObjCExistentialMetatypeToObjectInst(ObjCExistentialMetatypeToObjectInst *RHS) {
+//      return true;
+//   }
 
-    bool visitObjCMetatypeToObjectInst(ObjCMetatypeToObjectInst *RHS) {
+   bool visitProjectBlockStorageInst(ProjectBlockStorageInst *RHS) {
       return true;
-    }
+   }
 
-    bool visitObjCExistentialMetatypeToObjectInst(ObjCExistentialMetatypeToObjectInst *RHS) {
+   bool visitBridgeObjectToRefInst(BridgeObjectToRefInst *X) {
       return true;
-    }
+   }
 
-    bool visitProjectBlockStorageInst(ProjectBlockStorageInst *RHS) {
+   bool visitValueToBridgeObjectInst(ValueToBridgeObjectInst *i) {
       return true;
-    }
+   }
 
-    bool visitBridgeObjectToRefInst(BridgeObjectToRefInst *X) {
+   bool visitBridgeObjectToWordInst(BridgeObjectToWordInst *X) {
       return true;
-    }
+   }
 
-    bool visitValueToBridgeObjectInst(ValueToBridgeObjectInst *i) {
+   bool visitRefToBridgeObjectInst(RefToBridgeObjectInst *X) {
       return true;
-    }
+   }
+   bool visitClassifyBridgeObjectInst(ClassifyBridgeObjectInst *X) {
+      return true;
+   }
+   bool visitThinFunctionToPointerInst(ThinFunctionToPointerInst *X) {
+      return true;
+   }
+   bool visitPointerToThinFunctionInst(PointerToThinFunctionInst *X) {
+      return true;
+   }
 
-    bool visitBridgeObjectToWordInst(BridgeObjectToWordInst *X) {
-      return true;
-    }
+   // @todo
 
-    bool visitRefToBridgeObjectInst(RefToBridgeObjectInst *X) {
-      return true;
-    }
-    bool visitClassifyBridgeObjectInst(ClassifyBridgeObjectInst *X) {
-      return true;
-    }
-    bool visitThinFunctionToPointerInst(ThinFunctionToPointerInst *X) {
-      return true;
-    }
-    bool visitPointerToThinFunctionInst(PointerToThinFunctionInst *X) {
-      return true;
-    }
+//   bool visitObjCProtocolInst(ObjCProtocolInst *RHS) {
+//      auto *X = cast<ObjCProtocolInst>(LHS);
+//      return X->getProtocol() == RHS->getProtocol();
+//   }
 
-    bool visitObjCProtocolInst(ObjCProtocolInst *RHS) {
-      auto *X = cast<ObjCProtocolInst>(LHS);
-      return X->getProtocol() == RHS->getProtocol();
-    }
-
-    bool visitClassMethodInst(ClassMethodInst *RHS) {
+   bool visitClassMethodInst(ClassMethodInst *RHS) {
       auto *X = cast<ClassMethodInst>(LHS);
       return X->getMember()  == RHS->getMember() &&
              X->getOperand() == RHS->getOperand() &&
              X->getType()    == RHS->getType();
-    }
+   }
 
-    bool visitSuperMethodInst(SuperMethodInst *RHS) {
+   bool visitSuperMethodInst(SuperMethodInst *RHS) {
       auto *X = cast<SuperMethodInst>(LHS);
       return X->getMember()  == RHS->getMember() &&
              X->getOperand() == RHS->getOperand() &&
              X->getType()    == RHS->getType();
-    }
+   }
 
-    bool visitObjCMethodInst(ObjCMethodInst *RHS) {
+   bool visitObjCMethodInst(ObjCMethodInst *RHS) {
       auto *X = cast<ObjCMethodInst>(LHS);
       return X->getMember()  == RHS->getMember() &&
              X->getOperand() == RHS->getOperand() &&
              X->getType()    == RHS->getType();
-    }
+   }
 
-    bool visitObjCSuperMethodInst(ObjCSuperMethodInst *RHS) {
+   bool visitObjCSuperMethodInst(ObjCSuperMethodInst *RHS) {
       auto *X = cast<ObjCSuperMethodInst>(LHS);
       return X->getMember()  == RHS->getMember() &&
              X->getOperand() == RHS->getOperand() &&
              X->getType()    == RHS->getType();
-    }
+   }
 
-    bool visitWitnessMethodInst(const WitnessMethodInst *RHS) {
+   bool visitWitnessMethodInst(const WitnessMethodInst *RHS) {
       auto *X = cast<WitnessMethodInst>(LHS);
       if (X->getMember() != RHS->getMember())
-        return false;
+         return false;
       if (X->getLookupType() != RHS->getLookupType())
-        return false;
+         return false;
       if (X->getConformance() != RHS->getConformance())
-        return false;
+         return false;
       return true;
-    }
+   }
 
-    bool visitMarkDependenceInst(const MarkDependenceInst *RHS) {
-       return true;
-    }
-
-    bool visitOpenExistentialRefInst(const OpenExistentialRefInst *RHS) {
+   bool visitMarkDependenceInst(const MarkDependenceInst *RHS) {
       return true;
-    }
+   }
 
-  private:
-    const PILInstruction *LHS;
-  };
+   bool visitOpenExistentialRefInst(const OpenExistentialRefInst *RHS) {
+      return true;
+   }
+
+private:
+   const PILInstruction *LHS;
+};
 } // end anonymous namespace
 
 bool PILInstruction::hasIdenticalState(const PILInstruction *RHS) const {
-  PILInstruction *UnconstRHS = const_cast<PILInstruction *>(RHS);
-  return InstructionIdentityComparer(this).visit(UnconstRHS);
+   PILInstruction *UnconstRHS = const_cast<PILInstruction *>(RHS);
+   return InstructionIdentityComparer(this).visit(UnconstRHS);
 }
 
 namespace {
-  class AllOperandsAccessor : public PILInstructionVisitor<AllOperandsAccessor,
-                                                           ArrayRef<Operand> > {
-  public:
+class AllOperandsAccessor : public PILInstructionVisitor<AllOperandsAccessor,
+   ArrayRef<Operand> > {
+public:
 #define INST(CLASS, PARENT)                                                    \
   ArrayRef<Operand> visit##CLASS(const CLASS *I) {                             \
     ASSERT_IMPLEMENTS(CLASS, PILInstruction, getAllOperands,                   \
@@ -881,12 +885,12 @@ namespace {
     return I->getAllOperands();                                                \
   }
 #include "polarphp/pil/lang/PILNodesDef.h"
-  };
+};
 
-  class AllOperandsMutableAccessor
-    : public PILInstructionVisitor<AllOperandsMutableAccessor,
-                                   MutableArrayRef<Operand> > {
-  public:
+class AllOperandsMutableAccessor
+   : public PILInstructionVisitor<AllOperandsMutableAccessor,
+      MutableArrayRef<Operand> > {
+public:
 #define INST(CLASS, PARENT)                                                    \
   MutableArrayRef<Operand> visit##CLASS(CLASS *I) {                            \
     ASSERT_IMPLEMENTS(CLASS, PILInstruction, getAllOperands,                   \
@@ -894,16 +898,16 @@ namespace {
     return I->getAllOperands();                                                \
   }
 #include "polarphp/pil/lang/PILNodesDef.h"
-  };
+};
 
 #define IMPLEMENTS_METHOD(DerivedClass, BaseClass, MemberName, ExpectedType)  \
   (!::std::is_same<BaseClass, GET_IMPLEMENTING_CLASS(DerivedClass, MemberName,\
                                                      ExpectedType)>::value)
 
-  class TypeDependentOperandsAccessor
-      : public PILInstructionVisitor<TypeDependentOperandsAccessor,
-                                     ArrayRef<Operand>> {
-  public:
+class TypeDependentOperandsAccessor
+   : public PILInstructionVisitor<TypeDependentOperandsAccessor,
+      ArrayRef<Operand>> {
+public:
 #define INST(CLASS, PARENT)                                                    \
   ArrayRef<Operand> visit##CLASS(const CLASS *I) {                             \
     if (!IMPLEMENTS_METHOD(CLASS, PILInstruction, getTypeDependentOperands,    \
@@ -912,12 +916,12 @@ namespace {
     return I->getTypeDependentOperands();                                      \
   }
 #include "polarphp/pil/lang/PILNodesDef.h"
-  };
+};
 
-  class TypeDependentOperandsMutableAccessor
-    : public PILInstructionVisitor<TypeDependentOperandsMutableAccessor,
-                                   MutableArrayRef<Operand> > {
-  public:
+class TypeDependentOperandsMutableAccessor
+   : public PILInstructionVisitor<TypeDependentOperandsMutableAccessor,
+      MutableArrayRef<Operand> > {
+public:
 #define INST(CLASS, PARENT)                                                    \
   MutableArrayRef<Operand> visit##CLASS(CLASS *I) {                            \
     if (!IMPLEMENTS_METHOD(CLASS, PILInstruction, getTypeDependentOperands,    \
@@ -926,234 +930,234 @@ namespace {
     return I->getTypeDependentOperands();                                      \
   }
 #include "polarphp/pil/lang/PILNodesDef.h"
-  };
+};
 } // end anonymous namespace
 
 ArrayRef<Operand> PILInstruction::getAllOperands() const {
-  return AllOperandsAccessor().visit(const_cast<PILInstruction *>(this));
+   return AllOperandsAccessor().visit(const_cast<PILInstruction *>(this));
 }
 
 MutableArrayRef<Operand> PILInstruction::getAllOperands() {
-  return AllOperandsMutableAccessor().visit(this);
+   return AllOperandsMutableAccessor().visit(this);
 }
 
 ArrayRef<Operand> PILInstruction::getTypeDependentOperands() const {
-  return TypeDependentOperandsAccessor().visit(
+   return TypeDependentOperandsAccessor().visit(
       const_cast<PILInstruction *>(this));
 }
 
 MutableArrayRef<Operand> PILInstruction::getTypeDependentOperands() {
-  return TypeDependentOperandsMutableAccessor().visit(this);
+   return TypeDependentOperandsMutableAccessor().visit(this);
 }
 
 /// getOperandNumber - Return which operand this is in the operand list of the
 /// using instruction.
 unsigned Operand::getOperandNumber() const {
-  return this - &cast<PILInstruction>(getUser())->getAllOperands()[0];
+   return this - &cast<PILInstruction>(getUser())->getAllOperands()[0];
 }
 
 PILInstruction::MemoryBehavior PILInstruction::getMemoryBehavior() const {
 
-  if (auto *BI = dyn_cast<BuiltinInst>(this)) {
-    // Handle Swift builtin functions.
-    const BuiltinInfo &BInfo = BI->getBuiltinInfo();
-    if (BInfo.ID != BuiltinValueKind::None)
-      return BInfo.isReadNone() ? MemoryBehavior::None
-                                : MemoryBehavior::MayHaveSideEffects;
+   if (auto *BI = dyn_cast<BuiltinInst>(this)) {
+      // Handle Swift builtin functions.
+      const BuiltinInfo &BInfo = BI->getBuiltinInfo();
+      if (BInfo.ID != BuiltinValueKind::None)
+         return BInfo.isReadNone() ? MemoryBehavior::None
+                                   : MemoryBehavior::MayHaveSideEffects;
 
-    // Handle LLVM intrinsic functions.
-    const IntrinsicInfo &IInfo = BI->getIntrinsicInfo();
-    if (IInfo.ID != llvm::Intrinsic::not_intrinsic) {
-      // Read-only.
-      if (IInfo.hasAttribute(llvm::Attribute::ReadOnly) &&
-          IInfo.hasAttribute(llvm::Attribute::NoUnwind))
-        return MemoryBehavior::MayRead;
-      // Read-none?
-      return IInfo.hasAttribute(llvm::Attribute::ReadNone) &&
-                     IInfo.hasAttribute(llvm::Attribute::NoUnwind)
-                 ? MemoryBehavior::None
-                 : MemoryBehavior::MayHaveSideEffects;
-    }
-  }
+      // Handle LLVM intrinsic functions.
+      const IntrinsicInfo &IInfo = BI->getIntrinsicInfo();
+      if (IInfo.ID != llvm::Intrinsic::not_intrinsic) {
+         // Read-only.
+         if (IInfo.hasAttribute(llvm::Attribute::ReadOnly) &&
+             IInfo.hasAttribute(llvm::Attribute::NoUnwind))
+            return MemoryBehavior::MayRead;
+         // Read-none?
+         return IInfo.hasAttribute(llvm::Attribute::ReadNone) &&
+                IInfo.hasAttribute(llvm::Attribute::NoUnwind)
+                ? MemoryBehavior::None
+                : MemoryBehavior::MayHaveSideEffects;
+      }
+   }
 
-  // Handle full apply sites that have a resolvable callee function with an
-  // effects attribute.
-  if (isa<FullApplySite>(this)) {
-    FullApplySite Site(const_cast<PILInstruction *>(this));
-    if (auto *F = Site.getCalleeFunction()) {
-      return F->getEffectsKind() == EffectsKind::ReadNone
-                 ? MemoryBehavior::None
-                 : MemoryBehavior::MayHaveSideEffects;
-    }
-  }
+   // Handle full apply sites that have a resolvable callee function with an
+   // effects attribute.
+   if (isa<FullApplySite>(this)) {
+      FullApplySite Site(const_cast<PILInstruction *>(this));
+      if (auto *F = Site.getCalleeFunction()) {
+         return F->getEffectsKind() == EffectsKind::ReadNone
+                ? MemoryBehavior::None
+                : MemoryBehavior::MayHaveSideEffects;
+      }
+   }
 
-  switch (getKind()) {
+   switch (getKind()) {
 #define FULL_INST(CLASS, TEXTUALNAME, PARENT, MEMBEHAVIOR, RELEASINGBEHAVIOR)  \
   case PILInstructionKind::CLASS:                                              \
     return MemoryBehavior::MEMBEHAVIOR;
 #include "polarphp/pil/lang/PILNodesDef.h"
-  }
-  llvm_unreachable("We've just exhausted the switch.");
+   }
+   llvm_unreachable("We've just exhausted the switch.");
 }
 
 PILInstruction::ReleasingBehavior PILInstruction::getReleasingBehavior() const {
-  switch (getKind()) {
+   switch (getKind()) {
 #define FULL_INST(CLASS, TEXTUALNAME, PARENT, MEMBEHAVIOR, RELEASINGBEHAVIOR)  \
   case PILInstructionKind::CLASS:                                              \
     return ReleasingBehavior::RELEASINGBEHAVIOR;
 #include "polarphp/pil/lang/PILNodesDef.h"
-  }
-  llvm_unreachable("We've just exhausted the switch.");
+   }
+   llvm_unreachable("We've just exhausted the switch.");
 }
 
 bool PILInstruction::mayHaveSideEffects() const {
-  // If this instruction traps then it must have side effects.
-  if (mayTrap())
-    return true;
+   // If this instruction traps then it must have side effects.
+   if (mayTrap())
+      return true;
 
-  MemoryBehavior B = getMemoryBehavior();
-  return B == MemoryBehavior::MayWrite ||
-    B == MemoryBehavior::MayReadWrite ||
-    B == MemoryBehavior::MayHaveSideEffects;
+   MemoryBehavior B = getMemoryBehavior();
+   return B == MemoryBehavior::MayWrite ||
+          B == MemoryBehavior::MayReadWrite ||
+          B == MemoryBehavior::MayHaveSideEffects;
 }
 
 bool PILInstruction::mayRelease() const {
-  if (getReleasingBehavior() ==
-      PILInstruction::ReleasingBehavior::DoesNotRelease)
-    return false;
+   if (getReleasingBehavior() ==
+       PILInstruction::ReleasingBehavior::DoesNotRelease)
+      return false;
 
-  switch (getKind()) {
-  default:
-    llvm_unreachable("Unhandled releasing instruction!");
+   switch (getKind()) {
+      default:
+         llvm_unreachable("Unhandled releasing instruction!");
 
-  case PILInstructionKind::ApplyInst:
-  case PILInstructionKind::TryApplyInst:
-  case PILInstructionKind::BeginApplyInst:
-  case PILInstructionKind::AbortApplyInst:
-  case PILInstructionKind::EndApplyInst:
-  case PILInstructionKind::YieldInst:
-  case PILInstructionKind::DestroyAddrInst:
-  case PILInstructionKind::StrongReleaseInst:
+      case PILInstructionKind::ApplyInst:
+      case PILInstructionKind::TryApplyInst:
+      case PILInstructionKind::BeginApplyInst:
+      case PILInstructionKind::AbortApplyInst:
+      case PILInstructionKind::EndApplyInst:
+      case PILInstructionKind::YieldInst:
+      case PILInstructionKind::DestroyAddrInst:
+      case PILInstructionKind::StrongReleaseInst:
 #define ALWAYS_OR_SOMETIMES_LOADABLE_CHECKED_REF_STORAGE(Name, ...) \
   case PILInstructionKind::Name##ReleaseInst:
 #include "polarphp/ast/ReferenceStorageDef.h"
-  case PILInstructionKind::ReleaseValueInst:
-  case PILInstructionKind::ReleaseValueAddrInst:
-    return true;
+      case PILInstructionKind::ReleaseValueInst:
+      case PILInstructionKind::ReleaseValueAddrInst:
+         return true;
 
-  case PILInstructionKind::DestroyValueInst:
-    assert(!PILModuleConventions(getModule()).useLoweredAddresses());
-    return true;
+      case PILInstructionKind::DestroyValueInst:
+         assert(!PILModuleConventions(getModule()).useLoweredAddresses());
+         return true;
 
-  case PILInstructionKind::UnconditionalCheckedCastAddrInst:
-  case PILInstructionKind::UnconditionalCheckedCastValueInst:
-    return true;
+      case PILInstructionKind::UnconditionalCheckedCastAddrInst:
+      case PILInstructionKind::UnconditionalCheckedCastValueInst:
+         return true;
 
-  case PILInstructionKind::CheckedCastAddrBranchInst: {
-    // Failing casts with take_always can release.
-    auto *Cast = cast<CheckedCastAddrBranchInst>(this);
-    return Cast->getConsumptionKind() == CastConsumptionKind::TakeAlways;
-  }
-
-  case PILInstructionKind::CopyAddrInst: {
-    auto *CopyAddr = cast<CopyAddrInst>(this);
-    // copy_addr without initialization can cause a release.
-    return CopyAddr->isInitializationOfDest() ==
-           IsInitialization_t::IsNotInitialization;
-  }
-
-  case PILInstructionKind::BuiltinInst: {
-    auto *BI = cast<BuiltinInst>(this);
-    // Builtins without side effects also do not release.
-    if (!BI->mayHaveSideEffects())
-      return false;
-    // If this is a builtin which might have side effect, but its side
-    // effects do not cause reference counts to be decremented, return false.
-    if (auto Kind = BI->getBuiltinKind()) {
-      switch (Kind.getValue()) {
-        case BuiltinValueKind::CopyArray:
-          return false;
-        default:
-          break;
+      case PILInstructionKind::CheckedCastAddrBranchInst: {
+         // Failing casts with take_always can release.
+         auto *Cast = cast<CheckedCastAddrBranchInst>(this);
+         return Cast->getConsumptionKind() == CastConsumptionKind::TakeAlways;
       }
-    }
-    if (auto ID = BI->getIntrinsicID()) {
-      switch (ID.getValue()) {
-        case llvm::Intrinsic::memcpy:
-        case llvm::Intrinsic::memmove:
-        case llvm::Intrinsic::memset:
-          return false;
-        default:
-          break;
+
+      case PILInstructionKind::CopyAddrInst: {
+         auto *CopyAddr = cast<CopyAddrInst>(this);
+         // copy_addr without initialization can cause a release.
+         return CopyAddr->isInitializationOfDest() ==
+                IsInitialization_t::IsNotInitialization;
       }
-    }
-    return true;
-  }
-  }
+
+      case PILInstructionKind::BuiltinInst: {
+         auto *BI = cast<BuiltinInst>(this);
+         // Builtins without side effects also do not release.
+         if (!BI->mayHaveSideEffects())
+            return false;
+         // If this is a builtin which might have side effect, but its side
+         // effects do not cause reference counts to be decremented, return false.
+         if (auto Kind = BI->getBuiltinKind()) {
+            switch (Kind.getValue()) {
+               case BuiltinValueKind::CopyArray:
+                  return false;
+               default:
+                  break;
+            }
+         }
+         if (auto ID = BI->getIntrinsicID()) {
+            switch (ID.getValue()) {
+               case llvm::Intrinsic::memcpy:
+               case llvm::Intrinsic::memmove:
+               case llvm::Intrinsic::memset:
+                  return false;
+               default:
+                  break;
+            }
+         }
+         return true;
+      }
+   }
 }
 
 bool PILInstruction::mayReleaseOrReadRefCount() const {
-  switch (getKind()) {
-  case PILInstructionKind::IsUniqueInst:
-  case PILInstructionKind::IsEscapingClosureInst:
-    return true;
-  default:
-    return mayRelease();
-  }
+   switch (getKind()) {
+      case PILInstructionKind::IsUniqueInst:
+      case PILInstructionKind::IsEscapingClosureInst:
+         return true;
+      default:
+         return mayRelease();
+   }
 }
 
 namespace {
-  class TrivialCloner : public PILCloner<TrivialCloner> {
-    friend class PILCloner<TrivialCloner>;
-    friend class PILInstructionVisitor<TrivialCloner>;
-    PILInstruction *Result = nullptr;
-    TrivialCloner(PILFunction *F) : PILCloner(*F) {}
-  public:
+class TrivialCloner : public PILCloner<TrivialCloner> {
+   friend class PILCloner<TrivialCloner>;
+   friend class PILInstructionVisitor<TrivialCloner>;
+   PILInstruction *Result = nullptr;
+   TrivialCloner(PILFunction *F) : PILCloner(*F) {}
+public:
 
-    static PILInstruction *doIt(PILInstruction *I) {
+   static PILInstruction *doIt(PILInstruction *I) {
       TrivialCloner TC(I->getFunction());
       TC.visit(I);
       return TC.Result;
-    }
+   }
 
-    void postProcess(PILInstruction *Orig, PILInstruction *Cloned) {
+   void postProcess(PILInstruction *Orig, PILInstruction *Cloned) {
       assert(Orig->getFunction() == &getBuilder().getFunction() &&
              "cloning between functions is not supported");
 
       Result = Cloned;
       PILCloner<TrivialCloner>::postProcess(Orig, Cloned);
-    }
-    PILValue getMappedValue(PILValue Value) {
+   }
+   PILValue getMappedValue(PILValue Value) {
       return Value;
-    }
-    PILBasicBlock *remapBasicBlock(PILBasicBlock *BB) { return BB; }
-  };
+   }
+   PILBasicBlock *remapBasicBlock(PILBasicBlock *BB) { return BB; }
+};
 } // end anonymous namespace
 
 bool PILInstruction::isAllocatingStack() const {
-  if (isa<AllocStackInst>(this))
-    return true;
-
-  if (auto *ARI = dyn_cast<AllocRefInst>(this)) {
-    if (ARI->canAllocOnStack())
+   if (isa<AllocStackInst>(this))
       return true;
-  }
 
-  if (auto *PA = dyn_cast<PartialApplyInst>(this))
-    return PA->isOnStack();
+   if (auto *ARI = dyn_cast<AllocRefInst>(this)) {
+      if (ARI->canAllocOnStack())
+         return true;
+   }
 
-  return false;
+   if (auto *PA = dyn_cast<PartialApplyInst>(this))
+      return PA->isOnStack();
+
+   return false;
 }
 
 bool PILInstruction::isDeallocatingStack() const {
-  if (isa<DeallocStackInst>(this))
-    return true;
-
-  if (auto *DRI = dyn_cast<DeallocRefInst>(this)) {
-    if (DRI->canAllocOnStack())
+   if (isa<DeallocStackInst>(this))
       return true;
-  }
-  return false;
+
+   if (auto *DRI = dyn_cast<DeallocRefInst>(this)) {
+      if (DRI->canAllocOnStack())
+         return true;
+   }
+   return false;
 }
 
 
@@ -1162,86 +1166,86 @@ bool PILInstruction::isDeallocatingStack() const {
 /// then the new instruction is inserted before the specified point, otherwise
 /// the new instruction is returned without a parent.
 PILInstruction *PILInstruction::clone(PILInstruction *InsertPt) {
-  PILInstruction *NewInst = TrivialCloner::doIt(this);
+   PILInstruction *NewInst = TrivialCloner::doIt(this);
 
-  if (NewInst && InsertPt)
-    InsertPt->getParent()->insert(InsertPt, NewInst);
-  return NewInst;
+   if (NewInst && InsertPt)
+      InsertPt->getParent()->insert(InsertPt, NewInst);
+   return NewInst;
 }
 
 /// Returns true if the instruction can be duplicated without any special
 /// additional handling. It is important to know this information when
 /// you perform such optimizations like e.g. jump-threading.
 bool PILInstruction::isTriviallyDuplicatable() const {
-  if (isAllocatingStack())
-    return false;
-
-  if (auto *ARI = dyn_cast<AllocRefInst>(this)) {
-    if (ARI->canAllocOnStack())
+   if (isAllocatingStack())
       return false;
-  }
-  if (isa<OpenExistentialAddrInst>(this) || isa<OpenExistentialRefInst>(this) ||
-      isa<OpenExistentialMetatypeInst>(this) ||
-      isa<OpenExistentialValueInst>(this) || isa<OpenExistentialBoxInst>(this) ||
-      isa<OpenExistentialBoxValueInst>(this)) {
-    // Don't know how to duplicate these properly yet. Inst.clone() per
-    // instruction does not work. Because the follow-up instructions need to
-    // reuse the same archetype uuid which would only work if we used a
-    // cloner.
-    return false;
-  }
 
-  if (auto *MI = dyn_cast<MethodInst>(this)) {
-    // We can't build SSA for method values that lower to objc methods.
-    if (MI->getMember().isForeign)
+   if (auto *ARI = dyn_cast<AllocRefInst>(this)) {
+      if (ARI->canAllocOnStack())
+         return false;
+   }
+   if (isa<OpenExistentialAddrInst>(this) || isa<OpenExistentialRefInst>(this) ||
+       isa<OpenExistentialMetatypeInst>(this) ||
+       isa<OpenExistentialValueInst>(this) || isa<OpenExistentialBoxInst>(this) ||
+       isa<OpenExistentialBoxValueInst>(this)) {
+      // Don't know how to duplicate these properly yet. Inst.clone() per
+      // instruction does not work. Because the follow-up instructions need to
+      // reuse the same archetype uuid which would only work if we used a
+      // cloner.
       return false;
-  }
-  if (isa<ThrowInst>(this))
-    return false;
+   }
 
-  // BeginAccess defines the access scope entry point. All associated EndAccess
-  // instructions must directly operate on the BeginAccess.
-  if (isa<BeginAccessInst>(this))
-    return false;
+   if (auto *MI = dyn_cast<MethodInst>(this)) {
+      // We can't build SSA for method values that lower to objc methods.
+      if (MI->getMember().isForeign)
+         return false;
+   }
+   if (isa<ThrowInst>(this))
+      return false;
 
-  // begin_apply creates a token that has to be directly used by the
-  // corresponding end_apply and abort_apply.
-  if (isa<BeginApplyInst>(this))
-    return false;
+   // BeginAccess defines the access scope entry point. All associated EndAccess
+   // instructions must directly operate on the BeginAccess.
+   if (isa<BeginAccessInst>(this))
+      return false;
 
-  // dynamic_method_br is not duplicatable because IRGen does not support phi
-  // nodes of objc_method type.
-  if (isa<DynamicMethodBranchInst>(this))
-    return false;
+   // begin_apply creates a token that has to be directly used by the
+   // corresponding end_apply and abort_apply.
+   if (isa<BeginApplyInst>(this))
+      return false;
 
-  // If you add more cases here, you should also update PILLoop:canDuplicate.
+   // dynamic_method_br is not duplicatable because IRGen does not support phi
+   // nodes of objc_method type.
+   if (isa<DynamicMethodBranchInst>(this))
+      return false;
 
-  return true;
+   // If you add more cases here, you should also update PILLoop:canDuplicate.
+
+   return true;
 }
 
 bool PILInstruction::mayTrap() const {
-  switch(getKind()) {
-  case PILInstructionKind::CondFailInst:
-  case PILInstructionKind::UnconditionalCheckedCastInst:
-  case PILInstructionKind::UnconditionalCheckedCastAddrInst:
-    return true;
-  default:
-    return false;
-  }
+   switch(getKind()) {
+      case PILInstructionKind::CondFailInst:
+      case PILInstructionKind::UnconditionalCheckedCastInst:
+      case PILInstructionKind::UnconditionalCheckedCastAddrInst:
+         return true;
+      default:
+         return false;
+   }
 }
 
 bool PILInstruction::isMetaInstruction() const {
-  // Every instruction that implements getVarInfo() should be in this list.
-  switch (getKind()) {
-  case PILInstructionKind::AllocBoxInst:
-  case PILInstructionKind::AllocStackInst:
-  case PILInstructionKind::DebugValueInst:
-  case PILInstructionKind::DebugValueAddrInst:
-    return true;
-  default:
-    return false;
-  }
-  llvm_unreachable("Instruction not handled in isMetaInstruction()!");
+   // Every instruction that implements getVarInfo() should be in this list.
+   switch (getKind()) {
+      case PILInstructionKind::AllocBoxInst:
+      case PILInstructionKind::AllocStackInst:
+      case PILInstructionKind::DebugValueInst:
+      case PILInstructionKind::DebugValueAddrInst:
+         return true;
+      default:
+         return false;
+   }
+   llvm_unreachable("Instruction not handled in isMetaInstruction()!");
 }
 
 //===----------------------------------------------------------------------===//
@@ -1250,32 +1254,32 @@ bool PILInstruction::isMetaInstruction() const {
 
 llvm::raw_ostream &polar::operator<<(llvm::raw_ostream &OS,
                                      PILInstruction::MemoryBehavior B) {
-  switch (B) {
-    case PILInstruction::MemoryBehavior::None:
-      return OS << "None";
-    case PILInstruction::MemoryBehavior::MayRead:
-      return OS << "MayRead";
-    case PILInstruction::MemoryBehavior::MayWrite:
-      return OS << "MayWrite";
-    case PILInstruction::MemoryBehavior::MayReadWrite:
-      return OS << "MayReadWrite";
-    case PILInstruction::MemoryBehavior::MayHaveSideEffects:
-      return OS << "MayHaveSideEffects";
-  }
+   switch (B) {
+      case PILInstruction::MemoryBehavior::None:
+         return OS << "None";
+      case PILInstruction::MemoryBehavior::MayRead:
+         return OS << "MayRead";
+      case PILInstruction::MemoryBehavior::MayWrite:
+         return OS << "MayWrite";
+      case PILInstruction::MemoryBehavior::MayReadWrite:
+         return OS << "MayReadWrite";
+      case PILInstruction::MemoryBehavior::MayHaveSideEffects:
+         return OS << "MayHaveSideEffects";
+   }
 
-  llvm_unreachable("Unhandled MemoryBehavior in switch.");
+   llvm_unreachable("Unhandled MemoryBehavior in switch.");
 }
 
 llvm::raw_ostream &polar::operator<<(llvm::raw_ostream &OS,
                                      PILInstruction::ReleasingBehavior B) {
-  switch (B) {
-  case PILInstruction::ReleasingBehavior::DoesNotRelease:
-    return OS << "DoesNotRelease";
-  case PILInstruction::ReleasingBehavior::MayRelease:
-    return OS << "MayRelease";
-  }
+   switch (B) {
+      case PILInstruction::ReleasingBehavior::DoesNotRelease:
+         return OS << "DoesNotRelease";
+      case PILInstruction::ReleasingBehavior::MayRelease:
+         return OS << "MayRelease";
+   }
 
-  llvm_unreachable("Unhandled ReleasingBehavior in switch.");
+   llvm_unreachable("Unhandled ReleasingBehavior in switch.");
 }
 
 //===----------------------------------------------------------------------===//
@@ -1283,134 +1287,134 @@ llvm::raw_ostream &polar::operator<<(llvm::raw_ostream &OS,
 //===----------------------------------------------------------------------===//
 
 PILInstructionResultArray::PILInstructionResultArray(
-    const SingleValueInstruction *SVI)
-    : Pointer(), Size(1) {
-  // Make sure that even though we are munging things, we are able to get back
-  // the original value, types, and operands.
-  PILValue originalValue(SVI);
-  PILType originalType = SVI->getType();
-  (void)originalValue;
-  (void)originalType;
+   const SingleValueInstruction *SVI)
+   : Pointer(), Size(1) {
+   // Make sure that even though we are munging things, we are able to get back
+   // the original value, types, and operands.
+   PILValue originalValue(SVI);
+   PILType originalType = SVI->getType();
+   (void)originalValue;
+   (void)originalType;
 
-  // *PLEASE READ BEFORE CHANGING*
-  //
-  // Since SingleValueInstruction is both a ValueBase and a PILInstruction, but
-  // PILInstruction is the first parent, we need to ensure that our ValueBase *
-  // pointer is properly offset. by first static casting to ValueBase and then
-  // going back to a uint8_t *.
-  auto *Value = static_cast<const ValueBase *>(SVI);
-  assert(uintptr_t(Value) != uintptr_t(SVI) &&
-         "Expected value to be offset from SVI since it is not the first "
-         "multi-inheritence parent");
-  Pointer = reinterpret_cast<const uint8_t *>(Value);
+   // *PLEASE READ BEFORE CHANGING*
+   //
+   // Since SingleValueInstruction is both a ValueBase and a PILInstruction, but
+   // PILInstruction is the first parent, we need to ensure that our ValueBase *
+   // pointer is properly offset. by first static casting to ValueBase and then
+   // going back to a uint8_t *.
+   auto *Value = static_cast<const ValueBase *>(SVI);
+   assert(uintptr_t(Value) != uintptr_t(SVI) &&
+             "Expected value to be offset from SVI since it is not the first "
+             "multi-inheritence parent");
+   Pointer = reinterpret_cast<const uint8_t *>(Value);
 
 #ifndef NDEBUG
-  assert(originalValue == (*this)[0] &&
-         "Wrong value returned for single result");
-  assert(originalType == (*this)[0]->getType());
+   assert(originalValue == (*this)[0] &&
+          "Wrong value returned for single result");
+   assert(originalType == (*this)[0]->getType());
 
-  auto ValueRange = getValues();
-  assert(1 == std::distance(ValueRange.begin(), ValueRange.end()));
-  assert(originalValue == *ValueRange.begin());
+   auto ValueRange = getValues();
+   assert(1 == std::distance(ValueRange.begin(), ValueRange.end()));
+   assert(originalValue == *ValueRange.begin());
 
-  auto TypedRange = getTypes();
-  assert(1 == std::distance(TypedRange.begin(), TypedRange.end()));
-  assert(originalType == *TypedRange.begin());
+   auto TypedRange = getTypes();
+   assert(1 == std::distance(TypedRange.begin(), TypedRange.end()));
+   assert(originalType == *TypedRange.begin());
 
-  PILInstructionResultArray Copy = *this;
-  assert(Copy.hasSameTypes(*this));
-  assert(Copy == *this);
+   PILInstructionResultArray Copy = *this;
+   assert(Copy.hasSameTypes(*this));
+   assert(Copy == *this);
 #endif
 }
 
 PILInstructionResultArray::PILInstructionResultArray(
-    ArrayRef<MultipleValueInstructionResult> MVResults)
-    : Pointer(nullptr), Size(MVResults.size()) {
-  // We are assuming here that MultipleValueInstructionResult when static_cast
-  // is not offset.
-  if (Size)
-    Pointer = reinterpret_cast<const uint8_t *>(&MVResults[0]);
+   ArrayRef<MultipleValueInstructionResult> MVResults)
+   : Pointer(nullptr), Size(MVResults.size()) {
+   // We are assuming here that MultipleValueInstructionResult when static_cast
+   // is not offset.
+   if (Size)
+      Pointer = reinterpret_cast<const uint8_t *>(&MVResults[0]);
 
 #ifndef NDEBUG
-  // Verify our invariants.
-  assert(size() == MVResults.size());
-  auto ValueRange = getValues();
-  auto VRangeBegin = ValueRange.begin();
-  auto VRangeIter = VRangeBegin;
-  auto VRangeEnd = ValueRange.end();
-  assert(MVResults.size() == unsigned(std::distance(VRangeBegin, VRangeEnd)));
+   // Verify our invariants.
+   assert(size() == MVResults.size());
+   auto ValueRange = getValues();
+   auto VRangeBegin = ValueRange.begin();
+   auto VRangeIter = VRangeBegin;
+   auto VRangeEnd = ValueRange.end();
+   assert(MVResults.size() == unsigned(std::distance(VRangeBegin, VRangeEnd)));
 
-  auto TypedRange = getTypes();
-  auto TRangeBegin = TypedRange.begin();
-  auto TRangeIter = TRangeBegin;
-  auto TRangeEnd = TypedRange.end();
-  assert(MVResults.size() == unsigned(std::distance(TRangeBegin, TRangeEnd)));
-  for (unsigned i : indices(MVResults)) {
-    assert(PILValue(&MVResults[i]) == (*this)[i]);
-    assert(PILValue(&MVResults[i])->getType() == (*this)[i]->getType());
-    assert(PILValue(&MVResults[i]) == (*VRangeIter));
-    assert(PILValue(&MVResults[i])->getType() == (*VRangeIter)->getType());
-    assert(PILValue(&MVResults[i])->getType() == *TRangeIter);
-    ++VRangeIter;
-    ++TRangeIter;
-  }
+   auto TypedRange = getTypes();
+   auto TRangeBegin = TypedRange.begin();
+   auto TRangeIter = TRangeBegin;
+   auto TRangeEnd = TypedRange.end();
+   assert(MVResults.size() == unsigned(std::distance(TRangeBegin, TRangeEnd)));
+   for (unsigned i : indices(MVResults)) {
+      assert(PILValue(&MVResults[i]) == (*this)[i]);
+      assert(PILValue(&MVResults[i])->getType() == (*this)[i]->getType());
+      assert(PILValue(&MVResults[i]) == (*VRangeIter));
+      assert(PILValue(&MVResults[i])->getType() == (*VRangeIter)->getType());
+      assert(PILValue(&MVResults[i])->getType() == *TRangeIter);
+      ++VRangeIter;
+      ++TRangeIter;
+   }
 
-  PILInstructionResultArray Copy = *this;
-  assert(Copy.hasSameTypes(*this));
-  assert(Copy == *this);
+   PILInstructionResultArray Copy = *this;
+   assert(Copy.hasSameTypes(*this));
+   assert(Copy == *this);
 #endif
 }
 
 PILValue PILInstructionResultArray::operator[](size_t Index) const {
-  assert(Index < Size && "Index out of bounds");
-  // *NOTE* In the case where we have a single instruction, Index will always
-  // necessarily be 0 implying that it is safe for us to just multiple Index by
-  // sizeof(MultipleValueInstructionResult).
-  size_t Offset = sizeof(MultipleValueInstructionResult) * Index;
-  return PILValue(reinterpret_cast<const ValueBase *>(&Pointer[Offset]));
+   assert(Index < Size && "Index out of bounds");
+   // *NOTE* In the case where we have a single instruction, Index will always
+   // necessarily be 0 implying that it is safe for us to just multiple Index by
+   // sizeof(MultipleValueInstructionResult).
+   size_t Offset = sizeof(MultipleValueInstructionResult) * Index;
+   return PILValue(reinterpret_cast<const ValueBase *>(&Pointer[Offset]));
 }
 
 bool PILInstructionResultArray::hasSameTypes(
-    const PILInstructionResultArray &rhs) {
-  auto &lhs = *this;
-  if (lhs.size() != rhs.size())
-    return false;
-  for (unsigned i : indices(lhs)) {
-    if (lhs[i]->getType() != rhs[i]->getType())
+   const PILInstructionResultArray &rhs) {
+   auto &lhs = *this;
+   if (lhs.size() != rhs.size())
       return false;
-  }
-  return true;
+   for (unsigned i : indices(lhs)) {
+      if (lhs[i]->getType() != rhs[i]->getType())
+         return false;
+   }
+   return true;
 }
 
 bool PILInstructionResultArray::
 operator==(const PILInstructionResultArray &other) {
-  if (size() != other.size())
-    return false;
-  for (auto i : indices(*this))
-    if ((*this)[i] != other[i])
+   if (size() != other.size())
       return false;
-  return true;
+   for (auto i : indices(*this))
+      if ((*this)[i] != other[i])
+         return false;
+   return true;
 }
 
 PILInstructionResultArray::type_range
 PILInstructionResultArray::getTypes() const {
-  PILType (*F)(PILValue) = [](PILValue V) -> PILType {
-    return V->getType();
-  };
-  return {llvm::map_iterator(begin(), F), llvm::map_iterator(end(), F)};
+   PILType (*F)(PILValue) = [](PILValue V) -> PILType {
+      return V->getType();
+   };
+   return {llvm::map_iterator(begin(), F), llvm::map_iterator(end(), F)};
 }
 
 const ValueBase *PILInstructionResultArray::front() const {
-  assert(size() && "Can not access front of an empty result array");
-  return *begin();
+   assert(size() && "Can not access front of an empty result array");
+   return *begin();
 }
 
 const ValueBase *PILInstructionResultArray::back() const {
-  assert(size() && "Can not access back of an empty result array");
-  if (std::next(begin()) == end()) {
-    return *begin();
-  }
-  return *std::prev(end());
+   assert(size() && "Can not access back of an empty result array");
+   if (std::next(begin()) == end()) {
+      return *begin();
+   }
+   return *std::prev(end());
 }
 
 //===----------------------------------------------------------------------===//
@@ -1419,61 +1423,61 @@ const ValueBase *PILInstructionResultArray::back() const {
 
 Optional<unsigned>
 MultipleValueInstruction::getIndexOfResult(PILValue Target) const {
-  // First make sure we actually have one of our instruction results.
-  auto *MVIR = dyn_cast<MultipleValueInstructionResult>(Target);
-  if (!MVIR || MVIR->getParent() != this)
-    return None;
-  return MVIR->getIndex();
+   // First make sure we actually have one of our instruction results.
+   auto *MVIR = dyn_cast<MultipleValueInstructionResult>(Target);
+   if (!MVIR || MVIR->getParent() != this)
+      return None;
+   return MVIR->getIndex();
 }
 
 MultipleValueInstructionResult::MultipleValueInstructionResult(
-    ValueKind valueKind, unsigned index, PILType type,
-    ValueOwnershipKind ownershipKind)
-    : ValueBase(valueKind, type, IsRepresentative::No) {
-  setOwnershipKind(ownershipKind);
-  setIndex(index);
+   ValueKind valueKind, unsigned index, PILType type,
+   ValueOwnershipKind ownershipKind)
+   : ValueBase(valueKind, type, IsRepresentative::No) {
+   setOwnershipKind(ownershipKind);
+   setIndex(index);
 }
 
 void MultipleValueInstructionResult::setOwnershipKind(
-    ValueOwnershipKind NewKind) {
-  Bits.MultipleValueInstructionResult.VOKind = unsigned(NewKind);
+   ValueOwnershipKind NewKind) {
+   Bits.MultipleValueInstructionResult.VOKind = unsigned(NewKind);
 }
 
 void MultipleValueInstructionResult::setIndex(unsigned NewIndex) {
-  // We currently use 32 bits to store the Index. A previous comment wrote
-  // that "500k fields is probably enough".
-  Bits.MultipleValueInstructionResult.Index = NewIndex;
+   // We currently use 32 bits to store the Index. A previous comment wrote
+   // that "500k fields is probably enough".
+   Bits.MultipleValueInstructionResult.Index = NewIndex;
 }
 
 ValueOwnershipKind MultipleValueInstructionResult::getOwnershipKind() const {
-  return ValueOwnershipKind(Bits.MultipleValueInstructionResult.VOKind);
+   return ValueOwnershipKind(Bits.MultipleValueInstructionResult.VOKind);
 }
 
 MultipleValueInstruction *MultipleValueInstructionResult::getParent() {
-  char *Ptr = reinterpret_cast<char *>(
+   char *Ptr = reinterpret_cast<char *>(
       const_cast<MultipleValueInstructionResult *>(this));
 
-  // We know that we are in a trailing objects array with an extra prefix
-  // element that contains the pointer to our parent PILNode. So grab the
-  // address of the beginning of the array.
-  Ptr -= getIndex() * sizeof(MultipleValueInstructionResult);
+   // We know that we are in a trailing objects array with an extra prefix
+   // element that contains the pointer to our parent PILNode. So grab the
+   // address of the beginning of the array.
+   Ptr -= getIndex() * sizeof(MultipleValueInstructionResult);
 
-  // We may have some bytes of padding depending on our platform. Move past
-  // those bytes if we need to.
-  static_assert(alignof(MultipleValueInstructionResult) >=
-                    alignof(MultipleValueInstruction *),
-                "We assume this relationship in between the alignments");
-  Ptr -= alignof(MultipleValueInstructionResult) -
-         alignof(MultipleValueInstruction *);
+   // We may have some bytes of padding depending on our platform. Move past
+   // those bytes if we need to.
+   static_assert(alignof(MultipleValueInstructionResult) >=
+                 alignof(MultipleValueInstruction *),
+                 "We assume this relationship in between the alignments");
+   Ptr -= alignof(MultipleValueInstructionResult) -
+          alignof(MultipleValueInstruction *);
 
-  // Then subtract the size of MultipleValueInstruction.
-  Ptr -= sizeof(MultipleValueInstruction *);
+   // Then subtract the size of MultipleValueInstruction.
+   Ptr -= sizeof(MultipleValueInstruction *);
 
-  // Now that we have the correct address of our parent instruction, grab it and
-  // return it avoiding type punning.
-  uintptr_t value;
-  memcpy(&value, Ptr, sizeof(value));
-  return reinterpret_cast<MultipleValueInstruction *>(value);
+   // Now that we have the correct address of our parent instruction, grab it and
+   // return it avoiding type punning.
+   uintptr_t value;
+   memcpy(&value, Ptr, sizeof(value));
+   return reinterpret_cast<MultipleValueInstruction *>(value);
 }
 
 #ifndef NDEBUG

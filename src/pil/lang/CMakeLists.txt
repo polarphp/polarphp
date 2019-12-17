@@ -20,5 +20,10 @@ polar_merge_list(POLAR_PIL_LANG_SOURCES POLAR_HEADERS)
 
 polar_add_library(PolarPIL STATIC
    ${POLAR_PIL_LANG_SOURCES}
-   LINK_LIBS PolarUtils PolarKernel)
+   LINK_LIBS PolarUtils PolarKernel PolarAST)
+
+set_target_properties(
+   PolarPIL
+   PROPERTIES
+   INTERFACE_LINK_LIBRARIES "PolarAST")
 

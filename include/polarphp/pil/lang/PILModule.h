@@ -147,7 +147,7 @@ private:
   mutable llvm::BumpPtrAllocator BPA;
 
   /// The swift Module associated with this PILModule.
-  ModuleDecl *TheSwiftModule;
+  ModuleDecl *ThePolarphpModule;
 
   /// A specific context for AST-level declarations associated with this PIL
   /// module.
@@ -361,7 +361,7 @@ public:
                     bool WholeModule = false);
 
   /// Get the Swift module associated with this PIL module.
-  ModuleDecl *getPolarphpModule() const { return TheSwiftModule; }
+  ModuleDecl *getPolarphpModule() const { return ThePolarphpModule; }
   /// Get the AST context used for type uniquing etc. by this PIL module.
   AstContext &getAstContext() const;
   SourceManager &getSourceManager() const { return getAstContext().SourceMgr; }
@@ -372,7 +372,7 @@ public:
   /// processed as part of generating this module. This allows certain passes
   /// to make additional assumptions about these declarations.
   ///
-  /// If this is the same as TheSwiftModule, the entire module is being
+  /// If this is the same as ThePolarphpModule, the entire module is being
   /// compiled as a single unit. If this is null, no context-based assumptions
   /// can be made.
   const DeclContext *getAssociatedContext() const {

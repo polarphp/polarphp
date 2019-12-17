@@ -245,7 +245,7 @@ inline specificval_ty m_Specific(const ValueBase *V) { return V; }
 #define VALUE(Class, Parent)                                             \
   inline class_match<Class> m_##Class() { return class_match<Class>(); } \
   inline bind_ty<Class> m_##Class(Class *&V) { return V; }
-#include "polarphp/pil/lang/PILNodes.def"
+#include "polarphp/pil/lang/PILNodesDef.h"
 
 static inline APInt extendAPInt(const APInt &A, unsigned bitWidth,
                                 bool isSigned) {
@@ -311,7 +311,7 @@ namespace detail {
 struct GetOperandsFunctor {
    template <size_t... Idx>
    std::array<PILValue, sizeof...(Idx)>
-   operator()(PILInstruction *i, llvm::index_sequence<Idx...> seq) const {
+   operator()(PILInstruction *i, std::index_sequence<Idx...> seq) const {
       return {i->getOperand(Idx)...};
    }
 };
@@ -328,15 +328,15 @@ template <typename... MatcherTys> struct MatcherFunctor {
    template <size_t... Idx>
    std::array<bool, sizeof...(MatcherTys)>
    matchHelper(const std::array<PILValue, sizeof...(MatcherTys)> &operands,
-               llvm::index_sequence<Idx...> seq) {
+               std::index_sequence<Idx...> seq) {
       return {individual(std::get<Idx>(matchers), std::get<Idx>(operands))...};
    }
 
    bool match(PILInstruction *i) {
       std::array<PILValue, sizeof...(MatcherTys)> operands =
-      GetOperandsFunctor{}(i, llvm::index_sequence_for<MatcherTys...>{});
+      GetOperandsFunctor{}(i, std::index_sequence_for<MatcherTys...>{});
       auto tmpResult =
-      matchHelper(operands, llvm::index_sequence_for<MatcherTys...>{});
+      matchHelper(operands, std::index_sequence_for<MatcherTys...>{});
       for (unsigned i : indices(tmpResult)) {
          if (!tmpResult[i])
             return false;
@@ -385,7 +385,7 @@ struct InstructionOperand_match {
       const MatcherTys &... matchers) {                                        \
     return {matchers...};                                                      \
   }
-#include "polarphp/pil/lang/PILNodes.def"
+#include "polarphp/pil/lang/PILNodesDef.h"
 
 //===----------------------------------------------------------------------===//
 //                         Address/Struct Projections
@@ -662,7 +662,7 @@ using BuiltinApplyTy = typename Apply_match<BuiltinValueKind, Tys...>::Ty;
 #define BUILTIN(Id, Name, Attrs)
 
 // Define matchers for most of builtin instructions.
-#include "swift/AST/Builtins.def"
+#include "polarphp/ast/BuiltinsDef.h"
 
 //===
 // Convenience compound builtin instructions matchers that succeed

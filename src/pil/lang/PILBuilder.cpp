@@ -421,41 +421,42 @@ PILBuilder::emitDestroyValue(PILLocation Loc, PILValue Operand) {
    return createDestroyValue(Loc, Operand);
 }
 
-PILValue PILBuilder::emitThickToObjCMetatype(PILLocation Loc, PILValue Op,
-                                             PILType Ty) {
-   // If the operand is an otherwise-unused 'metatype' instruction in the
-   // same basic block, zap it and create a 'metatype' instruction that
-   // directly produces an Objective-C metatype.
-   if (auto metatypeInst = dyn_cast<MetatypeInst>(Op)) {
-      if (metatypeInst->use_empty() &&
-          metatypeInst->getParent() == getInsertionBB()) {
-         auto origLoc = metatypeInst->getLoc();
-         metatypeInst->eraseFromParent();
-         return createMetatype(origLoc, Ty);
-      }
-   }
+// @todo
+//PILValue PILBuilder::emitThickToObjCMetatype(PILLocation Loc, PILValue Op,
+//                                             PILType Ty) {
+//   // If the operand is an otherwise-unused 'metatype' instruction in the
+//   // same basic block, zap it and create a 'metatype' instruction that
+//   // directly produces an Objective-C metatype.
+//   if (auto metatypeInst = dyn_cast<MetatypeInst>(Op)) {
+//      if (metatypeInst->use_empty() &&
+//          metatypeInst->getParent() == getInsertionBB()) {
+//         auto origLoc = metatypeInst->getLoc();
+//         metatypeInst->eraseFromParent();
+//         return createMetatype(origLoc, Ty);
+//      }
+//   }
+//
+//   // Just create the thick_to_objc_metatype instruction.
+//   return createThickToObjCMetatype(Loc, Op, Ty);
+//}
 
-   // Just create the thick_to_objc_metatype instruction.
-   return createThickToObjCMetatype(Loc, Op, Ty);
-}
-
-PILValue PILBuilder::emitObjCToThickMetatype(PILLocation Loc, PILValue Op,
-                                             PILType Ty) {
-   // If the operand is an otherwise-unused 'metatype' instruction in the
-   // same basic block, zap it and create a 'metatype' instruction that
-   // directly produces a thick metatype.
-   if (auto metatypeInst = dyn_cast<MetatypeInst>(Op)) {
-      if (metatypeInst->use_empty() &&
-          metatypeInst->getParent() == getInsertionBB()) {
-         auto origLoc = metatypeInst->getLoc();
-         metatypeInst->eraseFromParent();
-         return createMetatype(origLoc, Ty);
-      }
-   }
-
-   // Just create the objc_to_thick_metatype instruction.
-   return createObjCToThickMetatype(Loc, Op, Ty);
-}
+//PILValue PILBuilder::emitObjCToThickMetatype(PILLocation Loc, PILValue Op,
+//                                             PILType Ty) {
+//   // If the operand is an otherwise-unused 'metatype' instruction in the
+//   // same basic block, zap it and create a 'metatype' instruction that
+//   // directly produces a thick metatype.
+//   if (auto metatypeInst = dyn_cast<MetatypeInst>(Op)) {
+//      if (metatypeInst->use_empty() &&
+//          metatypeInst->getParent() == getInsertionBB()) {
+//         auto origLoc = metatypeInst->getLoc();
+//         metatypeInst->eraseFromParent();
+//         return createMetatype(origLoc, Ty);
+//      }
+//   }
+//
+//   // Just create the objc_to_thick_metatype instruction.
+//   return createObjCToThickMetatype(Loc, Op, Ty);
+//}
 
 /// Add opened archetypes defined or used by the current instruction.
 /// If there are no such opened archetypes in the current instruction

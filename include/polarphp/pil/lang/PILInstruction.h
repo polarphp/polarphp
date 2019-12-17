@@ -4701,75 +4701,75 @@ public:
    /// closures.
    PILValue getCallee() const { return getOperand(); }
 };
-
+// @todo
 /// Given a thick metatype value, produces an Objective-C metatype
 /// value.
-class ThickToObjCMetatypeInst
-   : public UnaryInstructionBase<PILInstructionKind::ThickToObjCMetatypeInst,
-      ConversionInst>
-{
-   friend PILBuilder;
-
-   ThickToObjCMetatypeInst(PILDebugLocation DebugLoc, PILValue Operand,
-                           PILType Ty)
-      : UnaryInstructionBase(DebugLoc, Operand, Ty) {}
-};
-
-/// Given an Objective-C metatype value, produces a thick metatype
-/// value.
-class ObjCToThickMetatypeInst
-   : public UnaryInstructionBase<PILInstructionKind::ObjCToThickMetatypeInst,
-      ConversionInst>
-{
-   friend PILBuilder;
-
-   ObjCToThickMetatypeInst(PILDebugLocation DebugLoc, PILValue Operand,
-                           PILType Ty)
-      : UnaryInstructionBase(DebugLoc, Operand, Ty) {}
-};
-
-/// Given an Objective-C metatype value, convert it to an AnyObject value.
-class ObjCMetatypeToObjectInst
-   : public UnaryInstructionBase<PILInstructionKind::ObjCMetatypeToObjectInst,
-      ConversionInst>
-{
-   friend PILBuilder;
-
-   ObjCMetatypeToObjectInst(PILDebugLocation DebugLoc, PILValue Operand,
-                            PILType Ty)
-      : UnaryInstructionBase(DebugLoc, Operand, Ty) {}
-};
-
-/// Given an Objective-C existential metatype value, convert it to an AnyObject
-/// value.
-class ObjCExistentialMetatypeToObjectInst
-   : public UnaryInstructionBase<PILInstructionKind::ObjCExistentialMetatypeToObjectInst,
-      ConversionInst>
-{
-   friend PILBuilder;
-
-   ObjCExistentialMetatypeToObjectInst(PILDebugLocation DebugLoc,
-                                       PILValue Operand, PILType Ty)
-      : UnaryInstructionBase(DebugLoc, Operand, Ty) {}
-};
-
-/// Return the Objective-C Protocol class instance for a protocol.
-class ObjCProtocolInst
-   : public InstructionBase<PILInstructionKind::ObjCProtocolInst,
-      SingleValueInstruction> {
-   friend PILBuilder;
-
-   InterfaceDecl *Proto;
-   ObjCProtocolInst(PILDebugLocation DebugLoc, InterfaceDecl *Proto, PILType Ty)
-      : InstructionBase(DebugLoc, Ty),
-        Proto(Proto) {}
-
-public:
-   InterfaceDecl *getProtocol() const { return Proto; }
-
-   ArrayRef<Operand> getAllOperands() const { return {}; }
-   MutableArrayRef<Operand> getAllOperands() { return {}; }
-};
+//class ThickToObjCMetatypeInst
+//   : public UnaryInstructionBase<PILInstructionKind::ThickToObjCMetatypeInst,
+//      ConversionInst>
+//{
+//   friend PILBuilder;
+//
+//   ThickToObjCMetatypeInst(PILDebugLocation DebugLoc, PILValue Operand,
+//                           PILType Ty)
+//      : UnaryInstructionBase(DebugLoc, Operand, Ty) {}
+//};
+//
+///// Given an Objective-C metatype value, produces a thick metatype
+///// value.
+//class ObjCToThickMetatypeInst
+//   : public UnaryInstructionBase<PILInstructionKind::ObjCToThickMetatypeInst,
+//      ConversionInst>
+//{
+//   friend PILBuilder;
+//
+//   ObjCToThickMetatypeInst(PILDebugLocation DebugLoc, PILValue Operand,
+//                           PILType Ty)
+//      : UnaryInstructionBase(DebugLoc, Operand, Ty) {}
+//};
+//
+///// Given an Objective-C metatype value, convert it to an AnyObject value.
+//class ObjCMetatypeToObjectInst
+//   : public UnaryInstructionBase<PILInstructionKind::ObjCMetatypeToObjectInst,
+//      ConversionInst>
+//{
+//   friend PILBuilder;
+//
+//   ObjCMetatypeToObjectInst(PILDebugLocation DebugLoc, PILValue Operand,
+//                            PILType Ty)
+//      : UnaryInstructionBase(DebugLoc, Operand, Ty) {}
+//};
+//
+///// Given an Objective-C existential metatype value, convert it to an AnyObject
+///// value.
+//class ObjCExistentialMetatypeToObjectInst
+//   : public UnaryInstructionBase<PILInstructionKind::ObjCExistentialMetatypeToObjectInst,
+//      ConversionInst>
+//{
+//   friend PILBuilder;
+//
+//   ObjCExistentialMetatypeToObjectInst(PILDebugLocation DebugLoc,
+//                                       PILValue Operand, PILType Ty)
+//      : UnaryInstructionBase(DebugLoc, Operand, Ty) {}
+//};
+//
+///// Return the Objective-C Protocol class instance for a protocol.
+//class ObjCProtocolInst
+//   : public InstructionBase<PILInstructionKind::ObjCProtocolInst,
+//      SingleValueInstruction> {
+//   friend PILBuilder;
+//
+//   InterfaceDecl *Proto;
+//   ObjCProtocolInst(PILDebugLocation DebugLoc, InterfaceDecl *Proto, PILType Ty)
+//      : InstructionBase(DebugLoc, Ty),
+//        Proto(Proto) {}
+//
+//public:
+//   InterfaceDecl *getProtocol() const { return Proto; }
+//
+//   ArrayRef<Operand> getAllOperands() const { return {}; }
+//   MutableArrayRef<Operand> getAllOperands() { return {}; }
+//};
 
 
 /// Perform an unconditional checked cast that aborts if the cast fails.

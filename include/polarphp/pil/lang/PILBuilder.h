@@ -1101,23 +1101,24 @@ public:
          getPILDebugLocation(Loc), Op, Ty, getFunction(), C.OpenedArchetypes));
    }
 
-   ThickToObjCMetatypeInst *createThickToObjCMetatype(PILLocation Loc,
-                                                      PILValue Op, PILType Ty) {
-      return insert(new (getModule()) ThickToObjCMetatypeInst(
-         getPILDebugLocation(Loc), Op, Ty));
-   }
-
-   ObjCToThickMetatypeInst *createObjCToThickMetatype(PILLocation Loc,
-                                                      PILValue Op, PILType Ty) {
-      return insert(new (getModule()) ObjCToThickMetatypeInst(
-         getPILDebugLocation(Loc), Op, Ty));
-   }
-
-   ObjCProtocolInst *createObjCInterface(PILLocation Loc, InterfaceDecl *P,
-                                        PILType Ty) {
-      return insert(new (getModule())
-                       ObjCProtocolInst(getPILDebugLocation(Loc), P, Ty));
-   }
+   // @todo
+//   ThickToObjCMetatypeInst *createThickToObjCMetatype(PILLocation Loc,
+//                                                      PILValue Op, PILType Ty) {
+//      return insert(new (getModule()) ThickToObjCMetatypeInst(
+//         getPILDebugLocation(Loc), Op, Ty));
+//   }
+//
+//   ObjCToThickMetatypeInst *createObjCToThickMetatype(PILLocation Loc,
+//                                                      PILValue Op, PILType Ty) {
+//      return insert(new (getModule()) ObjCToThickMetatypeInst(
+//         getPILDebugLocation(Loc), Op, Ty));
+//   }
+//
+//   ObjCProtocolInst *createObjCInterface(PILLocation Loc, InterfaceDecl *P,
+//                                        PILType Ty) {
+//      return insert(new (getModule())
+//                       ObjCProtocolInst(getPILDebugLocation(Loc), P, Ty));
+//   }
 
    CopyValueInst *createCopyValue(PILLocation Loc, PILValue operand) {
       assert(!operand->getType().isTrivial(getFunction()) &&
@@ -1639,18 +1640,19 @@ public:
                                          &getFunction(), C.OpenedArchetypes));
    }
 
-   ObjCMetatypeToObjectInst *
-   createObjCMetatypeToObject(PILLocation Loc, PILValue Op, PILType Ty) {
-      return insert(new (getModule()) ObjCMetatypeToObjectInst(
-         getPILDebugLocation(Loc), Op, Ty));
-   }
-
-   ObjCExistentialMetatypeToObjectInst *
-   createObjCExistentialMetatypeToObject(PILLocation Loc, PILValue Op,
-                                         PILType Ty) {
-      return insert(new (getModule()) ObjCExistentialMetatypeToObjectInst(
-         getPILDebugLocation(Loc), Op, Ty));
-   }
+   // @todo
+//   ObjCMetatypeToObjectInst *
+//   createObjCMetatypeToObject(PILLocation Loc, PILValue Op, PILType Ty) {
+//      return insert(new (getModule()) ObjCMetatypeToObjectInst(
+//         getPILDebugLocation(Loc), Op, Ty));
+//   }
+//
+//   ObjCExistentialMetatypeToObjectInst *
+//   createObjCExistentialMetatypeToObject(PILLocation Loc, PILValue Op,
+//                                         PILType Ty) {
+//      return insert(new (getModule()) ObjCExistentialMetatypeToObjectInst(
+//         getPILDebugLocation(Loc), Op, Ty));
+//   }
 
    ValueMetatypeInst *createValueMetatype(PILLocation Loc, PILType Metatype,
                                           PILValue Base);

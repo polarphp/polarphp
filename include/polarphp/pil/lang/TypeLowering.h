@@ -515,8 +515,8 @@ public:
    // The latter is made challenging because the existence of the
    // virtual destructor requires an accessible 'operator delete'.
    void *operator new(size_t) = delete;
-
-protected:
+   // @todo
+//protected:
    void operator delete(void*) {}
 };
 
@@ -1074,7 +1074,7 @@ private:
 };
 
 } // namespace lowering
-} // namespace swift
+} // namespace polar
 
 namespace llvm {
 template<> struct DenseMapInfo<polar::lowering::TypeConverter::CachingTypeKey> {
