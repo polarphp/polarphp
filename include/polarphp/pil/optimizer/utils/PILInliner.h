@@ -1,4 +1,4 @@
-//===--- SILInliner.h - Inlines SIL functions -------------------*- C++ -*-===//
+//===--- PILInliner.h - Inlines PIL functions -------------------*- C++ -*-===//
 //
 // This source file is part of the Swift.org open source project
 //
@@ -10,24 +10,24 @@
 //
 //===----------------------------------------------------------------------===//
 //
-// This file defines the SILInliner class, used for inlining SIL functions into
+// This file defines the PILInliner class, used for inlining PIL functions into
 // function application sites
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef POLARPHP_PIL_OPTIMIZER_UTILS_SILINLINER_H
-#define POLARPHP_PIL_OPTIMIZER_UTILS_SILINLINER_H
+#ifndef POLARPHP_PIL_OPTIMIZER_UTILS_PILINLINER_H
+#define POLARPHP_PIL_OPTIMIZER_UTILS_PILINLINER_H
 
-#include "swift/AST/SubstitutionMap.h"
-#include "swift/SIL/ApplySite.h"
-#include "swift/SIL/SILInstruction.h"
-#include "swift/SIL/SILOpenedArchetypesTracker.h"
+#include "polarphp/ast/SubstitutionMap.h"
+#include "polarphp/pil/lang/ApplySite.h"
+#include "polarphp/pil/lang/PILInstruction.h"
+#include "polarphp/pil/lang/PILOpenedArchetypesTracker.h"
 #include "llvm/ADT/DenseMap.h"
 #include <functional>
 
-namespace swift {
+namespace polar {
 
-class SILOptFunctionBuilder;
+class PILOptFunctionBuilder;
 
 // For now Free is 0 and Expensive is 1. This can be changed in the future by
 // adding more categories.
@@ -38,26 +38,26 @@ enum class InlineCost : unsigned {
 
 /// Return the 'cost' of one instruction. Instructions that are expected to
 /// disappear at the LLVM IR level are assigned a cost of 'Free'.
-InlineCost instructionInlineCost(SILInstruction &I);
+InlineCost instructionInlineCost(PILInstruction &I);
 
-class SILInliner {
+class PILInliner {
 public:
   enum class InlineKind { MandatoryInline, PerformanceInline };
 
-  using DeletionFuncTy = std::function<void(SILInstruction *)>;
+  using DeletionFuncTy = std::function<void(PILInstruction *)>;
 
 private:
-  SILOptFunctionBuilder &FuncBuilder;
+  PILOptFunctionBuilder &FuncBuilder;
   InlineKind IKind;
   SubstitutionMap ApplySubs;
-  SILOpenedArchetypesTracker &OpenedArchetypesTracker;
+  PILOpenedArchetypesTracker &OpenedArchetypesTracker;
 
   DeletionFuncTy DeletionCallback;
 
 public:
-  SILInliner(SILOptFunctionBuilder &FuncBuilder, InlineKind IKind,
+  PILInliner(PILOptFunctionBuilder &FuncBuilder, InlineKind IKind,
              SubstitutionMap ApplySubs,
-             SILOpenedArchetypesTracker &OpenedArchetypesTracker)
+             PILOpenedArchetypesTracker &OpenedArchetypesTracker)
       : FuncBuilder(FuncBuilder), IKind(IKind), ApplySubs(ApplySubs),
         OpenedArchetypesTracker(OpenedArchetypesTracker) {}
 
@@ -82,7 +82,7 @@ public:
   /// registered callback is called from
   /// recursivelyDeleteTriviallyDeadInstructions.
   ///
-  /// (This is safer than the SILModule deletion callback because the
+  /// (This is safer than the PILModule deletion callback because the
   /// instruction is still in a valid form and its operands can be inspected.)
   void setDeletionCallback(DeletionFuncTy f) { DeletionCallback = f; }
 
@@ -107,7 +107,7 @@ public:
   ///
   /// *NOTE*: This attempts to perform inlining unconditionally and thus asserts
   /// if inlining will fail. All users /must/ check that a function is allowed
-  /// to be inlined using SILInliner::canInlineApplySite before calling this
+  /// to be inlined using PILInliner::canInlineApplySite before calling this
   /// function.
   ///
   /// *NOTE*: Inlining can result in improperly nested stack allocations, which
@@ -117,20 +117,20 @@ public:
   /// caller block for empty functions) and the last block in function order
   /// containing inlined instructions (the original caller block for
   /// single-block functions).
-  std::pair<SILBasicBlock::iterator, SILBasicBlock *>
-  inlineFunction(SILFunction *calleeFunction, FullApplySite apply,
-                 ArrayRef<SILValue> appliedArgs);
+  std::pair<PILBasicBlock::iterator, PILBasicBlock *>
+  inlineFunction(PILFunction *calleeFunction, FullApplySite apply,
+                 ArrayRef<PILValue> appliedArgs);
 
   /// Inline the function called by the given full apply site. This creates
-  /// an instance of SILInliner by constructing a substitution map and
+  /// an instance of PILInliner by constructing a substitution map and
   /// OpenedArchetypesTracker from the given apply site, and invokes
-  /// `inlineFunction` method on the SILInliner instance to inline the callee.
+  /// `inlineFunction` method on the PILInliner instance to inline the callee.
   /// This requires the full apply site to be a direct call i.e., the apply
   /// instruction must have a function ref.
   ///
   /// *NOTE*:This attempts to perform inlining unconditionally and thus asserts
   /// if inlining will fail. All users /must/ check that a function is allowed
-  /// to be inlined using SILInliner::canInlineApplySite before calling this
+  /// to be inlined using PILInliner::canInlineApplySite before calling this
   /// function.
   ///
   /// *NOTE*: Inlining can result in improperly nested stack allocations, which
@@ -140,11 +140,11 @@ public:
   /// caller block for empty functions) and the last block in function order
   /// containing inlined instructions (the original caller block for
   /// single-block functions).
-  static std::pair<SILBasicBlock::iterator, SILBasicBlock *>
-  inlineFullApply(FullApplySite apply, SILInliner::InlineKind inlineKind,
-                  SILOptFunctionBuilder &funcBuilder);
+  static std::pair<PILBasicBlock::iterator, PILBasicBlock *>
+  inlineFullApply(FullApplySite apply, PILInliner::InlineKind inlineKind,
+                  PILOptFunctionBuilder &funcBuilder);
 };
 
-} // end namespace swift
+} // end namespace polar
 
 #endif

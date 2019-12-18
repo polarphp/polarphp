@@ -15,7 +15,7 @@
 /// This is an analysis which determines if a block is a "program terminating
 /// block". Define a program terminating block is defined as follows:
 ///
-/// 1. A block at whose end point according to the SIL model, the program must
+/// 1. A block at whose end point according to the PIL model, the program must
 /// end. An example of such a block is one that includes a call to fatalError.
 /// 2. Any block that is joint post-dominated by program terminating blocks.
 ///
@@ -34,10 +34,10 @@
 namespace polar {
 
 class ProgramTerminationFunctionInfo {
-   llvm::SmallPtrSet<const SILBasicBlock *, 4> ProgramTerminatingBlocks;
+   llvm::SmallPtrSet<const PILBasicBlock *, 4> ProgramTerminatingBlocks;
 
 public:
-   ProgramTerminationFunctionInfo(const SILFunction *F) {
+   ProgramTerminationFunctionInfo(const PILFunction *F) {
       for (const auto &BB : *F) {
          if (!isARCInertTrapBB(&BB))
             continue;
@@ -45,7 +45,7 @@ public:
       }
    }
 
-   bool isProgramTerminatingBlock(const SILBasicBlock *BB) const {
+   bool isProgramTerminatingBlock(const PILBasicBlock *BB) const {
       return ProgramTerminatingBlocks.count(BB);
    }
 };

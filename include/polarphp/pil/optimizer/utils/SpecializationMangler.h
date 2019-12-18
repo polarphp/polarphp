@@ -28,10 +28,10 @@ enum class SpecializationKind : uint8_t {
 };
 
 /// Inject SpecializationPass into the Mangle namespace.
-using SpecializationPass = Demangle::SpecializationPass;
+using SpecializationPass = demangling::SpecializationPass;
 
 /// The base class for specialization mangles.
-class SpecializationMangler : public Mangle::ASTMangler {
+class SpecializationMangler : public mangle::AstMangler {
 protected:
   /// The specialization pass.
   SpecializationPass Pass;

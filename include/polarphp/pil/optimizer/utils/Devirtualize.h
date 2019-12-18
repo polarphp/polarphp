@@ -55,10 +55,10 @@ void getAllSubclasses(ClassHierarchyAnalysis *CHA,
 /// \p Module PILModule
 /// \p AI ApplySite that applies a procotol method
 /// \p F PILFunction with convention @convention(witness_method)
-/// \p CRef a concrete ProtocolConformanceRef
+/// \p CRef a concrete InterfaceConformanceRef
 SubstitutionMap getWitnessMethodSubstitutions(PILModule &Module, ApplySite AI,
                                               PILFunction *F,
-                                              ProtocolConformanceRef CRef);
+                                              InterfaceConformanceRef CRef);
 
 /// Attempt to devirtualize the given apply site.  If this fails,
 /// the returned ApplySite will be null.
@@ -117,6 +117,6 @@ ApplySite tryDevirtualizeWitnessMethod(ApplySite AI, optremark::Emitter *ORE);
 /// good enough reason to complicate the API.
 void deleteDevirtualizedApply(ApplySite AI);
 
-} // end namespace swift
+} // end namespace polar
 
 #endif

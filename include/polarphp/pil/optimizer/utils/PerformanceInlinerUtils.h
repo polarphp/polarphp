@@ -23,6 +23,7 @@
 #include "polarphp/pil/optimizer/utils/ConstantFolding.h"
 #include "polarphp/pil/optimizer/utils/PILInliner.h"
 #include "llvm/ADT/SmallVector.h"
+#include "llvm/Support/CommandLine.h"
 
 
 extern llvm::cl::opt<bool> EnablePILInliningOfGenerics;

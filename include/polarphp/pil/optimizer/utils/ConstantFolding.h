@@ -82,7 +82,7 @@ public:
    ConstantFolder(PILOptFunctionBuilder &FuncBuilder,
                   unsigned AssertConfiguration,
                   bool EnableDiagnostics = false,
-                  std::function<void (PILIConstExpr.hnstruction *)> Callback =
+                  std::function<void (PILInstruction *)> Callback =
                   [](PILInstruction *){}) :
       FuncBuilder(FuncBuilder),
       AssertConfiguration(AssertConfiguration),

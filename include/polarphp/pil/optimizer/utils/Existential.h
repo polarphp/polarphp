@@ -87,25 +87,25 @@ struct ConcreteExistentialInfo {
   ConcreteExistentialInfo(PILValue existential, PILInstruction *user);
 
   // This constructor initializes a ConcreteExistentialInfo based on already
-  // known ConcreteType and ProtocolDecl pair.
+  // known ConcreteType and InterfaceDecl pair.
   ConcreteExistentialInfo(PILValue existential, PILInstruction *user,
-                          CanType ConcreteType, ProtocolDecl *Protocol);
+                          CanType ConcreteType, InterfaceDecl *Interface);
 
   /// For scenerios where ConcreteExistentialInfo is created using a known
-  /// ConcreteType and ProtocolDecl, the ConcreteValue can be null.
+  /// ConcreteType and InterfaceDecl, the ConcreteValue can be null.
   bool isValid() const { return ConcreteType && !ExistentialSubs.empty(); }
 
   // Do a conformance lookup on ConcreteType with the given requirement, P. If P
   // is satisfiable based on the existential's conformance, return the new
   // conformance on P. Otherwise return None.
-  ProtocolConformanceRef lookupExistentialConformance(ProtocolDecl *P) const {
+  InterfaceConformanceRef lookupExistentialConformance(InterfaceDecl *P) const {
     CanType selfTy = P->getSelfInterfaceType()->getCanonicalType();
     return ExistentialSubs.lookupConformance(selfTy, P);
   }
 
 private:
   void initializeSubstitutionMap(
-      ArrayRef<ProtocolConformanceRef> ExistentialConformances, PILModule *M);
+      ArrayRef<InterfaceConformanceRef> ExistentialConformances, PILModule *M);
 
   void initializeConcreteTypeDef(PILInstruction *typeConversionInst);
 };
@@ -122,7 +122,7 @@ struct ConcreteOpenedExistentialInfo {
   // Provide a whole module type-inferred ConcreteType to fall back on if the
   // concrete type cannot be determined from data flow.
   ConcreteOpenedExistentialInfo(Operand &use, CanType concreteType,
-                                ProtocolDecl *protocol);
+                                InterfaceDecl *protocol);
 
   bool isValid() const {
     if (!CEI)
