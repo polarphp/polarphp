@@ -4753,19 +4753,19 @@ public:
 //      : UnaryInstructionBase(DebugLoc, Operand, Ty) {}
 //};
 //
-///// Return the Objective-C Protocol class instance for a protocol.
-//class ObjCProtocolInst
-//   : public InstructionBase<PILInstructionKind::ObjCProtocolInst,
+///// Return the Objective-C Interface class instance for a protocol.
+//class ObjCInterfaceInst
+//   : public InstructionBase<PILInstructionKind::ObjCInterfaceInst,
 //      SingleValueInstruction> {
 //   friend PILBuilder;
 //
 //   InterfaceDecl *Proto;
-//   ObjCProtocolInst(PILDebugLocation DebugLoc, InterfaceDecl *Proto, PILType Ty)
+//   ObjCInterfaceInst(PILDebugLocation DebugLoc, InterfaceDecl *Proto, PILType Ty)
 //      : InstructionBase(DebugLoc, Ty),
 //        Proto(Proto) {}
 //
 //public:
-//   InterfaceDecl *getProtocol() const { return Proto; }
+//   InterfaceDecl *getInterface() const { return Proto; }
 //
 //   ArrayRef<Operand> getAllOperands() const { return {}; }
 //   MutableArrayRef<Operand> getAllOperands() { return {}; }
@@ -5995,7 +5995,7 @@ class WitnessMethodInst final
 
 public:
    CanType getLookupType() const { return LookupType; }
-   InterfaceDecl *getLookupProtocol() const {
+   InterfaceDecl *getLookupInterface() const {
       return getMember().getDecl()->getDeclContext()->getSelfInterfaceDecl();
    }
 

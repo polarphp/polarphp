@@ -199,8 +199,9 @@ public:
    PILInstruction *visitSelectEnumInst(SelectEnumInst *EIT);
    PILInstruction *visitSelectEnumAddrInst(SelectEnumAddrInst *EIT);
    PILInstruction *visitAllocExistentialBoxInst(AllocExistentialBoxInst *S);
-   PILInstruction *visitThickToObjCMetatypeInst(ThickToObjCMetatypeInst *TTOCMI);
-   PILInstruction *visitObjCToThickMetatypeInst(ObjCToThickMetatypeInst *OCTTMI);
+   // @todo
+//   PILInstruction *visitThickToObjCMetatypeInst(ThickToObjCMetatypeInst *TTOCMI);
+//   PILInstruction *visitObjCToThickMetatypeInst(ObjCToThickMetatypeInst *OCTTMI);
    PILInstruction *visitTupleExtractInst(TupleExtractInst *TEI);
    PILInstruction *visitFixLifetimeInst(FixLifetimeInst *FLI);
    PILInstruction *visitSwitchValueInst(SwitchValueInst *SVI);
