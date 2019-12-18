@@ -148,6 +148,11 @@ public:
       }
    }
 
+   void Profile(llvm::FoldingSetNodeID &id) const
+   {
+      profile(id);
+   }
+
    ImmutablePointerSet<T> *merge(ImmutablePointerSet<T> *other)
    {
       if (empty()) {

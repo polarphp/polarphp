@@ -49,10 +49,10 @@ public:
    const_iterator end() const { return Vector.end(); }
 
    iterator_range<iterator> getItems() {
-      return swift::make_range(begin(), end());
+      return polar::make_range(begin(), end());
    }
    iterator_range<const_iterator> getItems() const {
-      return swift::make_range(begin(), end());
+      return polar::make_range(begin(), end());
    }
 
    ValueT &operator[](const KeyT &Arg) {
