@@ -19,13 +19,13 @@
 #define POLARPHP_PIL_TYPESUBSTCLONER_H
 
 #include "polarphp/ast/GenericEnvironment.h"
-#include "polarphp/ast/ProtocolConformance.h"
+#include "polarphp/ast/InterfaceConformance.h"
 #include "polarphp/ast/Type.h"
 #include "polarphp/pil/lang/DynamicCasts.h"
 #include "polarphp/pil/lang/PILCloner.h"
 #include "polarphp/pil/lang/PILFunctionBuilder.h"
-#include "polarphp/pil/lang/optimizer/utils/InstOptUtils.h"
-#include "polarphp/pil/lang/optimizer/utils/SpecializationMangler.h"
+#include "polarphp/pil/optimizer/utils/InstOptUtils.h"
+#include "polarphp/pil/optimizer/utils/SpecializationMangler.h"
 #include "llvm/Support/Debug.h"
 
 namespace polar {
@@ -148,7 +148,7 @@ public:
                    PILOpenedArchetypesTracker &OpenedArchetypesTracker,
                    bool Inlining = false)
       : PILClonerWithScopes<ImplClass>(To, OpenedArchetypesTracker, Inlining),
-        SwiftMod(From.getModule().getSwiftModule()),
+        PolarphpMod(From.getModule().getPolarphpModule()),
         SubsMap(ApplySubs),
         Original(From),
         Inlining(Inlining) {
@@ -159,7 +159,7 @@ public:
                    SubstitutionMap ApplySubs,
                    bool Inlining = false)
       : PILClonerWithScopes<ImplClass>(To, Inlining),
-        SwiftMod(From.getModule().getSwiftModule()),
+        PolarphpMod(From.getModule().getPolarphpModule()),
         SubsMap(ApplySubs),
         Original(From),
         Inlining(Inlining) {
@@ -193,8 +193,8 @@ protected:
          TypeExpansionContext(getBuilder().getFunction()), substTy);
    }
 
-   ProtocolConformanceRef remapConformance(Type ty,
-                                           ProtocolConformanceRef conf) {
+   InterfaceConformanceRef remapConformance(Type ty,
+                                           InterfaceConformanceRef conf) {
       auto conformance = conf.subst(ty, SubsMap);
       auto substTy = ty.subst(SubsMap)->getCanonicalType();
       auto context = getBuilder().getTypeExpansionContext();
@@ -272,7 +272,7 @@ protected:
       if (canUseScalarCheckedCastInstructions(B.getModule(),
                                               sourceType, targetType)) {
          emitIndirectConditionalCastWithScalar(
-            B, SwiftMod, loc, inst->getConsumptionKind(), src, sourceType, dest,
+            B, PolarphpMod, loc, inst->getConsumptionKind(), src, sourceType, dest,
             targetType, succBB, failBB, TrueCount, FalseCount);
          return;
       }
@@ -370,7 +370,7 @@ protected:
          return ParentFunction;
 
       // Clone the function with the substituted type for the debug info.
-      Mangle::GenericSpecializationMangler Mangler(
+      mangle::GenericSpecializationMangler Mangler(
          ParentFunction, SubsMap, IsNotSerialized, false, ForInlining);
       std::string MangledName = Mangler.mangle(RemappedSig);
 
