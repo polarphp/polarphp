@@ -86,7 +86,7 @@ public:
    /// Return the first instruction of the function containing the memory object.
    PILInstruction *getFunctionEntryPoint() const;
 
-   CanType getType() const { return MemoryPILType.getASTType(); }
+   CanType getType() const { return MemoryPILType.getAstType(); }
 
    SingleValueInstruction *getAddress() const {
       if (isa<AllocStackInst>(MemoryInst))
