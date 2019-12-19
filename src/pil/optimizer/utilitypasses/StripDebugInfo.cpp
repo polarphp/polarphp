@@ -39,7 +39,6 @@ class StripDebugInfo : public polar::PILFunctionTransform {
       stripFunction(getFunction());
       invalidateAnalysis(PILAnalysis::InvalidationKind::Instructions);
    }
-
 };
 } // end anonymous namespace
 

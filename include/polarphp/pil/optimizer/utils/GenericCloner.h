@@ -23,7 +23,7 @@
 #include "polarphp/pil/lang/PILInstruction.h"
 #include "polarphp/pil/lang/TypeSubstCloner.h"
 #include "polarphp/pil/optimizer/utils/BasicBlockOptUtils.h"
-#include "polarphp/pil/optimizer/utils/Generic.h"
+#include "polarphp/pil/optimizer/utils/Generics.h"
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/StringRef.h"
 #include <functional>
