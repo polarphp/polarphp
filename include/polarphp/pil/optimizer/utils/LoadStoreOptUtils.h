@@ -391,9 +391,10 @@ static inline llvm::hash_code hash_value(const LSLocation &L) {
 
 /// LSLocation and LSValue are used in DenseMap.
 namespace llvm {
-using swift::LSBase;
-using swift::LSLocation;
-using swift::LSValue;
+
+using polar::LSBase;
+using polar::LSLocation;
+using polar::LSValue;
 
 template <> struct DenseMapInfo<LSValue> {
    static inline LSValue getEmptyKey() {

@@ -120,7 +120,7 @@ public:
   bool DisablePILPartialApply = false;
 
   /// The name of the PIL outputfile if compiled with PIL debugging (-gsil).
-  std::string PILOutputFileNameForDebug;
+  std::string PILOutputFileNameForDebugging;
 
   /// If set to true, compile with the PIL Ownership Model enabled.
   bool VerifyPILOwnership = true;

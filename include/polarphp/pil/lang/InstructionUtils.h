@@ -30,6 +30,7 @@ PILValue getUnderlyingObject(PILValue V);
 /// This is similar to getUnderlyingObject, except that it does not strip any
 /// object-to-address projections, like ref_element_addr. In other words, the
 /// result is always an address value.
+
 PILValue getUnderlyingAddressRoot(PILValue V);
 
 PILValue getUnderlyingObjectStopAtMarkDependence(PILValue V);
