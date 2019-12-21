@@ -30,7 +30,7 @@ template<typename ImplClass,
    typename DeclRetTy = void,
    typename PatternRetTy = void,
    typename... Args>
-class AstVisitor : public polar::ast::AstVisitor<ImplClass,
+class AstVisitor : public polar::AstVisitor<ImplClass,
    ExprRetTy,
    StmtRetTy,
    DeclRetTy,
@@ -45,7 +45,7 @@ public:
   ExprRetTy visit##Id##Expr(Id##Expr *E, Args...AA) { \
     llvm_unreachable(#Id "Expr should not survive to SILGen"); \
   }
-#include "swift/AST/ExprNodes.def"
+#include "polarphp/ast/ExprNodesDef.h"
 
    ExprRetTy visitErrorExpr(ErrorExpr *E, Args...AA) {
       llvm_unreachable("expression kind should not survive to SILGen");

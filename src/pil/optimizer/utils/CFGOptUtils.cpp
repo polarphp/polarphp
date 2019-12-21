@@ -353,8 +353,8 @@ void polar::replaceBranchTarget(TermInst *t, PILBasicBlock *oldDest,
 
       case TermKind::DynamicMethodBranchInst: {
          auto dmbi = cast<DynamicMethodBranchInst>(t);
-         assert(oldDest == dmbi->getHasMethodBB()
-                || oldDest == dmbi->getNoMethodBB() && "Invalid edge index");
+         assert((oldDest == dmbi->getHasMethodBB()
+                         || oldDest == dmbi->getNoMethodBB()) && "Invalid edge index");
          auto hasMethodBB =
             oldDest == dmbi->getHasMethodBB() ? newDest : dmbi->getHasMethodBB();
          auto noMethodBB =
@@ -368,8 +368,8 @@ void polar::replaceBranchTarget(TermInst *t, PILBasicBlock *oldDest,
 
       case TermKind::CheckedCastBranchInst: {
          auto cbi = cast<CheckedCastBranchInst>(t);
-         assert(oldDest == cbi->getSuccessBB()
-                || oldDest == cbi->getFailureBB() && "Invalid edge index");
+         assert((oldDest == cbi->getSuccessBB()
+                         || oldDest == cbi->getFailureBB()) && "Invalid edge index");
          auto successBB =
             oldDest == cbi->getSuccessBB() ? newDest : cbi->getSuccessBB();
          auto failureBB =
@@ -384,8 +384,8 @@ void polar::replaceBranchTarget(TermInst *t, PILBasicBlock *oldDest,
 
       case TermKind::CheckedCastValueBranchInst: {
          auto cbi = cast<CheckedCastValueBranchInst>(t);
-         assert(oldDest == cbi->getSuccessBB()
-                || oldDest == cbi->getFailureBB() && "Invalid edge index");
+         assert((oldDest == cbi->getSuccessBB()
+                         || oldDest == cbi->getFailureBB()) && "Invalid edge index");
          auto successBB =
             oldDest == cbi->getSuccessBB() ? newDest : cbi->getSuccessBB();
          auto failureBB =
@@ -400,8 +400,8 @@ void polar::replaceBranchTarget(TermInst *t, PILBasicBlock *oldDest,
 
       case TermKind::CheckedCastAddrBranchInst: {
          auto cbi = cast<CheckedCastAddrBranchInst>(t);
-         assert(oldDest == cbi->getSuccessBB()
-                || oldDest == cbi->getFailureBB() && "Invalid edge index");
+         assert((oldDest == cbi->getSuccessBB()
+                         || oldDest == cbi->getFailureBB()) && "Invalid edge index");
          auto successBB =
             oldDest == cbi->getSuccessBB() ? newDest : cbi->getSuccessBB();
          auto failureBB =
@@ -551,8 +551,8 @@ bool polar::splitAllCriticalEdges(PILFunction &f, DominanceInfo *domInfo,
       for (unsigned idx = 0, e = bb.getSuccessors().size(); idx != e; ++idx) {
          auto *newBB =
             splitCriticalEdge(bb.getTerminator(), idx, domInfo, loopInfo);
-         assert(!newBB
-                || isa<CondBranchInst>(bb.getTerminator())
+         assert((!newBB
+                         || isa<CondBranchInst>(bb.getTerminator()))
                    && "Only cond_br may have a critical edge.");
          changed |= (newBB != nullptr);
       }

@@ -15,7 +15,7 @@
 
 #include "polarphp/ast/ForeignErrorConvention.h"
 #include "polarphp/ast/Types.h"
-#include "polarphp/pil/AbstractionPattern.h"
+#include "polarphp/pil/lang/AbstractionPattern.h"
 
 namespace polar::lowering {
 

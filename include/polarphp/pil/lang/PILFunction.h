@@ -34,7 +34,7 @@
 #include "llvm/ADT/ilist_node.h"
 
 /// The symbol name used for the program entry point function.
-#define POLAR_RENTRY_POINT_FUNCTION "main"
+#define POLAR_ENTRY_POINT_FUNCTION "main"
 
 /// @todo cycle dependency
 

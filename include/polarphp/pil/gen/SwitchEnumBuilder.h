@@ -156,7 +156,7 @@ public:
   }
 
   void addOptionalSomeCase(PILBasicBlock *caseBlock) {
-    auto *decl = getSGF().getASTContext().getOptionalSomeDecl();
+    auto *decl = getSGF().getAstContext().getOptionalSomeDecl();
     caseDataArray.emplace_back(
         decl, caseBlock, nullptr,
         [](ManagedValue mv, SwitchCaseFullExpr &&expr) { expr.exit(); },
@@ -164,7 +164,7 @@ public:
   }
 
   void addOptionalNoneCase(PILBasicBlock *caseBlock) {
-    auto *decl = getSGF().getASTContext().getOptionalNoneDecl();
+    auto *decl = getSGF().getAstContext().getOptionalNoneDecl();
     caseDataArray.emplace_back(
         decl, caseBlock, nullptr,
         [](ManagedValue mv, SwitchCaseFullExpr &&expr) { expr.exit(); },
@@ -175,7 +175,7 @@ public:
                            SwitchCaseBranchDest branchDest,
                            NormalCaseHandler handle,
                            ProfileCounter count = ProfileCounter()) {
-    auto *decl = getSGF().getASTContext().getOptionalSomeDecl();
+    auto *decl = getSGF().getAstContext().getOptionalSomeDecl();
     caseDataArray.emplace_back(decl, caseBlock, branchDest, handle, count);
   }
 
@@ -183,7 +183,7 @@ public:
                            SwitchCaseBranchDest branchDest,
                            NormalCaseHandler handle,
                            ProfileCounter count = ProfileCounter()) {
-    auto *decl = getSGF().getASTContext().getOptionalNoneDecl();
+    auto *decl = getSGF().getAstContext().getOptionalNoneDecl();
     caseDataArray.emplace_back(decl, caseBlock, branchDest, handle, count);
   }
 

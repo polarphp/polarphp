@@ -7,8 +7,17 @@
 # See https://polarphp.org/LICENSE.txt for license information
 # See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 #
-# Created by polarboy on 2019/11/18.
+# Created by polarboy on 2019/12/19.
 
-add_subdirectory(lang)
-add_subdirectory(optimizer)
-add_subdirectory(gen)
+set(POLAR_PIL_PILGEN_SOURCES)
+
+polar_collect_files(
+   TYPE_BOTH
+   DIR .
+   OUTPUT_VAR POLAR_PIL_PILGEN_SOURCES)
+
+polar_merge_list(POLAR_PIL_PILGEN_SOURCES POLAR_HEADERS)
+
+polar_add_library(PolarPILGen STATIC
+   ${POLAR_PIL_PILGEN_SOURCES}
+   LINK_LIBS PolarPIL)

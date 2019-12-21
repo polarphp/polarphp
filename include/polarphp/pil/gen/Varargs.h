@@ -21,7 +21,7 @@
 #define POLARPHP_PIL_GEN_VARARGS_H
 
 #include "ManagedValue.h"
-#include "swift/PIL/AbstractionPattern.h"
+#include "polarphp/pil/lang/AbstractionPattern.h"
 
 namespace polar::lowering {
 

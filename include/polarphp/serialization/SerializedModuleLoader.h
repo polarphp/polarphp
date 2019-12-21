@@ -332,9 +332,10 @@ public:
                      SmallVectorImpl<ValueDecl*> &decls) const override;
 
    /// Find all Objective-C methods with the given selector.
-   void lookupObjCMethods(
-      ObjCSelector selector,
-      SmallVectorImpl<AbstractFunctionDecl *> &results) const override;
+   // @todo
+//   void lookupObjCMethods(
+//      ObjCSelector selector,
+//      SmallVectorImpl<AbstractFunctionDecl *> &results) const override;
 
    Optional<CommentInfo> getCommentForDecl(const Decl *D) const override;
 

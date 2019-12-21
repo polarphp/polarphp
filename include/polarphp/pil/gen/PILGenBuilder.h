@@ -22,12 +22,12 @@
 #ifndef POLARPHP_PIL_GEN_PILGENBUILDER_H
 #define POLARPHP_PIL_GEN_PILGENBUILDER_H
 
-#include "Cleanup.h"
-#include "JumpDest.h"
-#include "ManagedValue.h"
-#include "RValue.h"
-#include "swift/PIL/PILBuilder.h"
-#include "swift/Basic/ProfileCounter.h"
+#include "polarphp/pil/gen/Cleanup.h"
+#include "polarphp/pil/gen/JumpDest.h"
+#include "polarphp/pil/gen/ManagedValue.h"
+#include "polarphp/pil/gen/RValue.h"
+#include "polarphp/pil/lang/PILBuilder.h"
+#include "polarphp/basic/ProfileCounter.h"
 
 namespace polar::lowering {
 
@@ -60,12 +60,12 @@ public:
    ManagedValue
    createInitExistentialValue(PILLocation loc, PILType existentialType,
                               CanType formalConcreteType, ManagedValue concrete,
-                              ArrayRef<ProtocolConformanceRef> conformances);
+                              ArrayRef<InterfaceConformanceRef> conformances);
    using PILBuilder::createInitExistentialRef;
    ManagedValue
    createInitExistentialRef(PILLocation loc, PILType existentialType,
                             CanType formalConcreteType, ManagedValue concrete,
-                            ArrayRef<ProtocolConformanceRef> conformances);
+                            ArrayRef<InterfaceConformanceRef> conformances);
 
    using PILBuilder::createPartialApply;
    ManagedValue createPartialApply(PILLocation loc, PILValue fn,
@@ -121,7 +121,7 @@ public:
   using PILBuilder::createStrongCopy##Name##Value;                             \
   ManagedValue createStrongCopy##Name##Value(PILLocation loc,                  \
                                              ManagedValue originalValue);
-#include "swift/AST/ReferenceStorage.def"
+#include "polarphp/ast/ReferenceStorageDef.h"
 
    ManagedValue createOwnedPhiArgument(PILType type);
    ManagedValue createGuaranteedPhiArgument(PILType type);

@@ -21,7 +21,7 @@
 #include "polarphp/pil/gen/Initialization.h"
 #include "polarphp/pil/gen/SGFContext.h"
 
-namespace polarphp::pil::lowering {
+namespace polar::lowering {
 
 /// An abstraction representing certain kinds of conversion that PILGen can
 /// do automatically in various situations.
@@ -326,6 +326,6 @@ public:
    }
 };
 
-} // end namespace polarphp::pil::lowering
+} // end namespace polar::lowering
 
 #endif // POLARPHP_PIL_GEN_CONVERSION_H

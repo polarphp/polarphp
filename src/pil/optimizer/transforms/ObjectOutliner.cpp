@@ -493,8 +493,8 @@ void ObjectOutliner::replaceFindStringCall(ApplyInst *FindStringCall) {
    SmallVector<ValueDecl *, 1> results;
    auto &F = *FindStringCall->getFunction();
    PILModule *Module = &F.getModule();
-   Module->getAstContext().lookupInSwiftModule("_findStringSwitchCaseWithCache",
-                                               results);
+   Module->getAstContext().lookupInPolarphpModule("_findStringSwitchCaseWithCache",
+                                                  results);
    if (results.size() != 1)
       return;
 

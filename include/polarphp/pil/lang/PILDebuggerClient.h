@@ -17,9 +17,9 @@
 #ifndef POLARPHP_PIL_PILDEBUGGERCLIENT_H
 #define POLARPHP_PIL_PILDEBUGGERCLIENT_H
 
-#include "swift/AST/DebuggerClient.h"
-#include "swift/PIL/PILLocation.h"
-#include "swift/PIL/PILValue.h"
+#include "polarphp/ast/DebuggerClient.h"
+#include "polarphp/pil/lang/PILLocation.h"
+#include "polarphp/pil/lang/PILValue.h"
 
 namespace polar {
 
@@ -29,7 +29,7 @@ class PILDebuggerClient : public DebuggerClient {
 public:
    using ResultVector = SmallVectorImpl<LookupResultEntry>;
 
-   PILDebuggerClient(ASTContext &C) : DebuggerClient(C) { }
+   PILDebuggerClient(AstContext &C) : DebuggerClient(C) { }
    virtual ~PILDebuggerClient() = default;
 
    /// DebuggerClient is asked to emit PIL references to locals,
@@ -45,6 +45,6 @@ private:
    virtual void anchor();
 };
 
-} // namespace swift
+} // namespace polar
 
 #endif

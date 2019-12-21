@@ -68,8 +68,8 @@ class TypeLowering;
 /// *NOTE* In PILGen we don't try to explode structs, because doing so would
 /// require considering resilience, a job we want to delegate to IRGen.
 class RValue {
-   friend class swift::Lowering::Scope;
-   friend class swift::Lowering::ArgumentSource;
+   friend class polar::lowering::Scope;
+   friend class polar::lowering::ArgumentSource;
 
    std::vector<ManagedValue> values;
    CanType type;
@@ -298,7 +298,7 @@ public:
    PILType getLoweredType(PILGenFunction &SGF) const &;
 
    /// Return the type lowering of RValue::getType().
-   const Lowering::TypeLowering &getTypeLowering(PILGenFunction &SGF) const &;
+   const lowering::TypeLowering &getTypeLowering(PILGenFunction &SGF) const &;
 
    /// Return the lowered PILType that would be used to implode the given RValue
    /// into 1 tuple value.

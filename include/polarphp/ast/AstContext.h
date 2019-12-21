@@ -528,7 +528,7 @@ public:
 
    /// Look for the declaration with the given name within the
    /// Swift module.
-   void lookupInSwiftModule(StringRef name,
+   void lookupInPolarphpModule(StringRef name,
                             SmallVectorImpl<ValueDecl *> &results) const;
 
    /// Retrieve a specific, known protocol.

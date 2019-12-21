@@ -529,7 +529,7 @@ public:
 template <class T>
 struct UnionMemberInfo {
    enum : bool {
-      is_trivially_copyable = IsTriviallyCopyable<T>::value
+      is_trivially_copyable = std::is_trivially_copyable<T>::value
    };
 
    enum : size_t {

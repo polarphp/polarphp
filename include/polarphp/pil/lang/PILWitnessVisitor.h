@@ -28,8 +28,6 @@
 
 namespace polar {
 
-using namespace polar::ast;
-
 /// A CRTP class for visiting the witnesses of a protocol.
 ///
 /// The design here is that each entry (or small group of entries)
@@ -71,7 +69,7 @@ public:
             ->getDecl();
 
         // ObjC protocols do not have witnesses.
-        if (!Lowering::TypeConverter::protocolRequiresWitnessTable(requirement))
+        if (!lowering::TypeConverter::protocolRequiresWitnessTable(requirement))
           continue;
 
         // If the type parameter is 'self', consider this to be protocol

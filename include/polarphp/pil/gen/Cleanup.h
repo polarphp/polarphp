@@ -252,7 +252,7 @@ public:
 /// temporarily modified.
 class CleanupStateRestorationScope {
    CleanupManager &cleanups;
-   SmallVector<std::pair<CleanupHandle, CleanupState>, 4> savedStates;
+   llvm::SmallVector<std::pair<CleanupHandle, CleanupState>, 4> savedStates;
 
    CleanupStateRestorationScope(const CleanupStateRestorationScope &) = delete;
    CleanupStateRestorationScope &

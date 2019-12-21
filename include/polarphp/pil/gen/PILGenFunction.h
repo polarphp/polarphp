@@ -249,9 +249,9 @@ struct MaterializedLValue {
       callbackStorage(callbackStorage) {}
 };
 
-/// PILGenFunction - an ASTVisitor for producing PIL from function bodies.
+/// PILGenFunction - an AstVisitor for producing PIL from function bodies.
 class LLVM_LIBRARY_VISIBILITY PILGenFunction
-  : public ASTVisitor<PILGenFunction>
+  : public AstVisitor<PILGenFunction>
 { // style violation because Xcode <rdar://problem/13065676>
 public:
   /// The PILGenModule this function belongs to.
@@ -271,7 +271,7 @@ public:
   DeclName MagicFunctionName;
   std::string MagicFunctionString;
 
-  ASTContext &getASTContext() const { return SGM.M.getASTContext(); }
+  AstContext &getAstContext() const { return SGM.M.getAstContext(); }
 
   /// The first block in the postmatter section of the function, if
   /// anything has been built there.
@@ -466,14 +466,14 @@ public:
   bool allowsVoidReturn() const { return ReturnDest.getBlock()->args_empty(); }
 
   /// Emit code to increment a counter for profiling.
-  void emitProfilerIncrement(ASTNode Node);
+  void emitProfilerIncrement(AstNode Node);
 
   /// Load the profiled execution count corresponding to \p Node, if one is
   /// available.
-  ProfileCounter loadProfilerCount(ASTNode Node) const;
+  ProfileCounter loadProfilerCount(AstNode Node) const;
 
   /// Get the PGO node's parent.
-  Optional<ASTNode> getPGOParent(ASTNode Node) const;
+  Optional<AstNode> getPGOParent(AstNode Node) const;
 
   /// Tracer object for counting PIL (and other events) caused by this instance.
   FrontendStatsTracer StatsTracer;
@@ -556,7 +556,7 @@ public:
   Optional<PILAccessEnforcement> getDynamicEnforcement(VarDecl *var = nullptr);
   Optional<PILAccessEnforcement> getUnknownEnforcement(VarDecl *var = nullptr);
 
-  SourceManager &getSourceManager() { return SGM.M.getASTContext().SourceMgr; }
+  SourceManager &getSourceManager() { return SGM.M.getAstContext().SourceMgr; }
 
   /// Push a new debug scope and set its parent pointer.
   void enterDebugScope(PILLocation Loc) {
@@ -680,7 +680,7 @@ public:
   ///
   /// This is used for both concrete witness thunks and default witness
   /// thunks.
-  void emitProtocolWitness(AbstractionPattern reqtOrigTy,
+  void emitInterfaceWitness(AbstractionPattern reqtOrigTy,
                            CanAnyFunctionType reqtSubstTy,
                            PILDeclRef requirement,
                            SubstitutionMap reqtSubs,
@@ -1023,7 +1023,7 @@ public:
                                                ManagedValue v,
                                                PILType resultTy);
 
-  ManagedValue emitProtocolMetatypeToObject(PILLocation loc,
+  ManagedValue emitInterfaceMetatypeToObject(PILLocation loc,
                                             CanType inputTy,
                                             PILType resultTy);
 
@@ -1053,7 +1053,7 @@ public:
                             CanType concreteFormalType,
                             const TypeLowering &concreteTL,
                             const TypeLowering &existentialTL,
-                            ArrayRef<ProtocolConformanceRef> conformances,
+                            ArrayRef<InterfaceConformanceRef> conformances,
                             SGFContext C,
                             llvm::function_ref<ManagedValue (SGFContext)> F,
                             bool allowEmbeddedNSError = true);
@@ -1069,7 +1069,7 @@ public:
   // Recursive entry points
   //===--------------------------------------------------------------------===//
 
-  using ASTVisitorType::visit;
+  using AstVisitorType::visit;
 
   //===--------------------------------------------------------------------===//
   // Statements
@@ -1286,7 +1286,7 @@ public:
                        ArgumentSource &&value,
                        bool isOnSelfParameter);
 
-  bool maybeEmitMaterializeForSetThunk(ProtocolConformanceRef conformance,
+  bool maybeEmitMaterializeForSetThunk(InterfaceConformanceRef conformance,
                                        PILLinkage linkage,
                                        Type selfInterfaceType, Type selfType,
                                        GenericEnvironment *genericEnv,
@@ -1459,7 +1459,7 @@ public:
   RValue emitAnyHashableErasure(PILLocation loc,
                                 ManagedValue value,
                                 Type type,
-                                ProtocolConformanceRef conformance,
+                                InterfaceConformanceRef conformance,
                                 SGFContext C);
 
   /// Turn a consumable managed value into a +1 managed value.
@@ -2001,7 +2001,7 @@ public:
   SubstitutionMap getForwardingSubstitutionMap();
 
   /// Get the _Pointer protocol used for pointer argument operations.
-  ProtocolDecl *getPointerProtocol();
+  InterfaceDecl *getPointerInterface();
 };
 
 

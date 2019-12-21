@@ -659,7 +659,7 @@ Identifier AstContext::getIdentifier(StringRef Str) const {
    return Identifier(I->getKeyData());
 }
 
-void AstContext::lookupInSwiftModule(
+void AstContext::lookupInPolarphpModule(
    StringRef name,
    SmallVectorImpl<ValueDecl *> &results) const {
    ModuleDecl *M = getStdlibModule();
@@ -677,7 +677,7 @@ FuncDecl *AstContext::getPlusFunctionOnRangeReplaceableCollection() const {
    }
    // Find all of the declarations with this name in the Swift module.
    SmallVector<ValueDecl *, 1> Results;
-   lookupInSwiftModule("+", Results);
+   lookupInPolarphpModule("+", Results);
    for (auto Result : Results) {
       if (auto *FD = dyn_cast<FuncDecl>(Result)) {
          if (!FD->getOperatorDecl())
@@ -700,7 +700,7 @@ FuncDecl *AstContext::getPlusFunctionOnString() const {
    }
    // Find all of the declarations with this name in the Swift module.
    SmallVector<ValueDecl *, 1> Results;
-   lookupInSwiftModule("+", Results);
+   lookupInPolarphpModule("+", Results);
    for (auto Result : Results) {
       if (auto *FD = dyn_cast<FuncDecl>(Result)) {
          if (!FD->getOperatorDecl())
@@ -730,7 +730,7 @@ FuncDecl *AstContext::getPlusFunctionOnString() const {
     if (getImpl().NAME##Decl) \
       return getImpl().NAME##Decl; \
     SmallVector<ValueDecl *, 1> results; \
-    lookupInSwiftModule(#NAME, results); \
+    lookupInPolarphpModule(#NAME, results); \
     for (auto result : results) { \
       if (auto type = dyn_cast<DECL_CLASS>(result)) { \
         auto params = type->getGenericParams(); \
@@ -889,7 +889,7 @@ InterfaceDecl *AstContext::getInterface(KnownInterfaceKind kind) const {
 static FuncDecl *findLibraryIntrinsic(const AstContext &ctx,
                                       StringRef name) {
    SmallVector<ValueDecl *, 1> results;
-   ctx.lookupInSwiftModule(name, results);
+   ctx.lookupInPolarphpModule(name, results);
    if (results.size() == 1)
       return dyn_cast_or_null<FuncDecl>(results.front());
    return nullptr;
@@ -939,7 +939,7 @@ static FuncDecl *
 lookupOperatorFunc(const AstContext &ctx, StringRef oper, Type contextType,
                    llvm::function_ref<bool(FunctionType *)> pred) {
    SmallVector<ValueDecl *, 32> candidates;
-   ctx.lookupInSwiftModule(oper, candidates);
+   ctx.lookupInPolarphpModule(oper, candidates);
 
    for (auto candidate : candidates) {
       // All operator declarations should be functions, but make sure.
@@ -1070,7 +1070,7 @@ FuncDecl *AstContext::getHashValueForDecl() const {
       return getImpl().HashValueForDecl;
 
    SmallVector<ValueDecl *, 1> results;
-   lookupInSwiftModule("_hashValue", results);
+   lookupInPolarphpModule("_hashValue", results);
    for (auto result : results) {
       auto *fd = dyn_cast<FuncDecl>(result);
       if (!fd)

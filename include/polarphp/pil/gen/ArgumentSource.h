@@ -58,11 +58,11 @@ class ArgumentSource {
 
    struct RValueStorage {
       RValue Value;
-      SILLocation Loc;
+      PILLocation Loc;
    };
    struct LValueStorage {
       LValue Value;
-      SILLocation Loc;
+      PILLocation Loc;
    };
 
    using StorageMembers =
@@ -84,10 +84,10 @@ class ArgumentSource {
 
 public:
    ArgumentSource() : StoredKind(Kind::Invalid) {}
-   ArgumentSource(SILLocation loc, RValue &&value) : StoredKind(Kind::RValue) {
+   ArgumentSource(PILLocation loc, RValue &&value) : StoredKind(Kind::RValue) {
       Storage.emplaceAggregate<RValueStorage>(StoredKind, std::move(value), loc);
    }
-   ArgumentSource(SILLocation loc, LValue &&value) : StoredKind(Kind::LValue) {
+   ArgumentSource(PILLocation loc, LValue &&value) : StoredKind(Kind::LValue) {
       Storage.emplaceAggregate<LValueStorage>(StoredKind, std::move(value), loc);
    }
    ArgumentSource(Expr *e) : StoredKind(Kind::Expr) {
@@ -154,7 +154,7 @@ public:
       llvm_unreachable("bad kind");
    }
 
-   SILLocation getLocation() const & {
+   PILLocation getLocation() const & {
       switch (StoredKind) {
          case Kind::Invalid:
             llvm_unreachable("argument source is invalid");
@@ -200,13 +200,13 @@ public:
 
    /// Given that this source is storing an RValue, extract and clear
    /// that value.
-   RValue &&asKnownRValue(SILGenFunction &SGF) && {
+   RValue &&asKnownRValue(PILGenFunction &SGF) && {
       return std::move(Storage.get<RValueStorage>(StoredKind).Value);
    }
    const RValue &asKnownRValue() const & {
       return Storage.get<RValueStorage>(StoredKind).Value;
    }
-   SILLocation getKnownRValueLocation() const & {
+   PILLocation getKnownRValueLocation() const & {
       return Storage.get<RValueStorage>(StoredKind).Loc;
    }
 
@@ -218,7 +218,7 @@ public:
    const LValue &asKnownLValue() const & {
       return Storage.get<LValueStorage>(StoredKind).Value;
    }
-   SILLocation getKnownLValueLocation() const & {
+   PILLocation getKnownLValueLocation() const & {
       return Storage.get<LValueStorage>(StoredKind).Loc;
    }
 
@@ -237,34 +237,34 @@ public:
    /// if this ArgumentSource is not an rvalue.
    RValue &peekRValue() &;
 
-   RValue getAsRValue(SILGenFunction &SGF, SGFContext C = SGFContext()) &&;
-   ManagedValue getAsSingleValue(SILGenFunction &SGF,
+   RValue getAsRValue(PILGenFunction &SGF, SGFContext C = SGFContext()) &&;
+   ManagedValue getAsSingleValue(PILGenFunction &SGF,
                                  SGFContext C = SGFContext()) &&;
-   ManagedValue getAsSingleValue(SILGenFunction &SGF,
+   ManagedValue getAsSingleValue(PILGenFunction &SGF,
                                  AbstractionPattern origFormalType,
                                  SGFContext C = SGFContext()) &&;
 
-   ManagedValue getConverted(SILGenFunction &SGF, const Conversion &conversion,
+   ManagedValue getConverted(PILGenFunction &SGF, const Conversion &conversion,
                              SGFContext C = SGFContext()) &&;
 
-   void forwardInto(SILGenFunction &SGF, Initialization *dest) &&;
-   void forwardInto(SILGenFunction &SGF, AbstractionPattern origFormalType,
+   void forwardInto(PILGenFunction &SGF, Initialization *dest) &&;
+   void forwardInto(PILGenFunction &SGF, AbstractionPattern origFormalType,
                     Initialization *dest, const TypeLowering &destTL) &&;
 
    /// If we have an rvalue, borrow the rvalue into a new ArgumentSource and
    /// return the ArgumentSource. Otherwise, assert.
-   ArgumentSource borrow(SILGenFunction &SGF) const &;
+   ArgumentSource borrow(PILGenFunction &SGF) const &;
 
-   ManagedValue materialize(SILGenFunction &SGF) &&;
+   ManagedValue materialize(PILGenFunction &SGF) &&;
 
    /// Emit this value to memory so that it follows the abstraction
    /// patterns of the original formal type.
    ///
    /// \param expectedType - the lowering of getSubstRValueType() under the
    ///   abstractions of origFormalType
-   ManagedValue materialize(SILGenFunction &SGF,
+   ManagedValue materialize(PILGenFunction &SGF,
                             AbstractionPattern origFormalType,
-                            SILType expectedType = SILType()) &&;
+                            PILType expectedType = PILType()) &&;
 
    bool isObviouslyEqual(const ArgumentSource &other) const;
 
@@ -275,7 +275,7 @@ public:
 
 private:
    /// Private helper constructor for delayed borrowed rvalues.
-   ArgumentSource(SILLocation loc, RValue &&rv, Kind kind);
+   ArgumentSource(PILLocation loc, RValue &&rv, Kind kind);
 
    // Make this non-move accessor private to make it more difficult
    // to accidentally re-emit values.
@@ -343,7 +343,7 @@ public:
    }
 
    /// Add an emitted r-value argument to this argument list.
-   void add(SILLocation loc, RValue &&arg) {
+   void add(PILLocation loc, RValue &&arg) {
       assert(!isNull());
       Arguments.emplace_back(loc, std::move(arg));
    }
@@ -358,7 +358,7 @@ public:
    }
 
    /// Copy these prepared arguments.  This propagates null.
-   PreparedArguments copy(SILGenFunction &SGF, SILLocation loc) const;
+   PreparedArguments copy(PILGenFunction &SGF, PILLocation loc) const;
 
    bool isObviouslyEqual(const PreparedArguments &other) const;
 

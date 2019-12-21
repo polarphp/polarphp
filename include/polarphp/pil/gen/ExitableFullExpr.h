@@ -30,11 +30,11 @@ namespace polar::lowering {
 ///
 /// This scope is also exposed to the debug info.
 class LLVM_LIBRARY_VISIBILITY ExitableFullExpr {
-   SILGenFunction &SGF;
+   PILGenFunction &SGF;
    FullExpr Scope;
    JumpDest ExitDest;
 public:
-   explicit ExitableFullExpr(SILGenFunction &SGF, CleanupLocation loc)
+   explicit ExitableFullExpr(PILGenFunction &SGF, CleanupLocation loc)
       : SGF(SGF), Scope(SGF.Cleanups, loc),
         ExitDest(SGF.B.splitBlockForFallthrough(),
                  SGF.Cleanups.getCleanupsDepth(), loc) {
@@ -47,7 +47,7 @@ public:
 
    JumpDest getExitDest() const { return ExitDest; }
 
-   SILBasicBlock *exit() {
+   PILBasicBlock *exit() {
       assert(!SGF.B.hasValidInsertionPoint());
       Scope.pop();
       SGF.B.setInsertionPoint(ExitDest.getBlock());

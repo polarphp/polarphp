@@ -17,9 +17,9 @@
 #ifndef POLARPHP_PIL_GEN_SPECIALIZEDEMITTER_H
 #define POLARPHP_PIL_GEN_SPECIALIZEDEMITTER_H
 
-#include "swift/Basic/LLVM.h"
-#include "swift/AST/Identifier.h"
-#include "swift/AST/Types.h"
+#include "polarphp/basic/LLVM.h"
+#include "polarphp/ast/Identifier.h"
+#include "polarphp/ast/Types.h"
 
 namespace polar {
 
@@ -107,7 +107,7 @@ public:
    }
 
    bool isNamedBuiltin() const { return TheKind == Kind::NamedBuiltin; }
-   Identifier getBuiltinName() const {SwitchEnumBuilder.h
+   Identifier getBuiltinName() const {
       assert(isNamedBuiltin());
       return TheBuiltinName;
    }
