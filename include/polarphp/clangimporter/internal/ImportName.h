@@ -18,9 +18,9 @@
 #define POLARPHP_CLANG_INTERNAL_IMPORT_NAME_H
 
 #include "polarphp/clangimporter/internal/ImportEnumInfo.h"
-#include "polarphp/clangimporter/internal/SwiftLookupTable.h"
+#include "polarphp/clangimporter/internal/PolarphpLookupTable.h"
 #include "polarphp/basic/StringExtras.h"
-#include "polarphp/basic/Version.h"
+#include "polarphp/kernel/Version.h"
 #include "polarphp/ast/AstContext.h"
 #include "polarphp/ast/Decl.h"
 #include "polarphp/ast/ForeignErrorConvention.h"
@@ -302,7 +302,7 @@ StringRef stripNotification(StringRef name);
 /// stateless and borrows from the ClangImporter::Implementation, but in the
 /// future will be more self-contained and encapsulated.
 class NameImporter {
-   ASTContext &swiftCtx;
+   AstContext &swiftCtx;
    const PlatformAvailability &availability;
 
    clang::Sema &clangSema;
@@ -324,7 +324,7 @@ class NameImporter {
       std::unique_ptr<InheritedNameSet>> allProperties;
 
 public:
-   NameImporter(ASTContext &ctx, const PlatformAvailability &avail,
+   NameImporter(AstContext &ctx, const PlatformAvailability &avail,
                 clang::Sema &cSema, bool inferIAM)
       : swiftCtx(ctx), availability(avail), clangSema(cSema),
         enumInfos(clangSema.getPreprocessor()),
@@ -362,7 +362,7 @@ public:
    Identifier importMacroName(const clang::IdentifierInfo *clangIdentifier,
                               const clang::MacroInfo *macro);
 
-   ASTContext &getContext() { return swiftCtx; }
+   AstContext &getContext() { return swiftCtx; }
    const LangOptions &getLangOpts() const { return swiftCtx.LangOpts; }
 
    Identifier getIdentifier(StringRef name) {
@@ -430,8 +430,8 @@ private:
 
 namespace llvm {
 // Provide DenseMapInfo for ImportNameVersion.
-template <> struct DenseMapInfo<swift::importer::ImportNameVersion> {
-   using ImportNameVersion = swift::importer::ImportNameVersion;
+template <> struct DenseMapInfo<polar::importer::ImportNameVersion> {
+   using ImportNameVersion = polar::importer::ImportNameVersion;
    using DMIU = DenseMapInfo<unsigned>;
    static inline ImportNameVersion getEmptyKey() {
       return (ImportNameVersion)DMIU::getEmptyKey();

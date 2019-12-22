@@ -415,7 +415,7 @@ public:
    void printStatistics() const override;
 
    /// Dump Swift lookup tables.
-   void dumpSwiftLookupTables();
+   void dumpPolarphpLookupTables();
 
    /// Given the path of a Clang module, collect the names of all its submodules.
    /// Calling this function does not load the module.

@@ -14,8 +14,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef SWIFT_AST_BUILTINS_H
-#define SWIFT_AST_BUILTINS_H
+#ifndef POLARPHP_AST_BUILTINS_H
+#define POLARPHP_AST_BUILTINS_H
 
 #include "polarphp/ast/Type.h"
 #include "polarphp/ast/Types.h"

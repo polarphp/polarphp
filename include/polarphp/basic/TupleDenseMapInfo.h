@@ -57,11 +57,10 @@ bool tuple_equal(const T &lhs, const T &rhs)
 
 } // internal
 
-template <template <typename...> class Template,
-          typename... Args>
-struct DenseMapInfo<Template<Args...>>
+template <typename... Args>
+struct DenseMapInfo<std::tuple<Args...>>
 {
-   using TupleType = Template<Args...>;
+   using TupleType = std::tuple<Args...>;
    static_assert (is_tuple<TupleType>::value);
    static TupleType getEmptyKey()
    {

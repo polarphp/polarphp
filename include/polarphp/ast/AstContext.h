@@ -827,6 +827,17 @@ public:
    /// Returns memory used exclusively by constraint solver.
    size_t getSolverMemory() const;
 
+   // @todo
+//   /// Retrieve the Swift name for the given Foundation entity, where
+//    /// "NS" prefix stripping will apply under omit-needless-words.
+//    StringRef getSwiftName(KnownFoundationEntity kind);
+//
+//    /// Retrieve the Swift identifier for the given Foundation entity, where
+//    /// "NS" prefix stripping will apply under omit-needless-words.
+//    Identifier getSwiftId(KnownFoundationEntity kind) {
+//      return getIdentifier(getSwiftName(kind));
+//    }
+
    /// Populate \p names with visible top level module names.
    /// This guarantees that resulted \p names doesn't have duplicated names.
    void getVisibleTopLevelModuleNames(SmallVectorImpl<Identifier> &names) const;

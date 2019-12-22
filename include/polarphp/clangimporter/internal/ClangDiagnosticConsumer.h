@@ -60,7 +60,7 @@ private:
    const bool DumpToStderr;
 
 public:
-   ClangDiagnosticConsumer(clangimporter::Implementation &impl,
+   ClangDiagnosticConsumer(ClangImporter::Implementation &impl,
                            clang::DiagnosticOptions &clangDiagOptions,
                            bool dumpToStderr);
 

@@ -58,7 +58,7 @@ struct IAMResult {
    // The canonical type decl we will import as a member of
    EffectiveClangContext effectiveDC = {};
 
-   static IAMResult infer(ASTContext &, clang::Sema &, const clang::NamedDecl *,
+   static IAMResult infer(AstContext &, clang::Sema &, const clang::NamedDecl *,
                           IAMOptions = IAMOptions::getDefault());
 
    IAMResult() = default;

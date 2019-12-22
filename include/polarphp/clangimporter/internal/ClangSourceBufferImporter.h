@@ -13,8 +13,8 @@
 #ifndef POLARPHP_CLANG_IMPORTER_INTERNAL_CLANGSOURCEBUFFERIMPORTER_H
 #define POLARPHP_CLANG_IMPORTER_INTERNAL_CLANGSOURCEBUFFERIMPORTER_H
 
-#include "swift/Basic/LLVM.h"
-#include "swift/Basic/SourceLoc.h"
+#include "polarphp/basic/LLVM.h"
+#include "polarphp/basic/SourceLoc.h"
 #include "clang/Basic/SourceLocation.h"
 #include "llvm/ADT/DenseMap.h"
 #include "llvm/ADT/IntrusiveRefCntPtr.h"

@@ -72,7 +72,7 @@ struct SerializedSwiftName {
    }
 
    /// Deserialize the name, adding it to the context's identifier table
-   DeclBaseName toDeclBaseName(ASTContext &Context) const;
+   DeclBaseName toDeclBaseName(AstContext &Context) const;
 
    bool empty() const {
       return Kind == DeclBaseName::Kind::Normal && Name.empty();
@@ -201,8 +201,8 @@ public:
       } else if (auto nsDecl = dyn_cast<clang::NamespaceDecl>(dc)) {
          DC = nsDecl->getCanonicalDecl();
       } else {
-         assert(isa<clang::TranslationUnitDecl>(dc) ||
-                isa<clang::ObjCContainerDecl>(dc) &&
+         assert((isa<clang::TranslationUnitDecl>(dc) ||
+                         isa<clang::ObjCContainerDecl>(dc)) &&
                 "No other kinds of effective Clang contexts");
          DC = dc;
       }
@@ -518,7 +518,7 @@ public:
    void deserializeAll();
 
    /// Dump the internal representation of this lookup table.
-   SWIFT_DEBUG_DUMP;
+   POLAR_DEBUG_DUMP;
 
    void dump(llvm::raw_ostream &os) const;
 };

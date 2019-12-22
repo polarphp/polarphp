@@ -31,6 +31,7 @@
 #include "polarphp/ast/ForeignErrorConvention.h"
 #include "polarphp/basic/FileTypes.h"
 #include "polarphp/basic/StringExtras.h"
+#include "polarphp/basic/TupleDenseMapInfo.h"
 #include "clang/AST/ASTContext.h"
 #include "clang/AST/DeclVisitor.h"
 #include "clang/Basic/IdentifierTable.h"
@@ -181,7 +182,7 @@ static inline Bridgeability
 getTypedefBridgeability(const clang::TypedefNameDecl *decl) {
    // @todo
    if (/*decl->hasAttr<clang::SwiftBridgedTypedefAttr>() || */
-       decl->getUnderlyingType()->isBlockPointerType()) {
+      decl->getUnderlyingType()->isBlockPointerType()) {
       return Bridgeability::Full;
    }
    return Bridgeability::None;
@@ -432,8 +433,8 @@ public:
    /// macros are identically defined.
    llvm::DenseMap<Identifier,
       SmallVector<std::pair<const clang::MacroInfo *, ValueDecl *>,
-      2>>
-   ImportedMacros;
+         2>>
+      ImportedMacros;
 
    // Mapping from macro to value for macros that expand to constant values.
    llvm::DenseMap<const clang::MacroInfo *, std::pair<clang::APValue, Type>>
@@ -442,8 +443,9 @@ public:
    /// Keeps track of active selector-based lookups, so that we don't infinitely
    /// recurse when checking whether a method with a given selector has already
    /// been imported.
-   llvm::DenseMap<std::pair<ObjCSelector, char>, unsigned>
-      ActiveSelectors;
+   /// @todo
+//   llvm::DenseMap<std::pair<ObjCSelector, char>, unsigned>
+//      ActiveSelectors;
 
    // Mapping from imported types to their raw value types.
    llvm::DenseMap<const NominalTypeDecl *, Type> RawTypes;
@@ -495,7 +497,7 @@ public:
    /// Keep track of all initializers that have been imported into a
    /// nominal type.
    llvm::DenseMap<const NominalTypeDecl *, TinyPtrVector<ConstructorDecl *>>
-   ConstructorsForNominal;
+      ConstructorsForNominal;
 
    /// Keep track of the nested 'Code' enum for imported error wrapper
    /// structs.
@@ -561,7 +563,7 @@ private:
    /// The set of imported protocols for a declaration, used only to
    /// load all members of the declaration.
    llvm::DenseMap<const Decl *, ArrayRef<InterfaceDecl *>>
-   ImportedInterfaces;
+      ImportedInterfaces;
 
    /// The set of declaration context for which we've already ruled out the
    /// presence of globals-as-members.
@@ -642,7 +644,7 @@ public:
    }
 
    /// Retrieve the Clang AST context.
-   clang::ASTContext &getClangASTContext() const {
+   clang::ASTContext &getClangAstContext() const {
       return Instance->getASTContext();
    }
 
@@ -705,10 +707,10 @@ public:
 
    /// Print an imported name as a string suitable for the swift_name attribute,
    /// or the 'Rename' field of AvailableAttr.
-   void printSwiftName(importer::ImportedName name,
-                       importer::ImportNameVersion version,
-                       bool fullyQualified,
-                       llvm::raw_ostream &os);
+   void printPolarphpName(importer::ImportedName name,
+                          importer::ImportNameVersion version,
+                          bool fullyQualified,
+                          llvm::raw_ostream &os);
 
    /// Import the given Clang identifier into Swift.
    ///
@@ -720,14 +722,15 @@ public:
    Identifier importIdentifier(const clang::IdentifierInfo *identifier,
                                StringRef removePrefix = "");
 
+   // @todo
    /// Import an Objective-C selector.
-   ObjCSelector importSelector(clang::Selector selector);
+//   ObjCSelector importSelector(clang::Selector selector);
 
    /// Import a Swift name as a Clang selector.
    clang::Selector exportSelector(DeclName name, bool allowSimpleName = true);
 
    /// Export a Swift Objective-C selector as a Clang Objective-C selector.
-   clang::Selector exportSelector(ObjCSelector selector);
+//   clang::Selector exportSelector(ObjCSelector selector);
 
    /// Import the given Swift source location into Clang.
    clang::SourceLocation exportSourceLoc(SourceLoc loc);
@@ -916,7 +919,7 @@ public:
    /// \param name The name of the type to find.
    ///
    /// \returns The named type, or null if the type could not be found.
-   Type getNamedSwiftType(StringRef moduleName, StringRef name);
+   Type getNamedPolarphpType(StringRef moduleName, StringRef name);
 
    /// Retrieve the named Swift type, e.g., Int32.
    ///
@@ -925,7 +928,7 @@ public:
    /// \param name The name of the type to find.
    ///
    /// \returns The named type, or null if the type could not be found.
-   Type getNamedSwiftType(ModuleDecl *module, StringRef name);
+   Type getNamedPolarphpType(ModuleDecl *module, StringRef name);
 
    /// Retrieve the NSObject type.
    Type getNSObjectType();
@@ -1166,7 +1169,7 @@ public:
    /// FIXME: This is all a hack; we should have lazier deserialization
    /// of protocols separate from their conformances.
    void recordImportedInterfaces(const Decl *decl,
-                                ArrayRef<InterfaceDecl *> protocols) {
+                                 ArrayRef<InterfaceDecl *> protocols) {
       if (protocols.empty())
          return;
 
@@ -1332,7 +1335,7 @@ public:
    void setSinglePCHImport(Optional<std::string> PCHFilename) {
       if (PCHFilename.hasValue()) {
          assert(llvm::sys::path::extension(PCHFilename.getValue())
-                   .endswith(file_types::getExtension(file_types::TY_PCH)) &&
+                   .endswith(filetypes::get_extension(filetypes::TY_PCH)) &&
                 "Single PCH imported filename doesn't have .pch extension!");
       }
       SinglePCHImport = PCHFilename;

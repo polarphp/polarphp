@@ -14,15 +14,15 @@
 // types.
 //
 // MAP_TYPE(C_TYPE_NAME, C_TYPE_KIND, C_TYPE_BITWIDTH,
-//          SWIFT_MODULE_NAME, SWIFT_TYPE_NAME,
+//          POLAR_MODULE_NAME, POLAR_TYPE_NAME,
 //          CAN_BE_MISSING, C_NAME_MAPPING)
 //  - C_TYPE_NAME is the name of the C type.
 //  - C_TYPE_KIND is the expected kind of the C type (see MappedCTypeKind
 //    enum).
 //  - C_TYPE_BITWIDTH is the expected size of the C type; a zero value
 //    means "don't check".
-//  - SWIFT_MODULE_NAME is the name of the swift library module.
-//  - SWIFT_TYPE_NAME is the name of the corresponding stdlib type.
+//  - POLAR_MODULE_NAME is the name of the swift library module.
+//  - POLAR_TYPE_NAME is the name of the corresponding stdlib type.
 //  - CAN_BE_MISSING is true if it is OK for swift type to be missing in the
 //    stdlib.
 //  - C_NAME_MAPPING specifies if we should create a typealias in the
@@ -31,10 +31,10 @@
 //===----------------------------------------------------------------------===//
 
 #define MAP_STDLIB_TYPE(C_TYPE_NAME, C_TYPE_KIND, C_TYPE_BITWIDTH,  \
-                        SWIFT_TYPE_NAME, CAN_BE_MISSING,            \
+                        POLAR_TYPE_NAME, CAN_BE_MISSING,            \
                         C_NAME_MAPPING)                             \
     MAP_TYPE(C_TYPE_NAME, C_TYPE_KIND, C_TYPE_BITWIDTH,             \
-             "Swift", SWIFT_TYPE_NAME, CAN_BE_MISSING,              \
+             "Polarphp", POLAR_TYPE_NAME, CAN_BE_MISSING,              \
              C_NAME_MAPPING)
 
 // MacTypes.h defines typedefs UIntXX, SIntXX, FloatXX.
@@ -145,15 +145,15 @@ true, DoNothing)
 // Objective-C types.
 MAP_TYPE("SEL",  ObjCSel, 0, "ObjectiveC", "Selector", false, DoNothing)
 MAP_STDLIB_TYPE("Class", ObjCClass, 0, "AnyClass", false, DoNothing)
-MAP_STDLIB_TYPE(
-   Impl.SwiftContext.getSwiftName(KnownFoundationEntity::NSInteger),
-   SignedWord, 0, "Int", false, DefineOnly)
+//MAP_STDLIB_TYPE(
+//   Impl.PolarphpContext.getPolarphpName(KnownFoundationEntity::NSInteger),
+//   SignedWord, 0, "Int", false, DefineOnly)
 
 // Treat NSUInteger specially: exposing it as a typealias for "Int" would be
 // confusing.
-MAP_STDLIB_TYPE(
-   Impl.SwiftContext.getSwiftName(KnownFoundationEntity::NSUInteger),
-   UnsignedWord, 0, "Int", false, DoNothing)
+//MAP_STDLIB_TYPE(
+//   Impl.PolarphpContext.getPolarphpName(KnownFoundationEntity::NSUInteger),
+//   UnsignedWord, 0, "Int", false, DoNothing)
 
 // CoreGraphics types.
 MAP_TYPE("CGFloat", CGFloat, 0, "CoreGraphics", "CGFloat", false, DoNothing)
