@@ -62,7 +62,7 @@ class VisibleDeclConsumer;
 enum class SelectorSplitKind;
 }
 
-namespace polar::clangimporter {
+namespace polar {
 
 class ClangModuleUnit;
 class ClangImporterOptions;
@@ -442,6 +442,6 @@ public:
 ImportDecl *createImportDecl(AstContext &Ctx, DeclContext *DC, ClangNode ClangN,
                              ArrayRef<clang::Module *> Exported);
 
-} // end namespace polar::clangimporter
+} // end namespace polar
 
 #endif // POLARPHP_CLANG_IMPORTER_CLANG_IMPORTER_H

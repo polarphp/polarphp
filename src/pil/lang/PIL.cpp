@@ -30,8 +30,6 @@
 
 using namespace polar;
 
-using polar::clangimporter::ClangModuleUnit;
-
 FormalLinkage polar::getDeclLinkage(const ValueDecl *D) {
    const DeclContext *fileContext = D->getDeclContext()->getModuleScopeContext();
 

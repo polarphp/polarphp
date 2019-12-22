@@ -27,7 +27,6 @@
 #include "clang/AST/DeclObjC.h"
 
 using namespace polar;
-using namespace polar::clangimporter;
 
 /// Get the method dispatch mechanism for a method.
 MethodDispatch

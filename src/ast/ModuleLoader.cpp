@@ -24,8 +24,6 @@ class FileCollector;
 
 namespace polar {
 
-using polar::clangimporter::ClangImporter;
-
 DependencyTracker::DependencyTracker(
    bool TrackSystemDeps, std::shared_ptr<llvm::FileCollector> FileCollector)
 // NB: The ClangImporter believes it's responsible for the construction of

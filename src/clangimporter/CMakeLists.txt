@@ -9,15 +9,13 @@
 #
 # Created by polarboy on 2019/12/22.
 
-set(POLAR_PIL_PARSER_SOURCES)
-
 polar_collect_files(
    TYPE_BOTH
    DIR .
-   OUTPUT_VAR POLAR_PIL_PARSER_SOURCES)
+   OUTPUT_VAR POLARPHP_CLANG_IMPORTER_SOURCES)
 
-polar_merge_list(POLAR_PIL_PARSER_SOURCES POLAR_HEADERS)
+polar_merge_list(POLARPHP_CLANG_IMPORTER_SOURCES POLAR_HEADERS)
 
-polar_add_library(PolarPILParser STATIC
-   ${POLAR_PIL_PARSER_SOURCES}
-   LINK_LIBS PolarPIL)
+polar_add_library(PolarClangImporter STATIC
+   ${POLARPHP_CLANG_IMPORTER_SOURCES}
+   LINK_LIBS PolarUtils PolarKernel PolarPIL)

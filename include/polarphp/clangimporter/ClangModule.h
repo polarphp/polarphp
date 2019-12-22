@@ -26,11 +26,9 @@ namespace clang {
 }
 
 namespace polar {
+
 class AstContext;
 class ModuleLoader;
-} // polar
-
-namespace polar::clangimporter {
 
 /// Represents a Clang module that has been imported into Swift.
 class ClangModuleUnit final : public LoadedFile {
@@ -129,6 +127,6 @@ public:
   }
 };
 
-} // polar::clangimporter
+} // polar
 
 #endif

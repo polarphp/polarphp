@@ -70,7 +70,6 @@
 
 using namespace polar;
 using namespace polar::lowering;
-using polar::clangimporter::ClangModuleUnit;
 
 STATISTIC(NumFuncLinked, "Number of PIL functions linked");
 

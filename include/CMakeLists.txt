@@ -5,7 +5,7 @@
 # Licensed under Apache License v2.0 with Runtime Library Exception
 #
 # See https://polarphp.org/LICENSE.txt for license information
-# See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
+# See https://polarphp.org/CDeclTypeRecordNodes.defONTRIBUTORS.txt for the list of polarphp project authors
 #
 # Created by polarboy on 2018/08/26.
 

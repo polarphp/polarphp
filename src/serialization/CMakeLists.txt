@@ -18,5 +18,6 @@ polar_merge_list(POLAR_SERIALIZATION_SOURCES POLAR_HEADERS)
 polar_add_library(PolarSerialization
    ${POLAR_SERIALIZATION_SOURCES}
    LINK_LIBS PolarBasic PolarUtils PolarGlobal PolarKernel
-   PolarSerialization
+   PolarClangImporter PolarSerialization
+   BitstreamReader
    )

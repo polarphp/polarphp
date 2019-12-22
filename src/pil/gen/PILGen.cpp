@@ -43,7 +43,7 @@
 
 using namespace polar;
 using namespace lowering;
-using namespace clangimporter;
+
 //===----------------------------------------------------------------------===//
 // PILGenModule Class implementation
 //===----------------------------------------------------------------------===//

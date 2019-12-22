@@ -19,7 +19,6 @@
 
 using namespace polar;
 using namespace polar::lowering;
-using namespace polar::clangimporter;
 
 void PILGenModule::useConformance(InterfaceConformanceRef conformanceRef) {
    // We don't need to emit dependent conformances.

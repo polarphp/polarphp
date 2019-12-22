@@ -632,7 +632,7 @@ shouldSerializeEntitiesAssociatedWithDeclContext(const DeclContext *DC) const {
    // Serialize entities associated with clang modules, since other entities
    // may depend on them, and someone who deserializes those entities may not
    // have their own copy.
-   if (isa<clangimporter::ClangModuleUnit>(DC->getModuleScopeContext())) {
+   if (isa<ClangModuleUnit>(DC->getModuleScopeContext())) {
       return true;
    }
 

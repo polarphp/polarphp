@@ -18,7 +18,7 @@
 #include <string>
 #include <vector>
 
-namespace polar::clangimporter {
+namespace polar {
 
 /// Options for controlling the behavior of the Clang importer.
 class ClangImporterOptions {
@@ -120,6 +120,6 @@ public:
    }
 };
 
-} // end namespace polar::clangimporter
+} // end namespace polar
 
 #endif
