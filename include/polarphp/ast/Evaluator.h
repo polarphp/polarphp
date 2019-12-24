@@ -49,8 +49,6 @@ namespace polar {
 using llvm::ArrayRef;
 using llvm::Optional;
 using llvm::None;
-using polar::UnifiedStatsReporter;
-using polar::FrontendStatsTracer;
 
 class DiagnosticEngine;
 class Evaluator;

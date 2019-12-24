@@ -365,19 +365,19 @@ getMagicIdentifierLiteralExprKindString(MagicIdentifierLiteralExpr::Kind value) 
    llvm_unreachable("Unhandled MagicIdentifierLiteralExpr in switch.");
 }
 
-static StringRef
-getObjCSelectorExprKindString(ObjCSelectorExpr::ObjCSelectorKind value) {
-   switch (value) {
-      case ObjCSelectorExpr::Method:
-         return "method";
-      case ObjCSelectorExpr::Getter:
-         return "getter";
-      case ObjCSelectorExpr::Setter:
-         return "setter";
-   }
-
-   llvm_unreachable("Unhandled ObjCSelectorExpr in switch.");
-}
+//static StringRef
+//getObjCSelectorExprKindString(ObjCSelectorExpr::ObjCSelectorKind value) {
+//   switch (value) {
+//      case ObjCSelectorExpr::Method:
+//         return "method";
+//      case ObjCSelectorExpr::Getter:
+//         return "getter";
+//      case ObjCSelectorExpr::Setter:
+//         return "setter";
+//   }
+//
+//   llvm_unreachable("Unhandled ObjCSelectorExpr in switch.");
+//}
 
 static StringRef getAccessSemanticsString(AccessSemantics value) {
    switch (value) {
@@ -2390,25 +2390,26 @@ public:
       PrintWithColorRAII(OS, ParenthesisColor) << ')';
    }
 
-   void visitConditionalBridgeFromObjCExpr(ConditionalBridgeFromObjCExpr *E) {
-      printCommon(E, "conditional_bridge_from_objc_expr") << " conversion=";
-      printDeclRef(E->getConversion());
-      OS << '\n';
-      printRec(E->getSubExpr());
-      PrintWithColorRAII(OS, ParenthesisColor) << ')';
-   }
-
-   void visitBridgeFromObjCExpr(BridgeFromObjCExpr *E) {
-      printCommon(E, "bridge_from_objc_expr") << '\n';
-      printRec(E->getSubExpr());
-      PrintWithColorRAII(OS, ParenthesisColor) << ')';
-   }
-
-   void visitBridgeToObjCExpr(BridgeToObjCExpr *E) {
-      printCommon(E, "bridge_to_objc_expr") << '\n';
-      printRec(E->getSubExpr());
-      PrintWithColorRAII(OS, ParenthesisColor) << ')';
-   }
+   // @todo
+//   void visitConditionalBridgeFromObjCExpr(ConditionalBridgeFromObjCExpr *E) {
+//      printCommon(E, "conditional_bridge_from_objc_expr") << " conversion=";
+//      printDeclRef(E->getConversion());
+//      OS << '\n';
+//      printRec(E->getSubExpr());
+//      PrintWithColorRAII(OS, ParenthesisColor) << ')';
+//   }
+//
+//   void visitBridgeFromObjCExpr(BridgeFromObjCExpr *E) {
+//      printCommon(E, "bridge_from_objc_expr") << '\n';
+//      printRec(E->getSubExpr());
+//      PrintWithColorRAII(OS, ParenthesisColor) << ')';
+//   }
+//
+//   void visitBridgeToObjCExpr(BridgeToObjCExpr *E) {
+//      printCommon(E, "bridge_to_objc_expr") << '\n';
+//      printRec(E->getSubExpr());
+//      PrintWithColorRAII(OS, ParenthesisColor) << ')';
+//   }
 
    void visitLoadExpr(LoadExpr *E) {
       printCommon(E, "load_expr") << '\n';
@@ -2839,15 +2840,15 @@ public:
       PrintWithColorRAII(OS, ParenthesisColor) << ')';
    }
 
-   void visitObjCSelectorExpr(ObjCSelectorExpr *E) {
-      printCommon(E, "objc_selector_expr");
-      OS << " kind=" << getObjCSelectorExprKindString(E->getSelectorKind());
-      PrintWithColorRAII(OS, DeclColor) << " decl=";
-      printDeclRef(E->getMethod());
-      OS << '\n';
-      printRec(E->getSubExpr());
-      PrintWithColorRAII(OS, ParenthesisColor) << ')';
-   }
+//   void visitObjCSelectorExpr(ObjCSelectorExpr *E) {
+//      printCommon(E, "objc_selector_expr");
+//      OS << " kind=" << getObjCSelectorExprKindString(E->getSelectorKind());
+//      PrintWithColorRAII(OS, DeclColor) << " decl=";
+//      printDeclRef(E->getMethod());
+//      OS << '\n';
+//      printRec(E->getSubExpr());
+//      PrintWithColorRAII(OS, ParenthesisColor) << ')';
+//   }
 
    void visitKeyPathExpr(KeyPathExpr *E) {
       printCommon(E, "keypath_expr");

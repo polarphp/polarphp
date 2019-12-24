@@ -2957,7 +2957,7 @@ SourceLoc ValueDecl::getAttributeInsertionLoc(bool forModifier) const {
 /// Returns true if \p VD needs to be treated as publicly-accessible
 /// at the SIL, LLVM, and machine levels due to being @usableFromInline.
 bool ValueDecl::isUsableFromInline() const {
-   assert(getFormalAccess() <= AccessLevel::Internal);
+   assert(getFormalAccess() <= AccessLevel::Interface);
 
    if (getAttrs().hasAttribute<UsableFromInlineAttr>() ||
        getAttrs().hasAttribute<AlwaysEmitIntoClientAttr>() ||
@@ -3055,7 +3055,7 @@ static AccessLevel getAdjustedFormalAccess(const ValueDecl *VD,
       return getMaximallyOpenAccessFor(VD);
 
    if (treatUsableFromInlineAsPublic &&
-       access <= AccessLevel::Internal &&
+       access <= AccessLevel::Interface &&
        VD->isUsableFromInline()) {
       return AccessLevel::Public;
    }
@@ -3091,7 +3091,7 @@ AccessLevel ValueDecl::getEffectiveAccess() const {
       case AccessLevel::Open:
          break;
       case AccessLevel::Public:
-      case AccessLevel::Internal:
+      case AccessLevel::Interface:
          if (getModuleContext()->isTestingEnabled() ||
              getModuleContext()->arePrivateImportsEnabled())
             effectiveAccess = getMaximallyOpenAccessFor(this);
@@ -3209,7 +3209,7 @@ getAccessScopeForFormalAccess(const ValueDecl *VD,
       case AccessLevel::FilePrivate:
          assert(resultDC->isModuleScopeContext());
          return AccessScope(resultDC, access == AccessLevel::Private);
-      case AccessLevel::Internal:
+      case AccessLevel::Interface:
          return AccessScope(resultDC->getParentModule());
       case AccessLevel::Public:
       case AccessLevel::Open:
@@ -3279,7 +3279,7 @@ static bool checkAccess(const DeclContext *useDC, const ValueDecl *VD,
          // '@usableFromInline'). Which works at the ABI level, so let's keep
          // supporting that here by explicitly checking for it.
          if (access == AccessLevel::Public &&
-             proto->getFormalAccess() == AccessLevel::Internal &&
+             proto->getFormalAccess() == AccessLevel::Interface &&
              proto->isUsableFromInline()) {
             return true;
          }
@@ -3309,7 +3309,7 @@ static bool checkAccess(const DeclContext *useDC, const ValueDecl *VD,
             return useSF && useSF->hasTestableOrPrivateImport(access, VD);
          }
          return true;
-      case AccessLevel::Internal: {
+      case AccessLevel::Interface: {
          const ModuleDecl *sourceModule = sourceDC->getParentModule();
          const DeclContext *useFile = useDC->getModuleScopeContext();
          if (useFile->getParentModule() == sourceModule)
@@ -4117,9 +4117,9 @@ ClassAncestryFlagsRequest::evaluate(Evaluator &evaluator, ClassDecl *value) cons
 
       if (CD->isGenericContext())
          result |= AncestryFlags::Generic;
-
-      if (CD->getAttrs().hasAttribute<ObjCMembersAttr>())
-         result |= AncestryFlags::ObjCMembers;
+      // @todo
+//      if (CD->getAttrs().hasAttribute<ObjCMembersAttr>())
+//         result |= AncestryFlags::ObjCMembers;
 
       if (CD->hasClangNode())
          result |= AncestryFlags::ClangImported;
@@ -4408,7 +4408,7 @@ bool EnumDecl::isFormallyExhaustive(const DeclContext *useDC) const {
    // Testably imported enums are exhaustive, on the grounds that only the author
    // of the original library can import it testably.
    if (auto *useSF = dyn_cast<SourceFile>(useDC->getModuleScopeContext()))
-      if (useSF->hasTestableOrPrivateImport(AccessLevel::Internal,
+      if (useSF->hasTestableOrPrivateImport(AccessLevel::Interface,
                                             containingModule))
          return true;
 
@@ -5597,7 +5597,7 @@ bool VarDecl::isMemberwiseInitialized(bool preferDeclaredProperties) const {
    auto origVar = this;
    if (auto origWrapped = getOriginalWrappedProperty())
       origVar = origWrapped;
-   if (origVar->getFormalAccess() < AccessLevel::Internal &&
+   if (origVar->getFormalAccess() < AccessLevel::Interface &&
        origVar->hasAttachedPropertyWrapper() &&
        (origVar->isParentInitialized() ||
         (origVar->getParentPatternBinding() &&

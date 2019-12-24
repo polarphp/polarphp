@@ -524,7 +524,7 @@ struct PrintOptions {
    /// Retrieve the print options that are suitable to print the testable interface.
    static PrintOptions printTestableInterface() {
       PrintOptions result = printInterface();
-      result.AccessFilter = AccessLevel::Internal;
+      result.AccessFilter = AccessLevel::Interface;
       return result;
    }
 
@@ -532,7 +532,7 @@ struct PrintOptions {
    /// swift file.
    static PrintOptions printSwiftFileInterface() {
       PrintOptions result = printInterface();
-      result.AccessFilter = AccessLevel::Internal;
+      result.AccessFilter = AccessLevel::Interface;
       result.EmptyLineBetweenMembers = true;
       return result;
    }

@@ -1030,7 +1030,7 @@ lookupOperatorDeclForName(const FileUnit &File, SourceLoc Loc, Identifier Name,
    }
 
    auto &SF = cast<SourceFile>(File);
-   assert(SF.ASTStage >= SourceFile::NameBound);
+   assert(SF.AstStage >= SourceFile::NameBound);
 
    // Look for an operator declaration in the current module.
    auto found = (SF.*OP_MAP).find(Name);
@@ -1148,7 +1148,7 @@ void ModuleDecl::getImportedModules(SmallVectorImpl<ImportedModule> &modules,
 void
 SourceFile::getImportedModules(SmallVectorImpl<ModuleDecl::ImportedModule> &modules,
                                ModuleDecl::ImportFilter filter) const {
-   assert(ASTStage >= Parsed || Kind == SourceFileKind::PIL);
+   assert(AstStage >= Parsed || Kind == SourceFileKind::PIL);
    assert(filter && "no imports requested?");
    for (auto desc : Imports) {
       ModuleDecl::ImportFilterKind requiredKind;
@@ -1494,7 +1494,7 @@ bool SourceFile::hasTestableOrPrivateImport(
    SourceFile::ImportQueryKind queryKind) const {
    auto *module = ofDecl->getModuleContext();
    switch (accessLevel) {
-      case AccessLevel::Internal:
+      case AccessLevel::Interface:
       case AccessLevel::Public:
          // internal/public access only needs an import marked as @_private. The
          // filename does not need to match (and we don't serialize it for such

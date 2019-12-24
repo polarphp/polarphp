@@ -61,7 +61,7 @@ enum class AccessLevel : uint8_t {
   /// File-private access is limited to the current file.
   FilePrivate,
   /// Internal access is limited to the current module.
-  Internal,
+  Interface,
   /// Public access is not limited, but some capabilities may be
   /// restricted outside of the current module.
   Public,

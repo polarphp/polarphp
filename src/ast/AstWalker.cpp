@@ -996,13 +996,13 @@ class Traversal : public AstVisitor<Traversal, Expr*, Stmt*,
     return E;
   }
 
-  Expr *visitObjCSelectorExpr(ObjCSelectorExpr *E) {
-    Expr *sub = doIt(E->getSubExpr());
-    if (!sub) return nullptr;
-
-    E->setSubExpr(sub);
-    return E;
-  }
+//  Expr *visitObjCSelectorExpr(ObjCSelectorExpr *E) {
+//    Expr *sub = doIt(E->getSubExpr());
+//    if (!sub) return nullptr;
+//
+//    E->setSubExpr(sub);
+//    return E;
+//  }
 
   Expr *visitKeyPathExpr(KeyPathExpr *E) {
     // For an ObjC key path, the string literal expr serves as the semantic

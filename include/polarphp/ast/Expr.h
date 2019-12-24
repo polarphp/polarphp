@@ -3283,47 +3283,48 @@ public:
 
 /// ConditionalBridgeFromObjCExpr - Bridge a value from a non-native
 /// representation.
-class ConditionalBridgeFromObjCExpr : public ImplicitConversionExpr {
-   ConcreteDeclRef Conversion;
+//class ConditionalBridgeFromObjCExpr : public ImplicitConversionExpr {
+//   ConcreteDeclRef Conversion;
+//
+//public:
+//   ConditionalBridgeFromObjCExpr(Expr *subExpr, Type type,
+//                                 ConcreteDeclRef conversion)
+//   : ImplicitConversionExpr(ExprKind::ConditionalBridgeFromObjC, subExpr, type),
+//     Conversion(conversion) {
+//   }
+//
+//   /// Retrieve the conversion function.
+//   ConcreteDeclRef getConversion() const {
+//      return Conversion;
+//   }
+//
+//   static bool classof(const Expr *E) {
+//      return E->getKind() == ExprKind::ConditionalBridgeFromObjC;
+//   }
+//};
 
-public:
-   ConditionalBridgeFromObjCExpr(Expr *subExpr, Type type,
-                                 ConcreteDeclRef conversion)
-   : ImplicitConversionExpr(ExprKind::ConditionalBridgeFromObjC, subExpr, type),
-     Conversion(conversion) {
-   }
-
-   /// Retrieve the conversion function.
-   ConcreteDeclRef getConversion() const {
-      return Conversion;
-   }
-
-   static bool classof(const Expr *E) {
-      return E->getKind() == ExprKind::ConditionalBridgeFromObjC;
-   }
-};
-
+// @todo
 /// BridgeFromObjCExpr - Bridge a value from a non-native representation.
-class BridgeFromObjCExpr : public ImplicitConversionExpr {
-public:
-   BridgeFromObjCExpr(Expr *subExpr, Type type)
-   : ImplicitConversionExpr(ExprKind::BridgeFromObjC, subExpr, type) {}
-
-   static bool classof(const Expr *E) {
-      return E->getKind() == ExprKind::BridgeFromObjC;
-   }
-};
+//class BridgeFromObjCExpr : public ImplicitConversionExpr {
+//public:
+//   BridgeFromObjCExpr(Expr *subExpr, Type type)
+//   : ImplicitConversionExpr(ExprKind::BridgeFromObjC, subExpr, type) {}
+//
+//   static bool classof(const Expr *E) {
+//      return E->getKind() == ExprKind::BridgeFromObjC;
+//   }
+//};
 
 /// BridgeToObjCExpr - Bridge a value to a non-native representation.
-class BridgeToObjCExpr : public ImplicitConversionExpr {
-public:
-   BridgeToObjCExpr(Expr *subExpr, Type type)
-   : ImplicitConversionExpr(ExprKind::BridgeToObjC, subExpr, type) {}
-
-   static bool classof(const Expr *E) {
-      return E->getKind() == ExprKind::BridgeToObjC;
-   }
-};
+//class BridgeToObjCExpr : public ImplicitConversionExpr {
+//public:
+//   BridgeToObjCExpr(Expr *subExpr, Type type)
+//   : ImplicitConversionExpr(ExprKind::BridgeToObjC, subExpr, type) {}
+//
+//   static bool classof(const Expr *E) {
+//      return E->getKind() == ExprKind::BridgeToObjC;
+//   }
+//};
 
 /// UnresolvedSpecializeExpr - Represents an explicit specialization using
 /// a type parameter list (e.g. "Vector<Int>") that has not been resolved.
@@ -4807,95 +4808,95 @@ public:
 /// \code
 /// #selector(UIView.insertSubview(_:aboveSubview:))
 /// \endcode
-class ObjCSelectorExpr : public Expr {
-   SourceLoc KeywordLoc;
-   SourceLoc LParenLoc;
-   SourceLoc ModifierLoc;
-   Expr *SubExpr;
-   SourceLoc RParenLoc;
-   AbstractFunctionDecl *ResolvedMethod = nullptr;
-
-public:
-   /// The kind of #selector expression this is.
-   enum ObjCSelectorKind {
-      Method, Getter, Setter
-   };
-
-   ObjCSelectorExpr(ObjCSelectorKind kind, SourceLoc keywordLoc,
-                    SourceLoc lParenLoc, SourceLoc modifierLoc, Expr *subExpr,
-                    SourceLoc rParenLoc)
-   : Expr(ExprKind::ObjCSelector, /*Implicit=*/false),
-     KeywordLoc(keywordLoc), LParenLoc(lParenLoc),
-     ModifierLoc(modifierLoc), SubExpr(subExpr), RParenLoc(rParenLoc) {
-      Bits.ObjCSelectorExpr.SelectorKind = static_cast<unsigned>(kind);
-   }
-
-   Expr *getSubExpr() const { return SubExpr; }
-   void setSubExpr(Expr *expr) { SubExpr = expr; }
-
-   /// Whether this selector references a property getter or setter.
-   bool isPropertySelector() const {
-      switch (getSelectorKind()) {
-         case ObjCSelectorKind::Method:
-            return false;
-
-         case ObjCSelectorKind::Getter:
-         case ObjCSelectorKind::Setter:
-            return true;
-      }
-
-      llvm_unreachable("Unhandled ObjcSelectorKind in switch.");
-   }
-
-   /// Whether this selector references a method.
-   bool isMethodSelector() const {
-      switch (getSelectorKind()) {
-         case ObjCSelectorKind::Method:
-            return true;
-
-         case ObjCSelectorKind::Getter:
-         case ObjCSelectorKind::Setter:
-            return false;
-      }
-   }
-
-   /// Retrieve the Objective-C method to which this expression refers.
-   AbstractFunctionDecl *getMethod() const { return ResolvedMethod; }
-
-   /// Set the Objective-C method to which this expression refers.
-   void setMethod(AbstractFunctionDecl *method) { ResolvedMethod = method; }
-
-   SourceLoc getLoc() const { return KeywordLoc; }
-   SourceRange getSourceRange() const {
-      return SourceRange(KeywordLoc, RParenLoc);
-   }
-
-   /// The location at which the getter: or setter: starts. Requires the selector
-   /// to be a getter or setter.
-   SourceLoc getModifierLoc() const {
-      assert(isPropertySelector() && "Modifiers only set on property selectors");
-      return ModifierLoc;
-   }
-
-   /// Retrieve the kind of the selector (method, getter, setter)
-   ObjCSelectorKind getSelectorKind() const {
-      return static_cast<ObjCSelectorKind>(Bits.ObjCSelectorExpr.SelectorKind);
-   }
-
-   /// Override the selector kind.
-   ///
-   /// Used by the type checker to recover from ill-formed #selector
-   /// expressions.
-   void overrideObjCSelectorKind(ObjCSelectorKind newKind,
-                                 SourceLoc modifierLoc) {
-      Bits.ObjCSelectorExpr.SelectorKind = static_cast<unsigned>(newKind);
-      ModifierLoc = modifierLoc;
-   }
-
-   static bool classof(const Expr *E) {
-      return E->getKind() == ExprKind::ObjCSelector;
-   }
-};
+//class ObjCSelectorExpr : public Expr {
+//   SourceLoc KeywordLoc;
+//   SourceLoc LParenLoc;
+//   SourceLoc ModifierLoc;
+//   Expr *SubExpr;
+//   SourceLoc RParenLoc;
+//   AbstractFunctionDecl *ResolvedMethod = nullptr;
+//
+//public:
+//   /// The kind of #selector expression this is.
+//   enum ObjCSelectorKind {
+//      Method, Getter, Setter
+//   };
+//
+//   ObjCSelectorExpr(ObjCSelectorKind kind, SourceLoc keywordLoc,
+//                    SourceLoc lParenLoc, SourceLoc modifierLoc, Expr *subExpr,
+//                    SourceLoc rParenLoc)
+//   : Expr(ExprKind::ObjCSelector, /*Implicit=*/false),
+//     KeywordLoc(keywordLoc), LParenLoc(lParenLoc),
+//     ModifierLoc(modifierLoc), SubExpr(subExpr), RParenLoc(rParenLoc) {
+//      Bits.ObjCSelectorExpr.SelectorKind = static_cast<unsigned>(kind);
+//   }
+//
+//   Expr *getSubExpr() const { return SubExpr; }
+//   void setSubExpr(Expr *expr) { SubExpr = expr; }
+//
+//   /// Whether this selector references a property getter or setter.
+//   bool isPropertySelector() const {
+//      switch (getSelectorKind()) {
+//         case ObjCSelectorKind::Method:
+//            return false;
+//
+//         case ObjCSelectorKind::Getter:
+//         case ObjCSelectorKind::Setter:
+//            return true;
+//      }
+//
+//      llvm_unreachable("Unhandled ObjcSelectorKind in switch.");
+//   }
+//
+//   /// Whether this selector references a method.
+//   bool isMethodSelector() const {
+//      switch (getSelectorKind()) {
+//         case ObjCSelectorKind::Method:
+//            return true;
+//
+//         case ObjCSelectorKind::Getter:
+//         case ObjCSelectorKind::Setter:
+//            return false;
+//      }
+//   }
+//
+//   /// Retrieve the Objective-C method to which this expression refers.
+//   AbstractFunctionDecl *getMethod() const { return ResolvedMethod; }
+//
+//   /// Set the Objective-C method to which this expression refers.
+//   void setMethod(AbstractFunctionDecl *method) { ResolvedMethod = method; }
+//
+//   SourceLoc getLoc() const { return KeywordLoc; }
+//   SourceRange getSourceRange() const {
+//      return SourceRange(KeywordLoc, RParenLoc);
+//   }
+//
+//   /// The location at which the getter: or setter: starts. Requires the selector
+//   /// to be a getter or setter.
+//   SourceLoc getModifierLoc() const {
+//      assert(isPropertySelector() && "Modifiers only set on property selectors");
+//      return ModifierLoc;
+//   }
+//
+//   /// Retrieve the kind of the selector (method, getter, setter)
+//   ObjCSelectorKind getSelectorKind() const {
+//      return static_cast<ObjCSelectorKind>(Bits.ObjCSelectorExpr.SelectorKind);
+//   }
+//
+//   /// Override the selector kind.
+//   ///
+//   /// Used by the type checker to recover from ill-formed #selector
+//   /// expressions.
+//   void overrideObjCSelectorKind(ObjCSelectorKind newKind,
+//                                 SourceLoc modifierLoc) {
+//      Bits.ObjCSelectorExpr.SelectorKind = static_cast<unsigned>(newKind);
+//      ModifierLoc = modifierLoc;
+//   }
+//
+//   static bool classof(const Expr *E) {
+//      return E->getKind() == ExprKind::ObjCSelector;
+//   }
+//};
 
 /// Produces a keypath string for the given referenced property.
 ///

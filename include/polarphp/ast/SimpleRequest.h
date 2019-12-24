@@ -29,9 +29,6 @@
 
 namespace polar {
 
-using polar::UnifiedStatsReporter;
-using polar::FrontendStatsTracer;
-
 class Evaluator;
 
 /// Describes how the result for a particular request will be cached.

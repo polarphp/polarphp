@@ -21,12 +21,13 @@
 #include "llvm/Support/raw_ostream.h"
 #include "polarphp/ast/PrintOptions.h"
 
-namespace polar {
-class SourceLoc;
+namespace polar::llparser {
+enum class tok;
 } // polar
 
 namespace polar {
 
+using polar::llparser::tok;
 class SourceLoc;
 class Decl;
 class DeclContext;
@@ -40,7 +41,6 @@ class Pattern;
 class ExtensionDecl;
 class NominalTypeDecl;
 class ValueDecl;
-enum class tok;
 enum class AccessorKind;
 
 /// Describes the context in which a name is being printed, which

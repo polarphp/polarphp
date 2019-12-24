@@ -26,11 +26,9 @@
 #include "polarphp/ast/TypeCheckRequests.h"
 #include "polarphp/basic/SourceMgr.h"
 #include "polarphp/basic/Statistic.h"
-#include "llvm/ADT/DenseMap.h"
 #include "llvm/ADT/Statistic.h"
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/Support/raw_ostream.h"
-#include "llvm/Support/SaveAndRestore.h"
 
 namespace polar {
 
@@ -957,7 +955,7 @@ AccessLevel AccessScope::accessLevelForDiagnostics() const {
    if (isPublic())
       return AccessLevel::Public;
    if (isa<ModuleDecl>(getDeclContext()))
-      return AccessLevel::Internal;
+      return AccessLevel::Interface;
    if (getDeclContext()->isModuleScopeContext()) {
       return isPrivate() ? AccessLevel::Private : AccessLevel::FilePrivate;
    }

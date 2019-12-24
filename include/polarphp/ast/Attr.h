@@ -653,21 +653,22 @@ public:
 /// the root class, and the ObjC implementation's responsibility to ensure
 /// instances begin with a Swift-refcounting-compatible object header and
 /// override all the necessary NSObject refcounting methods.
-class SwiftNativeObjCRuntimeBaseAttr : public DeclAttribute {
-public:
-   SwiftNativeObjCRuntimeBaseAttr(Identifier BaseClassName,
-                                  SourceLoc AtLoc, SourceRange Range,
-                                  bool Implicit)
-      : DeclAttribute(DAK_SwiftNativeObjCRuntimeBase, AtLoc, Range, Implicit),
-        BaseClassName(BaseClassName) {}
-
-   // The base class's name.
-   const Identifier BaseClassName;
-
-   static bool classof(const DeclAttribute *DA) {
-      return DA->getKind() == DAK_SwiftNativeObjCRuntimeBase;
-   }
-};
+// @todo
+//class SwiftNativeObjCRuntimeBaseAttr : public DeclAttribute {
+//public:
+//   SwiftNativeObjCRuntimeBaseAttr(Identifier BaseClassName,
+//                                  SourceLoc AtLoc, SourceRange Range,
+//                                  bool Implicit)
+//      : DeclAttribute(DAK_SwiftNativeObjCRuntimeBase, AtLoc, Range, Implicit),
+//        BaseClassName(BaseClassName) {}
+//
+//   // The base class's name.
+//   const Identifier BaseClassName;
+//
+//   static bool classof(const DeclAttribute *DA) {
+//      return DA->getKind() == DAK_SwiftNativeObjCRuntimeBase;
+//   }
+//};
 
 /// Determine the result of comparing an availability attribute to a specific
 /// platform or language version.
@@ -1084,25 +1085,26 @@ public:
 ///
 /// This attribute is introduced by the Clang importer, and is therefore always
 /// implicit.
-class ObjCBridgedAttr : public DeclAttribute {
-   ClassDecl *ObjCClass;
-
-public:
-   ObjCBridgedAttr(ClassDecl *ObjCClass)
-      : DeclAttribute(DAK_ObjCBridged, SourceLoc(), SourceRange(),
-                      /*Implicit=*/true),
-        ObjCClass(ObjCClass)
-   {
-   }
-
-   /// Retrieve the Objective-C class to which this foreign class is toll-free
-   /// bridged.
-   ClassDecl *getObjCClass() const { return ObjCClass; }
-
-   static bool classof(const DeclAttribute *DA) {
-      return DA->getKind() == DAK_ObjCBridged;
-   }
-};
+// @todo
+//class ObjCBridgedAttr : public DeclAttribute {
+//   ClassDecl *ObjCClass;
+//
+//public:
+//   ObjCBridgedAttr(ClassDecl *ObjCClass)
+//      : DeclAttribute(DAK_ObjCBridged, SourceLoc(), SourceRange(),
+//                      /*Implicit=*/true),
+//        ObjCClass(ObjCClass)
+//   {
+//   }
+//
+//   /// Retrieve the Objective-C class to which this foreign class is toll-free
+//   /// bridged.
+//   ClassDecl *getObjCClass() const { return ObjCClass; }
+//
+//   static bool classof(const DeclAttribute *DA) {
+//      return DA->getKind() == DAK_ObjCBridged;
+//   }
+//};
 
 /// An attribute that specifies a synthesized conformance of a known
 /// protocol for the declaration to which it appertains.

@@ -72,7 +72,6 @@ TYPE_ATTR(guaranteed)
 TYPE_ATTR(autoreleased)
 TYPE_ATTR(callee_owned)
 TYPE_ATTR(callee_guaranteed)
-TYPE_ATTR(objc_metatype)
 TYPE_ATTR(opened)
 TYPE_ATTR(pseudogeneric)
 TYPE_ATTR(yields)
@@ -188,11 +187,11 @@ SIMPLE_DECL_ATTR(UIApplicationMain, UIApplicationMain,
                  OnClass |
                  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
                  18)
-SIMPLE_DECL_ATTR(unsafe_no_objc_tagged_pointer, UnsafeNoObjCTaggedPointer,
-                 OnInterface |
-                 UserInaccessible |
-                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-                 19)
+//SIMPLE_DECL_ATTR(unsafe_no_objc_tagged_pointer, UnsafeNoObjCTaggedPointer,
+//                 OnInterface |
+//                 UserInaccessible |
+//                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+//                 19)
 DECL_ATTR(inline, Inline,
           OnVar | OnSubscript | OnAbstractFunction |
           ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
@@ -230,10 +229,10 @@ SIMPLE_DECL_ATTR(requires_stored_property_inits, RequiresStoredPropertyInits,
                  OnClass |
                  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
                  27)
-SIMPLE_DECL_ATTR(nonobjc, NonObjC,
-                 OnExtension | OnFunc | OnAccessor | OnVar | OnSubscript | OnConstructor |
-                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-                 30)
+//SIMPLE_DECL_ATTR(nonobjc, NonObjC,
+//                 OnExtension | OnFunc | OnAccessor | OnVar | OnSubscript | OnConstructor |
+//                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+//                 30)
 SIMPLE_DECL_ATTR(_fixed_layout, FixedLayout,
                  OnVar | OnClass | OnStruct |
                  UserInaccessible | ABIBreakingToAdd | ABIBreakingToRemove |
@@ -248,10 +247,10 @@ DECL_ATTR(_specialize, Specialize,
           AllowMultipleAttributes | LongAttribute | UserInaccessible |
           ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
           33)
-SIMPLE_DECL_ATTR(objcMembers, ObjCMembers,
-                 OnClass |
-                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-                 34)
+//SIMPLE_DECL_ATTR(objcMembers, ObjCMembers,
+//                 OnClass |
+//                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+//                 34)
 CONTEXTUAL_SIMPLE_DECL_ATTR(__consuming, Consuming,
                             OnFunc | OnAccessor |
                             DeclModifier |
@@ -314,21 +313,21 @@ DECL_ATTR(_effects, Effects,
           UserInaccessible |
           ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
           50)
-DECL_ATTR(__objc_bridged, ObjCBridged,
-          OnClass |
-          RejectByParser |
-          NotSerialized |
-          ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-          51)
+//DECL_ATTR(__objc_bridged, ObjCBridged,
+//          OnClass |
+//          RejectByParser |
+//          NotSerialized |
+//          ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+//          51)
 SIMPLE_DECL_ATTR(NSApplicationMain, NSApplicationMain,
                  OnClass |
                  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
                  52)
-SIMPLE_DECL_ATTR(_objc_non_lazy_realization, ObjCNonLazyRealization,
-                 OnClass |
-                 UserInaccessible |
-                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-                 53)
+//SIMPLE_DECL_ATTR(_objc_non_lazy_realization, ObjCNonLazyRealization,
+//                 OnClass |
+//                 UserInaccessible |
+//                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+//                 53)
 DECL_ATTR(__synthesized_protocol, SynthesizedInterface,
           OnConcreteNominalType |
           RejectByParser |
@@ -350,11 +349,11 @@ SIMPLE_DECL_ATTR(rethrows, Rethrows,
                  RejectByParser |
                  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
                  57)
-DECL_ATTR(_swift_native_objc_runtime_base, SwiftNativeObjCRuntimeBase,
-          OnClass |
-          UserInaccessible |
-          ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-          59)
+//DECL_ATTR(_swift_native_objc_runtime_base, SwiftNativeObjCRuntimeBase,
+//          OnClass |
+//          UserInaccessible |
+//          ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
+//          59)
 CONTEXTUAL_SIMPLE_DECL_ATTR(indirect, Indirect, DeclModifier |
                                                 OnEnum | OnEnumElement |
                                                 ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,

@@ -1229,7 +1229,7 @@ void CallerSideDefaultArgExprRequest::cacheResult(Expr *expr) const {
 
 Optional<bool> TypeCheckSourceFileRequest::getCachedResult() const {
    auto *SF = std::get<0>(getStorage());
-   if (SF->ASTStage == SourceFile::TypeChecked)
+   if (SF->AstStage == SourceFile::TypeChecked)
       return true;
 
    return None;
@@ -1239,7 +1239,7 @@ void TypeCheckSourceFileRequest::cacheResult(bool result) const {
    auto *SF = std::get<0>(getStorage());
 
    // Verify that we've checked types correctly.
-   SF->ASTStage = SourceFile::TypeChecked;
+   SF->AstStage = SourceFile::TypeChecked;
 
    {
       auto &Ctx = SF->getAstContext();

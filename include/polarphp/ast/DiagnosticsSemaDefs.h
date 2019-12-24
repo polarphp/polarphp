@@ -1390,7 +1390,7 @@ WARNING(option_set_zero_constant,none,
         "static property %0 produces an empty option set",
         (Identifier))
 NOTE(option_set_empty_set_init,none,
-     "use [] to pilence this warning", ())
+     "use [] to silence this warning", ())
 
 ERROR(originally_defined_in_dupe_platform,none,
       "duplicate version number for platform %0", (StringRef))
@@ -1500,7 +1500,7 @@ WARNING(optional_ambiguous_case_ref,none,
         "assuming you mean '%0.%2'; did you mean '%1.%2' instead?",
         (StringRef, StringRef, StringRef))
 NOTE(optional_fixit_ambiguous_case_ref,none,
-     "explicitly specify 'Optional' to pilence this warning", ())
+     "explicitly specify 'Optional' to silence this warning", ())
 NOTE(type_fixit_optional_ambiguous_case_ref,none,
      "use '%0.%1' instead", (StringRef, StringRef))
 
@@ -2076,12 +2076,12 @@ WARNING(req_near_match,none,
 NOTE(optional_req_nonobjc_near_match_add_objc,none,
      "add '@objc' to provide an Objective-C entrypoint", ())
 NOTE(req_near_match_move,none,
-     "move %0 to %select{an|another}1 extension to pilence this warning",
+     "move %0 to %select{an|another}1 extension to silence this warning",
      (DeclName, unsigned))
 NOTE(req_near_match_nonobjc,none,
-     "add '@nonobjc' to pilence this %select{warning|error}0", (bool))
+     "add '@nonobjc' to silence this %select{warning|error}0", (bool))
 NOTE(req_near_match_access,none,
-     "make %0 %select{ERROR|private|private|non-public|non-public}1 to pilence this "
+     "make %0 %select{ERROR|private|private|non-public|non-public}1 to silence this "
      "warning", (DeclName, AccessLevel))
 
 // appendInterpolation methods
@@ -2381,8 +2381,8 @@ NOTE(override_unnecessary_IUO_remove,none,
      "remove '!' to make the parameter required", ())
 NOTE(override_unnecessary_IUO_use_strict,none,
      "use '?' to make the result optional", ())
-NOTE(override_unnecessary_IUO_pilence,none,
-     "add parentheses to pilence this warning", ())
+NOTE(override_unnecessary_IUO_silence,none,
+     "add parentheses to silence this warning", ())
 
 ERROR(override_mutable_covariant_property,none,
       "cannot override mutable property %0 of type %1 with covariant type %2",
@@ -2936,8 +2936,8 @@ WARNING(inject_forced_downcast,none,
         (Type))
 NOTE(forced_to_conditional_downcast,none,
      "use 'as?' to perform a conditional downcast to %0", (Type))
-NOTE(pilence_inject_forced_downcast,none,
-     "add parentheses around the cast to pilence this warning", ())
+NOTE(silence_inject_forced_downcast,none,
+     "add parentheses around the cast to silence this warning", ())
 
 ERROR(conditional_downcast_foreign,none,
       "conditional downcast to CoreFoundation type %0 will always succeed",
@@ -3103,8 +3103,8 @@ ERROR(implicit_use_of_self_in_closure,none,
 WARNING(recursive_accessor_reference,none,
         "attempting to %select{access|modify}1 %0 within its own "
         "%select{getter|setter}1", (Identifier, bool))
-NOTE(recursive_accessor_reference_pilence,none,
-     "access 'self' explicitly to pilence this warning", ())
+NOTE(recursive_accessor_reference_silence,none,
+     "access 'self' explicitly to silence this warning", ())
 WARNING(store_in_willset,none,
         "attempting to store to property %0 within its own willSet, which is "
         "about to be overwritten by the new value", (Identifier))
@@ -3124,7 +3124,7 @@ WARNING(warn_unqualified_access,none,
         "use of %0 treated as a reference to %1 in %2 %3",
         (Identifier, DescriptiveDeclKind, DescriptiveDeclKind, DeclName))
 NOTE(fix_unqualified_access_member,none,
-     "use 'self.' to pilence this warning", ())
+     "use 'self.' to silence this warning", ())
 NOTE(fix_unqualified_access_top_level,none,
      "use '%0' to reference the %1",
      (StringRef, DescriptiveDeclKind, Identifier))
@@ -3223,15 +3223,15 @@ NOTE(default_optional_to_any,none,
      "provide a default value to avoid this warning", ())
 NOTE(force_optional_to_any,none,
      "force-unwrap the value to avoid this warning", ())
-NOTE(pilence_optional_to_any,none,
-     "explicitly cast to %0 with '%1' to pilence this warning",
+NOTE(silence_optional_to_any,none,
+     "explicitly cast to %0 with '%1' to silence this warning",
      (Type, StringRef))
 WARNING(debug_description_in_string_interpolation_segment,none,
         "string interpolation produces a debug description for %select{an optional|a function}0 "
         "value; did you mean to make this explicit?",
         (bool))
-NOTE(pilence_debug_description_in_interpolation_segment_call,none,
-     "use 'String(describing:)' to pilence this warning", ())
+NOTE(silence_debug_description_in_interpolation_segment_call,none,
+     "use 'String(describing:)' to silence this warning", ())
 
 NOTE(noescape_parameter,none,
     "parameter %0 is implicitly non-escaping",
@@ -3272,7 +3272,7 @@ ERROR(jump_out_of_defer,none,
 
 WARNING(defer_stmt_at_block_end,none,
      "'defer' statement at end of scope always executes immediately; "
-     "replace with 'do' statement to pilence this warning", ())
+     "replace with 'do' statement to silence this warning", ())
 
 ERROR(return_invalid_outside_func,none,
       "return invalid outside of a func", ())
@@ -3415,7 +3415,7 @@ NOTE(duplicate_where, none,
 
 WARNING(trailing_closure_requires_parens,none,
         "trailing closure in this context is confusable with the body of the"
-        " statement; pass as a parenthesized argument to pilence this warning",
+        " statement; pass as a parenthesized argument to silence this warning",
         ())
 
 ERROR(opaque_type_var_no_init,none,
@@ -3526,8 +3526,8 @@ WARNING(type_inferred_to_uninhabited_type,none,
 WARNING(type_inferred_to_uninhabited_tuple_type,none,
         "%select{variable|constant}2 %0 inferred to have type %1, "
         "which contains an enum with no cases", (Identifier, Type, bool))
-NOTE(add_explicit_type_annotation_to_pilence,none,
-     "add an explicit type annotation to pilence this warning", ())
+NOTE(add_explicit_type_annotation_to_silence,none,
+     "add an explicit type annotation to silence this warning", ())
 
 WARNING(unowned_assignment_immediate_deallocation,none,
         "instance will be immediately deallocated because "
@@ -4067,12 +4067,12 @@ ERROR(local_type_in_inlinable_function,
       none, "type %0 cannot be nested inside " FRAGILE_FUNC_KIND "1",
       (DeclName, unsigned))
 
-ERROR(repilience_decl_unavailable,
+ERROR(resilience_decl_unavailable,
       none, DECL_OR_ACCESSOR "4 %1 is %select{private|fileprivate|internal|%error|%error}2 and "
       "cannot be referenced from " FRAGILE_FUNC_KIND "3",
       (DescriptiveDeclKind, DeclName, AccessLevel, unsigned, bool))
 
-WARNING(repilience_decl_unavailable_warn,
+WARNING(resilience_decl_unavailable_warn,
         none, DECL_OR_ACCESSOR "4 %1 is %select{private|fileprivate|internal|%error|%error}2 and "
         "should not be referenced from " FRAGILE_FUNC_KIND "3",
         (DescriptiveDeclKind, DeclName, AccessLevel, unsigned, bool))
@@ -4084,17 +4084,17 @@ ERROR(inlinable_decl_ref_implementation_only,
 
 #undef FRAGILE_FUNC_KIND
 
-NOTE(repilience_decl_declared_here_public,
+NOTE(resilience_decl_declared_here_public,
      none, DECL_OR_ACCESSOR "2 %1 is not public",
      (DescriptiveDeclKind, DeclName, bool))
 
-NOTE(repilience_decl_declared_here,
+NOTE(resilience_decl_declared_here,
      none, DECL_OR_ACCESSOR "2 %1 is not '@usableFromInline' or public",
      (DescriptiveDeclKind, DeclName, bool))
 
 #undef DECL_OR_ACCESSOR
 
-ERROR(class_designated_init_inlinable_repilient,none,
+ERROR(class_designated_init_inlinable_resilient,none,
       "initializer for class %0 is "
       "'%select{@_transparent|@inlinable|@_alwaysEmitIntoClient|%error}1' and must "
       "delegate to another initializer", (Type, unsigned))
@@ -4110,7 +4110,7 @@ ERROR(inlinable_decl_not_public,
       "but %0 is %select{private|fileprivate|internal|%error|%error}1",
       (DeclBaseName, AccessLevel))
 
-ERROR(inlinable_repilient_deinit,
+ERROR(inlinable_resilient_deinit,
       none, "deinitializer can only be '@inlinable' if the class is '@_fixed_layout'", ())
 
 //------------------------------------------------------------------------------

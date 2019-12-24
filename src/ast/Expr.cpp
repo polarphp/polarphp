@@ -353,11 +353,11 @@ ConcreteDeclRef Expr::getReferencedDecl() const {
       PASS_THROUGH_REFERENCE(ArrayToPointer, getSubExpr);
       PASS_THROUGH_REFERENCE(StringToPointer, getSubExpr);
       PASS_THROUGH_REFERENCE(PointerToPointer, getSubExpr);
-      PASS_THROUGH_REFERENCE(ForeignObjectConversion, getSubExpr);
+//      PASS_THROUGH_REFERENCE(ForeignObjectConversion, getSubExpr);
       PASS_THROUGH_REFERENCE(UnevaluatedInstance, getSubExpr);
-      PASS_THROUGH_REFERENCE(BridgeToObjC, getSubExpr);
-      PASS_THROUGH_REFERENCE(BridgeFromObjC, getSubExpr);
-      PASS_THROUGH_REFERENCE(ConditionalBridgeFromObjC, getSubExpr);
+//      PASS_THROUGH_REFERENCE(BridgeToObjC, getSubExpr);
+//      PASS_THROUGH_REFERENCE(BridgeFromObjC, getSubExpr);
+//      PASS_THROUGH_REFERENCE(ConditionalBridgeFromObjC, getSubExpr);
       PASS_THROUGH_REFERENCE(UnderlyingToOpaque, getSubExpr);
       NO_REFERENCE(Coerce);
       NO_REFERENCE(ForcedCheckedCast);
@@ -371,7 +371,7 @@ ConcreteDeclRef Expr::getReferencedDecl() const {
       NO_REFERENCE(CodeCompletion);
       NO_REFERENCE(UnresolvedPattern);
       NO_REFERENCE(EditorPlaceholder);
-      NO_REFERENCE(ObjCSelector);
+//      NO_REFERENCE(ObjCSelector);
       NO_REFERENCE(KeyPath);
       NO_REFERENCE(KeyPathDot);
       PASS_THROUGH_REFERENCE(OneWay, getSubExpr);
@@ -556,7 +556,7 @@ bool Expr::canAppendPostfixExpression(bool appendingPostfixOperator) const {
       case ExprKind::StringLiteral:
       case ExprKind::InterpolatedStringLiteral:
       case ExprKind::MagicIdentifierLiteral:
-      case ExprKind::ObjCSelector:
+//      case ExprKind::ObjCSelector:
       case ExprKind::KeyPath:
          return true;
 
@@ -674,9 +674,9 @@ bool Expr::canAppendPostfixExpression(bool appendingPostfixOperator) const {
       case ExprKind::ForeignObjectConversion:
       case ExprKind::UnevaluatedInstance:
       case ExprKind::EnumIsCase:
-      case ExprKind::ConditionalBridgeFromObjC:
-      case ExprKind::BridgeFromObjC:
-      case ExprKind::BridgeToObjC:
+//      case ExprKind::ConditionalBridgeFromObjC:
+//      case ExprKind::BridgeFromObjC:
+//      case ExprKind::BridgeToObjC:
       case ExprKind::UnderlyingToOpaque:
          // Implicit conversion nodes have no syntax of their own; defer to the
          // subexpression.

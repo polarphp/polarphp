@@ -81,7 +81,7 @@ StringRef getAccessLevelSpelling(AccessLevel value) {
          return "private";
       case AccessLevel::FilePrivate:
          return "fileprivate";
-      case AccessLevel::Internal:
+      case AccessLevel::Interface:
          return "internal";
       case AccessLevel::Public:
          return "public";
@@ -644,7 +644,7 @@ bool DeclAttribute::printImpl(AstPrinter &Printer, const PrintOptions &Options,
    // callbacks.
    switch (getKind()) {
       case DAK_RawDocComment:
-      case DAK_ObjCBridged:
+//      case DAK_ObjCBridged:
       case DAK_SynthesizedInterface:
       case DAK_Rethrows:
       case DAK_Infix:
@@ -764,13 +764,13 @@ bool DeclAttribute::printImpl(AstPrinter &Printer, const PrintOptions &Options,
          Printer << cast<PrivateImportAttr>(this)->getSourceFile() << "\")";
          break;
       }
-
-      case DAK_SwiftNativeObjCRuntimeBase: {
-         auto *attr = cast<SwiftNativeObjCRuntimeBaseAttr>(this);
-         Printer.printAttrName("@_swift_native_objc_runtime_base");
-         Printer << "(" << attr->BaseClassName.str() << ")";
-         break;
-      }
+      // @todo
+//      case DAK_SwiftNativeObjCRuntimeBase: {
+//         auto *attr = cast<SwiftNativeObjCRuntimeBaseAttr>(this);
+//         Printer.printAttrName("@_swift_native_objc_runtime_base");
+//         Printer << "(" << attr->BaseClassName.str() << ")";
+//         break;
+//      }
 
       case DAK_Specialize: {
          Printer << "@" << getAttrName() << "(";
@@ -939,8 +939,8 @@ StringRef DeclAttribute::getAttrName() const {
          return "_alignment";
       case DAK_CDecl:
          return "_cdecl";
-      case DAK_SwiftNativeObjCRuntimeBase:
-         return "_swift_native_objc_runtime_base";
+//      case DAK_SwiftNativeObjCRuntimeBase:
+//         return "_swift_native_objc_runtime_base";
       case DAK_Semantics:
          return "_semantics";
       case DAK_Available:
@@ -993,8 +993,8 @@ StringRef DeclAttribute::getAttrName() const {
          return keywordOf(cast<ReferenceOwnershipAttr>(this)->get());
       case DAK_RawDocComment:
          return "<<raw doc comment>>";
-      case DAK_ObjCBridged:
-         return "<<ObjC bridged>>";
+//      case DAK_ObjCBridged:
+//         return "<<ObjC bridged>>";
       case DAK_SynthesizedInterface:
          return "<<synthesized protocol>>";
       case DAK_Specialize:

@@ -270,7 +270,7 @@ public:
 #define UNCHECKED_EXPR(ID, PARENT) \
       case ExprKind::ID: \
         assert((HadError || !M.is<SourceFile*>() || \
-                M.get<SourceFile*>()->ASTStage < SourceFile::TypeChecked) && \
+                M.get<SourceFile*>()->AstStage < SourceFile::TypeChecked) && \
                #ID "in wrong phase");\
         DISPATCH(ID);
 
@@ -290,7 +290,7 @@ public:
 #define UNCHECKED_EXPR(ID, PARENT) \
       case ExprKind::ID: \
         assert((HadError || !M.is<SourceFile*>() || \
-                M.get<SourceFile*>()->ASTStage < SourceFile::TypeChecked) && \
+                M.get<SourceFile*>()->AstStage < SourceFile::TypeChecked) && \
                #ID "in wrong phase");\
         DISPATCH(ID);
 
@@ -450,11 +450,11 @@ public:
       verifyParsed(node);
 
       // If we've bound names already, verify as a bound node.
-      if (!SF || SF->ASTStage >= SourceFile::NameBound)
+      if (!SF || SF->AstStage >= SourceFile::NameBound)
          verifyBound(node);
 
       // If we've checked types already, do some extra verification.
-      if (!SF || SF->ASTStage >= SourceFile::TypeChecked) {
+      if (!SF || SF->AstStage >= SourceFile::TypeChecked) {
          verifyCheckedAlways(node);
          if (!HadError && shouldVerifyChecked(node))
             verifyChecked(node);
@@ -521,7 +521,7 @@ public:
          case AbstractFunctionDecl::BodyKind::Parsed:
          case AbstractFunctionDecl::BodyKind::Synthesize:
             if (auto SF = dyn_cast<SourceFile>(afd->getModuleScopeContext())) {
-               return SF->ASTStage < SourceFile::TypeChecked;
+               return SF->AstStage < SourceFile::TypeChecked;
             }
 
             return false;
