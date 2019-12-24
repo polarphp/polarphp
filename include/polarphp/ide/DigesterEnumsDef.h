@@ -1,0 +1,8 @@
+//
+// Created by polarboy on 12/24/19.
+//
+
+#ifndef POLARPHP_DIGESTERENUMSDEF_H
+#define POLARPHP_DIGESTERENUMSDEF_H
+
+#endif //POLARPHP_DIGESTERENUMSDEF_H

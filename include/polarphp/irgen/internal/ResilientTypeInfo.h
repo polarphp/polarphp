@@ -1,0 +1,8 @@
+//
+// Created by polarboy on 12/24/19.
+//
+
+#ifndef POLARPHP_RESILIENTTYPEINFO_H
+#define POLARPHP_RESILIENTTYPEINFO_H
+
+#endif //POLARPHP_RESILIENTTYPEINFO_H

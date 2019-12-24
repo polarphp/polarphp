@@ -1,0 +1,8 @@
+//
+// Created by polarboy on 12/24/19.
+//
+
+#ifndef POLARPHP_LOCALTYPEDATAKIND_H
+#define POLARPHP_LOCALTYPEDATAKIND_H
+
+#endif //POLARPHP_LOCALTYPEDATAKIND_H

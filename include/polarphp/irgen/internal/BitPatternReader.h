@@ -1,0 +1,8 @@
+//
+// Created by polarboy on 12/24/19.
+//
+
+#ifndef POLARPHP_BITPATTERNREADER_H
+#define POLARPHP_BITPATTERNREADER_H
+
+#endif //POLARPHP_BITPATTERNREADER_H

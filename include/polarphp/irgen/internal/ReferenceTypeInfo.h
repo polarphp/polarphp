@@ -1,0 +1,8 @@
+//
+// Created by polarboy on 12/24/19.
+//
+
+#ifndef POLARPHP_REFERENCETYPEINFO_H
+#define POLARPHP_REFERENCETYPEINFO_H
+
+#endif //POLARPHP_REFERENCETYPEINFO_H

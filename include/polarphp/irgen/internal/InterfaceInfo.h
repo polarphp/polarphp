@@ -1,0 +1,8 @@
+//
+// Created by polarboy on 12/24/19.
+//
+
+#ifndef POLARPHP_INTERFACEINFO_H
+#define POLARPHP_INTERFACEINFO_H
+
+#endif //POLARPHP_INTERFACEINFO_H

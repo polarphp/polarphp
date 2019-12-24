@@ -1,0 +1,8 @@
+//
+// Created by polarboy on 12/24/19.
+//
+
+#ifndef POLARPHP_METADATAREQUEST_H
+#define POLARPHP_METADATAREQUEST_H
+
+#endif //POLARPHP_METADATAREQUEST_H

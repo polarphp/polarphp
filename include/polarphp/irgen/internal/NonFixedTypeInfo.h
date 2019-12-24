@@ -1,0 +1,8 @@
+//
+// Created by polarboy on 12/24/19.
+//
+
+#ifndef POLARPHP_NONFIXEDTYPEINFO_H
+#define POLARPHP_NONFIXEDTYPEINFO_H
+
+#endif //POLARPHP_NONFIXEDTYPEINFO_H
