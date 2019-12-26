@@ -69,7 +69,7 @@ bool is_after_llvm(FileTypeId Id);
 /// being compiled.
 ///
 /// These need to be passed to the Swift frontend
-bool is_part_of_polarphp_compilation(FileTypeId Id);
+bool is_part_of_php_compilation(FileTypeId Id);
 
 static inline void for_all_types(llvm::function_ref<void(filetypes::FileTypeId)> fn)
 {

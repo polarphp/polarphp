@@ -1,4 +1,4 @@
-//===--- OutputFileMap.cpp - map of inputs to multiple outputs ------------===//
+//===--- OutputFileMap.cpp - Map of inputs to multiple outputs ------------===//
 //
 // This source file is part of the Swift.org open source project
 //
@@ -9,249 +9,258 @@
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
 //===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
-//
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/12/01.
 
 #include "polarphp/basic/OutputFileMap.h"
+#include "polarphp/basic/FileTypes.h"
 #include "llvm/ADT/SmallString.h"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/Support/Path.h"
 #include "llvm/Support/raw_ostream.h"
 #include <system_error>
 
-namespace polar {
+using namespace polar;
 
 llvm::Expected<OutputFileMap>
-OutputFileMap::loadFromPath(StringRef path, StringRef workingDirectory)
-{
-   llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> fileBufOrErr =
-         llvm::MemoryBuffer::getFile(path);
-   if (!fileBufOrErr) {
-      return llvm::errorCodeToError(fileBufOrErr.getError());
+OutputFileMap::loadFromPath(StringRef Path, StringRef workingDirectory,
+                            const bool addEntriesForSourceRangeDependencies) {
+   llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> FileBufOrErr =
+      llvm::MemoryBuffer::getFile(Path);
+   if (!FileBufOrErr) {
+      return llvm::errorCodeToError(FileBufOrErr.getError());
    }
-   return loadFromBuffer(std::move(fileBufOrErr.get()), workingDirectory);
+   return loadFromBuffer(std::move(FileBufOrErr.get()), workingDirectory,
+                         addEntriesForSourceRangeDependencies);
 }
 
 llvm::Expected<OutputFileMap>
-OutputFileMap::loadFromBuffer(StringRef data, StringRef workingDirectory)
-{
-   std::unique_ptr<llvm::MemoryBuffer> buffer{
-      llvm::MemoryBuffer::getMemBuffer(data)};
-   return loadFromBuffer(std::move(buffer), workingDirectory);
+OutputFileMap::loadFromBuffer(StringRef Data, StringRef workingDirectory,
+                              bool addEntriesForSourceRangeDependencies) {
+   std::unique_ptr<llvm::MemoryBuffer> Buffer{
+      llvm::MemoryBuffer::getMemBuffer(Data)};
+   return loadFromBuffer(std::move(Buffer), workingDirectory,
+                         addEntriesForSourceRangeDependencies);
 }
 
 llvm::Expected<OutputFileMap>
-OutputFileMap::loadFromBuffer(std::unique_ptr<llvm::MemoryBuffer> buffer,
-                              StringRef workingDirectory)
-{
-   return parse(std::move(buffer), workingDirectory);
+OutputFileMap::loadFromBuffer(std::unique_ptr<llvm::MemoryBuffer> Buffer,
+                              StringRef workingDirectory,
+                              bool addEntriesForSourceRangeDependencies) {
+   return parse(std::move(Buffer), workingDirectory,
+                addEntriesForSourceRangeDependencies);
 }
 
-const TypeToPathMap *OutputFileMap::getOutputMapForInput(StringRef input) const
-{
-   auto iter = m_inputToOutputsMap.find(input);
-   if (iter == m_inputToOutputsMap.end()) {
+const TypeToPathMap *OutputFileMap::getOutputMapForInput(StringRef Input) const{
+   auto iter = InputToOutputsMap.find(Input);
+   if (iter == InputToOutputsMap.end())
       return nullptr;
-   } else {
+   else
       return &iter->second;
-   }
 }
 
 TypeToPathMap &
-OutputFileMap::getOrCreateOutputMapForInput(StringRef input)
-{
-   return m_inputToOutputsMap[input];
+OutputFileMap::getOrCreateOutputMapForInput(StringRef Input) {
+   return InputToOutputsMap[Input];
 }
 
-const TypeToPathMap *OutputFileMap::getOutputMapForSingleOutput() const
-{
+const TypeToPathMap *OutputFileMap::getOutputMapForSingleOutput() const {
    return getOutputMapForInput(StringRef());
 }
 
 TypeToPathMap &
-OutputFileMap::getOrCreateOutputMapForSingleOutput()
-{
-   return m_inputToOutputsMap[StringRef()];
+OutputFileMap::getOrCreateOutputMapForSingleOutput() {
+   return InputToOutputsMap[StringRef()];
 }
 
-void OutputFileMap::dump(llvm::raw_ostream &ostream, bool sortFlag) const
-{
-   using TypePathPair = std::pair<filetypes::FileTypeId, std::string>;
-   auto printOutputPair = [&ostream](StringRef inputPath,
-         const TypePathPair &outputPair) -> void {
-      ostream << inputPath << " -> " << filetypes::get_type_name(outputPair.first)
-              << ": \"" << outputPair.second << "\"\n";
+void OutputFileMap::dump(llvm::raw_ostream &os, bool Sort) const {
+   using TypePathPair = std::pair<filetypes::FileTypeId , std::string>;
+
+   auto printOutputPair = [&os](StringRef InputPath,
+                                const TypePathPair &OutputPair) -> void {
+      os << InputPath << " -> " << filetypes::get_type_name(OutputPair.first)
+         << ": \"" << OutputPair.second << "\"\n";
    };
 
-   if (sortFlag) {
+   if (Sort) {
       using PathMapPair = std::pair<StringRef, TypeToPathMap>;
-      std::vector<PathMapPair> maps;
-      for (auto &inputPair : m_inputToOutputsMap) {
-         maps.emplace_back(inputPair.first(), inputPair.second);
+      std::vector<PathMapPair> Maps;
+      for (auto &InputPair : InputToOutputsMap) {
+         Maps.emplace_back(InputPair.first(), InputPair.second);
       }
-      std::sort(maps.begin(), maps.end(), [] (const PathMapPair &lhs,
-                const PathMapPair &rhs) -> bool {
-         return lhs.first < rhs.first;
+      std::sort(Maps.begin(), Maps.end(), [] (const PathMapPair &LHS,
+                                              const PathMapPair &RHS) -> bool {
+         return LHS.first < RHS.first;
       });
-      for (auto &inputPair : maps) {
-         const TypeToPathMap &map = inputPair.second;
-         std::vector<TypePathPair> pairs;
-         pairs.insert(pairs.end(), map.begin(), map.end());
-         std::sort(pairs.begin(), pairs.end());
-         for (auto &outputPair : pairs) {
-            printOutputPair(inputPair.first, outputPair);
+      for (auto &InputPair : Maps) {
+         const TypeToPathMap &Map = InputPair.second;
+         std::vector<TypePathPair> Pairs;
+         Pairs.insert(Pairs.end(), Map.begin(), Map.end());
+         std::sort(Pairs.begin(), Pairs.end());
+         for (auto &OutputPair : Pairs) {
+            printOutputPair(InputPair.first, OutputPair);
          }
       }
    } else {
-      for (auto &inputPair : m_inputToOutputsMap) {
-         const TypeToPathMap &map = inputPair.second;
-         for (const TypePathPair &outputPair : map) {
-            printOutputPair(inputPair.first(), outputPair);
+      for (auto &InputPair : InputToOutputsMap) {
+         const TypeToPathMap &Map = InputPair.second;
+         for (const TypePathPair &OutputPair : Map) {
+            printOutputPair(InputPair.first(), OutputPair);
          }
       }
    }
 }
 
-static void writeQuotedEscaped(llvm::raw_ostream &ostream,
-                               const StringRef fileName)
-{
-   ostream << "\"" << llvm::yaml::escape(fileName) << "\"";
+static void writeQuotedEscaped(llvm::raw_ostream &os,
+                               const StringRef fileName) {
+   os << "\"" << llvm::yaml::escape(fileName) << "\"";
 }
 
-void OutputFileMap::write(llvm::raw_ostream &ostream,
-                          ArrayRef<StringRef> inputs) const
-{
-   for (const auto &input : inputs) {
-      writeQuotedEscaped(ostream, input);
-      ostream << ":";
+void OutputFileMap::write(llvm::raw_ostream &os,
+                          ArrayRef<StringRef> inputs) const {
+   for (const auto input : inputs) {
+      writeQuotedEscaped(os, input);
+      os << ":";
+
       const TypeToPathMap *outputMap = getOutputMapForInput(input);
       if (!outputMap) {
          // The map doesn't have an entry for this input. (Perhaps there were no
          // outputs and thus the entry was never created.) Put an empty sub-map
          // into the output and move on.
-         ostream << " {}\n";
+         os << " {}\n";
          continue;
       }
 
-      ostream << "\n";
+      os << "\n";
+      // DenseMap is unordered. If you write a test, please sort the output.
       for (auto &typeAndOutputPath : *outputMap) {
          filetypes::FileTypeId type = typeAndOutputPath.getFirst();
          StringRef output = typeAndOutputPath.getSecond();
-         ostream << "  " << filetypes::get_type_name(type) << ": ";
-         writeQuotedEscaped(ostream, output);
-         ostream << "\n";
+         os << "  " << filetypes::get_type_name(type) << ": ";
+         writeQuotedEscaped(os, output);
+         os << "\n";
       }
    }
 }
 
 llvm::Expected<OutputFileMap>
-OutputFileMap::parse(std::unique_ptr<llvm::MemoryBuffer> buffer,
-                     StringRef workingDirectory)
-{
+OutputFileMap::parse(std::unique_ptr<llvm::MemoryBuffer> Buffer,
+                     StringRef workingDirectory,
+                     const bool addEntriesForSourceRangeDependencies) {
    auto constructError =
-         [](const char *errorString) -> llvm::Expected<OutputFileMap> {
-      return llvm::make_error<llvm::StringError>(errorString,
-                                                 llvm::inconvertibleErrorCode());
-   };
+      [](const char *errorString) -> llvm::Expected<OutputFileMap> {
+         return llvm::make_error<llvm::StringError>(errorString,
+                                                    llvm::inconvertibleErrorCode());
+      };
    /// FIXME: Make the returned error strings more specific by including some of
    /// the source.
-   llvm::SourceMgr sourceMgr;
-   llvm::yaml::Stream yamlStream(buffer->getMemBufferRef(), sourceMgr);
-   auto iter = yamlStream.begin();
-   if (iter == yamlStream.end()) {
+   llvm::SourceMgr SM;
+   llvm::yaml::Stream YAMLStream(Buffer->getMemBufferRef(), SM);
+   auto I = YAMLStream.begin();
+   if (I == YAMLStream.end())
       return constructError("empty YAML stream");
-   }
-   auto root = iter->getRoot();
-   if (!root) {
-      return constructError("no root");
-   }
-   OutputFileMap outFileMap;
-   auto *map = dyn_cast<llvm::yaml::MappingNode>(root);
-   if (!map) {
-      return constructError("root was not a MappingNode");
-   }
-   auto resolvePath =
-         [workingDirectory](
-         llvm::yaml::ScalarNode *path,
-         llvm::SmallVectorImpl<char> &pathStorage) -> StringRef {
-      StringRef pathStr = path->getValue(pathStorage);
-      if (workingDirectory.empty() || pathStr.empty() || pathStr == "-" ||
-          llvm::sys::path::is_absolute(pathStr)) {
-         return pathStr;
-      }
-      // Copy the path to avoid making assumptions about how getValue deals with
-      // Storage.
-      SmallString<128> PathStrCopy(pathStr);
-      pathStorage.clear();
-      pathStorage.reserve(PathStrCopy.size() + workingDirectory.size() + 1);
-      pathStorage.insert(pathStorage.begin(), workingDirectory.begin(),
-                         workingDirectory.end());
-      llvm::sys::path::append(pathStorage, PathStrCopy);
-      return StringRef(pathStorage.data(), pathStorage.size());
-   };
 
-   for (auto &pair : *map) {
-      llvm::yaml::Node *key = pair.getKey();
-      llvm::yaml::Node *value = pair.getValue();
-      if (!key) {
+   auto Root = I->getRoot();
+   if (!Root)
+      return constructError("no root");
+
+   OutputFileMap OFM;
+
+   auto *Map = dyn_cast<llvm::yaml::MappingNode>(Root);
+   if (!Map)
+      return constructError("root was not a MappingNode");
+
+   auto resolvePath =
+      [workingDirectory](
+         llvm::yaml::ScalarNode *Path,
+         llvm::SmallVectorImpl<char> &PathStorage) -> StringRef {
+         StringRef PathStr = Path->getValue(PathStorage);
+         if (workingDirectory.empty() || PathStr.empty() || PathStr == "-" ||
+             llvm::sys::path::is_absolute(PathStr)) {
+            return PathStr;
+         }
+         // Copy the path to avoid making assumptions about how getValue deals with
+         // Storage.
+         SmallString<128> PathStrCopy(PathStr);
+         PathStorage.clear();
+         PathStorage.reserve(PathStrCopy.size() + workingDirectory.size() + 1);
+         PathStorage.insert(PathStorage.begin(), workingDirectory.begin(),
+                            workingDirectory.end());
+         llvm::sys::path::append(PathStorage, PathStrCopy);
+         return StringRef(PathStorage.data(), PathStorage.size());
+      };
+
+   for (auto &Pair : *Map) {
+      llvm::yaml::Node *Key = Pair.getKey();
+      llvm::yaml::Node *Value = Pair.getValue();
+
+      if (!Key)
          return constructError("bad key");
-      }
-      if (!value) {
+
+      if (!Value)
          return constructError("bad value");
-      }
-      auto *inputPath = dyn_cast<llvm::yaml::ScalarNode>(key);
-      if (!inputPath)
+
+      auto *InputPath = dyn_cast<llvm::yaml::ScalarNode>(Key);
+      if (!InputPath)
          return constructError("input path not a scalar node");
 
-      llvm::yaml::MappingNode *outputMapNode =
-            dyn_cast<llvm::yaml::MappingNode>(value);
-      if (!outputMapNode) {
+      llvm::yaml::MappingNode *OutputMapNode =
+         dyn_cast<llvm::yaml::MappingNode>(Value);
+      if (!OutputMapNode)
          return constructError("output map not a MappingNode");
-      }
-      TypeToPathMap outputMap;
-      for (auto &outputPair : *outputMapNode) {
-         llvm::yaml::Node *key = outputPair.getKey();
-         llvm::yaml::Node *value = outputPair.getValue();
-         auto *kindNode = dyn_cast<llvm::yaml::ScalarNode>(key);
-         if (!kindNode) {
-            return constructError("kind not a ScalarNode");
-         }
-         auto *path = dyn_cast<llvm::yaml::ScalarNode>(value);
-         if (!path) {
-            return constructError("path not a scalar node");
-         }
 
-         llvm::SmallString<16> kindStorage;
-         filetypes::FileTypeId kind =
-               filetypes::lookup_type_for_name(kindNode->getValue(kindStorage));
+      TypeToPathMap OutputMap;
+
+      for (auto &OutputPair : *OutputMapNode) {
+         llvm::yaml::Node *Key = OutputPair.getKey();
+         llvm::yaml::Node *Value = OutputPair.getValue();
+
+         auto *KindNode = dyn_cast<llvm::yaml::ScalarNode>(Key);
+         if (!KindNode)
+            return constructError("kind not a ScalarNode");
+
+         auto *Path = dyn_cast<llvm::yaml::ScalarNode>(Value);
+         if (!Path)
+            return constructError("path not a scalar node");
+
+         llvm::SmallString<16> KindStorage;
+         filetypes::FileTypeId Kind =
+            filetypes::lookup_type_for_name(KindNode->getValue(KindStorage));
 
          // Ignore unknown types, so that an older swiftc can be used with a newer
          // build system.
-         if (kind == filetypes::TY_INVALID) {
+         if (Kind == filetypes::TY_INVALID)
             continue;
+
+         llvm::SmallString<128> PathStorage;
+         OutputMap.insert(std::pair<filetypes::FileTypeId, std::string>(
+            Kind, resolvePath(Path, PathStorage)));
+
+         // HACK: fake up an SwiftRanges & CompiledSource output filenames
+         if (addEntriesForSourceRangeDependencies &&
+             Kind == filetypes::TY_PHPDeps) {
+            // Not for the master-phpdeps
+            llvm::SmallString<128> Storage;
+            if (!InputPath->getValue(Storage).empty()) {
+               std::string baseName = OutputMap[Kind];
+               baseName.resize(baseName.size() -
+                               filetypes::get_extension(filetypes::TY_PHPDeps).size());
+               auto insertFilename = [&](filetypes::FileTypeId type) {
+                  std::string s = baseName;
+                  s += filetypes::get_extension(type);
+                  OutputMap.insert({type, s});
+               };
+               insertFilename(filetypes::TY_PHPRanges);
+               insertFilename(filetypes::TY_CompiledSource);
+            }
          }
-         llvm::SmallString<128> pathStorage;
-         outputMap.insert(std::pair<filetypes::FileTypeId, std::string>(
-                             kind, resolvePath(path, pathStorage)));
       }
 
       llvm::SmallString<128> InputStorage;
-      outFileMap.m_inputToOutputsMap[resolvePath(inputPath, InputStorage)] =
-            std::move(outputMap);
+      OFM.InputToOutputsMap[resolvePath(InputPath, InputStorage)] =
+         std::move(OutputMap);
    }
 
-   if (yamlStream.failed()) {
-       return constructError("Output file map parse failed");
-   }
-   return outFileMap;
+   if (YAMLStream.failed())
+      return constructError("Output file map parse failed");
+
+   return OFM;
 }
-
-} // polar

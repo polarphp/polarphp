@@ -4061,7 +4061,7 @@ public:
 //   }
 
    /// True if the class is known to be implemented in Swift.
-   bool hasKnownSwiftImplementation() const {
+   bool hasKnownPolarphpImplementation() const {
       return !hasClangNode();
    }
 };

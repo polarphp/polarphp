@@ -1698,7 +1698,7 @@ static bool checkSingleOverride(ValueDecl *override, ValueDecl *base) {
    // @todo
    if (auto *baseDecl = dyn_cast<ClassDecl>(base->getDeclContext())) {
       if (!isAccessor &&
-          baseDecl->hasKnownSwiftImplementation() &&
+          baseDecl->hasKnownPolarphpImplementation() &&
           /*!base->isObjCDynamic() &&*/
           isa<ExtensionDecl>(override->getDeclContext())) {
          diags.diagnose(override, diag::override_class_declaration_in_extension);

@@ -1,8 +1,38 @@
+//===--- TypeRefs.def - Swift Type References -------------------*- C++ -*-===//
 //
-// Created by polarboy on 12/25/19.
+// This source file is part of the Swift.org open source project
 //
+// Copyright (c) 2014 - 2017 Apple Inc. and the Swift project authors
+// Licensed under Apache License v2.0 with Runtime Library Exception
+//
+// See https://swift.org/LICENSE.txt for license information
+// See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
+//
+//===----------------------------------------------------------------------===//
+//
+// This file defines Swift Type Reference Kinds.
+//
+//===----------------------------------------------------------------------===//
 
-#ifndef POLARPHP_TYPEREFSDEF_H
-#define POLARPHP_TYPEREFSDEF_H
+// TYPEREF(Id, Parent)
 
-#endif //POLARPHP_TYPEREFSDEF_H
+TYPEREF(Builtin, TypeRef)
+TYPEREF(Nominal, TypeRef)
+TYPEREF(BoundGeneric, TypeRef)
+TYPEREF(Tuple, TypeRef)
+TYPEREF(Function, TypeRef)
+TYPEREF(InterfaceComposition, TypeRef)
+TYPEREF(Metatype, TypeRef)
+TYPEREF(ExistentialMetatype, TypeRef)
+TYPEREF(GenericTypeParameter, TypeRef)
+TYPEREF(DependentMember, TypeRef)
+TYPEREF(ForeignClass, TypeRef)
+TYPEREF(ObjCClass, TypeRef)
+TYPEREF(ObjCInterface, TypeRef)
+TYPEREF(Opaque, TypeRef)
+#define REF_STORAGE(Name, ...) \
+  TYPEREF(Name##Storage, TypeRef)
+#include "polarphp/ast/ReferenceStorageDef.h"
+TYPEREF(PILBox, TypeRef)
+
+#undef TYPEREF

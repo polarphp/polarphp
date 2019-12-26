@@ -31,7 +31,7 @@
 
 #include "llvm/ADT/APInt.h"
 #include "llvm/ADT/Optional.h"
-#include "swift/Basic/Debug.h"
+#include "polarphp/basic/Debug.h"
 #include <cassert>
 
 namespace polar {
@@ -277,7 +277,7 @@ public:
 
    /// Pretty-print the vector.
    void print(llvm::raw_ostream &out) const;
-   SWIFT_DEBUG_DUMP;
+   POLAR_DEBUG_DUMP;
 };
 
 } // end namespace polar

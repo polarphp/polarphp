@@ -34,4 +34,5 @@ add_subdirectory(reflection)
 #add_subdirectory(syntax)
 #add_subdirectory(parser)
 add_subdirectory(llparser)
+add_subdirectory(tbdgen)
 

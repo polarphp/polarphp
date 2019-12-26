@@ -200,14 +200,14 @@ static bool mustDeserializeInterfaceConformance(PILModule &M,
    if (!c.isConcrete())
       return false;
    auto conformance = c.getConcrete()->getRootConformance();
-   return M.Types.protocolRequiresWitnessTable(conformance->getInterface())
+   return M.Types.interfaceRequiresWitnessTable(conformance->getInterface())
           && isa<ClangModuleUnit>(conformance->getDeclContext()
                                      ->getModuleScopeContext());
 }
 
 void PILLinkerVisitor::visitInterfaceConformance(
    InterfaceConformanceRef ref, const Optional<PILDeclRef> &Member) {
-   // If an abstract protocol conformance was passed in, do nothing.
+   // If an abstract interface conformance was passed in, do nothing.
    if (ref.isAbstract())
       return;
 
@@ -303,11 +303,11 @@ void PILLinkerVisitor::visitApplySubstitutions(SubstitutionMap subs) {
 
 void PILLinkerVisitor::visitInitExistentialAddrInst(
    InitExistentialAddrInst *IEI) {
-   // Link in all protocol conformances that this touches.
+   // Link in all interface conformances that this touches.
    //
    // TODO: There might be a two step solution where the init_existential_inst
    // causes the witness table to be brought in as a declaration and then the
-   // protocol method inst causes the actual deserialization. For now we are
+   // interface method inst causes the actual deserialization. For now we are
    // not going to be smart about this to enable avoiding any issues with
    // visiting the open_existential_addr/witness_method before the
    // init_existential_inst.
@@ -318,13 +318,13 @@ void PILLinkerVisitor::visitInitExistentialAddrInst(
 
 void PILLinkerVisitor::visitInitExistentialRefInst(
    InitExistentialRefInst *IERI) {
-   // Link in all protocol conformances that this touches.
+   // Link in all interface conformances that this touches.
    //
    // TODO: There might be a two step solution where the init_existential_inst
    // causes the witness table to be brought in as a declaration and then the
-   // protocol method inst causes the actual deserialization. For now we are
+   // interface method inst causes the actual deserialization. For now we are
    // not going to be smart about this to enable avoiding any issues with
-   // visiting the protocol_method before the init_existential_inst.
+   // visiting the interface_method before the init_existential_inst.
    for (InterfaceConformanceRef C : IERI->getConformances()) {
       visitInterfaceConformance(C, Optional<PILDeclRef>());
    }

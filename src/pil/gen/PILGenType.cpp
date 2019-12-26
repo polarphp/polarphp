@@ -346,14 +346,14 @@ static IsFreeFunctionWitness_t isFreeFunctionWitness(ValueDecl *requirement,
 }
 
 /// A CRTP class for emitting witness thunks for the requirements of a
-/// protocol.
+/// interface.
 ///
 /// There are two subclasses:
 ///
 /// - PILGenConformance: emits witness thunks for a conformance of a
-///   a concrete type to a protocol
+///   a concrete type to a interface
 /// - PILGenDefaultWitnessTable: emits default witness thunks for
-///   default implementations of protocol requirements
+///   default implementations of interface requirements
 ///
 template<typename T> class PILGenWitnessTable : public PILWitnessVisitor<T> {
    T &asDerived() { return *static_cast<T*>(this); }
@@ -411,7 +411,7 @@ static IsSerialized_t isConformanceSerialized(RootInterfaceConformance *conf) {
           ? IsSerialized : IsNotSerialized;
 }
 
-/// Emit a witness table for a protocol conformance.
+/// Emit a witness table for a interface conformance.
 class PILGenConformance : public PILGenWitnessTable<PILGenConformance> {
    using super = PILGenWitnessTable<PILGenConformance>;
 
@@ -431,9 +431,9 @@ public:
    {
       auto *proto = Conformance->getInterface();
 
-      // Not all protocols use witness tables; in this case we just skip
+      // Not all interfaces use witness tables; in this case we just skip
       // all of emit() below completely.
-      if (!lowering::TypeConverter::protocolRequiresWitnessTable(proto))
+      if (!lowering::TypeConverter::interfaceRequiresWitnessTable(proto))
          Conformance = nullptr;
    }
 
@@ -489,7 +489,7 @@ public:
 
 
    void addOutOfLineBaseInterface(InterfaceDecl *baseInterface) {
-      assert(lowering::TypeConverter::protocolRequiresWitnessTable(baseInterface));
+      assert(lowering::TypeConverter::interfaceRequiresWitnessTable(baseInterface));
 
       auto conformance = Conformance->getInheritedConformance(baseInterface);
 
@@ -573,10 +573,10 @@ public:
 
    void addConditionalRequirements() {
       PILWitnessTable::enumerateWitnessTableConditionalConformances(
-         Conformance, [&](unsigned, CanType type, InterfaceDecl *protocol) {
+         Conformance, [&](unsigned, CanType type, InterfaceDecl *interface) {
             auto conformance =
                Conformance->getGenericSignature()->lookupConformance(type,
-                                                                     protocol);
+                                                                     interface);
             assert(conformance &&
                       "unable to find conformance that should be known");
 
@@ -640,7 +640,7 @@ PILFunction *PILGenModule::emitInterfaceWitness(
    // itself.
    //
    // For example, if the conforming type is a class and the witness is defined
-   // in a protocol extension, the generic signature will have an additional
+   // in a interface extension, the generic signature will have an additional
    // generic parameter representing Self, so the generic parameters of the
    // class will all be shifted down by one.
    if (reqtSubMap) {
@@ -703,7 +703,7 @@ PILFunction *PILGenModule::emitInterfaceWitness(
    f->setDebugScope(new (M)
                        PILDebugScope(RegularLocation(witnessRef.getDecl()), f));
 
-   PrettyStackTracePILFunction trace("generating protocol witness thunk", f);
+   PrettyStackTracePILFunction trace("generating interface witness thunk", f);
 
    // Create the witness.
    PILGenFunction SGF(*this, *f, PolarphpModule);
@@ -737,19 +737,19 @@ static PILFunction *emitSelfConformanceWitness(PILGenModule &SGM,
 
    // A mapping from the requirement's generic signature to the type parameters
    // of the witness thunk (which is non-generic).
-   auto protocol = conformance->getInterface();
-   auto protocolType = protocol->getDeclaredInterfaceType();
-   auto reqtSubs = SubstitutionMap::getInterfaceSubstitutions(protocol,
-                                                              protocolType,
-                                                              InterfaceConformanceRef(protocol));
+   auto interface = conformance->getInterface();
+   auto interfaceType = interface->getDeclaredInterfaceType();
+   auto reqtSubs = SubstitutionMap::getInterfaceSubstitutions(interface,
+                                                              interfaceType,
+                                                              InterfaceConformanceRef(interface));
 
-   // Open the protocol type.
-   auto openedType = OpenedArchetypeType::get(protocolType);
+   // Open the interface type.
+   auto openedType = OpenedArchetypeType::get(interfaceType);
 
    // Form the substitutions for calling the witness.
-   auto witnessSubs = SubstitutionMap::getInterfaceSubstitutions(protocol,
+   auto witnessSubs = SubstitutionMap::getInterfaceSubstitutions(interface,
                                                                  openedType,
-                                                                 InterfaceConformanceRef(protocol));
+                                                                 InterfaceConformanceRef(interface));
 
    // Substitute to get the formal substituted type of the thunk.
    auto reqtSubstTy =
@@ -775,7 +775,7 @@ static PILFunction *emitSelfConformanceWitness(PILGenModule &SGM,
    f->setDebugScope(new (SGM.M)
                        PILDebugScope(RegularLocation(requirement.getDecl()), f));
 
-   PrettyStackTracePILFunction trace("generating protocol witness thunk", f);
+   PrettyStackTracePILFunction trace("generating interface witness thunk", f);
 
    // Create the witness.
    PILGenFunction SGF(SGM, *f, SGM.PolarphpModule);
@@ -826,9 +826,9 @@ public:
 
    void addInterfaceConformanceDescriptor() {}
 
-   void addOutOfLineBaseInterface(InterfaceDecl *protocol) {
+   void addOutOfLineBaseInterface(InterfaceDecl *interface) {
       // This is an unnecessary restriction that's just not necessary for Error.
-      llvm_unreachable("base protocols not supported in self-conformance");
+      llvm_unreachable("base interfaces not supported in self-conformance");
    }
 
    // These are real semantic restrictions.
@@ -850,14 +850,14 @@ public:
 };
 }
 
-void PILGenModule::emitSelfConformanceWitnessTable(InterfaceDecl *protocol) {
-   auto conformance = getAstContext().getSelfConformance(protocol);
+void PILGenModule::emitSelfConformanceWitnessTable(InterfaceDecl *interface) {
+   auto conformance = getAstContext().getSelfConformance(interface);
    PILGenSelfConformanceWitnessTable(*this, conformance).emit();
 }
 
 namespace {
 
-/// Emit a default witness table for a resilient protocol definition.
+/// Emit a default witness table for a resilient interface definition.
 class PILGenDefaultWitnessTable
    : public PILGenWitnessTable<PILGenDefaultWitnessTable> {
    using super = PILGenWitnessTable<PILGenDefaultWitnessTable>;
@@ -934,15 +934,15 @@ public:
 
 } // end anonymous namespace
 
-void PILGenModule::emitDefaultWitnessTable(InterfaceDecl *protocol) {
+void PILGenModule::emitDefaultWitnessTable(InterfaceDecl *interface) {
    PILLinkage linkage =
-      getPILLinkage(getDeclLinkage(protocol), ForDefinition);
+      getPILLinkage(getDeclLinkage(interface), ForDefinition);
 
-   PILGenDefaultWitnessTable builder(*this, protocol, linkage);
-   builder.visitInterfaceDecl(protocol);
+   PILGenDefaultWitnessTable builder(*this, interface, linkage);
+   builder.visitInterfaceDecl(interface);
 
    PILDefaultWitnessTable *defaultWitnesses =
-      M.createDefaultWitnessTableDeclaration(protocol, linkage);
+      M.createDefaultWitnessTableDeclaration(interface, linkage);
    defaultWitnesses->convertToDefinition(builder.DefaultWitnesses);
 }
 
@@ -974,15 +974,15 @@ public:
             visit(member);
       }
       // @todo
-      // Build a default witness table if this is a protocol that needs one.
-      if (auto protocol = dyn_cast<InterfaceDecl>(theType)) {
-         if (/*!protocol->isObjC() && */ protocol->isResilient()) {
-            auto *SF = protocol->getParentSourceFile();
+      // Build a default witness table if this is a interface that needs one.
+      if (auto interface = dyn_cast<InterfaceDecl>(theType)) {
+         if (/*!interface->isObjC() && */ interface->isResilient()) {
+            auto *SF = interface->getParentSourceFile();
             if (!SF || SF->Kind != SourceFileKind::Interface)
-               SGM.emitDefaultWitnessTable(protocol);
+               SGM.emitDefaultWitnessTable(interface);
          }
-         if (protocol->requiresSelfConformanceWitnessTable()) {
-            SGM.emitSelfConformanceWitnessTable(protocol);
+         if (interface->requiresSelfConformanceWitnessTable()) {
+            SGM.emitSelfConformanceWitnessTable(interface);
          }
          return;
       }
@@ -1011,7 +1011,7 @@ public:
    }
    void visitFuncDecl(FuncDecl *fd) {
       SGM.emitFunction(fd);
-      // FIXME: Default implementations in protocols.
+      // FIXME: Default implementations in interfaces.
       // @todo
 //      if (SGM.requiresObjCMethodEntryPoint(fd) &&
 //          !isa<InterfaceDecl>(fd->getDeclContext()))
@@ -1077,7 +1077,7 @@ public:
 
    void visitAbstractStorageDecl(AbstractStorageDecl *asd) {
       // @todo
-      // FIXME: Default implementations in protocols.
+      // FIXME: Default implementations in interfaces.
 //      if (asd->isObjC() && !isa<InterfaceDecl>(asd->getDeclContext()))
 //         SGM.emitObjCPropertyMethodThunks(asd);
 
@@ -1099,7 +1099,7 @@ void PILGenModule::visitNominalTypeDecl(NominalTypeDecl *ntd) {
 }
 
 /// PILGenExtension - an ASTVisitor for generating PIL from method declarations
-/// and protocol conformances inside type extensions.
+/// and interface conformances inside type extensions.
 class PILGenExtension : public TypeMemberVisitor<PILGenExtension> {
 public:
    PILGenModule &SGM;
@@ -1113,7 +1113,7 @@ public:
          visit(member);
 
       if (!isa<InterfaceDecl>(e->getExtendedNominal())) {
-         // Emit witness tables for protocol conformances introduced by the
+         // Emit witness tables for interface conformances introduced by the
          // extension.
          for (auto *conformance : e->getLocalConformances(
             ConformanceLookupKind::All,

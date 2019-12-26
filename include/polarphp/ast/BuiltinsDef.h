@@ -59,7 +59,7 @@ BUILTIN_CAST_OR_BITCAST_OPERATION(SExtOrBitCast,  "sextOrBitCast",  "n")
 ///
 ///       builtin "add_Vec4xInt32"(Vec4xInt32, Vec4xInt32) : Vec4xInt32.
 ///
-/// 2. Polymorphic typed operations that are valid only in raw SIL. By the time
+/// 2. Polymorphic typed operations that are valid only in raw PIL. By the time
 ///    diagnostic constant propagation runs, these must have as its operand a
 ///    fully specialized type. If the builtin has a type that is not one of its
 ///    overloaded types, diagnostic constant propagation will emit a diagnostic
@@ -219,60 +219,60 @@ BUILTIN_BINARY_PREDICATE(FCMP_UNE, "fcmp_une", "n", FloatOrVector)
 BUILTIN_BINARY_PREDICATE(FCMP_UNO, "fcmp_uno", "n", FloatOrVector)
 #undef BUILTIN_BINARY_PREDICATE
 
-// BUILTIN_SIL_OPERATION - Operations that can be lowered to SIL instructions.
+// BUILTIN_PIL_OPERATION - Operations that can be lowered to PIL instructions.
 // These have various types.
-// Since these operations will be lowered to SIL Instructions, we do not
+// Since these operations will be lowered to PIL Instructions, we do not
 // assign any attributes on them.
-#ifndef BUILTIN_SIL_OPERATION
-#define BUILTIN_SIL_OPERATION(Id, Name, Overload) BUILTIN(Id, Name, "")
+#ifndef BUILTIN_PIL_OPERATION
+#define BUILTIN_PIL_OPERATION(Id, Name, Overload) BUILTIN(Id, Name, "")
 #endif
 
 /// retain: T -> ()
-BUILTIN_SIL_OPERATION(Retain, "retain", Special)
+BUILTIN_PIL_OPERATION(Retain, "retain", Special)
 
 /// release: T -> ()
-BUILTIN_SIL_OPERATION(Release, "release", Special)
+BUILTIN_PIL_OPERATION(Release, "release", Special)
 
 /// autorelease: T -> ()
-BUILTIN_SIL_OPERATION(Autorelease, "autorelease", Special)
+BUILTIN_PIL_OPERATION(Autorelease, "autorelease", Special)
 
 /// Load has type (Builtin.RawPointer) -> T
-BUILTIN_SIL_OPERATION(Load, "load", Special)
+BUILTIN_PIL_OPERATION(Load, "load", Special)
 
 /// LoadRaw has type (Builtin.RawPointer) -> T
 /// This is a load of T from raw memory.
 /// Its address does not adhere to strict aliasing.
-BUILTIN_SIL_OPERATION(LoadRaw, "loadRaw", Special)
+BUILTIN_PIL_OPERATION(LoadRaw, "loadRaw", Special)
 
 /// LoadInvariant has type (Builtin.RawPointer) -> T
 /// This is a load of T from raw memory.
 /// The load is marked as invariant.
-BUILTIN_SIL_OPERATION(LoadInvariant, "loadInvariant", Special)
+BUILTIN_PIL_OPERATION(LoadInvariant, "loadInvariant", Special)
 
 /// Take has type (Builtin.RawPointer) -> T
-BUILTIN_SIL_OPERATION(Take, "take", Special)
+BUILTIN_PIL_OPERATION(Take, "take", Special)
 
 /// Destroy has type (T.Type, Builtin.RawPointer) -> ()
-BUILTIN_SIL_OPERATION(Destroy, "destroy", Special)
+BUILTIN_PIL_OPERATION(Destroy, "destroy", Special)
 
 /// Assign has type (T, Builtin.RawPointer) -> ()
-BUILTIN_SIL_OPERATION(Assign, "assign", Special)
+BUILTIN_PIL_OPERATION(Assign, "assign", Special)
 
 /// Init has type (T, Builtin.RawPointer) -> ()
-BUILTIN_SIL_OPERATION(Init, "initialize", Special)
+BUILTIN_PIL_OPERATION(Init, "initialize", Special)
 
 /// CastToNativeObject has type (T) -> Builtin.NativeObject.
 ///
 /// This builtin asserts if the underlying type /could/ be objc.
-BUILTIN_SIL_OPERATION(CastToNativeObject, "castToNativeObject", Special)
+BUILTIN_PIL_OPERATION(CastToNativeObject, "castToNativeObject", Special)
 
 /// UnsafeCastToNativeObject has type (T) -> Builtin.NativeObject.
 ///
 /// This builtin does not check if the underlying type /could/ be objc.
-BUILTIN_SIL_OPERATION(UnsafeCastToNativeObject, "unsafeCastToNativeObject", Special)
+BUILTIN_PIL_OPERATION(UnsafeCastToNativeObject, "unsafeCastToNativeObject", Special)
 
 /// CastFromNativeObject has type (Builtin.NativeObject) -> T
-BUILTIN_SIL_OPERATION(CastFromNativeObject, "castFromNativeObject", Special)
+BUILTIN_PIL_OPERATION(CastFromNativeObject, "castFromNativeObject", Special)
 
 /// CastToBridgeObject has type (T, Builtin.Word) -> Builtin.BridgeObject.
 /// It sets the BridgeObject to the bitwise OR of its operands.
@@ -285,7 +285,7 @@ BUILTIN_SIL_OPERATION(CastFromNativeObject, "castFromNativeObject", Special)
 /// object pointer value, nor may it have the native/ObjC discriminator bit set,
 /// nor may it have any bits set if the first operand is an ObjC tagged pointer,
 /// or else undefined behavior will ensue.
-BUILTIN_SIL_OPERATION(CastToBridgeObject, "castToBridgeObject", Special)
+BUILTIN_PIL_OPERATION(CastToBridgeObject, "castToBridgeObject", Special)
 
 /// ValueToBridgeObject has type (T) -> Builtin.BridgeObject.
 /// It sets the BridgeObject to a tagged pointer representation holding its
@@ -297,18 +297,18 @@ BUILTIN_SIL_OPERATION(CastToBridgeObject, "castToBridgeObject", Special)
 /// x thus must not be using any high bits shifted away (via _swift_abi_ObjCReservedLowBits)
 /// or the tag bits post-shift.
 /// ARC operations on such tagged values are NOPs.
-BUILTIN_SIL_OPERATION(ValueToBridgeObject, "valueToBridgeObject", Special)
+BUILTIN_PIL_OPERATION(ValueToBridgeObject, "valueToBridgeObject", Special)
 
 /// CastReferenceFromBridgeObject has type (Builtin.BridgeObject) -> T.
 /// It recovers the heap object reference by masking spare bits from the
 /// BridgeObject.
-BUILTIN_SIL_OPERATION(CastReferenceFromBridgeObject,
+BUILTIN_PIL_OPERATION(CastReferenceFromBridgeObject,
                       "castReferenceFromBridgeObject",
                       Special)
 
 /// CastBitPatternFromBridgeObject has type (Builtin.BridgeObject) -> Builtin.Word.
 /// It presents the raw bit pattern of the BridgeObject as
-BUILTIN_SIL_OPERATION(CastBitPatternFromBridgeObject,
+BUILTIN_PIL_OPERATION(CastBitPatternFromBridgeObject,
                       "castBitPatternFromBridgeObject",
                       Special)
 
@@ -316,55 +316,55 @@ BUILTIN_SIL_OPERATION(CastBitPatternFromBridgeObject,
 ///      (Builtin.BridgeObject) -> (Builtin.Int1, Builtin.Int1).
 /// It interprets the bits mangled into a bridge object, returning whether it is
 /// an Objective-C object or tagged pointer representation.
-BUILTIN_SIL_OPERATION(ClassifyBridgeObject, "classifyBridgeObject", Special)
+BUILTIN_PIL_OPERATION(ClassifyBridgeObject, "classifyBridgeObject", Special)
 
 
 /// BridgeToRawPointer has type (T) -> Builtin.RawPointer
-BUILTIN_SIL_OPERATION(BridgeToRawPointer, "bridgeToRawPointer", Special)
+BUILTIN_PIL_OPERATION(BridgeToRawPointer, "bridgeToRawPointer", Special)
 
 /// BridgeFromRawPointer (Builtin.RawPointer) -> T
-/// SILGen requires that T is a single retainable pointer.
+/// PILGen requires that T is a single retainable pointer.
 /// Bridging to/from a raw pointer does not imply a retain.
-BUILTIN_SIL_OPERATION(BridgeFromRawPointer, "bridgeFromRawPointer", Special)
+BUILTIN_PIL_OPERATION(BridgeFromRawPointer, "bridgeFromRawPointer", Special)
 
 /// castReference has type T -> U.
 /// T and U must be convertible to AnyObject.
-BUILTIN_SIL_OPERATION(CastReference, "castReference", Special)
+BUILTIN_PIL_OPERATION(CastReference, "castReference", Special)
 
 /// reinterpretCast has type T -> U.
-BUILTIN_SIL_OPERATION(ReinterpretCast, "reinterpretCast", Special)
+BUILTIN_PIL_OPERATION(ReinterpretCast, "reinterpretCast", Special)
 
 /// addressof (inout T) -> Builtin.RawPointer
 /// Returns a RawPointer pointing to a physical lvalue. The returned pointer is
 /// only valid for the duration of the original binding.
-BUILTIN_SIL_OPERATION(AddressOf, "addressof", Special)
+BUILTIN_PIL_OPERATION(AddressOf, "addressof", Special)
 
 /// addressOfBorrow (__shared T) -> Builtin.RawPointer
 /// Returns a RawPointer pointing to a borrowed rvalue. The returned pointer is only
 /// valid within the scope of the borrow.
-BUILTIN_SIL_OPERATION(AddressOfBorrow, "addressOfBorrow", Special)
+BUILTIN_PIL_OPERATION(AddressOfBorrow, "addressOfBorrow", Special)
 
 /// GepRaw(Builtin.RawPointer, Builtin.Word) -> Builtin.RawPointer
 ///
 /// Adds index bytes to a base pointer.
-BUILTIN_SIL_OPERATION(GepRaw, "gepRaw", Integer)
+BUILTIN_PIL_OPERATION(GepRaw, "gepRaw", Integer)
 
 /// Gep (Builtin.RawPointer, Builtin.Word, T.Type) -> Builtin.RawPointer
 ///
 /// Like the GepRaw-builtin, but multiplies the index by stride-of type 'T'.
-BUILTIN_SIL_OPERATION(Gep, "gep", Integer)
+BUILTIN_PIL_OPERATION(Gep, "gep", Integer)
 
 /// getTailAddr(Builtin.RawPointer,
 ///             Builtin.Word, T.Type, E.Type) -> Builtin.RawPointer
 ///
 /// Like the Gep-builtin, but rounds up the resulting address to a tail-
 /// allocated element type 'E'.
-BUILTIN_SIL_OPERATION(GetTailAddr, "getTailAddr", Integer)
+BUILTIN_PIL_OPERATION(GetTailAddr, "getTailAddr", Integer)
 
 /// performInstantaneousReadAccess(Builtin.RawPointer, T.Type) -> ()
 /// Begin and then immediately end a read access to the given raw pointer,
 /// which will be treated as an address of type 'T'.
-BUILTIN_SIL_OPERATION(PerformInstantaneousReadAccess,
+BUILTIN_PIL_OPERATION(PerformInstantaneousReadAccess,
                       "performInstantaneousReadAccess", Special)
 
 /// beginUnpairedModifyAccess(Builtin.RawPointer, Builtin.RawPointer,
@@ -374,22 +374,22 @@ BUILTIN_SIL_OPERATION(PerformInstantaneousReadAccess,
 /// will be used by the runtime to record the access. The lifetime of the
 /// value buffer must be longer than that of the access itself. The accessed
 /// address will be treated as having type 'T'.
-BUILTIN_SIL_OPERATION(BeginUnpairedModifyAccess, "beginUnpairedModifyAccess",
+BUILTIN_PIL_OPERATION(BeginUnpairedModifyAccess, "beginUnpairedModifyAccess",
                       Special)
 
 /// endUnpairedAccess(Builtin.RawPointer) -> ()
 /// Ends an in-progress unpaired access. The raw pointer argument must be
 /// be a pointer to an UnsafeValueBuffer that records an in progress access.
-BUILTIN_SIL_OPERATION(EndUnpairedAccess, "endUnpairedAccess", Special)
+BUILTIN_PIL_OPERATION(EndUnpairedAccess, "endUnpairedAccess", Special)
 
 /// condfail(Int1) -> ()
 /// Triggers a runtime failure if the condition is true.
 /// This builtin is deprecated. Use condfail_message instead.
-BUILTIN_SIL_OPERATION(LegacyCondFail, "condfail", Special)
+BUILTIN_PIL_OPERATION(LegacyCondFail, "condfail", Special)
 
 /// fixLifetime(T) -> ()
 /// Fixes the lifetime of any heap references in a value.
-BUILTIN_SIL_OPERATION(FixLifetime, "fixLifetime", Special)
+BUILTIN_PIL_OPERATION(FixLifetime, "fixLifetime", Special)
 
 /// isUnique : <T> (inout T[?]) -> Int1
 ///
@@ -420,31 +420,31 @@ BUILTIN_SIL_OPERATION(FixLifetime, "fixLifetime", Special)
 ///
 /// Thus, isUnique only returns true for non-null, native swift object
 /// references with a strong reference count of one.
-BUILTIN_SIL_OPERATION(IsUnique, "isUnique", Special)
+BUILTIN_PIL_OPERATION(IsUnique, "isUnique", Special)
 
 /// IsUnique_native : <T> (inout T[?]) -> Int1
 ///
 /// These variants of isUnique implicitly cast to a non-null NativeObject before
 /// checking uniqueness. This allows an object reference statically typed as
 /// BridgeObject to be treated as a native object by the runtime.
-BUILTIN_SIL_OPERATION(IsUnique_native, "isUnique_native", Special)
+BUILTIN_PIL_OPERATION(IsUnique_native, "isUnique_native", Special)
 
 /// bindMemory : <T> (Builtin.RawPointer, Builtin.Word, T.Type) -> ()
-BUILTIN_SIL_OPERATION(BindMemory, "bindMemory", Special)
+BUILTIN_PIL_OPERATION(BindMemory, "bindMemory", Special)
 
 /// allocWithTailElems_<n>(C.Type,
 ///                    Builtin.Word, E1.Type, ... , Builtin.Word, En.Type) -> C\
 ///
 /// The integer suffix <n> specifies the number of tail-allocated arrays.
 /// Each tail-allocated array adds a counter and an element meta-type parameter.
-BUILTIN_SIL_OPERATION(AllocWithTailElems, "allocWithTailElems", Special)
+BUILTIN_PIL_OPERATION(AllocWithTailElems, "allocWithTailElems", Special)
 
 /// projectTailElems : <C,E> (C) -> Builtin.RawPointer
 ///
 /// Projects the first tail-allocated element of type E from a class C.
-BUILTIN_SIL_OPERATION(ProjectTailElems, "projectTailElems", Special)
+BUILTIN_PIL_OPERATION(ProjectTailElems, "projectTailElems", Special)
 
-#undef BUILTIN_SIL_OPERATION
+#undef BUILTIN_PIL_OPERATION
 
 // BUILTIN_RUNTIME_CALL - A call into a runtime function.
 // These functions accept a single argument of any type.
@@ -489,7 +489,7 @@ BUILTIN_MISC_OPERATION(IsPOD, "ispod", "n", Special)
 /// IsConcrete has type (T.Type) -> Bool
 ///
 /// If the meta type T is concrete, we can always transform this to `true` at
-/// any time in SIL. If it's generic, then we lower it to `false` right before
+/// any time in PIL. If it's generic, then we lower it to `false` right before
 /// IRGen in IRGenPrepare. This allows for the optimizer to specialize this at
 /// -O and eliminate conditional code.
 BUILTIN_MISC_OPERATION(IsConcrete, "isConcrete", "n", Special)
@@ -632,23 +632,23 @@ BUILTIN_MISC_OPERATION(WillThrow, "willThrow", "", Special)
 /// poundAssert has type (Builtin.Int1, Builtin.RawPointer) -> ().
 BUILTIN_MISC_OPERATION(PoundAssert, "poundAssert", "", Special)
 
-// BUILTIN_MISC_OPERATION_WITH_SILGEN - Miscellaneous operations that are
-// specially emitted during SIL generation.
-#ifndef BUILTIN_MISC_OPERATION_WITH_SILGEN
-#define BUILTIN_MISC_OPERATION_WITH_SILGEN(Id, Name, Attrs, Overload) \
+// BUILTIN_MISC_OPERATION_WITH_PILGEN - Miscellaneous operations that are
+// specially emitted during PIL generation.
+#ifndef BUILTIN_MISC_OPERATION_WITH_PILGEN
+#define BUILTIN_MISC_OPERATION_WITH_PILGEN(Id, Name, Attrs, Overload) \
   BUILTIN_MISC_OPERATION(Id, Name, Attrs, Overload)
 #endif
 
 /// globalStringTablePointer has type String -> Builtin.RawPointer.
 /// It returns an immortal, global string table pointer for strings constructed
 /// from string literals.
-BUILTIN_MISC_OPERATION_WITH_SILGEN(GlobalStringTablePointer, "globalStringTablePointer", "", Special)
+BUILTIN_MISC_OPERATION_WITH_PILGEN(GlobalStringTablePointer, "globalStringTablePointer", "", Special)
 
-#undef BUILTIN_MISC_OPERATION_WITH_SILGEN
+#undef BUILTIN_MISC_OPERATION_WITH_PILGEN
 
 #undef BUILTIN_MISC_OPERATION
 
-/// Builtins for instrumentation added by sanitizers during SILGen.
+/// Builtins for instrumentation added by sanitizers during PILGen.
 #ifndef BUILTIN_SANITIZER_OPERATION
 #define BUILTIN_SANITIZER_OPERATION(Id, Name, Attrs) BUILTIN(Id, Name, Attrs)
 #endif

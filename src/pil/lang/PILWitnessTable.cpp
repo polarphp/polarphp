@@ -10,9 +10,9 @@
 //
 //===----------------------------------------------------------------------===//
 //
-// This file defines the PILWitnessTable class, which is used to map a protocol
+// This file defines the PILWitnessTable class, which is used to map a interface
 // conformance for a type to its implementing PILFunctions. This information is
-// used by IRGen to create witness tables for protocol dispatch.
+// used by IRGen to create witness tables for interface dispatch.
 //
 // It can also be used by generic specialization and existential
 // devirtualization passes to promote witness_method instructions to static
@@ -190,7 +190,7 @@ bool PILWitnessTable::enumerateWitnessTableConditionalConformances(
 
       auto proto = req.getSecondType()->castTo<InterfaceType>()->getDecl();
 
-      if (lowering::TypeConverter::protocolRequiresWitnessTable(proto)) {
+      if (lowering::TypeConverter::interfaceRequiresWitnessTable(proto)) {
          if (fn(conformanceIndex, req.getFirstType()->getCanonicalType(), proto))
             return true;
 

@@ -113,14 +113,14 @@ ERROR(error_no_source_location_scope_map,none,
       "-dump-scope-maps argument must be 'expanded' or a list of "
       "source locations", ())
 
-NOTE(note_valid_swift_versions, none,
-     "valid arguments to '-swift-version' are %0", (StringRef))
+NOTE(note_valid_php_versions, none,
+     "valid arguments to '-php-version' are %0", (StringRef))
 
 ERROR(error_mode_cannot_emit_dependencies,none,
       "this mode does not support emitting dependency files", ())
 ERROR(error_mode_cannot_emit_reference_dependencies,none,
       "this mode does not support emitting reference dependency files", ())
-ERROR(error_mode_cannot_emit_swift_ranges,none,
+ERROR(error_mode_cannot_emit_php_ranges,none,
 "this mode does not support emitting unparsed ranges files", ())
 ERROR(error_mode_cannot_emit_compiled_source,none,
 "this mode does not support emitting compiled source files", ())
@@ -142,8 +142,8 @@ ERROR(cannot_emit_ir_skipping_function_bodies,none,
 
 WARNING(emit_reference_dependencies_without_primary_file,none,
   "ignoring -emit-reference-dependencies (requires -primary-file)", ())
-WARNING(emit_swift_ranges_without_primary_file,none,
-"ignoring -emit-swift-ranges (requires -primary-file)", ())
+WARNING(emit_php_ranges_without_primary_file,none,
+"ignoring -emit-php-ranges (requires -primary-file)", ())
 WARNING(emit_compiled_source_without_primary_file,none,
 "ignoring -emit-compiled-source (requires -primary-file)", ())
 
@@ -265,7 +265,7 @@ ERROR(symbol_in_ir_not_in_tbd,none,
       (StringRef, StringRef))
 
 ERROR(tbd_validation_failure,none,
-      "please file a radar or open a bug on bugs.swift.org with this code, and "
+      "please file a radar or open a bug on bugs.php.org with this code, and "
       "add -Xfrontend -validate-tbd-against-ir=none to squash the errors", ())
 
 ERROR(redundant_prefix_compilation_flag,none,
@@ -292,7 +292,7 @@ ERROR(error_invalid_debug_prefix_map, none,
       "'original=remapped'", (StringRef))
 
 
-ERROR(error_unable_to_write_swift_ranges_file, none,
+ERROR(error_unable_to_write_php_ranges_file, none,
 "unable to write unparsed ranges file '$0': %1", (StringRef, StringRef))
 
 ERROR(error_unable_to_write_compiled_source_file, none,
@@ -305,9 +305,9 @@ ERROR(invalid_vfs_overlay_file,none,
 WARNING(module_interface_scoped_import_unsupported,none,
         "scoped imports are not yet supported in module interfaces",
         ())
-WARNING(warn_unsupported_module_interface_swift_version,none,
+WARNING(warn_unsupported_module_interface_php_version,none,
         "module interfaces are only supported with Swift language version 5 "
-        "or later (currently using -swift-version %0)",
+        "or later (currently using -php-version %0)",
         (StringRef))
 WARNING(warn_unsupported_module_interface_library_evolution,none,
         "module interfaces are only supported with -enable-library-evolution",

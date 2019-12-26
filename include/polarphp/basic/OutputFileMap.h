@@ -1,16 +1,17 @@
-// This source file is part of the polarphp.org open source project
+//===--- OutputFileMap.h - Map of inputs to multiple outputs ----*- C++ -*-===//
 //
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
+// This source file is part of the Swift.org open source project
+//
+// Copyright (c) 2014 - 2018 Apple Inc. and the Swift project authors
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
+// See https://swift.org/LICENSE.txt for license information
+// See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
-// Created by polarboy on 2019/11/26.
+//===----------------------------------------------------------------------===//
 
-#ifndef POLARPHP_BASIC_OUTPUT_FILE_MAP_H
-#define POLARPHP_BASIC_OUTPUT_FILE_MAP_H
+#ifndef POLARPHP_BASIC_OUTPUTFILEMAP_H
+#define POLARPHP_BASIC_OUTPUTFILEMAP_H
 
 #include "polarphp/basic/FileTypes.h"
 #include "polarphp/basic/LLVM.h"
@@ -34,38 +35,42 @@ using TypeToPathMap = llvm::DenseMap<filetypes::FileTypeId, std::string>;
 ///
 /// The structure is a map from input paths to sub-maps, each of which maps
 /// file types to output paths.
-class OutputFileMap
-{
+class OutputFileMap {
+private:
+   llvm::StringMap<TypeToPathMap> InputToOutputsMap;
+
 public:
-   OutputFileMap()
-   {}
+   OutputFileMap() {}
 
    ~OutputFileMap() = default;
 
-   /// Loads an OutputFileMap from the given \p path into the receiver, if
+   /// Loads an OutputFileMap from the given \p Path into the receiver, if
    /// possible.
-   static llvm::Expected<OutputFileMap> loadFromPath(StringRef path,
-                                                     StringRef workingDirectory);
+   static llvm::Expected<OutputFileMap>
+   loadFromPath(StringRef Path, StringRef workingDirectory,
+                bool addEntriesForSourceRangeDependencies);
 
    static llvm::Expected<OutputFileMap>
-   loadFromBuffer(StringRef data, StringRef workingDirectory);
+   loadFromBuffer(StringRef Data, StringRef workingDirectory,
+                  bool addEntriesForSourceRangeDependencies);
 
-   /// Loads an OutputFileMap from the given \p buffer, taking ownership
+   /// Loads an OutputFileMap from the given \p Buffer, taking ownership
    /// of the buffer in the process.
    ///
    /// When non-empty, \p workingDirectory is used to resolve relative paths in
    /// the output file map.
    static llvm::Expected<OutputFileMap>
-   loadFromBuffer(std::unique_ptr<llvm::MemoryBuffer> buffer,
-                  StringRef workingDirectory);
+   loadFromBuffer(std::unique_ptr<llvm::MemoryBuffer> Buffer,
+                  StringRef workingDirectory,
+                  bool addEntriesForSourceRangeDependencies);
 
-   /// Get the map of outputs for the given \p input, if present in the
+   /// Get the map of outputs for the given \p Input, if present in the
    /// OutputFileMap. (If not present, returns nullptr.)
-   const TypeToPathMap *getOutputMapForInput(StringRef input) const;
+   const TypeToPathMap *getOutputMapForInput(StringRef Input) const;
 
-   /// Get a map of outputs for the given \p input, creating it in
+   /// Get a map of outputs for the given \p Input, creating it in
    /// the OutputFileMap if not already present.
-   TypeToPathMap &getOrCreateOutputMapForInput(StringRef input);
+   TypeToPathMap &getOrCreateOutputMapForInput(StringRef Input);
 
    /// Get the map of outputs for a single compile product.
    const TypeToPathMap *getOutputMapForSingleOutput() const;
@@ -74,7 +79,7 @@ public:
    TypeToPathMap &getOrCreateOutputMapForSingleOutput();
 
    /// Dump the OutputFileMap to the given \p os.
-   void dump(llvm::raw_ostream &os, bool isSort = false) const;
+   void dump(llvm::raw_ostream &os, bool Sort = false) const;
 
    /// Write the OutputFileMap for the \p inputs so it can be parsed.
    ///
@@ -83,13 +88,13 @@ public:
    void write(llvm::raw_ostream &os, ArrayRef<StringRef> inputs) const;
 
 private:
-   /// Parses the given \p buffer and returns either an OutputFileMap or
-   /// error, taking ownership of \p buffer in the process.
+   /// Parses the given \p Buffer and returns either an OutputFileMap or
+   /// error, taking ownership of \p Buffer in the process.
    static llvm::Expected<OutputFileMap>
-   parse(std::unique_ptr<llvm::MemoryBuffer> buffer, StringRef workingDirectory);
-   llvm::StringMap<TypeToPathMap> m_inputToOutputsMap;
+   parse(std::unique_ptr<llvm::MemoryBuffer> Buffer, StringRef workingDirectory,
+         bool addEntriesForSourceRangeDependencies);
 };
 
-} // polar
+} // end namespace polar
 
-#endif // POLARPHP_BASIC_OUTPUT_FILE_MAP_H
+#endif

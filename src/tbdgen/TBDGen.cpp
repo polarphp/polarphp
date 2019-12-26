@@ -15,10 +15,11 @@
 //===----------------------------------------------------------------------===//
 
 #include "polarphp/tbdgen/TBDGen.h"
+#include "polarphp/tbdgen/internal/TBDGenVisitor.h"
 
 #include "polarphp/ast/Availability.h"
-#include "polarphp/ast/ASTMangler.h"
-#include "polarphp/ast/ASTVisitor.h"
+#include "polarphp/ast/AstMangler.h"
+#include "polarphp/ast/AstVisitor.h"
 #include "polarphp/ast/DiagnosticsFrontend.h"
 #include "polarphp/ast/Module.h"
 #include "polarphp/ast/ParameterList.h"
@@ -44,11 +45,9 @@
 #include "llvm/TextAPI/MachO/TextAPIReader.h"
 #include "llvm/TextAPI/MachO/TextAPIWriter.h"
 
-#include "TBDGenVisitor.h"
-
-using namespace swift;
-using namespace swift::irgen;
-using namespace swift::tbdgen;
+using namespace polar;
+using namespace polar::irgen;
+using namespace polar::tbdgen;
 using StringSet = llvm::StringSet<>;
 using SymbolKind = llvm::MachO::SymbolKind;
 
@@ -101,8 +100,8 @@ void TBDGenVisitor::addMethodDescriptor(PILDeclRef declRef) {
    addSymbol(entity);
 }
 
-void TBDGenVisitor::addProtocolRequirementsBaseDescriptor(ProtocolDecl *proto) {
-   auto entity = LinkEntity::forProtocolRequirementsBaseDescriptor(proto);
+void TBDGenVisitor::addInterfaceRequirementsBaseDescriptor(InterfaceDecl *proto) {
+   auto entity = LinkEntity::forInterfaceRequirementsBaseDescriptor(proto);
    addSymbol(entity);
 }
 
@@ -126,21 +125,21 @@ void TBDGenVisitor::addBaseConformanceDescriptor(
 void TBDGenVisitor::addConformances(DeclContext *DC) {
    for (auto conformance : DC->getLocalConformances(
       ConformanceLookupKind::NonInherited)) {
-      auto protocol = conformance->getProtocol();
+      auto interface = conformance->getInterface();
       auto needsWTable =
-         Lowering::TypeConverter::protocolRequiresWitnessTable(protocol);
+         lowering::TypeConverter::interfaceRequiresWitnessTable(interface);
       if (!needsWTable)
          continue;
 
       // Only root conformances get symbols; the others get any public symbols
       // from their parent conformances.
-      auto rootConformance = dyn_cast<RootProtocolConformance>(conformance);
+      auto rootConformance = dyn_cast<RootInterfaceConformance>(conformance);
       if (!rootConformance) {
          continue;
       }
 
-      addSymbol(LinkEntity::forProtocolWitnessTable(rootConformance));
-      addSymbol(LinkEntity::forProtocolConformanceDescriptor(rootConformance));
+      addSymbol(LinkEntity::forInterfaceWitnessTable(rootConformance));
+      addSymbol(LinkEntity::forInterfaceConformanceDescriptor(rootConformance));
 
       // FIXME: the logic around visibility in extensions is confusing, and
       // sometimes witness thunks need to be manually made public.
@@ -151,9 +150,9 @@ void TBDGenVisitor::addConformances(DeclContext *DC) {
                                       ValueDecl *witnessDecl) {
          auto witnessLinkage = PILDeclRef(witnessDecl).getLinkage(ForDefinition);
          if (conformanceIsFixed &&
-             (isa<SelfProtocolConformance>(rootConformance) ||
+             (isa<SelfInterfaceConformance>(rootConformance) ||
               fixmeWitnessHasLinkageThatNeedsToBePublic(witnessLinkage))) {
-            Mangle::ASTMangler Mangler;
+            mangle::AstMangler Mangler;
             addSymbol(
                Mangler.mangleWitnessThunk(rootConformance, requirementDecl));
          }
@@ -312,7 +311,7 @@ void TBDGenVisitor::visitVarDecl(VarDecl *VD) {
           isGlobalOrStaticVar(VD)) {
          if (getDeclLinkage(VD) == FormalLinkage::PublicUnique) {
             // The actual variable has a symbol.
-            Mangle::ASTMangler mangler;
+            mangle::AstMangler mangler;
             addSymbol(mangler.mangleEntity(VD, false));
          }
 
@@ -344,7 +343,7 @@ void TBDGenVisitor::visitNominalTypeDecl(NominalTypeDecl *NTD) {
    }
    addSymbol(LinkEntity::forTypeMetadataAccessFunction(declaredType));
 
-   // There are symbols associated with any protocols this type conforms to.
+   // There are symbols associated with any interfaces this type conforms to.
    addConformances(NTD);
 
    for (auto member : NTD->getMembers())
@@ -355,19 +354,20 @@ void TBDGenVisitor::visitClassDecl(ClassDecl *CD) {
    if (getDeclLinkage(CD) != FormalLinkage::PublicUnique)
       return;
 
-   auto &ctxt = CD->getASTContext();
+   auto &ctxt = CD->getAstContext();
    auto isGeneric = CD->isGenericContext();
    auto objCCompatible = ctxt.LangOpts.EnableObjCInterop && !isGeneric;
-   auto isObjC = objCCompatible && CD->isObjC();
+//   auto isObjC = objCCompatible && CD->isObjC();
 
    // Metaclasses and ObjC class (duh) are a ObjC thing, and so are not needed in
    // build artifacts/for classes which can't touch ObjC.
    if (objCCompatible) {
+      // @todo
       bool addObjCClass = false;
-      if (isObjC) {
-         addObjCClass = true;
-         addSymbol(LinkEntity::forObjCClass(CD));
-      }
+//      if (isObjC) {
+//         addObjCClass = true;
+//         addSymbol(LinkEntity::forObjCClass(CD));
+//      }
 
       if (CD->getMetaclassKind() == ClassDecl::MetaclassKind::ObjC) {
          addObjCClass = true;
@@ -395,7 +395,7 @@ void TBDGenVisitor::visitClassDecl(ClassDecl *CD) {
       addSymbol(LinkEntity::forClassMetadataBaseOffset(CD));
    }
 
-   auto &Ctx = CD->getASTContext();
+   auto &Ctx = CD->getAstContext();
    if (Ctx.LangOpts.EnableObjCInterop) {
       if (resilientAncestry) {
          addSymbol(LinkEntity::forObjCResilientClassStub(
@@ -461,13 +461,13 @@ void TBDGenVisitor::visitDestructorDecl(DestructorDecl *DD) {
    auto parentClass = DD->getParent()->getSelfClassDecl();
 
    // But the non-deallocating one doesn't apply to some @objc classes.
-   if (!Lowering::usesObjCAllocator(parentClass)) {
+   if (!lowering::usesObjCAllocator(parentClass)) {
       addSymbol(PILDeclRef(DD, PILDeclRef::Kind::Destroyer));
    }
 }
 
 void TBDGenVisitor::visitExtensionDecl(ExtensionDecl *ED) {
-   if (!isa<ProtocolDecl>(ED->getExtendedNominal())) {
+   if (!isa<InterfaceDecl>(ED->getExtendedNominal())) {
       addConformances(ED);
    }
 
@@ -476,7 +476,7 @@ void TBDGenVisitor::visitExtensionDecl(ExtensionDecl *ED) {
 }
 
 #ifndef NDEBUG
-static bool isValidProtocolMemberForTBDGen(const Decl *D) {
+static bool isValidInterfaceMemberForTBDGen(const Decl *D) {
    switch (D->getKind()) {
       case DeclKind::TypeAlias:
       case DeclKind::AssociatedType:
@@ -494,7 +494,7 @@ static bool isValidProtocolMemberForTBDGen(const Decl *D) {
       case DeclKind::Enum:
       case DeclKind::Struct:
       case DeclKind::Class:
-      case DeclKind::Protocol:
+      case DeclKind::Interface:
       case DeclKind::GenericTypeParam:
       case DeclKind::Module:
       case DeclKind::Param:
@@ -514,62 +514,63 @@ static bool isValidProtocolMemberForTBDGen(const Decl *D) {
 }
 #endif
 
-void TBDGenVisitor::visitProtocolDecl(ProtocolDecl *PD) {
-   if (!PD->isObjC()) {
-      addSymbol(LinkEntity::forProtocolDescriptor(PD));
+void TBDGenVisitor::visitInterfaceDecl(InterfaceDecl *PD) {
+// @todo
+//   if (!PD->isObjC()) {
+   addSymbol(LinkEntity::forInterfaceDescriptor(PD));
 
-      struct WitnessVisitor : public PILWitnessVisitor<WitnessVisitor> {
-         TBDGenVisitor &TBD;
-         ProtocolDecl *PD;
+   struct WitnessVisitor : public PILWitnessVisitor<WitnessVisitor> {
+      TBDGenVisitor &TBD;
+      InterfaceDecl *PD;
 
-      public:
-         WitnessVisitor(TBDGenVisitor &TBD, ProtocolDecl *PD)
-            : TBD(TBD), PD(PD) {}
+   public:
+      WitnessVisitor(TBDGenVisitor &TBD, InterfaceDecl *PD)
+         : TBD(TBD), PD(PD) {}
 
-         void addMethod(PILDeclRef declRef) {
-            if (PD->isResilient()) {
-               TBD.addDispatchThunk(declRef);
-               TBD.addMethodDescriptor(declRef);
-            }
+      void addMethod(PILDeclRef declRef) {
+         if (PD->isResilient()) {
+            TBD.addDispatchThunk(declRef);
+            TBD.addMethodDescriptor(declRef);
          }
+      }
 
-         void addAssociatedType(AssociatedType associatedType) {
-            TBD.addAssociatedTypeDescriptor(associatedType.getAssociation());
-         }
+      void addAssociatedType(AssociatedType associatedType) {
+         TBD.addAssociatedTypeDescriptor(associatedType.getAssociation());
+      }
 
-         void addProtocolConformanceDescriptor() {
-            TBD.addProtocolRequirementsBaseDescriptor(PD);
-         }
+      void addInterfaceConformanceDescriptor() {
+         TBD.addInterfaceRequirementsBaseDescriptor(PD);
+      }
 
-         void addOutOfLineBaseProtocol(ProtocolDecl *proto) {
-            TBD.addBaseConformanceDescriptor(BaseConformance(PD, proto));
-         }
+      void addOutOfLineBaseInterface(InterfaceDecl *proto) {
+         TBD.addBaseConformanceDescriptor(BaseConformance(PD, proto));
+      }
 
-         void addAssociatedConformance(AssociatedConformance associatedConf) {
-            TBD.addAssociatedConformanceDescriptor(associatedConf);
-         }
+      void addAssociatedConformance(AssociatedConformance associatedConf) {
+         TBD.addAssociatedConformanceDescriptor(associatedConf);
+      }
 
-         void addPlaceholder(MissingMemberDecl *decl) {}
+      void addPlaceholder(MissingMemberDecl *decl) {}
 
-         void doIt() {
-            visitProtocolDecl(PD);
-         }
-      };
+      void doIt() {
+         visitInterfaceDecl(PD);
+      }
+   };
 
-      WitnessVisitor(*this, PD).doIt();
+   WitnessVisitor(*this, PD).doIt();
 
-      // Include the self-conformance.
-      addConformances(PD);
-   }
+   // Include the self-conformance.
+   addConformances(PD);
+//   }
 
 #ifndef NDEBUG
-   // There's no (currently) relevant information about members of a protocol at
-   // individual protocols, each conforming type has to handle them individually
+   // There's no (currently) relevant information about members of a interface at
+   // individual interfaces, each conforming type has to handle them individually
    // (NB. anything within an active IfConfigDecls also appears outside). Let's
    // assert this fact:
    for (auto *member : PD->getMembers()) {
-      assert(isValidProtocolMemberForTBDGen(member) &&
-             "unexpected member of protocol during TBD generation");
+      assert(isValidInterfaceMemberForTBDGen(member) &&
+             "unexpected member of interface during TBD generation");
    }
 #endif
 }
@@ -616,7 +617,7 @@ enum DylibVersionKind_t: unsigned {
 /// that fits in the alloted space, which matches the behavior of the linker.
 static Optional<llvm::MachO::PackedVersion>
 parsePackedVersion(DylibVersionKind_t kind, StringRef versionString,
-                   ASTContext &ctx) {
+                   AstContext &ctx) {
    if (versionString.empty())
       return None;
 
@@ -645,7 +646,7 @@ static void enumeratePublicSymbolsAndWrite(ModuleDecl *M, FileUnit *singleFile,
                                            StringSet *symbols,
                                            llvm::raw_ostream *os,
                                            const TBDGenOptions &opts) {
-   auto &ctx = M->getASTContext();
+   auto &ctx = M->getAstContext();
    auto isWholeModule = singleFile == nullptr;
    const auto &triple = ctx.LangOpts.Target;
    UniversalLinkageInfo linkInfo(triple, opts.HasMultipleIGMs, false,
@@ -654,10 +655,10 @@ static void enumeratePublicSymbolsAndWrite(ModuleDecl *M, FileUnit *singleFile,
    llvm::MachO::InterfaceFile file;
    file.setFileType(llvm::MachO::FileType::TBD_V3);
    file.setApplicationExtensionSafe(
-      isApplicationExtensionSafe(M->getASTContext().LangOpts));
+      isApplicationExtensionSafe(M->getAstContext().LangOpts));
    file.setInstallName(opts.InstallName);
    file.setTwoLevelNamespace();
-   file.setSwiftABIVersion(irgen::getSwiftABIVersion());
+   file.setSwiftABIVersion(irgen::getPolarphpABIVersion());
    file.setInstallAPI(opts.IsInstallAPI);
 
    if (auto packed = parsePackedVersion(CurrentVersion,
@@ -707,16 +708,16 @@ static void enumeratePublicSymbolsAndWrite(ModuleDecl *M, FileUnit *singleFile,
    }
 }
 
-void swift::enumeratePublicSymbols(FileUnit *file, StringSet &symbols,
+void polar::enumeratePublicSymbols(FileUnit *file, StringSet &symbols,
                                    const TBDGenOptions &opts) {
    enumeratePublicSymbolsAndWrite(file->getParentModule(), file, &symbols,
                                   nullptr, opts);
 }
-void swift::enumeratePublicSymbols(ModuleDecl *M, StringSet &symbols,
+void polar::enumeratePublicSymbols(ModuleDecl *M, StringSet &symbols,
                                    const TBDGenOptions &opts) {
    enumeratePublicSymbolsAndWrite(M, nullptr, &symbols, nullptr, opts);
 }
-void swift::writeTBDFile(ModuleDecl *M, llvm::raw_ostream &os,
+void polar::writeTBDFile(ModuleDecl *M, llvm::raw_ostream &os,
                          const TBDGenOptions &opts) {
    enumeratePublicSymbolsAndWrite(M, nullptr, nullptr, &os, opts);
 }

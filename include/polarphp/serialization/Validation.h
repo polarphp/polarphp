@@ -170,7 +170,7 @@ ValidationInfo validateSerializedAst(
 /// - \p loadedModuleFile is an invalid loaded module.
 /// - \p ModuleName is the name used to refer to the module in diagnostics.
 void diagnoseSerializedAstLoadFailure(
-   ASTContext &Ctx, SourceLoc diagLoc, const ValidationInfo &loadInfo,
+   AstContext &Ctx, SourceLoc diagLoc, const ValidationInfo &loadInfo,
    const ExtendedValidationInfo &extendedInfo, StringRef moduleBufferID,
    StringRef moduleDocBufferID, ModuleFile *loadedModuleFile,
    Identifier ModuleName);

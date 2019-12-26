@@ -59,8 +59,8 @@ public:
 
    bool haveModuleOrModuleDocOutputPaths() const
    {
-      return !supplementaryOutputs.moduleOutputPath.empty() ||
-            !supplementaryOutputs.moduleDocOutputPath.empty();
+      return !supplementaryOutputs.ModuleOutputPath.empty() ||
+            !supplementaryOutputs.ModuleDocOutputPath.empty();
    }
 };
 

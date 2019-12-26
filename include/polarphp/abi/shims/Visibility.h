@@ -165,11 +165,19 @@
 #endif
 
 #if __has_builtin(__builtin_expect)
+#  ifndef POLAR_LIKELY
 #define POLAR_LIKELY(expression) (__builtin_expect(!!(expression), 1))
-#define POLAR_UNLIKELY(expression) (__builtin_expect(!!(expression), 0))
+#  endif
+#ifndef POLAR_UNLIKELY
+#  define POLAR_UNLIKELY(expression) (__builtin_expect(!!(expression), 0))
+#endif
 #else
+#  ifndef POLAR_LIKELY
 #define POLAR_LIKELY(expression) ((expression))
+#  endif
+#  ifndef POLAR_UNLIKELY
 #define POLAR_UNLIKELY(expression) ((expression))
+#  endif
 #endif
 
 // POLARPHP_ABI_SHIMS_VISIBILITY_H

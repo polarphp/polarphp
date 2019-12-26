@@ -188,7 +188,7 @@ bool PolarphpRangesEmitter::emit() const {
       });
    if (!hadError)
       return false;
-   diags.diagnose(SourceLoc(), diag::error_unable_to_write_swift_ranges_file,
+   diags.diagnose(SourceLoc(), diag::error_unable_to_write_php_ranges_file,
                   outputPath, "Output error");
    return true;
 }

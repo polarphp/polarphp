@@ -1642,19 +1642,19 @@ public:
                  "partial_apply context argument must have the same convention "
                  "as the resulting function's callee convention");
 
-         auto isSwiftRefcounted = [](PILType t) -> bool {
+         auto isPolarphpRefcounted = [](PILType t) -> bool {
             if (t.is<PILBoxType>())
                return true;
             if (t.getAstType() == t.getAstContext().TheNativeObjectType)
                return true;
             if (auto clas = t.getClassOrBoundGenericClass())
                // Must be a class defined in Swift.
-               return clas->hasKnownSwiftImplementation();
+               return clas->hasKnownPolarphpImplementation();
             return false;
          };
 
          // The context argument must be a swift-refcounted box or class.
-         require(isSwiftRefcounted(PAI->getArguments().front()->getType()),
+         require(isPolarphpRefcounted(PAI->getArguments().front()->getType()),
                  "partial_apply context argument must be swift-refcounted");
       }
    }
