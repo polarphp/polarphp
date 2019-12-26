@@ -25,6 +25,7 @@ namespace llvm {
 
 // Containers.
 class StringRef;
+class StringSaver;
 class StringLiteral;
 class Twine;
 template <typename T> class SmallPtrSetImpl;

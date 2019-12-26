@@ -714,29 +714,29 @@ public:
       return AbstractionPattern::getOpaque();
    }
 
-   /// Get the calling convention used by witnesses of a protocol.
+   /// Get the calling convention used by witnesses of a interface.
    static PILFunctionTypeRepresentation
    getInterfaceWitnessRepresentation(InterfaceDecl *P) {
-      // ObjC protocols use the objc method convention.
+      // ObjC interfaces use the objc method convention.
       // @todo
 //      if (P->isObjC())
 //         return PILFunctionTypeRepresentation::ObjCMethod;
 
-      // Native protocols use the witness calling convention.
+      // Native interfaces use the witness calling convention.
       return PILFunctionTypeRepresentation::WitnessMethod;
    }
 
    /// Get the calling convention used to call a declaration.
    PILFunctionTypeRepresentation getDeclRefRepresentation(PILDeclRef c);
 
-   /// Get the method dispatch strategy for a protocol.
+   /// Get the method dispatch strategy for a interface.
    static InterfaceDispatchStrategy getInterfaceDispatchStrategy(InterfaceDecl *P);
 
    /// Count the total number of fields inside the given PIL Type
    unsigned countNumberOfFields(PILType Ty, TypeExpansionContext expansion);
 
-   /// True if a protocol uses witness tables for dynamic dispatch.
-   static bool protocolRequiresWitnessTable(InterfaceDecl *P) {
+   /// True if a interface uses witness tables for dynamic dispatch.
+   static bool interfaceRequiresWitnessTable(InterfaceDecl *P) {
       return InterfaceDescriptorFlags::needsWitnessTable
          (getInterfaceDispatchStrategy(P));
    }
@@ -746,7 +746,7 @@ public:
    ///
    /// TODO: We want this always to hold.
    static bool isIndirectPlusZeroSelfParameter(Type T) {
-      // Calls through opaque protocols can be done with +0 rvalues.  This allows
+      // Calls through opaque interfaces can be done with +0 rvalues.  This allows
       // us to avoid materializing copies of existentials.
       return !T->hasReferenceSemantics()
              && (T->isExistentialType() || T->is<ArchetypeType>());

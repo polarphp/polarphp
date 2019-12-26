@@ -11,7 +11,7 @@
 //===----------------------------------------------------------------------===//
 //
 // This file defines the PILWitnessVisitor class, which is used to generate and
-// perform lookups in witness method tables for protocols and protocol
+// perform lookups in witness method tables for interfaces and interface
 // conformances.
 //
 //===----------------------------------------------------------------------===//
@@ -28,7 +28,7 @@
 
 namespace polar {
 
-/// A CRTP class for visiting the witnesses of a protocol.
+/// A CRTP class for visiting the witnesses of a interface.
 ///
 /// The design here is that each entry (or small group of entries)
 /// gets turned into a call to the implementation class describing
@@ -49,11 +49,11 @@ template <class T> class PILWitnessVisitor : public AstVisitor<T> {
   T &asDerived() { return *static_cast<T*>(this); }
 
 public:
-  void visitInterfaceDecl(InterfaceDecl *protocol) {
-    // The protocol conformance descriptor gets added first.
+  void visitInterfaceDecl(InterfaceDecl *interface) {
+    // The interface conformance descriptor gets added first.
     asDerived().addInterfaceConformanceDescriptor();
 
-    for (const auto &reqt : protocol->getRequirementSignature()) {
+    for (const auto &reqt : interface->getRequirementSignature()) {
       switch (reqt.getKind()) {
       // These requirements don't show up in the witness table.
       case RequirementKind::Superclass:
@@ -68,23 +68,23 @@ public:
           cast<InterfaceType>(reqt.getSecondType()->getCanonicalType())
             ->getDecl();
 
-        // ObjC protocols do not have witnesses.
-        if (!lowering::TypeConverter::protocolRequiresWitnessTable(requirement))
+        // ObjC interfaces do not have witnesses.
+        if (!lowering::TypeConverter::interfaceRequiresWitnessTable(requirement))
           continue;
 
-        // If the type parameter is 'self', consider this to be protocol
+        // If the type parameter is 'self', consider this to be interface
         // inheritance.  In the canonical signature, these should all
-        // come before any protocol requirements on associated types.
+        // come before any interface requirements on associated types.
         if (auto parameter = dyn_cast<GenericTypeParamType>(type)) {
-          assert(type->isEqual(protocol->getSelfInterfaceType()));
+          assert(type->isEqual(interface->getSelfInterfaceType()));
           assert(parameter->getDepth() == 0 && parameter->getIndex() == 0 &&
-                 "non-self type parameter in protocol");
+                 "non-self type parameter in interface");
           asDerived().addOutOfLineBaseInterface(requirement);
           continue;
         }
 
         // Otherwise, add an associated requirement.
-        AssociatedConformance assocConf(protocol, type, requirement);
+        AssociatedConformance assocConf(interface, type, requirement);
         asDerived().addAssociatedConformance(assocConf);
         continue;
       }
@@ -93,7 +93,7 @@ public:
     }
 
     // Add the associated types.
-    for (auto *associatedType : protocol->getAssociatedTypeMembers()) {
+    for (auto *associatedType : interface->getAssociatedTypeMembers()) {
       // If this is a new associated type (which does not override an
       // existing associated type), add it.
       if (associatedType->getOverriddenDecls().empty())
@@ -103,21 +103,21 @@ public:
     if (asDerived().shouldVisitRequirementSignatureOnly())
       return;
 
-    // Visit the witnesses for the direct members of a protocol.
-    for (Decl *member : protocol->getMembers()) {
+    // Visit the witnesses for the direct members of a interface.
+    for (Decl *member : interface->getMembers()) {
       AstVisitor<T>::visit(member);
     }
   }
 
-  /// If true, only the base protocols and associated types will be visited.
+  /// If true, only the base interfaces and associated types will be visited.
   /// The base implementation returns false.
   bool shouldVisitRequirementSignatureOnly() const {
     return false;
   }
 
-  /// Fallback for unexpected protocol requirements.
+  /// Fallback for unexpected interface requirements.
   void visitDecl(Decl *d) {
-    llvm_unreachable("unhandled protocol requirement");
+    llvm_unreachable("unhandled interface requirement");
   }
 
   void visitAbstractStorageDecl(AbstractStorageDecl *sd) {

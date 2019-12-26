@@ -66,12 +66,12 @@ static Optional<SanitizerKind> parse(const char* arg)
    return llvm::StringSwitch<Optional<SanitizerKind>>(arg)
 #define SANITIZER(_, kind, name, file) .Case(#name, SanitizerKind::kind)
 #include "polarphp/basic/SanitizersDef.h"
-   .Default(None);
+      .Default(None);
 }
 
 llvm::SanitizerCoverageOptions parse_sanitizer_coverage_arg_value(
-      const llvm::opt::Arg *arg, const llvm::Triple &triple,
-      DiagnosticEngine &diags, OptionSet<SanitizerKind> sanitizers)
+   const llvm::opt::Arg *arg, const llvm::Triple &triple,
+   DiagnosticEngine &diags, OptionSet<SanitizerKind> sanitizers)
 {
 
    llvm::SanitizerCoverageOptions opts;
@@ -80,8 +80,8 @@ llvm::SanitizerCoverageOptions parse_sanitizer_coverage_arg_value(
    for (int i = 0, n = arg->getNumValues(); i != n; ++i) {
       if (opts.CoverageType == llvm::SanitizerCoverageOptions::SCK_None) {
          opts.CoverageType =
-               llvm::StringSwitch<llvm::SanitizerCoverageOptions::Type>(
-                  arg->getValue(i))
+            llvm::StringSwitch<llvm::SanitizerCoverageOptions::Type>(
+               arg->getValue(i))
                .Case("func", llvm::SanitizerCoverageOptions::SCK_Function)
                .Case("bb", llvm::SanitizerCoverageOptions::SCK_BB)
                .Case("edge", llvm::SanitizerCoverageOptions::SCK_Edge)
@@ -138,11 +138,11 @@ llvm::SanitizerCoverageOptions parse_sanitizer_coverage_arg_value(
 }
 
 OptionSet<SanitizerKind> parse_sanitizer_arg_values(
-      const llvm::opt::ArgList &Args,
-      const llvm::opt::Arg *arg,
-      const llvm::Triple &triple,
-      DiagnosticEngine &diags,
-      llvm::function_ref<bool(llvm::StringRef, bool)> sanitizerRuntimeLibExists)
+   const llvm::opt::ArgList &Args,
+   const llvm::opt::Arg *arg,
+   const llvm::Triple &triple,
+   DiagnosticEngine &diags,
+   llvm::function_ref<bool(llvm::StringRef, bool)> sanitizerRuntimeLibExists)
 {
    OptionSet<SanitizerKind> sanitizerSet;
 
@@ -171,7 +171,7 @@ OptionSet<SanitizerKind> parse_sanitizer_arg_values(
          SmallString<128> b;
          diags.diagnose(SourceLoc(), diag::error_unsupported_opt_for_target,
                         (arg->getOption().getPrefixedName() + to_string_ref(kind))
-                        .toStringRef(b),
+                           .toStringRef(b),
                         triple.getTriple());
       } else {
          sanitizerSet |= kind;
@@ -201,6 +201,50 @@ OptionSet<SanitizerKind> parse_sanitizer_arg_values(
 
    return sanitizerSet;
 }
+
+OptionSet<SanitizerKind> parse_sanitizer_recover_arg_values(
+   const llvm::opt::Arg *A, const OptionSet<SanitizerKind> &enabledSanitizers,
+   DiagnosticEngine &Diags, bool emitWarnings) {
+   OptionSet<SanitizerKind> sanitizerRecoverSet;
+
+   // Find the sanitizer kind.
+   for (const char *arg : A->getValues()) {
+      Optional<SanitizerKind> optKind = parse(arg);
+
+      // Unrecognized sanitizer option
+      if (!optKind.hasValue()) {
+         Diags.diagnose(SourceLoc(), diag::error_unsupported_option_argument,
+                        A->getOption().getPrefixedName(), arg);
+         continue;
+      }
+      SanitizerKind kind = optKind.getValue();
+
+      // Only support ASan for now.
+      if (kind != SanitizerKind::Address) {
+         Diags.diagnose(SourceLoc(), diag::error_unsupported_option_argument,
+                        A->getOption().getPrefixedName(), arg);
+         continue;
+      }
+
+      // Check that the sanitizer is enabled.
+      if (!(enabledSanitizers & kind)) {
+         SmallString<128> b;
+         if (emitWarnings) {
+            Diags.diagnose(SourceLoc(),
+                           diag::warning_option_requires_specific_sanitizer,
+                           (A->getOption().getPrefixedName() + to_string_ref(kind))
+                              .toStringRef(b),
+                           to_string_ref(kind));
+         }
+         continue;
+      }
+
+      sanitizerRecoverSet |= kind;
+   }
+
+   return sanitizerRecoverSet;
+}
+
 
 std::string get_sanitizer_list(const OptionSet<SanitizerKind> &set)
 {

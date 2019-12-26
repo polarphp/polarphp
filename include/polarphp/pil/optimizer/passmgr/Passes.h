@@ -26,6 +26,8 @@ class PILModuleTransform;
 
 namespace irgen {
 class IRGenModule;
+
+PILTransform *createAllocStackHoisting();
 }
 
 /// Run all the PIL diagnostic passes on \p M.

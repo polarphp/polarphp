@@ -176,13 +176,13 @@ void SerializableSourceRange::print(raw_ostream &out) const {
 void SerializableSourceRange::dump() const { print(llvm::errs()); }
 
 //==============================================================================
-// MARK: PolarphpRangesEmitter
+// MARK: PHPRangesEmitter
 //==============================================================================
 
-bool PolarphpRangesEmitter::emit() const {
+bool PHPRangesEmitter::emit() const {
    const bool hadError =
       withOutputFile(diags, outputPath, [&](llvm::raw_pwrite_stream &out) {
-         out << PolarphpRangesFileContents::header;
+         out << PHPRangesFileContents::header;
          emitRanges(out);
          return false;
       });
@@ -193,21 +193,21 @@ bool PolarphpRangesEmitter::emit() const {
    return true;
 }
 
-void PolarphpRangesEmitter::emitRanges(llvm::raw_ostream &out) const {
-   PolarphpRangesFileContents wholeFileContents(
+void PHPRangesEmitter::emitRanges(llvm::raw_ostream &out) const {
+   PHPRangesFileContents wholeFileContents(
       collectSortedSerializedNoninlinableFunctionBodies());
    llvm::yaml::Output yamlWriter(out);
    yamlWriter << wholeFileContents;
 }
 
 Ranges
-PolarphpRangesEmitter::collectSortedSerializedNoninlinableFunctionBodies() const {
+PHPRangesEmitter::collectSortedSerializedNoninlinableFunctionBodies() const {
    return serializeRanges(
       coalesceSortedRanges(sortRanges(collectNoninlinableFunctionBodies())));
 }
 
 std::vector<CharSourceRange>
-PolarphpRangesEmitter::collectNoninlinableFunctionBodies() const {
+PHPRangesEmitter::collectNoninlinableFunctionBodies() const {
    struct FnBodyCollector : AstWalker {
       const SourceManager &SM;
 
@@ -239,7 +239,7 @@ PolarphpRangesEmitter::collectNoninlinableFunctionBodies() const {
 }
 
 std::vector<CharSourceRange>
-PolarphpRangesEmitter::sortRanges(std::vector<CharSourceRange> ranges) const {
+PHPRangesEmitter::sortRanges(std::vector<CharSourceRange> ranges) const {
    std::sort(ranges.begin(), ranges.end(),
              [&](const CharSourceRange &lhs, const CharSourceRange &rhs) {
                 return sourceMgr.isBeforeInBuffer(lhs.getStart(), rhs.getStart());
@@ -247,7 +247,7 @@ PolarphpRangesEmitter::sortRanges(std::vector<CharSourceRange> ranges) const {
    return ranges;
 }
 
-std::vector<CharSourceRange> PolarphpRangesEmitter::coalesceSortedRanges(
+std::vector<CharSourceRange> PHPRangesEmitter::coalesceSortedRanges(
    std::vector<CharSourceRange> ranges) const {
    if (ranges.empty())
       return ranges;
@@ -264,14 +264,14 @@ std::vector<CharSourceRange> PolarphpRangesEmitter::coalesceSortedRanges(
 }
 
 std::vector<SerializableSourceRange>
-PolarphpRangesEmitter::serializeRanges(std::vector<CharSourceRange> ranges) const {
+PHPRangesEmitter::serializeRanges(std::vector<CharSourceRange> ranges) const {
    std::vector<SerializableSourceRange> result;
    for (const auto r : ranges)
       result.push_back(SerializableSourceRange(r, sourceMgr));
    return result;
 }
 
-bool PolarphpRangesEmitter::isImmediatelyBeforeOrOverlapping(
+bool PHPRangesEmitter::isImmediatelyBeforeOrOverlapping(
    CharSourceRange prev, CharSourceRange next) const {
    // TODO: investigate returning true if only white space intervenes.
    // Would be more work here, but less work downstream.
@@ -303,14 +303,14 @@ bool CompiledSourceEmitter::emit() {
 }
 
 //==============================================================================
-// MARK: PolarphpRangesFileContents
+// MARK: PHPRangesFileContents
 //==============================================================================
 
-void PolarphpRangesFileContents::dump(const StringRef primaryInputFilename) const {
+void PHPRangesFileContents::dump(const StringRef primaryInputFilename) const {
    llvm::errs() << "\n*** Swift range file contents for '"
                 << primaryInputFilename << "': ***\n";
    llvm::yaml::Output dumper(llvm::errs());
-   dumper << *const_cast<PolarphpRangesFileContents *>(this);
+   dumper << *const_cast<PHPRangesFileContents *>(this);
 }
 
 } // polar

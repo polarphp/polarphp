@@ -42,12 +42,12 @@ enum PolarphpFlags
    DoesNotAffectIncrementalBuild = (1 << 8),
    AutolinkExtractOption = (1 << 9),
    ModuleWrapOption = (1 << 10),
-   PolarphpFormatOption = (1 << 11),
+   PolarphpIndentOption = (1 << 11),
    ArgumentIsPath = (1 << 12),
    ModuleInterfaceOption = (1 << 13),
 };
 
-enum ID {
+enum FileTypeId {
    OPT_INVALID = 0, // This is not an option ID.
 #define OPTION(PREFIX, NAME, ID, KIND, GROUP, ALIAS, ALIASARGS, FLAGS, PARAM,  \
    HELPTEXT, METAVAR, VALUES)                                      \

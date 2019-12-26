@@ -47,6 +47,10 @@ OptionSet<SanitizerKind> parse_sanitizer_arg_values(
       const llvm::Triple &triple, DiagnosticEngine &diag,
       llvm::function_ref<bool(llvm::StringRef, bool)> sanitizerRuntimeLibExists);
 
+OptionSet<SanitizerKind> parse_sanitizer_recover_arg_values(
+   const llvm::opt::Arg *A, const OptionSet<SanitizerKind> &enabledSanitizers,
+   DiagnosticEngine &Diags, bool emitWarnings);
+
 /// Parses a -sanitize-coverage= argument's value.
 llvm::SanitizerCoverageOptions parse_sanitizer_coverage_arg_value(
       const llvm::opt::Arg *arg,

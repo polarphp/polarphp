@@ -157,7 +157,7 @@ template <class T> class PILVTableVisitor {
 protected:
   void addVTableEntries(ClassDecl *theClass) {
     // Imported classes do not have a vtable.
-    if (!theClass->hasKnownSwiftImplementation())
+    if (!theClass->hasKnownPolarphpImplementation())
       return;
 
     // Note that while vtable order is not ABI, we still want it to be

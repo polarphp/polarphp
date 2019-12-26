@@ -1,16 +1,17 @@
-// This source file is part of the polarphp.org open source project
+//===--- FrontendOptions.h --------------------------------------*- C++ -*-===//
 //
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
+// This source file is part of the Swift.org open source project
+//
+// Copyright (c) 2014 - 2017 Apple Inc. and the Swift project authors
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
+// See https://swift.org/LICENSE.txt for license information
+// See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
-// Created by polarboy on 2019/11/26.
+//===----------------------------------------------------------------------===//
 
-#ifndef POLARPHP_FRONTEND_OPTIONS_H
-#define POLARPHP_FRONTEND_OPTIONS_H
+#ifndef POLARPHP_FRONTEND_FRONTENDOPTIONS_H
+#define POLARPHP_FRONTEND_FRONTENDOPTIONS_H
 
 #include "polarphp/basic/FileTypes.h"
 #include "polarphp/kernel/Version.h"
@@ -25,16 +26,17 @@ namespace llvm {
 class MemoryBuffer;
 }
 
-namespace polar::frontend {
+namespace polar {
 
 /// Options for controlling the behavior of the frontend.
-class FrontendOptions
-{
+class FrontendOptions {
+   friend class ArgsToFrontendOptionsConverter;
+
 public:
-   FrontendInputsAndOutputs inputsAndOutputs;
+   FrontendInputsAndOutputs InputsAndOutputs;
 
    /// The kind of input on which the frontend should operate.
-   InputFileKind inputKind = InputFileKind::Polarphp;
+   InputFileKind InputKind = InputFileKind::PHP;
 
    void forAllOutputPaths(const InputFile &input,
                           llvm::function_ref<void(StringRef)> fn) const;
@@ -42,61 +44,45 @@ public:
    bool isOutputFileDirectory() const;
 
    /// A list of arbitrary modules to import and make implicitly visible.
-   std::vector<std::string> implicitImportModuleNames;
+   std::vector<std::string> ImplicitImportModuleNames;
+
+   /// An Objective-C header to import and make implicitly visible.
+   std::string ImplicitObjCHeaderPath;
 
    /// The name of the module which the frontend is building.
-   std::string moduleName;
+   std::string ModuleName;
 
    /// The name of the library to link against when using this module.
-   std::string moduleLinkName;
+   std::string ModuleLinkName;
 
    /// Arguments which should be passed in immediate mode.
-   std::vector<std::string> immediateArgv;
+   std::vector<std::string> ImmediateArgv;
 
    /// A list of arguments to forward to LLVM's option processing; this
    /// should only be used for debugging and experimental features.
    std::vector<std::string> LLVMArgs;
 
    /// The path to output swift interface files for the compiled source files.
-   std::string dumpAPIPath;
+   std::string DumpAPIPath;
 
    /// The path to collect the group information for the compiled source files.
-   std::string groupInfoPath;
+   std::string GroupInfoPath;
 
    /// The path to which we should store indexing data, if any.
-   std::string indexStorePath;
+   std::string IndexStorePath;
 
-   /// The path to look in when loading a parseable interface file, to see if a
+   /// The path to look in when loading a module interface file, to see if a
    /// binary module has already been built for use by the compiler.
-   std::string prebuiltModuleCachePath;
+   std::string PrebuiltModuleCachePath;
+
+   /// For these modules, we should prefer using Swift interface when importing them.
+   std::vector<std::string> PreferInterfaceForModules;
 
    /// Emit index data for imported serialized swift system modules.
-   bool indexSystemModules = false;
-
-   /// If non-zero, warn when a function body takes longer than this many
-   /// milliseconds to type-check.
-   ///
-   /// Intended for debugging purposes only.
-   unsigned warnLongFunctionBodies = 0;
-
-   /// If non-zero, warn when type-checking an expression takes longer
-   /// than this many milliseconds.
-   ///
-   /// Intended for debugging purposes only.
-   unsigned warnLongExpressionTypeChecking = 0;
-
-   /// If non-zero, overrides the default threshold for how long we let
-   /// the expression type checker run before we consider an expression
-   /// too complex.
-   unsigned solverExpressionTimeThreshold = 0;
-
-   /// If non-zero, overrides the default threshold for how many times
-   /// the Space::minus function is called before we consider switch statement
-   /// exhaustiveness checking to be too complex.
-   unsigned switchCheckingInvocationThreshold = 0;
+   bool IndexSystemModules = false;
 
    /// The module for which we should verify all of the generic signatures.
-   std::string verifyGenericSignaturesInModule;
+   std::string VerifyGenericSignaturesInModule;
 
    enum class ActionType {
       NoneAction,        ///< No specific action
@@ -110,25 +96,25 @@ public:
       PrintAST,          ///< Parse, type-check, and pretty-print AST
 
       /// Parse and dump scope map.
-      DumpScopeMaps,
+         DumpScopeMaps,
 
       /// Parse, type-check, and dump type refinement context hierarchy
-      DumpTypeRefinementContexts,
+         DumpTypeRefinementContexts,
 
       EmitImportedModules, ///< Emit the modules that this one imports
       EmitPCH,             ///< Emit PCH of imported bridging header
 
-      EmitPILGen, ///< Emit raw SIL
-      EmitPIL,    ///< Emit canonical SIL
+      EmitPILGen, ///< Emit raw PIL
+      EmitPIL,    ///< Emit canonical PIL
 
       EmitModuleOnly, ///< Emit module only
       MergeModules,   ///< Merge modules only
 
       /// Build from a swiftinterface, as close to `import` as possible
-      CompileModuleFromInterface,
+         CompileModuleFromInterface,
 
-      EmitPIBGen, ///< Emit serialized AST + raw SIL
-      EmitPIB,    ///< Emit serialized AST + canonical SIL
+      EmitPIBGen, ///< Emit serialized AST + raw PIL
+      EmitPIB,    ///< Emit serialized AST + canonical PIL
 
       Immediate, ///< Immediate mode
       REPL,      ///< REPL mode
@@ -139,140 +125,145 @@ public:
       EmitObject,   ///< Emit object file
 
       DumpTypeInfo, ///< Dump IRGen type info
+
+      EmitPCM, ///< Emit precompiled Clang module from a module map
+      DumpPCM, ///< Dump information about a precompiled Clang module
    };
 
    /// Indicates the action the user requested that the frontend perform.
-   ActionType requestedAction = ActionType::NoneAction;
+   ActionType RequestedAction = ActionType::NoneAction;
 
    /// Indicates that the input(s) should be parsed as the Swift stdlib.
-   bool parseStdlib = false;
+   bool ParseStdlib = false;
+
+   /// Ignore .swiftsourceinfo file when trying to get source locations from module imported decls.
+   bool IgnoreSwiftSourceInfo = false;
 
    /// When true, emitted module files will always contain options for the
    /// debugger to use. When unset, the options will only be present if the
    /// module appears to not be a public module.
-   Optional<bool> serializeOptionsForDebugging;
+   Optional<bool> SerializeOptionsForDebugging;
 
    /// When true, check if all required SwiftOnoneSupport symbols are present in
    /// the module.
-   bool checkOnoneSupportCompleteness = false;
+   bool CheckOnoneSupportCompleteness = false;
 
    /// If set, inserts instrumentation useful for testing the debugger.
-   bool debuggerTestingTransform = false;
+   bool DebuggerTestingTransform = false;
 
    /// If set, dumps wall time taken to check each function body to llvm::errs().
-   bool debugTimeFunctionBodies = false;
+   bool DebugTimeFunctionBodies = false;
 
    /// If set, dumps wall time taken to check each expression.
-   bool debugTimeExpressionTypeChecking = false;
+   bool DebugTimeExpressionTypeChecking = false;
 
-   /// If set, prints the time taken in each major compilation phase to
+   /// If set, prints the time taken in each major compilation phase to 
    /// llvm::errs().
    ///
    /// \sa swift::SharedTimer
-   bool debugTimeCompilation = false;
+   bool DebugTimeCompilation = false;
 
    /// The path to which we should output statistics files.
-   std::string statsOutputDir;
+   std::string StatsOutputDir;
 
    /// Trace changes to stats to files in StatsOutputDir.
-   bool traceStats = false;
+   bool TraceStats = false;
 
    /// Profile changes to stats to files in StatsOutputDir.
-   bool profileEvents = false;
+   bool ProfileEvents = false;
 
    /// Profile changes to stats to files in StatsOutputDir, grouped by source
    /// entity.
-   bool profileEntities = false;
+   bool ProfileEntities = false;
 
    /// If true, serialization encodes an extra lookup table for use in module-
    /// merging when emitting partial modules (the per-file modules in a non-WMO
    /// build).
-   bool enableSerializationNestedTypeLookupTable = true;
+   bool EnableSerializationNestedTypeLookupTable = true;
 
    /// Indicates whether or not an import statement can pick up a Swift source
    /// file (as opposed to a module file).
-   bool enableSourceImport = false;
+   bool EnableSourceImport = false;
 
    /// Indicates whether we are compiling for testing.
    ///
    /// \see ModuleDecl::isTestingEnabled
-   bool enableTesting = false;
+   bool EnableTesting = false;
 
    /// Indicates whether we are compiling for private imports.
    ///
    /// \see ModuleDecl::arePrivateImportsEnabled
-   bool enablePrivateImports = false;
+   bool EnablePrivateImports = false;
 
 
    /// Indicates whether we add implicit dynamic.
    ///
    /// \see ModuleDecl::isImplicitDynamicEnabled
-   bool enableImplicitDynamic = false;
+   bool EnableImplicitDynamic = false;
 
    /// Enables the "fully resilient" resilience strategy.
    ///
    /// \see ResilienceStrategy::Resilient
-   bool enableLibraryEvolution = false;
+   bool EnableLibraryEvolution = false;
 
-   /// Indicates that the frontend should emit "verbose" SIL
-   /// (if asked to emit SIL).
-   bool EmitVerboseSIL = false;
+   /// Indicates that the frontend should emit "verbose" PIL
+   /// (if asked to emit PIL).
+   bool EmitVerbosePIL = false;
 
    /// If set, this module is part of a mixed Objective-C/Swift framework, and
    /// the Objective-C half should implicitly be visible to the Swift sources.
-   bool importUnderlyingModule = false;
+   bool ImportUnderlyingModule = false;
 
    /// If set, the header provided in ImplicitObjCHeaderPath will be rewritten
    /// by the Clang importer as part of semantic analysis.
-   bool serializeBridgingHeader = false;
+   bool SerializeBridgingHeader = false;
 
    /// Indicates whether or not the frontend should print statistics upon
    /// termination.
-   bool printStats = false;
+   bool PrintStats = false;
 
    /// Indicates whether or not the Clang importer should print statistics upon
    /// termination.
-   bool printClangStats = false;
+   bool PrintClangStats = false;
 
    /// Indicates whether the playground transformation should be applied.
-   bool playgroundTransform = false;
+   bool PlaygroundTransform = false;
 
    /// Indicates whether the AST should be instrumented to simulate a debugger's
    /// program counter. Similar to the PlaygroundTransform, this will instrument
    /// the AST with function calls that get called when you would see a program
    /// counter move in a debugger. To adopt this implement the
    /// __builtin_pc_before and __builtin_pc_after functions.
-   bool pcMacro = false;
+   bool PCMacro = false;
 
    /// Indicates whether the playground transformation should omit
    /// instrumentation that has a high runtime performance impact.
-   bool playgroundHighPerformance = false;
+   bool PlaygroundHighPerformance = false;
 
    /// Indicates whether standard help should be shown.
-   bool printHelp = false;
+   bool PrintHelp = false;
 
    /// Indicates whether full help (including "hidden" options) should be shown.
-   bool printHelpHidden = false;
+   bool PrintHelpHidden = false;
 
-   /// Should we sort SIL functions, vtables, witness tables, and global
-   /// variables by name when we print it out. This eases diffing of SIL files.
-   bool emitSortedPIL = false;
+   /// Should we sort PIL functions, vtables, witness tables, and global
+   /// variables by name when we print it out. This eases diffing of PIL files.
+   bool EmitSortedPIL = false;
 
    /// Indicates whether the dependency tracker should track system
    /// dependencies as well.
-   bool trackSystemDeps = false;
+   bool TrackSystemDeps = false;
 
    /// Should we serialize the hashes of dependencies (vs. the modification
    /// times) when compiling a module interface?
-   bool serializeModuleInterfaceDependencyHashes = false;
+   bool SerializeModuleInterfaceDependencyHashes = false;
 
    /// Should we warn if an imported module needed to be rebuilt from a
    /// module interface file?
-   bool remarkOnRebuildFromModuleInterface = false;
+   bool RemarkOnRebuildFromModuleInterface = false;
 
    /// The different modes for validating TBD against the LLVM IR.
-   enum class TBDValidationMode
-   {
+   enum class TBDValidationMode {
       Default,        ///< Do the default validation for the current platform.
       None,           ///< Do no validation.
       MissingFromTBD, ///< Only check for symbols that are in IR but not TBD.
@@ -283,19 +274,18 @@ public:
    TBDValidationMode ValidateTBDAgainstIR = TBDValidationMode::Default;
 
    /// An enum with different modes for automatically crashing at defined times.
-   enum class DebugCrashMode
-   {
+   enum class DebugCrashMode {
       None, ///< Don't automatically crash.
       AssertAfterParse, ///< Automatically assert after parsing.
       CrashAfterParse, ///< Automatically crash after parsing.
    };
 
    /// Indicates a debug crash mode for the frontend.
-   DebugCrashMode crashMode = DebugCrashMode::None;
+   DebugCrashMode CrashMode = DebugCrashMode::None;
 
    /// Line and column for each of the locations to be probed by
    /// -dump-scope-maps.
-   SmallVector<std::pair<unsigned, unsigned>, 2> dumpScopeMapLocations;
+   SmallVector<std::pair<unsigned, unsigned>, 2> DumpScopeMapLocations;
 
    /// Indicates whether the action will immediately run code.
    static bool isActionImmediate(ActionType);
@@ -305,17 +295,15 @@ public:
 
    /// Return a hash code of any components from these options that should
    /// contribute to a Swift Bridging PCH hash.
-   llvm::hash_code getPCHHashComponents() const
-   {
+   llvm::hash_code getPCHHashComponents() const {
       return llvm::hash_value(0);
    }
 
    StringRef determineFallbackModuleName() const;
 
-   bool isCompilingExactlyOnePolarphpFile() const
-   {
-      return inputKind == InputFileKind::Polarphp &&
-            inputsAndOutputs.hasSingleInput();
+   bool isCompilingExactlyOnePolarphpFile() const {
+      return InputKind == InputFileKind::PHP &&
+             InputsAndOutputs.hasSingleInput();
    }
 
    const PrimarySpecificPaths &
@@ -323,23 +311,26 @@ public:
    const PrimarySpecificPaths &
    getPrimarySpecificPathsForPrimary(StringRef) const;
 
-public:
-   static bool doesActionGenerateSIL(ActionType);
-   static bool doesActionProduceOutput(ActionType);
-   static bool doesActionProduceTextualOutput(ActionType);
-   static bool needsProperModuleName(ActionType);
-   static filetypes::FileTypeId formatForPrincipalOutputFileForAction(ActionType);
-
 private:
-   friend class ArgsToFrontendOptionsConverter;
    static bool canActionEmitDependencies(ActionType);
    static bool canActionEmitReferenceDependencies(ActionType);
+   static bool canActionEmitPHPRanges(ActionType);
+   static bool canActionEmitCompiledSource(ActionType);
+   static bool canActionEmitObjCHeader(ActionType);
    static bool canActionEmitLoadedModuleTrace(ActionType);
    static bool canActionEmitModule(ActionType);
    static bool canActionEmitModuleDoc(ActionType);
    static bool canActionEmitInterface(ActionType);
+
+public:
+   static bool doesActionGeneratePIL(ActionType);
+   static bool doesActionGenerateIR(ActionType);
+   static bool doesActionProduceOutput(ActionType);
+   static bool doesActionProduceTextualOutput(ActionType);
+   static bool needsProperModuleName(ActionType);
+   static filetypes::FileTypeId formatForPrincipalOutputFileForAction(ActionType);
 };
 
-} // polar::frontend
+} // polar
 
-#endif // POLARPHP_FRONTEND_OPTIONS_H
+#endif

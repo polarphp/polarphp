@@ -11,13 +11,16 @@
 
 #set(POLAR_FRONTEND_SOURCES)
 
-#polar_collect_files(
-#   TYPE_BOTH
-#   DIR .
-#   OUTPUT_VAR POLAR_FRONTEND_SOURCES)
+polar_collect_files(
+   TYPE_BOTH
+   DIR .
+   OUTPUT_VAR POLAR_FRONTEND_SOURCES)
 
-#polar_merge_list(POLAR_FRONTEND_SOURCES POLAR_HEADERS)
+polar_merge_list(POLAR_FRONTEND_SOURCES POLAR_HEADERS)
 
-#polar_add_library(PolarFrontend SHARED
-#   ${POLAR_FRONTEND_SOURCES}
-#   LINK_LIBS PolarUtils PolarKernel PolarSyntax)
+polar_add_library(PolarFrontend STATIC
+   ${POLAR_FRONTEND_SOURCES}
+   LINK_LIBS PolarUtils PolarKernel
+   PolarPIL PolarOption PolarPILParser
+   PolarPILGen PolarPILOptimizer PolarSema
+   PolarSerialization)

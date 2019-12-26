@@ -161,7 +161,7 @@ struct llvm::yaml::MappingTraits<
 };
 
 //==============================================================================
-// MARK: PolarphpRangesFileContents
+// MARK: PHPRangesFileContents
 //==============================================================================
 
 namespace polar {
@@ -169,19 +169,19 @@ namespace incremental_ranges {
 
 /// The complete contents of the file written by the frontend and read by the
 /// driver containing source range information for one primary input file.
-struct PolarphpRangesFileContents {
+struct PHPRangesFileContents {
    /// For each non-primary, the unparsed ranges in it.
    /// At present these represent the bodies of types defined in the nonprimary
    /// that are not used in the primary.
    Ranges noninlinableFunctionBodies;
 
-   PolarphpRangesFileContents() = default;
+   PHPRangesFileContents() = default;
 
-   PolarphpRangesFileContents(Ranges &&noninlinableFunctionBodies)
+   PHPRangesFileContents(Ranges &&noninlinableFunctionBodies)
       : noninlinableFunctionBodies(std::move(noninlinableFunctionBodies)) {}
 
    /// Return None for error.
-   static Optional<PolarphpRangesFileContents>
+   static Optional<PHPRangesFileContents>
    load(const StringRef primaryPath, const llvm::MemoryBuffer &swiftRangesBuffer,
         const bool showIncrementalBuildDecisions, DiagnosticEngine &diags);
 
@@ -194,10 +194,10 @@ struct PolarphpRangesFileContents {
 
 template <>
 struct llvm::yaml::MappingTraits<
-      polar::incremental_ranges::PolarphpRangesFileContents> {
+      polar::incremental_ranges::PHPRangesFileContents> {
    static void
    mapping(llvm::yaml::IO &io,
-           polar::incremental_ranges::PolarphpRangesFileContents &srfc) {
+           polar::incremental_ranges::PHPRangesFileContents &srfc) {
       io.mapRequired("noninlinableFunctionBodies",
                      srfc.noninlinableFunctionBodies);
    }
@@ -208,19 +208,19 @@ LLVM_YAML_IS_STRING_MAP(polar::incremental_ranges::Ranges)
 LLVM_YAML_IS_STRING_MAP(polar::incremental_ranges::RangesByFilename)
 
 //==============================================================================
-// MARK: PolarphpRangesEmitter
+// MARK: PHPRangesEmitter
 //==============================================================================
 namespace polar {
 namespace incremental_ranges {
 /// Gathers up the information from the frontend, processes it, and writes it.
-class PolarphpRangesEmitter {
+class PHPRangesEmitter {
    const StringRef outputPath;
    SourceFile *const primaryFile;
    const SourceManager &sourceMgr;
    DiagnosticEngine &diags;
 
 public:
-   PolarphpRangesEmitter(StringRef outputPath, SourceFile *primaryFile,
+   PHPRangesEmitter(StringRef outputPath, SourceFile *primaryFile,
                          const SourceManager &sourceMgr, DiagnosticEngine &diags)
       : outputPath(outputPath), primaryFile(primaryFile), sourceMgr(sourceMgr),
         diags(diags) {}

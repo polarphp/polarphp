@@ -9,19 +9,9 @@
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
 //===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
-//
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/11/26.
 
-#ifndef POLARPHP_FRONTEND_INPUTS_AND_OUTPUTS_H
-#define POLARPHP_FRONTEND_INPUTS_AND_OUTPUTS_H
+#ifndef POLARPHP_FRONTEND_FRONTENDINPUTS_H
+#define POLARPHP_FRONTEND_FRONTENDINPUTS_H
 
 #include "polarphp/basic/PrimarySpecificPaths.h"
 #include "polarphp/basic/SupplementaryOutputPaths.h"
@@ -36,24 +26,29 @@ namespace llvm {
 class MemoryBuffer;
 }
 
-namespace polar::frontend {
+namespace polar {
 
 class DiagnosticEngine;
 
 /// Information about all the inputs and outputs to the frontend.
 
-class FrontendInputsAndOutputs
-{
-public:
-   bool areBatchModeChecksBypassed() const
-   {
-      return m_areBatchModeChecksBypassed;
-   }
+class FrontendInputsAndOutputs {
+   friend class ArgsToFrontendInputsConverter;
 
-   void setBypassBatchModeChecks(bool bbc)
-   {
-      m_areBatchModeChecksBypassed = bbc;
-   }
+   std::vector<InputFile> AllInputs;
+   llvm::StringMap<unsigned> PrimaryInputsByName;
+   std::vector<unsigned> PrimaryInputsInOrder;
+
+   /// In Single-threaded WMO mode, all inputs are used
+   /// both for importing and compiling.
+   bool IsSingleThreadedWMO = false;
+
+   /// Punt where needed to enable batch mode experiments.
+   bool AreBatchModeChecksBypassed = false;
+
+public:
+   bool areBatchModeChecksBypassed() const { return AreBatchModeChecksBypassed; }
+   void setBypassBatchModeChecks(bool bbc) { AreBatchModeChecksBypassed = bbc; }
 
    FrontendInputsAndOutputs() = default;
    FrontendInputsAndOutputs(const FrontendInputsAndOutputs &other);
@@ -66,15 +61,8 @@ public:
    // batch-mode do for each primary. Both WMO modes produce only one set of
    // supplementary outputs.
 
-   bool isSingleThreadedWMO() const
-   {
-      return m_isSingleThreadedWMO;
-   }
-
-   void setIsSingleThreadedWMO(bool istw)
-   {
-      m_isSingleThreadedWMO = istw;
-   }
+   bool isSingleThreadedWMO() const { return IsSingleThreadedWMO; }
+   void setIsSingleThreadedWMO(bool istw) { IsSingleThreadedWMO = istw; }
 
    bool isWholeModule() const { return !hasPrimaryInputs(); }
 
@@ -82,45 +70,23 @@ public:
 
    // All inputs:
 
-   ArrayRef<InputFile> getAllInputs() const
-   {
-      return m_allInputs;
-   }
+   ArrayRef<InputFile> getAllInputs() const { return AllInputs; }
 
    std::vector<std::string> getInputFilenames() const;
 
    /// \return nullptr if not a primary input file.
    const InputFile *primaryInputNamed(StringRef name) const;
 
-   unsigned inputCount() const
-   {
-      return m_allInputs.size();
-   }
+   unsigned inputCount() const { return AllInputs.size(); }
 
-   bool hasInputs() const
-   {
-      return !m_allInputs.empty();
-   }
+   bool hasInputs() const { return !AllInputs.empty(); }
 
-   bool hasSingleInput() const
-   {
-      return inputCount() == 1;
-   }
+   bool hasSingleInput() const { return inputCount() == 1; }
 
-   const InputFile &firstInput() const
-   {
-      return m_allInputs[0];
-   }
+   const InputFile &firstInput() const { return AllInputs[0]; }
+   InputFile &firstInput() { return AllInputs[0]; }
 
-   InputFile &firstInput()
-   {
-      return m_allInputs[0];
-   }
-
-   const InputFile &lastInput() const
-   {
-      return m_allInputs.back();
-   }
+   const InputFile &lastInput() const { return AllInputs.back(); }
 
    const std::string &getFilenameOfFirstInput() const;
 
@@ -142,27 +108,15 @@ public:
    bool
    forEachNonPrimaryInput(llvm::function_ref<bool(const InputFile &)> fn) const;
 
-   unsigned primaryInputCount() const
-   {
-      return m_primaryInputsInOrder.size();
-   }
+   unsigned primaryInputCount() const { return PrimaryInputsInOrder.size(); }
 
    // Primary count readers:
 
-   bool hasUniquePrimaryInput() const
-   {
-      return primaryInputCount() == 1;
-   }
+   bool hasUniquePrimaryInput() const { return primaryInputCount() == 1; }
 
-   bool hasPrimaryInputs() const
-   {
-      return primaryInputCount() > 0;
-   }
+   bool hasPrimaryInputs() const { return primaryInputCount() > 0; }
 
-   bool hasMultiplePrimaryInputs() const
-   {
-      return primaryInputCount() > 1;
-   }
+   bool hasMultiplePrimaryInputs() const { return primaryInputCount() > 1; }
 
    /// Fails an assertion if there is more than one primary input.
    /// Used in situations where only one primary input can be handled
@@ -203,15 +157,28 @@ public:
    bool areAllNonPrimariesPIB() const;
 
    /// \return true for error
-   bool verifyInputs(DiagnosticEngine &diags, bool treatAsPIL,
+   bool verifyInputs(DiagnosticEngine &diags, bool treatAsSIL,
                      bool isREPLRequested, bool isNoneRequested) const;
 
    // Changing inputs
+
+public:
    void clearInputs();
    void addInput(const InputFile &input);
    void addInputFile(StringRef file, llvm::MemoryBuffer *buffer = nullptr);
    void addPrimaryInputFile(StringRef file,
                             llvm::MemoryBuffer *buffer = nullptr);
+
+   // Outputs
+
+private:
+   friend class ArgsToFrontendOptionsConverter;
+   friend class ModuleInterfaceBuilder;
+   void setMainAndSupplementaryOutputs(
+      ArrayRef<std::string> outputFiles,
+      ArrayRef<SupplementaryOutputPaths> supplementaryOutputs);
+
+public:
    unsigned countOfInputsProducingMainOutputs() const;
 
    bool hasInputsProducingMainOutputs() const {
@@ -227,7 +194,7 @@ public:
    ///
    /// If \p fn returns true, return early and return true.
    bool forEachInputProducingAMainOutputFile(
-         llvm::function_ref<bool(const InputFile &)> fn) const;
+      llvm::function_ref<bool(const InputFile &)> fn) const;
 
    std::vector<std::string> copyOutputFilenames() const;
 
@@ -247,7 +214,7 @@ public:
 
    /// If \p fn returns true, exit early and return true.
    bool forEachInputProducingSupplementaryOutput(
-         llvm::function_ref<bool(const InputFile &)> fn) const;
+      llvm::function_ref<bool(const InputFile &)> fn) const;
 
    /// Assumes there is not more than one primary input file, if any.
    /// Otherwise, you would need to call getPrimarySpecificPathsForPrimary
@@ -259,42 +226,24 @@ public:
    getPrimarySpecificPathsForPrimary(StringRef) const;
 
    bool hasSupplementaryOutputPath(
-         llvm::function_ref<const std::string &(const SupplementaryOutputPaths &)>
-         extractorFn) const;
+      llvm::function_ref<const std::string &(const SupplementaryOutputPaths &)>
+      extractorFn) const;
 
    bool hasDependenciesPath() const;
    bool hasReferenceDependenciesPath() const;
+   bool hasPHPRangesPath() const;
+   bool hasCompiledSourcePath() const;
+   bool hasObjCHeaderOutputPath() const;
    bool hasLoadedModuleTracePath() const;
    bool hasModuleOutputPath() const;
    bool hasModuleDocOutputPath() const;
-   bool hasParseableInterfaceOutputPath() const;
+   bool hasModuleSourceInfoOutputPath() const;
+   bool hasModuleInterfaceOutputPath() const;
    bool hasTBDPath() const;
 
    bool hasDependencyTrackerPath() const;
-
-   // Outputs
-
-private:
-   friend class ArgsToFrontendOptionsConverter;
-   friend class ParseableInterfaceBuilder;
-   friend class ArgsToFrontendInputsConverter;
-
-   void setMainAndSupplementaryOutputs(
-         ArrayRef<std::string> outputFiles,
-         ArrayRef<SupplementaryOutputPaths> supplementaryOutputs);
-
-   std::vector<InputFile> m_allInputs;
-   llvm::StringMap<unsigned> m_primaryInputsByName;
-   std::vector<unsigned> m_primaryInputsInOrder;
-
-   /// In Single-threaded WMO mode, all inputs are used
-   /// both for importing and compiling.
-   bool m_isSingleThreadedWMO = false;
-
-   /// Punt where needed to enable batch mode experiments.
-   bool m_areBatchModeChecksBypassed = false;
 };
 
-} // polar::frontend
+} // namespace polar
 
-#endif // POLARPHP_FRONTEND_INPUTS_AND_OUTPUTS_H
+#endif // POLARPHP_FRONTEND_FRONTENDINPUTS_H

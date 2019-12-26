@@ -69,7 +69,7 @@ private:
 
    void addMethodDescriptor(PILDeclRef declRef);
 
-   void addProtocolRequirementsBaseDescriptor(ProtocolDecl *proto);
+   void addInterfaceRequirementsBaseDescriptor(InterfaceDecl *proto);
    void addAssociatedTypeDescriptor(AssociatedTypeDecl *assocType);
    void addAssociatedConformanceDescriptor(AssociatedConformance conformance);
    void addBaseConformanceDescriptor(BaseConformance conformance);
@@ -113,7 +113,7 @@ public:
 
    void visitFuncDecl(FuncDecl *FD);
 
-   void visitProtocolDecl(ProtocolDecl *PD);
+   void visitInterfaceDecl(InterfaceDecl *PD);
 
    void visitAbstractStorageDecl(AbstractStorageDecl *ASD);
 
