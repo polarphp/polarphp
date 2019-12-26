@@ -121,7 +121,7 @@ LLVM_ATTRIBUTE_UNUSED
 static bool hasASTBeenTypeChecked(AstNode N, PILDeclRef forDecl) {
    DeclContext *DC = getProfilerContextForDecl(N, forDecl);
    SourceFile *SF = DC->getParentSourceFile();
-   return !SF || SF->ASTStage >= SourceFile::TypeChecked;
+   return !SF || SF->AstStage >= SourceFile::TypeChecked;
 }
 
 /// Check whether a mapped AST node requires a new profiler.

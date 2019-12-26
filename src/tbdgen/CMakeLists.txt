@@ -1,0 +1,21 @@
+# This source file is part of the polarphp.org open source project
+#
+# Copyright (c) 2017 - 2019 polarphp software foundation
+# Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
+# Licensed under Apache License v2.0 with Runtime Library Exception
+#
+# See https://polarphp.org/LICENSE.txt for license information
+# See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
+#
+# Created by polarboy on 2019/12/26.
+
+polar_collect_files(
+   TYPE_BOTH
+   DIR .
+   OUTPUT_VAR POLAR_TBGEN_SOURCES)
+
+polar_merge_list(POLAR_TBGEN_SOURCES POLAR_HEADERS)
+
+polar_add_library(PolarTBGen STATIC
+   ${POLAR_TBGEN_SOURCES}
+   LINK_LIBS PolarUtils PolarKernel PolarAST PolarPIL)

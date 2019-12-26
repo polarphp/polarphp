@@ -1717,7 +1717,7 @@ PILModule::constructPIL(ModuleDecl *mod, TypeConverter &tc,
    } else {
       for (auto file : mod->getFiles()) {
          auto nextSF = dyn_cast<SourceFile>(file);
-         if (!nextSF || nextSF->ASTStage != SourceFile::TypeChecked)
+         if (!nextSF || nextSF->AstStage != SourceFile::TypeChecked)
             continue;
          SGM.emitSourceFile(nextSF);
       }

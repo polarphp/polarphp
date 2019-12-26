@@ -287,8 +287,8 @@ constantFoldBinaryWithOverflow(BuiltinInst *BI, BuiltinValueKind ID,
 static PILValue
 constantFoldCountLeadingOrTrialingZeroIntrinsic(BuiltinInst *bi,
                                                 bool countLeadingZeros) {
-   assert(bi->getIntrinsicID() == llvm::Intrinsic::ctlz ||
-          bi->getIntrinsicID() == llvm::Intrinsic::cttz &&
+   assert((bi->getIntrinsicID() == llvm::Intrinsic::ctlz ||
+           bi->getIntrinsicID() == llvm::Intrinsic::cttz) &&
           "Invalid Intrinsic - expected Ctlz/Cllz");
    OperandValueArrayRef args = bi->getArguments();
 

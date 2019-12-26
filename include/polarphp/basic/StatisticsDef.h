@@ -274,11 +274,11 @@ FRONTEND_STATISTIC(Sema, NumUnloadedLazyIterableDeclContexts)
 
 /// All type check requests go into the Sema area.
 #define POLAR_REQUEST(ZONE, NAME, Sig, Caching, LocOptions) FRONTEND_STATISTIC(Sema, NAME)
-#include "polarphp/ast/AccessTypeIdZoneDef.h"
+#include "polarphp/ast/AccessTypeIDZoneDef.h"
 #include "polarphp/ast/NameLookupTypeIDZoneDef.h"
 #include "polarphp/ast/TypeCheckerTypeIDZoneDef.h"
-//#include "swift/Sema/IDETypeCheckingRequestIDZone.def"
-//#include "swift/IDE/IDERequestIDZone.def"
+#include "polarphp/sema/IDETypeCheckingRequestIDZoneDef.h"
+//#include "polarphp/IDE/IDERequestIDZone.def"
 #undef POLAR_REQUEST
 
 /// The next 10 statistics count 5 kinds of PIL entities present

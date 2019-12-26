@@ -190,7 +190,7 @@ protected:
 ///     decl-pil-stage [[only in PIL mode]
 /// \endverbatim
 bool Parser::parseTopLevel() {
-   SF.ASTStage = SourceFile::Parsing;
+   SF.AstStage = SourceFile::Parsing;
 
    // Prime the lexer.
    if (Tok.is(tok::NUM_TOKENS))
@@ -265,7 +265,7 @@ bool Parser::parseTopLevel() {
    }
 
    // Note that the source file is fully parsed and verify it.
-   SF.ASTStage = SourceFile::Parsed;
+   SF.AstStage = SourceFile::Parsed;
    verify(SF);
 
    // Next time start relexing from the beginning of the comment so that we can
@@ -1179,7 +1179,7 @@ bool Parser::parseNewDeclAttribute(DeclAttributes &Attributes, SourceLoc AtLoc,
          llvm_unreachable("DAK_Count should not appear in parsing switch");
 
       case DAK_RawDocComment:
-      case DAK_ObjCBridged:
+//      case DAK_ObjCBridged:
 //      case DAK_RestatedObjCConformance:
       case DAK_SynthesizedInterface:
       case DAK_ClangImporterSynthesizedType:
@@ -1356,7 +1356,7 @@ bool Parser::parseNewDeclAttribute(DeclAttributes &Attributes, SourceLoc AtLoc,
          AccessLevel access = llvm::StringSwitch<AccessLevel>(AttrName)
             .Case("private", AccessLevel::Private)
             .Case("fileprivate", AccessLevel::FilePrivate)
-            .Case("internal", AccessLevel::Internal)
+            .Case("internal", AccessLevel::Interface)
             .Case("public", AccessLevel::Public)
             .Case("open", AccessLevel::Open);
 
@@ -1486,34 +1486,34 @@ bool Parser::parseNewDeclAttribute(DeclAttributes &Attributes, SourceLoc AtLoc,
 
          break;
       }
-
-      case DAK_SwiftNativeObjCRuntimeBase: {
-         if (!consumeIf(tok::l_paren)) {
-            diagnose(Loc, diag::attr_expected_lparen, AttrName,
-                     DeclAttribute::isDeclModifier(DK));
-            return false;
-         }
-
-         if (Tok.isNot(tok::identifier)) {
-            diagnose(Loc, diag::swift_native_objc_runtime_base_must_be_identifier);
-            return false;
-         }
-
-         Identifier name;
-         consumeIdentifier(&name);
-
-         auto range = SourceRange(Loc, Tok.getRange().getStart());
-
-         if (!consumeIf(tok::r_paren)) {
-            diagnose(Loc, diag::attr_expected_rparen, AttrName,
-                     DeclAttribute::isDeclModifier(DK));
-            return false;
-         }
-
-         Attributes.add(new(Context) SwiftNativeObjCRuntimeBaseAttr(name,
-                                                                    AtLoc, range, /*implicit*/ false));
-         break;
-      }
+      // @todo
+//      case DAK_SwiftNativeObjCRuntimeBase: {
+//         if (!consumeIf(tok::l_paren)) {
+//            diagnose(Loc, diag::attr_expected_lparen, AttrName,
+//                     DeclAttribute::isDeclModifier(DK));
+//            return false;
+//         }
+//
+//         if (Tok.isNot(tok::identifier)) {
+//            diagnose(Loc, diag::swift_native_objc_runtime_base_must_be_identifier);
+//            return false;
+//         }
+//
+//         Identifier name;
+//         consumeIdentifier(&name);
+//
+//         auto range = SourceRange(Loc, Tok.getRange().getStart());
+//
+//         if (!consumeIf(tok::r_paren)) {
+//            diagnose(Loc, diag::attr_expected_rparen, AttrName,
+//                     DeclAttribute::isDeclModifier(DK));
+//            return false;
+//         }
+//
+//         Attributes.add(new(Context) SwiftNativeObjCRuntimeBaseAttr(name,
+//                                                                    AtLoc, range, /*implicit*/ false));
+//         break;
+//      }
 
       case DAK_Semantics: {
          if (!consumeIf(tok::l_paren)) {
@@ -2547,7 +2547,8 @@ bool Parser::parseTypeAttribute(TypeAttributes &Attributes, SourceLoc AtLoc,
       case TAK_autoreleased:
       case TAK_callee_owned:
       case TAK_callee_guaranteed:
-      case TAK_objc_metatype:
+      // @todo
+//      case TAK_objc_metatype:
          if (!isInPILMode()) {
             diagnose(AtLoc, diag::only_allowed_in_pil, Text);
             return false;

@@ -175,7 +175,7 @@ void CalleeCache::computeWitnessMethodCalleesForWitnessTable(
          case AccessLevel::Public:
             canCallUnknown = true;
             break;
-         case AccessLevel::Internal:
+         case AccessLevel::Interface:
             if (!M.isWholeModule()) {
                canCallUnknown = true;
                break;

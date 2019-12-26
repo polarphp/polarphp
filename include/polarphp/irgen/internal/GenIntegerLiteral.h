@@ -1,8 +1,73 @@
+//===--- GenIntegerLiteral.h - IRGen for Builtin.IntegerLiteral -*- C++ -*-===//
 //
-// Created by polarboy on 12/24/19.
+// This source file is part of the Swift.org open source project
 //
+// Copyright (c) 2014 - 2017 Apple Inc. and the Swift project authors
+// Licensed under Apache License v2.0 with Runtime Library Exception
+//
+// See https://swift.org/LICENSE.txt for license information
+// See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
+//
+//===----------------------------------------------------------------------===//
+//
+// This file defines interfaces for emitting code for Builtin.IntegerLiteral
+// values.
+//
+//===----------------------------------------------------------------------===//
 
-#ifndef POLARPHP_GENINTEGERLITERAL_H
-#define POLARPHP_GENINTEGERLITERAL_H
+#ifndef POLARPHP_IRGEN_INTERNAL_GENINTEGERLITERAL_H
+#define POLARPHP_IRGEN_INTERNAL_GENINTEGERLITERAL_H
 
-#endif //POLARPHP_GENINTEGERLITERAL_H
+#include "polarphp/basic/APIntMap.h"
+
+namespace llvm {
+class Constant;
+class IntegerType;
+class Type;
+class Value;
+}
+
+namespace polar {
+class IntegerLiteralInst;
+namespace irgen {
+
+class Explosion;
+class IRGenFunction;
+class IRGenModule;
+
+/// A constant integer literal value.
+struct ConstantIntegerLiteral {
+   llvm::Constant *Data;
+   llvm::Constant *Flags;
+};
+
+/// A map for caching globally-emitted constant integers.
+class ConstantIntegerLiteralMap {
+   APIntMap<ConstantIntegerLiteral> map;
+
+public:
+   ConstantIntegerLiteralMap() {}
+
+   ConstantIntegerLiteral get(IRGenModule &IGM, APInt &&value);
+};
+
+/// Construct a constant IntegerLiteral from an IntegerLiteralInst.
+ConstantIntegerLiteral
+emitConstantIntegerLiteral(IRGenModule &IGM, IntegerLiteralInst *ILI);
+
+/// Emit a checked truncation of an IntegerLiteral value.
+void emitIntegerLiteralCheckedTrunc(IRGenFunction &IGF,
+                                    Explosion &in,
+                                    llvm::IntegerType *resultTy,
+                                    bool resultIsSigned,
+                                    Explosion &out);
+
+/// Emit a sitofp operation on an IntegerLiteral value.
+llvm::Value *emitIntegerLiteralToFP(IRGenFunction &IGF,
+                                    Explosion &in,
+                                    llvm::Type *toType);
+
+} // irgen
+} // polar
+
+#endif // POLARPHP_IRGEN_INTERNAL_GENINTEGERLITERAL_H

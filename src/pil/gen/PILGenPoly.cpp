@@ -163,7 +163,7 @@ public:
                                   const TypeLowering &expectedTL);
 };
 } // end anonymous namespace
-;
+
 
 static ArrayRef<InterfaceConformanceRef>
 collectExistentialConformances(ModuleDecl *M, CanType fromType, CanType toType) {
@@ -324,7 +324,7 @@ static bool isInterfaceClass(Type t) {
    AstContext &ctx = classDecl->getAstContext();
    return (classDecl->getName() == ctx.Id_Interface &&
            classDecl->getModuleContext()->getName() == ctx.Id_ObjectiveC);
-};
+}
 
 static ManagedValue emitManagedLoad(PILGenFunction &SGF, PILLocation loc,
                                     ManagedValue addr,

@@ -640,15 +640,16 @@ synthesizeStructRawValueGetterBody(AbstractFunctionDecl *afd, void *context) {
    Expr *result = storedRef;
 
    Type computedType = getterDecl->getResultInterfaceType();
-   if (!computedType->isEqual(storedType)) {
-      auto bridge = new (ctx) BridgeFromObjCExpr(storedRef, computedType);
-      bridge->setType(computedType);
-
-      auto coerce = new (ctx) CoerceExpr(bridge, {}, {nullptr, computedType});
-      coerce->setType(computedType);
-
-      result = coerce;
-   }
+   // @todo
+//   if (!computedType->isEqual(storedType)) {
+//      auto bridge = new (ctx) BridgeFromObjCExpr(storedRef, computedType);
+//      bridge->setType(computedType);
+//
+//      auto coerce = new (ctx) CoerceExpr(bridge, {}, {nullptr, computedType});
+//      coerce->setType(computedType);
+//
+//      result = coerce;
+//   }
 
    auto ret = new (ctx) ReturnStmt(SourceLoc(), result);
    auto body = BraceStmt::create(ctx, SourceLoc(), AstNode(ret), SourceLoc(),
@@ -1560,16 +1561,17 @@ synthesizeRawValueBridgingConstructorBody(AbstractFunctionDecl *afd,
    paramRef->setType(paramDecl->getType());
 
    Expr *rhs = paramRef;
-   if (!storedRawValue->getInterfaceType()->isEqual(paramDecl->getType())) {
-      auto bridge = new (ctx) BridgeToObjCExpr(paramRef, storedType);
-      bridge->setType(storedType);
-
-      auto coerce = new (ctx) CoerceExpr(bridge, SourceLoc(),
-                                         {nullptr, storedType});
-      coerce->setType(storedType);
-
-      rhs = coerce;
-   }
+   // @todo
+//   if (!storedRawValue->getInterfaceType()->isEqual(paramDecl->getType())) {
+//      auto bridge = new (ctx) BridgeToObjCExpr(paramRef, storedType);
+//      bridge->setType(storedType);
+//
+//      auto coerce = new (ctx) CoerceExpr(bridge, SourceLoc(),
+//                                         {nullptr, storedType});
+//      coerce->setType(storedType);
+//
+//      rhs = coerce;
+//   }
 
    // Add assignment.
    auto assign = new (ctx) AssignExpr(lhs, SourceLoc(), rhs,
@@ -5322,65 +5324,66 @@ static Type findCFSuperclass(ClangImporter::Implementation &impl,
    return Type();
 }
 
-ClassDecl *
-SwiftDeclConverter::importCFClassType(const clang::TypedefNameDecl *decl,
-                                      Identifier className, CFPointeeInfo info,
-                                      EffectiveClangContext effectiveContext) {
-   auto dc = Impl.importDeclContextOf(decl, effectiveContext);
-   if (!dc)
-      return nullptr;
-
-   Type superclass = findCFSuperclass(Impl, decl, info);
-
-   // TODO: maybe use NSObject as the superclass if we can find it?
-   // TODO: try to find a non-mutable type to use as the superclass.
-
-   auto theClass = Impl.createDeclWithClangNode<ClassDecl>(
-      decl, AccessLevel::Public, SourceLoc(), className, SourceLoc(), None,
-      nullptr, dc);
-   theClass->setSuperclass(superclass);
-   theClass->setAddedImplicitInitializers(); // suppress all initializers
-   theClass->setHasMissingVTableEntries(false);
-   theClass->setForeignClassKind(ClassDecl::ForeignKind::CFType);
-   // @todo
-//   addObjCAttribute(theClass, None);
-
-   if (superclass) {
-      SmallVector<TypeLoc, 4> inheritedTypes;
-      inheritedTypes.push_back(TypeLoc::withoutLoc(superclass));
-      theClass->setInherited(Impl.PolarphpContext.AllocateCopy(inheritedTypes));
-   }
-
-   addSynthesizedInterfaceAttrs(Impl, theClass, {KnownInterfaceKind::CFObject});
-
-   // Look for bridging attributes on the clang record.  We can
-   // just check the most recent redeclaration, which will inherit
-   // any attributes from earlier declarations.
-   auto record = info.getRecord()->getMostRecentDecl();
-   if (info.isConst()) {
-      if (auto attr = record->getAttr<clang::ObjCBridgeAttr>()) {
-         // Record the Objective-C class to which this CF type is toll-free
-         // bridged.
-         if (ClassDecl *objcClass = dynCastIgnoringCompatibilityAlias<ClassDecl>(
-            Impl.importDeclByName(attr->getBridgedType()->getName()))) {
-            theClass->getAttrs().add(new (Impl.PolarphpContext)
-                                        ObjCBridgedAttr(objcClass));
-         }
-      }
-   } else {
-      if (auto attr = record->getAttr<clang::ObjCBridgeMutableAttr>()) {
-         // Record the Objective-C class to which this CF type is toll-free
-         // bridged.
-         if (ClassDecl *objcClass = dynCastIgnoringCompatibilityAlias<ClassDecl>(
-            Impl.importDeclByName(attr->getBridgedType()->getName()))) {
-            theClass->getAttrs().add(new (Impl.PolarphpContext)
-                                        ObjCBridgedAttr(objcClass));
-         }
-      }
-   }
-
-   return theClass;
-}
+//ClassDecl *
+//SwiftDeclConverter::importCFClassType(const clang::TypedefNameDecl *decl,
+//                                      Identifier className, CFPointeeInfo info,
+//                                      EffectiveClangContext effectiveContext) {
+//   auto dc = Impl.importDeclContextOf(decl, effectiveContext);
+//   if (!dc)
+//      return nullptr;
+//
+//   Type superclass = findCFSuperclass(Impl, decl, info);
+//
+//   // TODO: maybe use NSObject as the superclass if we can find it?
+//   // TODO: try to find a non-mutable type to use as the superclass.
+//
+//   auto theClass = Impl.createDeclWithClangNode<ClassDecl>(
+//      decl, AccessLevel::Public, SourceLoc(), className, SourceLoc(), None,
+//      nullptr, dc);
+//   theClass->setSuperclass(superclass);
+//   theClass->setAddedImplicitInitializers(); // suppress all initializers
+//   theClass->setHasMissingVTableEntries(false);
+//   theClass->setForeignClassKind(ClassDecl::ForeignKind::CFType);
+//   // @todo
+////   addObjCAttribute(theClass, None);
+//
+//   if (superclass) {
+//      SmallVector<TypeLoc, 4> inheritedTypes;
+//      inheritedTypes.push_back(TypeLoc::withoutLoc(superclass));
+//      theClass->setInherited(Impl.PolarphpContext.AllocateCopy(inheritedTypes));
+//   }
+//
+//   addSynthesizedInterfaceAttrs(Impl, theClass, {KnownInterfaceKind::CFObject});
+//
+//   // Look for bridging attributes on the clang record.  We can
+//   // just check the most recent redeclaration, which will inherit
+//   // any attributes from earlier declarations.
+//   auto record = info.getRecord()->getMostRecentDecl();
+//   if (info.isConst()) {
+//      if (auto attr = record->getAttr<clang::ObjCBridgeAttr>()) {
+//         // Record the Objective-C class to which this CF type is toll-free
+//         // bridged.
+//         if (ClassDecl *objcClass = dynCastIgnoringCompatibilityAlias<ClassDecl>(
+//            Impl.importDeclByName(attr->getBridgedType()->getName()))) {
+//            theClass->getAttrs().add(new (Impl.PolarphpContext)
+//                                        ObjCBridgedAttr(objcClass));
+//         }
+//      }
+//   } else {
+//   // @todo
+////      if (auto attr = record->getAttr<clang::ObjCBridgeMutableAttr>()) {
+////         // Record the Objective-C class to which this CF type is toll-free
+////         // bridged.
+////         if (ClassDecl *objcClass = dynCastIgnoringCompatibilityAlias<ClassDecl>(
+////            Impl.importDeclByName(attr->getBridgedType()->getName()))) {
+////            theClass->getAttrs().add(new (Impl.PolarphpContext)
+////                                        ObjCBridgedAttr(objcClass));
+////         }
+////      }
+//   }
+//
+//   return theClass;
+//}
 
 Decl *SwiftDeclConverter::importCompatibilityTypeAlias(
    const clang::NamedDecl *decl,
@@ -7559,12 +7562,12 @@ void ClangImporter::Implementation::importAttributes(
 //      }
 
       // Infer @objcMembers on XCTestCase.
-      if (ID->getName() == "XCTestCase") {
-         if (!MappedDecl->getAttrs().hasAttribute<ObjCMembersAttr>()) {
-            auto attr = new (C) ObjCMembersAttr(/*IsImplicit=*/true);
-            MappedDecl->getAttrs().add(attr);
-         }
-      }
+//      if (ID->getName() == "XCTestCase") {
+//         if (!MappedDecl->getAttrs().hasAttribute<ObjCMembersAttr>()) {
+//            auto attr = new (C) ObjCMembersAttr(/*IsImplicit=*/true);
+//            MappedDecl->getAttrs().add(attr);
+//         }
+//      }
    }
 
    // Ban CFRelease|CFRetain|CFAutorelease(CFTypeRef) as well as custom ones

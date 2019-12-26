@@ -173,7 +173,7 @@ static bool isKnownFinalClass(ClassDecl *cd, PILModule &module,
       case AccessLevel::Open:
          return false;
       case AccessLevel::Public:
-      case AccessLevel::Internal:
+      case AccessLevel::Interface:
          if (!module.isWholeModule())
             return false;
          break;
@@ -194,7 +194,7 @@ static bool isKnownFinalClass(ClassDecl *cd, PILModule &module,
             case AccessLevel::Open:
                return false;
             case AccessLevel::Public:
-            case AccessLevel::Internal:
+            case AccessLevel::Interface:
                if (!module.isWholeModule())
                   return false;
                break;

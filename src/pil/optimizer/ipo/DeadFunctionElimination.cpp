@@ -351,7 +351,7 @@ protected:
          case AccessLevel::FilePrivate:
             linkage = PILLinkage::Private;
             break;
-         case AccessLevel::Internal:
+         case AccessLevel::Interface:
             linkage = PILLinkage::Hidden;
             break;
          case AccessLevel::Public:

@@ -412,10 +412,10 @@ public:
    RValue visitCollectionUpcastConversionExpr(
       CollectionUpcastConversionExpr *E,
       SGFContext C);
-   RValue visitBridgeToObjCExpr(BridgeToObjCExpr *E, SGFContext C);
-   RValue visitBridgeFromObjCExpr(BridgeFromObjCExpr *E, SGFContext C);
-   RValue visitConditionalBridgeFromObjCExpr(ConditionalBridgeFromObjCExpr *E,
-                                             SGFContext C);
+//   RValue visitBridgeToObjCExpr(BridgeToObjCExpr *E, SGFContext C);
+//   RValue visitBridgeFromObjCExpr(BridgeFromObjCExpr *E, SGFContext C);
+//   RValue visitConditionalBridgeFromObjCExpr(ConditionalBridgeFromObjCExpr *E,
+//                                             SGFContext C);
    RValue visitArchetypeToSuperExpr(ArchetypeToSuperExpr *E, SGFContext C);
    RValue visitUnresolvedTypeConversionExpr(UnresolvedTypeConversionExpr *E,
                                             SGFContext C);
@@ -456,7 +456,7 @@ public:
                                              SGFContext C);
    RValue visitObjectLiteralExpr(ObjectLiteralExpr *E, SGFContext C);
    RValue visitEditorPlaceholderExpr(EditorPlaceholderExpr *E, SGFContext C);
-   RValue visitObjCSelectorExpr(ObjCSelectorExpr *E, SGFContext C);
+//   RValue visitObjCSelectorExpr(ObjCSelectorExpr *E, SGFContext C);
    RValue visitKeyPathExpr(KeyPathExpr *E, SGFContext C);
    RValue visitMagicIdentifierLiteralExpr(MagicIdentifierLiteralExpr *E,
                                           SGFContext C);
@@ -519,147 +519,147 @@ struct BridgingConversion {
 };
 }
 
-static BridgingConversion getBridgingConversion(Expr *E) {
-   E = E->getSemanticsProvidingExpr();
-
-   // Detect bridging conversions.
-   if (auto bridge = dyn_cast<BridgeToObjCExpr>(E)) {
-      return { bridge->getSubExpr(), Conversion::BridgeToObjC, 0 };
-   }
-   if (auto bridge = dyn_cast<BridgeFromObjCExpr>(E)) {
-      return { bridge->getSubExpr(), Conversion::BridgeFromObjC, 0 };
-   }
-
-   // We can handle optional injections.
-   if (auto inject = dyn_cast<InjectIntoOptionalExpr>(E)) {
-      return getBridgingConversion(inject->getSubExpr());
-   }
-
-   // Look through optional-to-optional conversions.
-   if (auto optEval = dyn_cast<OptionalEvaluationExpr>(E)) {
-      auto sub = optEval->getSubExpr()->getSemanticsProvidingExpr();
-      if (auto subResult = getBridgingConversion(sub)) {
-         sub = subResult.SubExpr->getSemanticsProvidingExpr();
-         if (auto bind = dyn_cast<BindOptionalExpr>(sub)) {
-            if (bind->getDepth() == subResult.MaxOptionalDepth) {
-               return { bind->getSubExpr(),
-                        subResult.Kind,
-                        subResult.MaxOptionalDepth + 1 };
-            }
-         }
-      }
-   }
-
-   // Open-existentials can be part of bridging conversions in very
-   // specific patterns.
-   auto open = dyn_cast<OpenExistentialExpr>(E);
-   if (open) E = open->getSubExpr();
-
-   // Existential erasure.
-   if (auto erasure = dyn_cast<ErasureExpr>(E)) {
-      Conversion::KindTy kind;
-
-      // Converting to Any is sometimes part of bridging and definitely
-      // needs special peepholing behavior.
-      if (erasure->getType()->isAny()) {
-         kind = Conversion::AnyErasure;
-
-         // Otherwise, nope.
-      } else {
-         return {};
-      }
-
-      // Tentatively look through the erasure.
-      E = erasure->getSubExpr();
-
-      // If we have an opening, we can only peephole if the value being
-      // used is exactly the original value.
-      if (open) {
-         if (E == open->getOpaqueValue()) {
-            return { open->getExistentialValue(), kind, 0 };
-         }
-         return {};
-      }
-
-      // Otherwise we can always peephole.
-      return { E, kind, 0 };
-   }
-
-   // If we peeked through an opening, and we didn't recognize a specific
-   // pattern above involving the opaque value, make sure we use the opening
-   // as the final expression instead of accidentally look through it.
-   if (open) return { open, None, 0 };
-
-   return { E, None, 0 };
-}
+//static BridgingConversion getBridgingConversion(Expr *E) {
+//   E = E->getSemanticsProvidingExpr();
+//
+//   // Detect bridging conversions.
+//   if (auto bridge = dyn_cast<BridgeToObjCExpr>(E)) {
+//      return { bridge->getSubExpr(), Conversion::BridgeToObjC, 0 };
+//   }
+//   if (auto bridge = dyn_cast<BridgeFromObjCExpr>(E)) {
+//      return { bridge->getSubExpr(), Conversion::BridgeFromObjC, 0 };
+//   }
+//
+//   // We can handle optional injections.
+//   if (auto inject = dyn_cast<InjectIntoOptionalExpr>(E)) {
+//      return getBridgingConversion(inject->getSubExpr());
+//   }
+//
+//   // Look through optional-to-optional conversions.
+//   if (auto optEval = dyn_cast<OptionalEvaluationExpr>(E)) {
+//      auto sub = optEval->getSubExpr()->getSemanticsProvidingExpr();
+//      if (auto subResult = getBridgingConversion(sub)) {
+//         sub = subResult.SubExpr->getSemanticsProvidingExpr();
+//         if (auto bind = dyn_cast<BindOptionalExpr>(sub)) {
+//            if (bind->getDepth() == subResult.MaxOptionalDepth) {
+//               return { bind->getSubExpr(),
+//                        subResult.Kind,
+//                        subResult.MaxOptionalDepth + 1 };
+//            }
+//         }
+//      }
+//   }
+//
+//   // Open-existentials can be part of bridging conversions in very
+//   // specific patterns.
+//   auto open = dyn_cast<OpenExistentialExpr>(E);
+//   if (open) E = open->getSubExpr();
+//
+//   // Existential erasure.
+//   if (auto erasure = dyn_cast<ErasureExpr>(E)) {
+//      Conversion::KindTy kind;
+//
+//      // Converting to Any is sometimes part of bridging and definitely
+//      // needs special peepholing behavior.
+//      if (erasure->getType()->isAny()) {
+//         kind = Conversion::AnyErasure;
+//
+//         // Otherwise, nope.
+//      } else {
+//         return {};
+//      }
+//
+//      // Tentatively look through the erasure.
+//      E = erasure->getSubExpr();
+//
+//      // If we have an opening, we can only peephole if the value being
+//      // used is exactly the original value.
+//      if (open) {
+//         if (E == open->getOpaqueValue()) {
+//            return { open->getExistentialValue(), kind, 0 };
+//         }
+//         return {};
+//      }
+//
+//      // Otherwise we can always peephole.
+//      return { E, kind, 0 };
+//   }
+//
+//   // If we peeked through an opening, and we didn't recognize a specific
+//   // pattern above involving the opaque value, make sure we use the opening
+//   // as the final expression instead of accidentally look through it.
+//   if (open) return { open, None, 0 };
+//
+//   return { E, None, 0 };
+//}
 
 /// If the given expression represents a bridging conversion, emit it with
 /// the special reabstracting context.
-static Optional<ManagedValue>
-tryEmitAsBridgingConversion(PILGenFunction &SGF, Expr *E, bool isExplicit,
-                            SGFContext C) {
-   // Try to pattern-match a conversion.  This can find bridging
-   // conversions, but it can also find simple optional conversions:
-   // injections and opt-to-opt conversions.
-   auto result = getBridgingConversion(E);
-
-   // If we didn't find a conversion at all, there's nothing special to do.
-   if (!result ||
-       result.SubExpr == E ||
-       result.SubExpr->getType()->isEqual(E->getType()))
-      return None;
-
-   // Even if the conversion doesn't involve bridging, we might still
-   // expose more peephole opportunities by combining it with a contextual
-   // conversion.
-   if (!result.Kind) {
-      // Only do this if the conversion is implicit.
-      if (isExplicit)
-         return None;
-
-      // Look for a contextual conversion.
-      auto conversion = C.getAsConversion();
-      if (!conversion)
-         return None;
-
-      // Adjust the contextual conversion.
-      auto sub = result.SubExpr;
-      auto sourceType = sub->getType()->getCanonicalType();
-      if (auto adjusted = conversion->getConversion()
-         .adjustForInitialOptionalConversions(sourceType)) {
-         // Emit into the applied conversion.
-         return conversion->emitWithAdjustedConversion(SGF, E, *adjusted,
-                                                       [sub](PILGenFunction &SGF, PILLocation loc, SGFContext C) {
-                                                          return SGF.emitRValueAsSingleValue(sub, C);
-                                                       });
-      }
-
-      // If that didn't work, there's nothing special to do.
-      return None;
-   }
-
-   auto kind = *result.Kind;
-   auto subExpr = result.SubExpr;
-
-   CanType resultType = E->getType()->getCanonicalType();
-   Conversion conversion =
-      Conversion::getBridging(kind, subExpr->getType()->getCanonicalType(),
-                              resultType, SGF.getLoweredType(resultType),
-                              isExplicit);
-
-   // Only use this special pattern for AnyErasure conversions when we're
-   // emitting into a peephole.
-   if (kind == Conversion::AnyErasure) {
-      auto outerConversion = C.getAsConversion();
-      if (!outerConversion ||
-          !canPeepholeConversions(SGF, outerConversion->getConversion(),
-                                  conversion)) {
-         return None;
-      }
-   }
-
-   return SGF.emitConvertedRValue(subExpr, conversion, C);
-}
+//static Optional<ManagedValue>
+//tryEmitAsBridgingConversion(PILGenFunction &SGF, Expr *E, bool isExplicit,
+//                            SGFContext C) {
+//   // Try to pattern-match a conversion.  This can find bridging
+//   // conversions, but it can also find simple optional conversions:
+//   // injections and opt-to-opt conversions.
+//   auto result = getBridgingConversion(E);
+//
+//   // If we didn't find a conversion at all, there's nothing special to do.
+//   if (!result ||
+//       result.SubExpr == E ||
+//       result.SubExpr->getType()->isEqual(E->getType()))
+//      return None;
+//
+//   // Even if the conversion doesn't involve bridging, we might still
+//   // expose more peephole opportunities by combining it with a contextual
+//   // conversion.
+//   if (!result.Kind) {
+//      // Only do this if the conversion is implicit.
+//      if (isExplicit)
+//         return None;
+//
+//      // Look for a contextual conversion.
+//      auto conversion = C.getAsConversion();
+//      if (!conversion)
+//         return None;
+//
+//      // Adjust the contextual conversion.
+//      auto sub = result.SubExpr;
+//      auto sourceType = sub->getType()->getCanonicalType();
+//      if (auto adjusted = conversion->getConversion()
+//         .adjustForInitialOptionalConversions(sourceType)) {
+//         // Emit into the applied conversion.
+//         return conversion->emitWithAdjustedConversion(SGF, E, *adjusted,
+//                                                       [sub](PILGenFunction &SGF, PILLocation loc, SGFContext C) {
+//                                                          return SGF.emitRValueAsSingleValue(sub, C);
+//                                                       });
+//      }
+//
+//      // If that didn't work, there's nothing special to do.
+//      return None;
+//   }
+//
+//   auto kind = *result.Kind;
+//   auto subExpr = result.SubExpr;
+//
+//   CanType resultType = E->getType()->getCanonicalType();
+//   Conversion conversion =
+//      Conversion::getBridging(kind, subExpr->getType()->getCanonicalType(),
+//                              resultType, SGF.getLoweredType(resultType),
+//                              isExplicit);
+//
+//   // Only use this special pattern for AnyErasure conversions when we're
+//   // emitting into a peephole.
+//   if (kind == Conversion::AnyErasure) {
+//      auto outerConversion = C.getAsConversion();
+//      if (!outerConversion ||
+//          !canPeepholeConversions(SGF, outerConversion->getConversion(),
+//                                  conversion)) {
+//         return None;
+//      }
+//   }
+//
+//   return SGF.emitConvertedRValue(subExpr, conversion, C);
+//}
 
 RValue RValueEmitter::visitApplyExpr(ApplyExpr *E, SGFContext C) {
    return SGF.emitApplyExpr(E, C);
@@ -1364,80 +1364,82 @@ visitCollectionUpcastConversionExpr(CollectionUpcastConversionExpr *E,
                                        mv, C);
 }
 
-RValue
-RValueEmitter::visitConditionalBridgeFromObjCExpr(
-   ConditionalBridgeFromObjCExpr *E, SGFContext C) {
-   // Get the sub expression argument as a managed value
-   auto mv = SGF.emitRValueAsSingleValue(E->getSubExpr());
-
-   auto conversionRef = E->getConversion();
-   auto conversion = cast<FuncDecl>(conversionRef.getDecl());
-   auto subs = conversionRef.getSubstitutions();
-
-   auto nativeType =
-      Type(GenericTypeParamType::get(0, 0, SGF.getAstContext())).subst(subs);
-
-   auto metatypeType = SGF.getLoweredType(MetatypeType::get(nativeType));
-   auto metatype =
-      ManagedValue::forUnmanaged(SGF.B.createMetatype(E, metatypeType));
-
-   return SGF.emitApplyOfLibraryIntrinsic(E, conversion, subs,
-                                          { mv, metatype }, C);
-}
+// @todo
+//RValue
+//RValueEmitter::visitConditionalBridgeFromObjCExpr(
+//   ConditionalBridgeFromObjCExpr *E, SGFContext C) {
+//   // Get the sub expression argument as a managed value
+//   auto mv = SGF.emitRValueAsSingleValue(E->getSubExpr());
+//
+//   auto conversionRef = E->getConversion();
+//   auto conversion = cast<FuncDecl>(conversionRef.getDecl());
+//   auto subs = conversionRef.getSubstitutions();
+//
+//   auto nativeType =
+//      Type(GenericTypeParamType::get(0, 0, SGF.getAstContext())).subst(subs);
+//
+//   auto metatypeType = SGF.getLoweredType(MetatypeType::get(nativeType));
+//   auto metatype =
+//      ManagedValue::forUnmanaged(SGF.B.createMetatype(E, metatypeType));
+//
+//   return SGF.emitApplyOfLibraryIntrinsic(E, conversion, subs,
+//                                          { mv, metatype }, C);
+//}
 
 /// Given an implicit bridging conversion, check whether the context
 /// can be peepholed.
-static bool
-tryPeepholeBridgingConversion(PILGenFunction &SGF, Conversion::KindTy kind,
-                              ImplicitConversionExpr *E, SGFContext C) {
-   assert(isa<BridgeFromObjCExpr>(E) || isa<BridgeToObjCExpr>(E));
-   if (auto outerConversion = C.getAsConversion()) {
-      auto subExpr = E->getSubExpr();
-      CanType sourceType = subExpr->getType()->getCanonicalType();
-      CanType resultType = E->getType()->getCanonicalType();
-      PILType loweredResultTy = SGF.getLoweredType(resultType);
-      auto conversion = Conversion::getBridging(kind, sourceType, resultType,
-                                                loweredResultTy);
-      if (outerConversion->tryPeephole(SGF, E->getSubExpr(), conversion)) {
-         outerConversion->finishInitialization(SGF);
-         return true;
-      }
-   }
+// @todo
+//static bool
+//tryPeepholeBridgingConversion(PILGenFunction &SGF, Conversion::KindTy kind,
+//                              ImplicitConversionExpr *E, SGFContext C) {
+//   assert(isa<BridgeFromObjCExpr>(E) || isa<BridgeToObjCExpr>(E));
+//   if (auto outerConversion = C.getAsConversion()) {
+//      auto subExpr = E->getSubExpr();
+//      CanType sourceType = subExpr->getType()->getCanonicalType();
+//      CanType resultType = E->getType()->getCanonicalType();
+//      PILType loweredResultTy = SGF.getLoweredType(resultType);
+//      auto conversion = Conversion::getBridging(kind, sourceType, resultType,
+//                                                loweredResultTy);
+//      if (outerConversion->tryPeephole(SGF, E->getSubExpr(), conversion)) {
+//         outerConversion->finishInitialization(SGF);
+//         return true;
+//      }
+//   }
+//
+//   return false;
+//}
 
-   return false;
-}
-
-RValue
-RValueEmitter::visitBridgeFromObjCExpr(BridgeFromObjCExpr *E, SGFContext C) {
-   if (tryPeepholeBridgingConversion(SGF, Conversion::BridgeFromObjC, E, C))
-      return RValue::forInContext();
-
-   // Emit the sub-expression.
-   auto mv = SGF.emitRValueAsSingleValue(E->getSubExpr());
-
-   CanType origType = E->getSubExpr()->getType()->getCanonicalType();
-   CanType resultType = E->getType()->getCanonicalType();
-   PILType loweredResultTy = SGF.getLoweredType(resultType);
-   auto result = SGF.emitBridgedToNativeValue(E, mv, origType, resultType,
-                                              loweredResultTy, C);
-   return RValue(SGF, E, result);
-}
-
-RValue
-RValueEmitter::visitBridgeToObjCExpr(BridgeToObjCExpr *E, SGFContext C) {
-   if (tryPeepholeBridgingConversion(SGF, Conversion::BridgeToObjC, E, C))
-      return RValue::forInContext();
-
-   // Emit the sub-expression.
-   auto mv = SGF.emitRValueAsSingleValue(E->getSubExpr());
-
-   CanType origType = E->getSubExpr()->getType()->getCanonicalType();
-   CanType resultType = E->getType()->getCanonicalType();
-   PILType loweredResultTy = SGF.getLoweredType(resultType);
-   auto result = SGF.emitNativeToBridgedValue(E, mv, origType, resultType,
-                                              loweredResultTy, C);
-   return RValue(SGF, E, result);
-}
+//RValue
+//RValueEmitter::visitBridgeFromObjCExpr(BridgeFromObjCExpr *E, SGFContext C) {
+//   if (tryPeepholeBridgingConversion(SGF, Conversion::BridgeFromObjC, E, C))
+//      return RValue::forInContext();
+//
+//   // Emit the sub-expression.
+//   auto mv = SGF.emitRValueAsSingleValue(E->getSubExpr());
+//
+//   CanType origType = E->getSubExpr()->getType()->getCanonicalType();
+//   CanType resultType = E->getType()->getCanonicalType();
+//   PILType loweredResultTy = SGF.getLoweredType(resultType);
+//   auto result = SGF.emitBridgedToNativeValue(E, mv, origType, resultType,
+//                                              loweredResultTy, C);
+//   return RValue(SGF, E, result);
+//}
+//
+//RValue
+//RValueEmitter::visitBridgeToObjCExpr(BridgeToObjCExpr *E, SGFContext C) {
+//   if (tryPeepholeBridgingConversion(SGF, Conversion::BridgeToObjC, E, C))
+//      return RValue::forInContext();
+//
+//   // Emit the sub-expression.
+//   auto mv = SGF.emitRValueAsSingleValue(E->getSubExpr());
+//
+//   CanType origType = E->getSubExpr()->getType()->getCanonicalType();
+//   CanType resultType = E->getType()->getCanonicalType();
+//   PILType loweredResultTy = SGF.getLoweredType(resultType);
+//   auto result = SGF.emitNativeToBridgedValue(E, mv, origType, resultType,
+//                                              loweredResultTy, C);
+//   return RValue(SGF, E, result);
+//}
 
 RValue RValueEmitter::visitArchetypeToSuperExpr(ArchetypeToSuperExpr *E,
                                                 SGFContext C) {
@@ -1791,9 +1793,10 @@ RValue RValueEmitter::visitImplicitlyUnwrappedFunctionConversionExpr(
 }
 
 RValue RValueEmitter::visitErasureExpr(ErasureExpr *E, SGFContext C) {
-   if (auto result = tryEmitAsBridgingConversion(SGF, E, false, C)) {
-      return RValue(SGF, E, *result);
-   }
+// @todo
+//   if (auto result = tryEmitAsBridgingConversion(SGF, E, false, C)) {
+//      return RValue(SGF, E, *result);
+//   }
 
    auto &existentialTL = SGF.getTypeLowering(E->getType());
    auto concreteFormalType = E->getSubExpr()->getType()->getCanonicalType();
@@ -1956,8 +1959,9 @@ RValue RValueEmitter::visitEnumIsCaseExpr(EnumIsCaseExpr *E,
 }
 
 RValue RValueEmitter::visitCoerceExpr(CoerceExpr *E, SGFContext C) {
-   if (auto result = tryEmitAsBridgingConversion(SGF, E->getSubExpr(), true, C))
-      return RValue(SGF, E, *result);
+// @todo
+//   if (auto result = tryEmitAsBridgingConversion(SGF, E->getSubExpr(), true, C))
+//      return RValue(SGF, E, *result);
 
    return visit(E->getSubExpr(), C);
 }
@@ -4179,9 +4183,10 @@ RValue RValueEmitter::visitInjectIntoOptionalExpr(InjectIntoOptionalExpr *E,
    }
 
    // Try the bridging peephole.
-   if (auto result = tryEmitAsBridgingConversion(SGF, E, false, C)) {
-      return RValue(SGF, E, *result);
-   }
+   // @todo
+//   if (auto result = tryEmitAsBridgingConversion(SGF, E, false, C)) {
+//      return RValue(SGF, E, *result);
+//   }
 
    auto helper = [E](PILGenFunction &SGF, PILLocation loc, SGFContext C) {
       return SGF.emitRValueAsSingleValue(E->getSubExpr(), C);
@@ -4626,9 +4631,10 @@ static bool emitOptimizedOptionalEvaluation(PILGenFunction &SGF,
 
 RValue RValueEmitter::visitOptionalEvaluationExpr(OptionalEvaluationExpr *E,
                                                   SGFContext C) {
-   if (auto result = tryEmitAsBridgingConversion(SGF, E, false, C)) {
-      return RValue(SGF, E, *result);
-   }
+   // @todo
+//   if (auto result = tryEmitAsBridgingConversion(SGF, E, false, C)) {
+//      return RValue(SGF, E, *result);
+//   }
 
    SmallVector<ManagedValue, 1> results;
    SGF.emitOptionalEvaluation(E, E->getType(), results, C,
@@ -4996,9 +5002,10 @@ void PILGenFunction::emitOpenExistentialExprImpl(
 
 RValue RValueEmitter::visitOpenExistentialExpr(OpenExistentialExpr *E,
                                                SGFContext C) {
-   if (auto result = tryEmitAsBridgingConversion(SGF, E, false, C)) {
-      return RValue(SGF, E, *result);
-   }
+   // @todo
+//   if (auto result = tryEmitAsBridgingConversion(SGF, E, false, C)) {
+//      return RValue(SGF, E, *result);
+//   }
 
    FormalEvaluationScope writebackScope(SGF);
    return SGF.emitOpenExistentialExpr<RValue>(E,

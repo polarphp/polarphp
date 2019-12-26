@@ -20,4 +20,4 @@ polar_merge_list(POLAR_PIL_PARSER_SOURCES POLAR_HEADERS)
 
 polar_add_library(PolarPILParser STATIC
    ${POLAR_PIL_PARSER_SOURCES}
-   LINK_LIBS PolarPIL)
+   LINK_LIBS PolarPIL PolarSema)

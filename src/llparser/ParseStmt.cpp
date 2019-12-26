@@ -534,7 +534,7 @@ ParserStatus Parser::parseBraceItems(SmallVectorImpl<AstNode> &Entries,
 /// Recover from a 'case' or 'default' outside of a 'switch' by consuming up to
 /// the next ':'.
 static ParserResult<Stmt> recoverFromInvalidCase(Parser &P) {
-   assert(P.Tok.is(tok::kw_case) || P.Tok.is(tok::kw_default)
+   assert((P.Tok.is(tok::kw_case) || P.Tok.is(tok::kw_default))
                                     && "not case or default?!");
    P.diagnose(P.Tok, diag::case_outside_of_switch, P.Tok.getText());
    P.skipUntil(tok::colon);

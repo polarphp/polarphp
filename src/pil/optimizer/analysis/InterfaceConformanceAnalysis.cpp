@@ -39,7 +39,7 @@ public:
       if (auto *NTD = dyn_cast<NominalTypeDecl>(D)) {
          auto Interfaces = NTD->getAllInterfaces();
          for (auto &Interface : Interfaces) {
-            if (Interface->getEffectiveAccess() <= AccessLevel::Internal) {
+            if (Interface->getEffectiveAccess() <= AccessLevel::Interface) {
                InterfaceConformanceCache[Interface].push_back(NTD);
             }
          }
@@ -51,7 +51,7 @@ public:
             for (auto *conformance : e->getLocalConformances()) {
                if (isa<NormalInterfaceConformance>(conformance)) {
                   auto *proto = conformance->getInterface();
-                  if (proto->getEffectiveAccess() <= AccessLevel::Internal) {
+                  if (proto->getEffectiveAccess() <= AccessLevel::Interface) {
                      InterfaceConformanceCache[proto].push_back(ntd);
                   }
                }
@@ -100,7 +100,7 @@ InterfaceConformanceAnalysis::findSoleConformingType(InterfaceDecl *Interface) {
    while (!PDWorkList.empty()) {
       auto *PD = PDWorkList.pop_back_val();
       // Interfaces must have internal or lower access.
-      if (PD->getEffectiveAccess() > AccessLevel::Internal) {
+      if (PD->getEffectiveAccess() > AccessLevel::Interface) {
          return nullptr;
       }
       VisitedPDs.insert(PD);

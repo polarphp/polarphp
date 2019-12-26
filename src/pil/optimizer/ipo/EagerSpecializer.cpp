@@ -638,8 +638,8 @@ emitArgumentConversion(SmallVectorImpl<PILValue> &CallArgs) {
          ReInfo.createSpecializedType(SubstitutedType, Builder.getModule());
    }
 
-   assert(!substConv.useLoweredAddresses()
-          || OrigArgs.size() == ReInfo.getNumArguments() &&
+   assert((!substConv.useLoweredAddresses()
+             || OrigArgs.size() == ReInfo.getNumArguments()) &&
              "signature mismatch");
 
    CallArgs.reserve(OrigArgs.size());

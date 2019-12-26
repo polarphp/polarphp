@@ -1,8 +1,48 @@
+//===--- GenConstant.h - Swift IR Generation For Constants ------*- C++ -*-===//
 //
-// Created by polarboy on 12/24/19.
+// This source file is part of the Swift.org open source project
 //
+// Copyright (c) 2014 - 2017 Apple Inc. and the Swift project authors
+// Licensed under Apache License v2.0 with Runtime Library Exception
+//
+// See https://swift.org/LICENSE.txt for license information
+// See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
+//
+//===----------------------------------------------------------------------===//
+//
+//  This file implements IR generation for constant values.
+//
+//===----------------------------------------------------------------------===//
 
-#ifndef POLARPHP_GENCONSTANT_H
-#define POLARPHP_GENCONSTANT_H
+#ifndef POLARPHP_IRGEN_INTERNAL_GENCONSTANT_H
+#define POLARPHP_IRGEN_INTERNAL_GENCONSTANT_H
 
-#endif //POLARPHP_GENCONSTANT_H
+#include "llvm/IR/Constant.h"
+#include "polarphp/irgen/internal/IRGenModule.h"
+
+namespace polar::irgen {
+
+/// Construct a ConstantInt from an IntegerLiteralInst.
+llvm::Constant *emitConstantInt(IRGenModule &IGM, IntegerLiteralInst *ILI);
+
+/// Construct a ConstantFP from a FloatLiteralInst.
+llvm::Constant *emitConstantFP(IRGenModule &IGM, FloatLiteralInst *FLI);
+
+/// Construct a pointer to a string from a StringLiteralInst.
+llvm::Constant *emitAddrOfConstantString(IRGenModule &IGM,
+                                         StringLiteralInst *SLI);
+
+/// Construct a struct literal from a StructInst containing constant values.
+llvm::Constant *emitConstantStruct(IRGenModule &IGM, StructInst *SI);
+
+/// Construct a struct literal from a TupleInst containing constant values.
+llvm::Constant *emitConstantTuple(IRGenModule &IGM, TupleInst *TI);
+
+/// Construct an object (with a HeapObject header) from an ObjectInst
+/// containing constant values.
+llvm::Constant *emitConstantObject(IRGenModule &IGM, ObjectInst *OI,
+                                   StructLayout *ClassLayout);
+
+} // polar::irgen
+
+#endif // POLARPHP_IRGEN_INTERNAL_GENCONSTANT_H

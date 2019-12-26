@@ -124,8 +124,8 @@ class Lexer {
 
    const TriviaRetentionMode TriviaRetention;
 
-   /// InSILBody - This is true when we're lexing the body of a SIL declaration
-   /// in a SIL file.  This enables some context-sensitive lexing.
+   /// InPILBody - This is true when we're lexing the body of a PIL declaration
+   /// in a PIL file.  This enables some context-sensitive lexing.
    bool InPILBody = false;
 
    /// The current leading trivia for the next token.
@@ -169,7 +169,7 @@ public:
    ///   Unlike language options, this does affect primitive lexing, which
    ///   means that APIs like getLocForEndOfToken really ought to take
    ///   this flag; it's just that we don't care that much about fidelity
-   ///   when parsing SIL files.
+   ///   when parsing PIL files.
    Lexer(
       const LangOptions &Options, const SourceManager &SourceMgr,
       unsigned BufferID, DiagnosticEngine *Diags, LexerMode LexMode,
@@ -368,7 +368,7 @@ public:
    /// Determine the token kind of the string, given that it is a valid
    /// non-operator identifier. Return tok::identifier if the string is not a
    /// reserved word.
-   static tok kindOfIdentifier(StringRef Str, bool InSILMode);
+   static tok kindOfIdentifier(StringRef Str, bool InPILMode);
 
    /// Determines if the given string is a valid operator identifier,
    /// without escaping characters.
@@ -483,20 +483,20 @@ public:
    /// Get the token that starts at the given location.
    Token getTokenAt(SourceLoc Loc);
 
-   /// SILBodyRAII - This helper class is used when parsing a SIL body to inform
-   /// the lexer that SIL-specific lexing should be enabled.
-   struct SILBodyRAII {
+   /// PILBodyRAII - This helper class is used when parsing a PIL body to inform
+   /// the lexer that PIL-specific lexing should be enabled.
+   struct PILBodyRAII {
       Lexer &L;
-      SILBodyRAII(Lexer &L) : L(L) {
+      PILBodyRAII(Lexer &L) : L(L) {
          assert(!L.InPILBody && "Already in a sil body?");
          L.InPILBody = true;
       }
-      ~SILBodyRAII() {
+      ~PILBodyRAII() {
          assert(L.InPILBody && "Left sil body already?");
          L.InPILBody = false;
       }
-      SILBodyRAII(const SILBodyRAII&) = delete;
-      void operator=(const SILBodyRAII&) = delete;
+      PILBodyRAII(const PILBodyRAII&) = delete;
+      void operator=(const PILBodyRAII&) = delete;
    };
 
 private:

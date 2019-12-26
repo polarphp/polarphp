@@ -1,0 +1,8 @@
+//
+// Created by polarboy on 12/25/19.
+//
+
+#ifndef POLARPHP_METADATASOURCE_H
+#define POLARPHP_METADATASOURCE_H
+
+#endif //POLARPHP_METADATASOURCE_H

@@ -187,7 +187,7 @@ public:
       // Just overwrite the next element instead of inserting if possible.
       if (i == m_endOfAccepted && i != m_data.size()) {
          m_data[i].score = score;
-         m_data[i].Value = std::move(value);
+         m_data[i].value = std::move(value);
       } else {
          if (m_data.size() == m_maxSize) {
             m_data.pop_back();

@@ -40,6 +40,7 @@ class TargetMachine;
 namespace polar::llparser {
 class Parser;
 class Token;
+class PersistentParserState;
 }
 
 namespace polar {
@@ -57,7 +58,6 @@ class GenericParamList;
 class IRGenOptions;
 class ModuleDecl;
 typedef void *OpaqueSyntaxNode;
-class PersistentParserState;
 class SerializationOptions;
 class SourceFile;
 class PILOptions;
@@ -75,6 +75,7 @@ class PILModule;
 using polar::PrimarySpecificPaths;
 using polar::llparser::Parser;
 using polar::llparser::Token;
+using polar::llparser::PersistentParserState;
 
 namespace lowering {
 class TypeConverter;

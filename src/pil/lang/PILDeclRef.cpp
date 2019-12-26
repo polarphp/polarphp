@@ -261,7 +261,7 @@ PILLinkage PILDeclRef::getLinkage(ForDefinition_t forDefinition) const {
          case AccessLevel::FilePrivate:
             return maybeAddExternal(PILLinkage::Private);
 
-         case AccessLevel::Internal:
+         case AccessLevel::Interface:
          case AccessLevel::Public:
          case AccessLevel::Open:
             return PILLinkage::Shared;
@@ -374,8 +374,8 @@ PILLinkage PILDeclRef::getLinkage(ForDefinition_t forDefinition) const {
    // keypath can be formed from other files.
    if (auto accessor = dyn_cast<AccessorDecl>(d)) {
       if (accessor->isSetter()
-          && accessor->getStorage()->getEffectiveAccess() == AccessLevel::Internal)
-         effectiveAccess = AccessLevel::Internal;
+          && accessor->getStorage()->getEffectiveAccess() == AccessLevel::Interface)
+         effectiveAccess = AccessLevel::Interface;
    }
 
    switch (effectiveAccess) {
@@ -383,7 +383,7 @@ PILLinkage PILDeclRef::getLinkage(ForDefinition_t forDefinition) const {
       case AccessLevel::FilePrivate:
          return maybeAddExternal(PILLinkage::Private);
 
-      case AccessLevel::Internal:
+      case AccessLevel::Interface:
          if (limit == Limit::OnDemand)
             return PILLinkage::Shared;
          return maybeAddExternal(PILLinkage::Hidden);
@@ -1022,7 +1022,7 @@ SubclassScope PILDeclRef::getSubclassScope() const {
       case AccessLevel::Private:
       case AccessLevel::FilePrivate:
          return SubclassScope::NotApplicable;
-      case AccessLevel::Internal:
+      case AccessLevel::Interface:
       case AccessLevel::Public:
          return SubclassScope::Internal;
       case AccessLevel::Open:

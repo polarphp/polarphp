@@ -735,83 +735,84 @@ ParserResult<Expr> Parser::parseExprKeyPathObjC() {
 ///     '#selector' '(' 'getter' ':' expr ')'
 ///     '#selector' '(' 'setter' ':' expr ')'
 ///
-ParserResult<Expr> Parser::parseExprSelector() {
-   // @todo
-//   SyntaxParsingContext ExprCtxt(SyntaxContext, SyntaxKind::ObjcSelectorExpr);
-   // Consume '#selector'.
-   SourceLoc keywordLoc = consumeToken(tok::pound_selector);
-
-   // Parse the leading '('.
-   if (!Tok.is(tok::l_paren)) {
-      diagnose(Tok, diag::expr_selector_expected_lparen);
-      return makeParserError();
-   }
-   SourceLoc lParenLoc = consumeToken(tok::l_paren);
-   SourceLoc modifierLoc;
-
-   // Parse possible 'getter:' or 'setter:' modifiers, and determine
-   // the kind of selector we're working with.
-   ObjCSelectorExpr::ObjCSelectorKind selectorKind;
-   if (peekToken().is(tok::colon) &&
-       (Tok.isContextualKeyword("getter") ||
-        Tok.isContextualKeyword("setter"))) {
-      // Parse the modifier.
-      if (Tok.isContextualKeyword("getter"))
-         selectorKind = ObjCSelectorExpr::Getter;
-      else
-         selectorKind = ObjCSelectorExpr::Setter;
-
-      Tok.setKind(tok::contextual_keyword);
-      modifierLoc = consumeToken();
-      (void) consumeToken(tok::colon);
-   } else {
-      selectorKind = ObjCSelectorExpr::Method;
-   }
-
-   ObjCSelectorContext selectorContext;
-   switch (selectorKind) {
-      case ObjCSelectorExpr::Getter:
-         selectorContext = ObjCSelectorContext::GetterSelector;
-         break;
-      case ObjCSelectorExpr::Setter:
-         selectorContext = ObjCSelectorContext::SetterSelector;
-         break;
-      case ObjCSelectorExpr::Method:
-         selectorContext = ObjCSelectorContext::MethodSelector;
-   }
-
-   // Parse the subexpression.
-   CodeCompletionCallbacks::InObjCSelectorExprRAII
-      InObjCSelectorExpr(CodeCompletion, selectorContext);
-   ParserResult<Expr> subExpr =
-      parseExpr(selectorKind == ObjCSelectorExpr::Method
-                ? diag::expr_selector_expected_method_expr
-                : diag::expr_selector_expected_property_expr);
-   if (subExpr.hasCodeCompletion())
-      return makeParserCodeCompletionResult<Expr>();
-
-   // Parse the closing ')'.
-   SourceLoc rParenLoc;
-   if (subExpr.isParseError()) {
-      skipUntilDeclStmtRBrace(tok::r_paren);
-      if (Tok.is(tok::r_paren))
-         rParenLoc = consumeToken();
-      else
-         rParenLoc = PreviousLoc;
-   } else {
-      parseMatchingToken(tok::r_paren, rParenLoc,
-                         diag::expr_selector_expected_rparen, lParenLoc);
-   }
-
-   // If the subexpression was in error, just propagate the error.
-   if (subExpr.isParseError())
-      return makeParserResult<Expr>(
-         new(Context) ErrorExpr(SourceRange(keywordLoc, rParenLoc)));
-
-   return makeParserResult<Expr>(
-      new(Context) ObjCSelectorExpr(selectorKind, keywordLoc, lParenLoc,
-                                    modifierLoc, subExpr.get(), rParenLoc));
-}
+// @todo
+//ParserResult<Expr> Parser::parseExprSelector() {
+//   // @todo
+////   SyntaxParsingContext ExprCtxt(SyntaxContext, SyntaxKind::ObjcSelectorExpr);
+//   // Consume '#selector'.
+//   SourceLoc keywordLoc = consumeToken(tok::pound_selector);
+//
+//   // Parse the leading '('.
+//   if (!Tok.is(tok::l_paren)) {
+//      diagnose(Tok, diag::expr_selector_expected_lparen);
+//      return makeParserError();
+//   }
+//   SourceLoc lParenLoc = consumeToken(tok::l_paren);
+//   SourceLoc modifierLoc;
+//
+//   // Parse possible 'getter:' or 'setter:' modifiers, and determine
+//   // the kind of selector we're working with.
+//   ObjCSelectorExpr::ObjCSelectorKind selectorKind;
+//   if (peekToken().is(tok::colon) &&
+//       (Tok.isContextualKeyword("getter") ||
+//        Tok.isContextualKeyword("setter"))) {
+//      // Parse the modifier.
+//      if (Tok.isContextualKeyword("getter"))
+//         selectorKind = ObjCSelectorExpr::Getter;
+//      else
+//         selectorKind = ObjCSelectorExpr::Setter;
+//
+//      Tok.setKind(tok::contextual_keyword);
+//      modifierLoc = consumeToken();
+//      (void) consumeToken(tok::colon);
+//   } else {
+//      selectorKind = ObjCSelectorExpr::Method;
+//   }
+//
+//   ObjCSelectorContext selectorContext;
+//   switch (selectorKind) {
+//      case ObjCSelectorExpr::Getter:
+//         selectorContext = ObjCSelectorContext::GetterSelector;
+//         break;
+//      case ObjCSelectorExpr::Setter:
+//         selectorContext = ObjCSelectorContext::SetterSelector;
+//         break;
+//      case ObjCSelectorExpr::Method:
+//         selectorContext = ObjCSelectorContext::MethodSelector;
+//   }
+//
+//   // Parse the subexpression.
+//   CodeCompletionCallbacks::InObjCSelectorExprRAII
+//      InObjCSelectorExpr(CodeCompletion, selectorContext);
+//   ParserResult<Expr> subExpr =
+//      parseExpr(selectorKind == ObjCSelectorExpr::Method
+//                ? diag::expr_selector_expected_method_expr
+//                : diag::expr_selector_expected_property_expr);
+//   if (subExpr.hasCodeCompletion())
+//      return makeParserCodeCompletionResult<Expr>();
+//
+//   // Parse the closing ')'.
+//   SourceLoc rParenLoc;
+//   if (subExpr.isParseError()) {
+//      skipUntilDeclStmtRBrace(tok::r_paren);
+//      if (Tok.is(tok::r_paren))
+//         rParenLoc = consumeToken();
+//      else
+//         rParenLoc = PreviousLoc;
+//   } else {
+//      parseMatchingToken(tok::r_paren, rParenLoc,
+//                         diag::expr_selector_expected_rparen, lParenLoc);
+//   }
+//
+//   // If the subexpression was in error, just propagate the error.
+//   if (subExpr.isParseError())
+//      return makeParserResult<Expr>(
+//         new(Context) ErrorExpr(SourceRange(keywordLoc, rParenLoc)));
+//
+//   return makeParserResult<Expr>(
+//      new(Context) ObjCSelectorExpr(selectorKind, keywordLoc, lParenLoc,
+//                                    modifierLoc, subExpr.get(), rParenLoc));
+//}
 
 static DeclRefKind getDeclRefKindForOperator(tok kind) {
    switch (kind) {

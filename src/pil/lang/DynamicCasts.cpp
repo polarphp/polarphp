@@ -65,7 +65,7 @@ static bool canClassOrSuperclassesHaveUnknownSubclasses(ClassDecl *CD,
 
       // Internal and public classes may have unknown subclasses if we are not in
       // whole-module-optimization mode.
-      if (CD->getEffectiveAccess() >= AccessLevel::Internal &&
+      if (CD->getEffectiveAccess() >= AccessLevel::Interface &&
           !isWholeModuleOpts)
          return true;
 
@@ -161,8 +161,8 @@ classifyDynamicCastToInterface(ModuleDecl *M, CanType source, CanType target,
    // module could have implemented them, but no conformances were found.
    // Therefore it is safe to make a negative decision at compile-time.
    if (isWholeModuleOpts &&
-       (SourceNominalTy->getEffectiveAccess() <= AccessLevel::Internal ||
-        TargetInterface->getEffectiveAccess() <= AccessLevel::Internal)) {
+       (SourceNominalTy->getEffectiveAccess() <= AccessLevel::Interface ||
+        TargetInterface->getEffectiveAccess() <= AccessLevel::Interface)) {
       return DynamicCastFeasibility::WillFail;
    }
 
@@ -272,21 +272,22 @@ classifyClassHierarchyCast(CanType source, CanType target) {
    return DynamicCastFeasibility::WillFail;
 }
 
-CanType polar::getNSBridgedClassOfCFClass(ModuleDecl *M, CanType type) {
-   if (auto classDecl = type->getClassOrBoundGenericClass()) {
-      if (classDecl->getForeignClassKind() == ClassDecl::ForeignKind::CFType) {
-         if (auto bridgedAttr =
-            classDecl->getAttrs().getAttribute<ObjCBridgedAttr>()) {
-            auto bridgedClass = bridgedAttr->getObjCClass();
-            // TODO: this should handle generic classes properly.
-            if (!bridgedClass->isGenericContext()) {
-               return bridgedClass->getDeclaredInterfaceType()->getCanonicalType();
-            }
-         }
-      }
-   }
-   return CanType();
-}
+// @todo
+//CanType polar::getNSBridgedClassOfCFClass(ModuleDecl *M, CanType type) {
+//   if (auto classDecl = type->getClassOrBoundGenericClass()) {
+//      if (classDecl->getForeignClassKind() == ClassDecl::ForeignKind::CFType) {
+//         if (auto bridgedAttr =
+//            classDecl->getAttrs().getAttribute<ObjCBridgedAttr>()) {
+//            auto bridgedClass = bridgedAttr->getObjCClass();
+//            // TODO: this should handle generic classes properly.
+//            if (!bridgedClass->isGenericContext()) {
+//               return bridgedClass->getDeclaredInterfaceType()->getCanonicalType();
+//            }
+//         }
+//      }
+//   }
+//   return CanType();
+//}
 
 static bool isCFBridgingConversion(ModuleDecl *M,
                                    CanType sourceFormalType,

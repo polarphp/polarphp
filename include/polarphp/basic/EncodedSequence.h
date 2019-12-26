@@ -1,0 +1,8 @@
+//
+// Created by polarboy on 12/25/19.
+//
+
+#ifndef POLARPHP_ENCODEDSEQUENCE_H
+#define POLARPHP_ENCODEDSEQUENCE_H
+
+#endif //POLARPHP_ENCODEDSEQUENCE_H
