@@ -27,7 +27,7 @@
 #include "llvm/ADT/DenseMap.h"
 #include "llvm/Support/Mutex.h"
 
-namespace polar {
+namespace polar::sys {
 
 using llvm::StringRef;
 
@@ -177,4 +177,4 @@ void CacheImpl::destroy()
    delete static_cast<DefaultCache*>(impl);
 }
 
-} // polar
+} // polar::sys

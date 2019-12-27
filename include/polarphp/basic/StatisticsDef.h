@@ -278,7 +278,7 @@ FRONTEND_STATISTIC(Sema, NumUnloadedLazyIterableDeclContexts)
 #include "polarphp/ast/NameLookupTypeIDZoneDef.h"
 #include "polarphp/ast/TypeCheckerTypeIDZoneDef.h"
 #include "polarphp/sema/IDETypeCheckingRequestIDZoneDef.h"
-//#include "polarphp/IDE/IDERequestIDZone.def"
+#include "polarphp/ide/IDERequestIDZoneDef.h"
 #undef POLAR_REQUEST
 
 /// The next 10 statistics count 5 kinds of PIL entities present

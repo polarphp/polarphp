@@ -28,7 +28,7 @@
 #include "llvm/ADT/StringRef.h"
 #include "llvm/ADT/Optional.h"
 
-namespace polar {
+namespace polar::sys {
 
 template <typename T>
 struct CacheKeyHashInfo
@@ -301,6 +301,6 @@ struct CacheValueInfo<llvm::IntrusiveRefCntPtr<T>>
    }
 };
 
-} // polar
+} // polar::sys
 
 #endif // POLARPHP_BASIC_CACHE_H

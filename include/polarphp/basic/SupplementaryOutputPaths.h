@@ -29,7 +29,8 @@ struct SupplementaryOutputPaths {
    /// information.
    ///
    /// \sa swift::printAsObjC
-   std::string ObjCHeaderOutputPath;
+   // @todo
+//   std::string ObjCHeaderOutputPath;
 
    /// The path to which we should emit a serialized module.
    /// It is valid whenever there are any inputs.
@@ -153,7 +154,7 @@ struct SupplementaryOutputPaths {
    SupplementaryOutputPaths(const SupplementaryOutputPaths &) = default;
 
    bool empty() const {
-      return ObjCHeaderOutputPath.empty() && ModuleOutputPath.empty() &&
+      return /*ObjCHeaderOutputPath.empty() && */ModuleOutputPath.empty() &&
              ModuleDocOutputPath.empty() && DependenciesFilePath.empty() &&
              ReferenceDependenciesFilePath.empty() &&
              SerializedDiagnosticsPath.empty() && LoadedModuleTracePath.empty() &&

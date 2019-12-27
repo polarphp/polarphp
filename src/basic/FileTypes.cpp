@@ -73,7 +73,6 @@ bool filetypes::is_textual(FileTypeId Id) {
       case filetypes::TY_ASTDump:
       case filetypes::TY_RawPIL:
       case filetypes::TY_LLVM_IR:
-      case filetypes::TY_ObjCHeader:
       case filetypes::TY_AutolinkFile:
       case filetypes::TY_ImportedModules:
       case filetypes::TY_TBD:
@@ -123,7 +122,6 @@ bool filetypes::is_after_llvm(FileTypeId Id) {
       case filetypes::TY_Dependencies:
       case filetypes::TY_ASTDump:
       case filetypes::TY_RawPIL:
-      case filetypes::TY_ObjCHeader:
       case filetypes::TY_AutolinkFile:
       case filetypes::TY_Image:
       case filetypes::TY_dSYM:
@@ -165,7 +163,6 @@ bool filetypes::is_part_of_php_compilation(FileTypeId Id) {
       case filetypes::TY_LLVM_BC:
       case filetypes::TY_Object:
       case filetypes::TY_Dependencies:
-      case filetypes::TY_ObjCHeader:
       case filetypes::TY_AutolinkFile:
       case filetypes::TY_PCH:
       case filetypes::TY_ImportedModules:
