@@ -109,13 +109,13 @@ bool isFunctionAttr(Node::Kind kind) {
       case Node::Kind::GenericSpecializationNotReAbstracted:
       case Node::Kind::GenericPartialSpecialization:
       case Node::Kind::GenericPartialSpecializationNotReAbstracted:
-      case Node::Kind::ObjCAttribute:
-      case Node::Kind::NonObjCAttribute:
+//      case Node::Kind::ObjCAttribute:
+//      case Node::Kind::NonObjCAttribute:
       case Node::Kind::DynamicAttribute:
       case Node::Kind::DirectMethodReferenceAttribute:
       case Node::Kind::VTableAttribute:
       case Node::Kind::PartialApplyForwarder:
-      case Node::Kind::PartialApplyObjCForwarder:
+//      case Node::Kind::PartialApplyObjCForwarder:
       case Node::Kind::OutlinedVariable:
       case Node::Kind::OutlinedBridgedMethod:
       case Node::Kind::MergedFunction:
@@ -547,8 +547,8 @@ NodePointer Demangler::demangleSymbol(StringRef MangledName,
    NodePointer Parent = topLevel;
    while (NodePointer FuncAttr = popNode(isFunctionAttr)) {
       Parent->addChild(FuncAttr, *this);
-      if (FuncAttr->getKind() == Node::Kind::PartialApplyForwarder ||
-          FuncAttr->getKind() == Node::Kind::PartialApplyObjCForwarder)
+      if (FuncAttr->getKind() == Node::Kind::PartialApplyForwarder/* ||
+          FuncAttr->getKind() == Node::Kind::PartialApplyObjCForwarder*/)
          Parent = FuncAttr;
    }
    for (Node *Nd : NodeStack) {
@@ -1907,6 +1907,7 @@ NodePointer Demangler::demangleImplFunctionType() {
 }
 
 NodePointer Demangler::demangleMetatype() {
+// @todo
    switch (nextChar()) {
       case 'a':
          return createWithPoppedType(Node::Kind::TypeMetadataAccessFunction);
@@ -1968,17 +1969,17 @@ NodePointer Demangler::demangleMetatype() {
          return createWithChild(Node::Kind::OpaqueTypeDescriptor, popNode());
       case 'r':
          return createWithPoppedType(Node::Kind::TypeMetadataCompletionFunction);
-      case 's':
-         return createWithPoppedType(Node::Kind::ObjCResilientClassStub);
+//      case 's':
+//         return createWithPoppedType(Node::Kind::ObjCResilientClassStub);
       case 'S':
          return createWithChild(Node::Kind::InterfaceSelfConformanceDescriptor,
                                 popInterface());
-      case 't':
-         return createWithPoppedType(Node::Kind::FullObjCResilientClassStub);
+//      case 't':
+//         return createWithPoppedType(Node::Kind::FullObjCResilientClassStub);
       case 'u':
          return createWithPoppedType(Node::Kind::MethodLookupFunction);
-      case 'U':
-         return createWithPoppedType(Node::Kind::ObjCMetadataUpdateFunction);
+//      case 'U':
+//         return createWithPoppedType(Node::Kind::ObjCMetadataUpdateFunction);
       case 'V':
          return createWithChild(Node::Kind::PropertyDescriptor,
                                 popNode(isEntity));
@@ -2233,16 +2234,16 @@ NodePointer Demangler::demangleThunkOrSpecialization() {
          return createWithChild(Node::Kind::DispatchThunk, popNode(isEntity));
       case 'q':
          return createWithChild(Node::Kind::MethodDescriptor, popNode(isEntity));
-      case 'o':
-         return createNode(Node::Kind::ObjCAttribute);
-      case 'O':
-         return createNode(Node::Kind::NonObjCAttribute);
+//      case 'o':
+//         return createNode(Node::Kind::ObjCAttribute);
+//      case 'O':
+//         return createNode(Node::Kind::NonObjCAttribute);
       case 'D':
          return createNode(Node::Kind::DynamicAttribute);
       case 'd':
          return createNode(Node::Kind::DirectMethodReferenceAttribute);
-      case 'a':
-         return createNode(Node::Kind::PartialApplyObjCForwarder);
+//      case 'a':
+//         return createNode(Node::Kind::PartialApplyObjCForwarder);
       case 'A':
          return createNode(Node::Kind::PartialApplyForwarder);
       case 'm':
@@ -2870,10 +2871,10 @@ NodePointer Demangler::demangleSpecialType() {
          return popFunctionType(Node::Kind::AutoClosureType);
       case 'U':
          return popFunctionType(Node::Kind::UncurriedFunctionType);
-      case 'L':
-         return popFunctionType(Node::Kind::EscapingObjCBlock);
-      case 'B':
-         return popFunctionType(Node::Kind::ObjCBlock);
+//      case 'L':
+//         return popFunctionType(Node::Kind::EscapingObjCBlock);
+//      case 'B':
+//         return popFunctionType(Node::Kind::ObjCBlock);
       case 'C':
          return popFunctionType(Node::Kind::CFunctionPointer);
       case 'o':

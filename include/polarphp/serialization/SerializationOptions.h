@@ -131,7 +131,7 @@ public:
    bool EnableNestedTypeLookupTable = false;
    bool SerializeAllPIL = false;
    bool SerializeOptionsForDebugging = false;
-   bool IsSIB = false;
+   bool IsPIB = false;
 };
 
 } // end namespace polar

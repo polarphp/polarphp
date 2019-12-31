@@ -16,6 +16,7 @@
 //===----------------------------------------------------------------------===//
 
 #define DEBUG_TYPE "polarphp-immediate"
+
 #include "polarphp/immediate/Immediate.h"
 #include "polarphp/immediate/internal/ImmediateImpl.h"
 
@@ -77,7 +78,7 @@ static void *loadRuntimeLib(StringRef sharedLibName,
 }
 
 void *polar::immediate::loadPHPRuntime(ArrayRef<std::string>
-                                         runtimeLibPaths) {
+                                       runtimeLibPaths) {
 #if defined(_WIN32)
    return loadRuntimeLib("swiftCore" LTDL_SHLIB_EXT, runtimeLibPaths);
 #else

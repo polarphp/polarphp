@@ -372,13 +372,13 @@ private:
          case Node::Kind::Directness:
          case Node::Kind::DynamicAttribute:
          case Node::Kind::EscapingAutoClosureType:
-         case Node::Kind::EscapingObjCBlock:
+//         case Node::Kind::EscapingObjCBlock:
          case Node::Kind::NoEscapeFunctionType:
          case Node::Kind::ExplicitClosure:
          case Node::Kind::Extension:
          case Node::Kind::EnumCase:
          case Node::Kind::FieldOffset:
-         case Node::Kind::FullObjCResilientClassStub:
+//         case Node::Kind::FullObjCResilientClassStub:
          case Node::Kind::FullTypeMetadata:
          case Node::Kind::Function:
          case Node::Kind::FunctionSignatureSpecialization:
@@ -433,12 +433,12 @@ private:
          case Node::Kind::NativePinningAddressor:
          case Node::Kind::NativePinningMutableAddressor:
          case Node::Kind::NominalTypeDescriptor:
-         case Node::Kind::NonObjCAttribute:
+//         case Node::Kind::NonObjCAttribute:
          case Node::Kind::Number:
-         case Node::Kind::ObjCAttribute:
-         case Node::Kind::ObjCBlock:
-         case Node::Kind::ObjCMetadataUpdateFunction:
-         case Node::Kind::ObjCResilientClassStub:
+//         case Node::Kind::ObjCAttribute:
+//         case Node::Kind::ObjCBlock:
+//         case Node::Kind::ObjCMetadataUpdateFunction:
+//         case Node::Kind::ObjCResilientClassStub:
          case Node::Kind::OpaqueTypeDescriptor:
          case Node::Kind::OpaqueTypeDescriptorAccessor:
          case Node::Kind::OpaqueTypeDescriptorAccessorImpl:
@@ -448,7 +448,7 @@ private:
          case Node::Kind::OwningAddressor:
          case Node::Kind::OwningMutableAddressor:
          case Node::Kind::PartialApplyForwarder:
-         case Node::Kind::PartialApplyObjCForwarder:
+//         case Node::Kind::PartialApplyObjCForwarder:
          case Node::Kind::PostfixOperator:
          case Node::Kind::PrefixOperator:
          case Node::Kind::PrivateDeclName:
@@ -1025,18 +1025,19 @@ NodePointer NodePrinter::print(NodePointer Node, bool asPrefixContext) {
          Printer << "method lookup function for ";
          print(Node->getChild(0));
          return nullptr;
-      case Node::Kind::ObjCMetadataUpdateFunction:
-         Printer << "ObjC metadata update function for ";
-         print(Node->getChild(0));
-         return nullptr;
-      case Node::Kind::ObjCResilientClassStub:
-         Printer << "ObjC resilient class stub for ";
-         print(Node->getChild(0));
-         return nullptr;
-      case Node::Kind::FullObjCResilientClassStub:
-         Printer << "full ObjC resilient class stub for ";
-         print(Node->getChild(0));
-         return nullptr;
+      // @todo
+//      case Node::Kind::ObjCMetadataUpdateFunction:
+//         Printer << "ObjC metadata update function for ";
+//         print(Node->getChild(0));
+//         return nullptr;
+//      case Node::Kind::ObjCResilientClassStub:
+//         Printer << "ObjC resilient class stub for ";
+//         print(Node->getChild(0));
+//         return nullptr;
+//      case Node::Kind::FullObjCResilientClassStub:
+//         Printer << "full ObjC resilient class stub for ";
+//         print(Node->getChild(0));
+//         return nullptr;
       case Node::Kind::OutlinedBridgedMethod:
          Printer << "outlined bridged method (" << Node->getText() << ") of ";
          return nullptr;
@@ -1295,12 +1296,12 @@ NodePointer NodePrinter::print(NodePointer Node, bool asPrefixContext) {
          Printer << "__owned ";
          print(Node->getChild(0));
          return nullptr;
-      case Node::Kind::NonObjCAttribute:
-         Printer << "@nonobjc ";
-         return nullptr;
-      case Node::Kind::ObjCAttribute:
-         Printer << "@objc ";
-         return nullptr;
+//      case Node::Kind::NonObjCAttribute:
+//         Printer << "@nonobjc ";
+//         return nullptr;
+//      case Node::Kind::ObjCAttribute:
+//         Printer << "@objc ";
+//         return nullptr;
       case Node::Kind::DirectMethodReferenceAttribute:
          Printer << "super ";
          return nullptr;
@@ -1517,17 +1518,18 @@ NodePointer NodePrinter::print(NodePointer Node, bool asPrefixContext) {
             printChildren(Node);
          }
          return nullptr;
-      case Node::Kind::PartialApplyObjCForwarder:
-         if (Options.ShortenPartialApply)
-            Printer << "partial apply";
-         else
-            Printer << "partial apply ObjC forwarder";
-
-         if (Node->hasChildren()) {
-            Printer << " for ";
-            printChildren(Node);
-         }
-         return nullptr;
+      // @todo
+//      case Node::Kind::PartialApplyObjCForwarder:
+//         if (Options.ShortenPartialApply)
+//            Printer << "partial apply";
+//         else
+//            Printer << "partial apply ObjC forwarder";
+//
+//         if (Node->hasChildren()) {
+//            Printer << " for ";
+//            printChildren(Node);
+//         }
+//         return nullptr;
       case Node::Kind::KeyPathGetterThunkHelper:
       case Node::Kind::KeyPathSetterThunkHelper:
          if (Node->getKind() == Node::Kind::KeyPathGetterThunkHelper)
@@ -1831,16 +1833,17 @@ NodePointer NodePrinter::print(NodePointer Node, bool asPrefixContext) {
          printFunctionType(nullptr, Node);
          return nullptr;
       }
-      case Node::Kind::ObjCBlock: {
-         Printer << "@convention(block) ";
-         printFunctionType(nullptr, Node);
-         return nullptr;
-      }
-      case Node::Kind::EscapingObjCBlock: {
-         Printer << "@escaping @convention(block) ";
-         printFunctionType(nullptr, Node);
-         return nullptr;
-      }
+      // @todo
+//      case Node::Kind::ObjCBlock: {
+//         Printer << "@convention(block) ";
+//         printFunctionType(nullptr, Node);
+//         return nullptr;
+//      }
+//      case Node::Kind::EscapingObjCBlock: {
+//         Printer << "@escaping @convention(block) ";
+//         printFunctionType(nullptr, Node);
+//         return nullptr;
+//      }
       case Node::Kind::PILBoxType: {
          Printer << "@box ";
          NodePointer type = Node->getChild(0);

@@ -370,7 +370,7 @@ public:
    std::string getModuleOutputPathForAtMostOnePrimary() const;
    std::string
    getReferenceDependenciesFilePathForPrimary(StringRef filename) const;
-   std::string getSwiftRangesFilePathForPrimary(StringRef filename) const;
+   std::string getPHPRangesFilePathForPrimary(StringRef filename) const;
    std::string getCompiledSourceFilePathForPrimary(StringRef filename) const;
    std::string getSerializedDiagnosticsPathForAtMostOnePrimary() const;
 

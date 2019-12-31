@@ -29,7 +29,6 @@
 #include "polarphp/basic/Platform.h"
 #include "polarphp/basic/OptionSet.h"
 #include "polarphp/ast/DiagnosticEngine.h"
-#include "polarphp/ast/DiagnosticsDriver.h"
 #include "polarphp/ast/DiagnosticsFrontend.h"
 #include "llvm/ADT/Optional.h"
 #include "llvm/ADT/STLExtras.h"

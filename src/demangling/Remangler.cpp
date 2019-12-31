@@ -1374,8 +1374,8 @@ void Remangler::mangleGlobal(Node *node) {
          case Node::Kind::GenericPartialSpecializationNotReAbstracted:
          case Node::Kind::OutlinedBridgedMethod:
          case Node::Kind::OutlinedVariable:
-         case Node::Kind::ObjCAttribute:
-         case Node::Kind::NonObjCAttribute:
+//         case Node::Kind::ObjCAttribute:
+//         case Node::Kind::NonObjCAttribute:
          case Node::Kind::DynamicAttribute:
          case Node::Kind::VTableAttribute:
          case Node::Kind::DirectMethodReferenceAttribute:
@@ -1705,9 +1705,9 @@ void Remangler::manglePropertyDescriptor(Node *node) {
    Buffer << "MV";
 }
 
-void Remangler::mangleNonObjCAttribute(Node *node) {
-   Buffer << "TO";
-}
+//void Remangler::mangleNonObjCAttribute(Node *node) {
+//   Buffer << "TO";
+//}
 
 void Remangler::mangleTuple(Node *node) {
    mangleTypeList(node);
@@ -1717,20 +1717,20 @@ void Remangler::mangleTuple(Node *node) {
 void Remangler::mangleNumber(Node *node) {
    mangleIndex(node->getIndex());
 }
+//
+//void Remangler::mangleObjCAttribute(Node *node) {
+//   Buffer << "To";
+//}
 
-void Remangler::mangleObjCAttribute(Node *node) {
-   Buffer << "To";
-}
+//void Remangler::mangleObjCBlock(Node *node) {
+//   mangleChildNodesReversed(node);
+//   Buffer << "XB";
+//}
 
-void Remangler::mangleObjCBlock(Node *node) {
-   mangleChildNodesReversed(node);
-   Buffer << "XB";
-}
-
-void Remangler::mangleEscapingObjCBlock(Node *node) {
-   mangleChildNodesReversed(node);
-   Buffer << "XL";
-}
+//void Remangler::mangleEscapingObjCBlock(Node *node) {
+//   mangleChildNodesReversed(node);
+//   Buffer << "XL";
+//}
 
 void Remangler::mangleOwningAddressor(Node *node) {
    mangleAbstractStorage(node->getFirstChild(), "lO");
@@ -1744,11 +1744,11 @@ void Remangler::manglePartialApplyForwarder(Node *node) {
    mangleChildNodesReversed(node);
    Buffer << "TA";
 }
-
-void Remangler::manglePartialApplyObjCForwarder(Node *node) {
-   mangleChildNodesReversed(node);
-   Buffer << "Ta";
-}
+//
+//void Remangler::manglePartialApplyObjCForwarder(Node *node) {
+//   mangleChildNodesReversed(node);
+//   Buffer << "Ta";
+//}
 
 void Remangler::mangleMergedFunction(Node *node) {
    Buffer << "Tm";
@@ -2248,20 +2248,21 @@ void Remangler::mangleMethodLookupFunction(Node *node) {
    Buffer << "Mu";
 }
 
-void Remangler::mangleObjCMetadataUpdateFunction(Node *node) {
-   mangleSingleChildNode(node);
-   Buffer << "MU";
-}
+// @todo
+//void Remangler::mangleObjCMetadataUpdateFunction(Node *node) {
+//   mangleSingleChildNode(node);
+//   Buffer << "MU";
+//}
+//
+//void Remangler::mangleObjCResilientClassStub(Node *node) {
+//   mangleSingleChildNode(node);
+//   Buffer << "Ms";
+//}
 
-void Remangler::mangleObjCResilientClassStub(Node *node) {
-   mangleSingleChildNode(node);
-   Buffer << "Ms";
-}
-
-void Remangler::mangleFullObjCResilientClassStub(Node *node) {
-   mangleSingleChildNode(node);
-   Buffer << "Mt";
-}
+//void Remangler::mangleFullObjCResilientClassStub(Node *node) {
+//   mangleSingleChildNode(node);
+//   Buffer << "Mt";
+//}
 
 void Remangler::mangleThrowsAnnotation(Node *node) {
    Buffer << 'K';

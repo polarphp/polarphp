@@ -103,9 +103,9 @@ bool Context::isThunkSymbol(llvm::StringRef MangledName) {
             return false;
 
          switch (Nd->getFirstChild()->getKind()) {
-            case Node::Kind::ObjCAttribute:
-            case Node::Kind::NonObjCAttribute:
-            case Node::Kind::PartialApplyObjCForwarder:
+//            case Node::Kind::ObjCAttribute:
+//            case Node::Kind::NonObjCAttribute:
+//            case Node::Kind::PartialApplyObjCForwarder:
             case Node::Kind::PartialApplyForwarder:
             case Node::Kind::ReabstractionThunkHelper:
             case Node::Kind::ReabstractionThunk:
@@ -183,7 +183,7 @@ bool Context::hasPolarphpCallingConvention(llvm::StringRef MangledName) {
       case Node::Kind::AssociatedTypeMetadataAccessor:
       case Node::Kind::AssociatedTypeWitnessTableAccessor:
       case Node::Kind::BaseWitnessTableAccessor:
-      case Node::Kind::ObjCAttribute:
+//      case Node::Kind::ObjCAttribute:
          return false;
       default:
          break;

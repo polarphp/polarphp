@@ -282,16 +282,16 @@ class SerializedAstFile final : public LoadedFile {
 
    ModuleFile &File;
 
-   bool IsSIB;
+   bool IsPIB;
 
-   SerializedAstFile(ModuleDecl &M, ModuleFile &file, bool isSIB = false)
-      : LoadedFile(FileUnitKind::SerializedAST, M), File(file), IsSIB(isSIB) {}
+   SerializedAstFile(ModuleDecl &M, ModuleFile &file, bool isPIB = false)
+      : LoadedFile(FileUnitKind::SerializedAST, M), File(file), IsPIB(isPIB) {}
 
    void
    collectLinkLibrariesFromImports(ModuleDecl::LinkLibraryCallback callback) const;
 
 public:
-   bool isSIB() const { return IsSIB; }
+   bool isPIB() const { return IsPIB; }
 
    /// Returns the language version that was used to compile the contents of this
    /// file.

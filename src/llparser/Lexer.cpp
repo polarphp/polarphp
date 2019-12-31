@@ -22,7 +22,6 @@
 #include "polarphp/basic/SourceMgr.h"
 #include "llvm/Support/Compiler.h"
 #include "llvm/Support/MathExtras.h"
-#include "llvm/Support/MemoryBuffer.h"
 #include "llvm/ADT/SmallString.h"
 #include "llvm/ADT/StringSwitch.h"
 #include "llvm/ADT/Twine.h"

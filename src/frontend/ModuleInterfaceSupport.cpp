@@ -14,9 +14,7 @@
 #include "polarphp/ast/AstPrinter.h"
 #include "polarphp/ast/Decl.h"
 #include "polarphp/ast/DiagnosticsFrontend.h"
-#include "polarphp/ast/DiagnosticsSema.h"
 #include "polarphp/ast/ExistentialLayout.h"
-#include "polarphp/ast/FileSystem.h"
 #include "polarphp/ast/Module.h"
 #include "polarphp/ast/InterfaceConformance.h"
 #include "polarphp/basic/StlExtras.h"
@@ -28,11 +26,8 @@
 #include "polarphp/serialization/Validation.h"
 
 #include "clang/Basic/Module.h"
-#include "llvm/ADT/Hashing.h"
-#include "llvm/ADT/StringSet.h"
 #include "llvm/Support/Path.h"
 #include "llvm/Support/Regex.h"
-#include "llvm/Support/StringSaver.h"
 
 using namespace polar;
 

@@ -1711,7 +1711,7 @@ PILModule::constructPIL(ModuleDecl *mod, TypeConverter &tc,
       if (auto *file = dyn_cast<SourceFile>(SF)) {
          SGM.emitSourceFile(file);
       } else if (auto *file = dyn_cast<SerializedAstFile>(SF)) {
-         if (file->isSIB())
+         if (file->isPIB())
             M->getPILLoader()->getAllForModule(mod->getName(), file);
       }
    } else {
@@ -1727,7 +1727,7 @@ PILModule::constructPIL(ModuleDecl *mod, TypeConverter &tc,
                                 mod->getFiles().end(),
                                 [](const FileUnit *File) -> bool {
                                    auto *SASTF = dyn_cast<SerializedAstFile>(File);
-                                   return SASTF && SASTF->isSIB();
+                                   return SASTF && SASTF->isPIB();
                                 });
       if (hasSIB)
          M->getPILLoader()->getAllForModule(mod->getName(), nullptr);

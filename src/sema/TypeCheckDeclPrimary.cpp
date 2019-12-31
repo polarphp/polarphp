@@ -532,7 +532,7 @@ static void checkRedeclaration(AstContext &ctx, ValueDecl *current) {
          if (currentFile->Kind == SourceFileKind::PIL) {
             auto *otherFile = dyn_cast<SerializedAstFile>(
                other->getDeclContext()->getModuleScopeContext());
-            if (otherFile && otherFile->isSIB())
+            if (otherFile && otherFile->isPIB())
                continue;
          }
 

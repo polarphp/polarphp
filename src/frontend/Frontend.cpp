@@ -104,7 +104,7 @@ std::string CompilerInvocation::getReferenceDependenciesFilePathForPrimary(
       .supplementaryOutputs.ReferenceDependenciesFilePath;
 }
 std::string
-CompilerInvocation::getSwiftRangesFilePathForPrimary(StringRef filename) const {
+CompilerInvocation::getPHPRangesFilePathForPrimary(StringRef filename) const {
    return getPrimarySpecificPathsForPrimary(filename)
       .supplementaryOutputs.PHPRangesFilePath;
 }

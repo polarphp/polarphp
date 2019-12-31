@@ -18,4 +18,5 @@ polar_merge_list(POLAR_IRGEN_SOURCES POLAR_HEADERS)
 polar_add_library(PolarIRGen
    ${POLAR_IRGEN_SOURCES}
    LINK_LIBS PolarBasic PolarUtils PolarAST PolarPILGen
-             PolarPIL PolarPILOptimizer PolarLLVMPasses)
+             PolarPIL PolarPILOptimizer
+             LLVMPasses)

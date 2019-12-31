@@ -13,12 +13,6 @@
 #include "polarphp/immediate/Immediate.h"
 #include "polarphp/immediate/internal/ImmediateImpl.h"
 
-#include "polarphp/global/Config.h"
-#include "polarphp/global/Subsystems.h"
-#include "polarphp/ast/ASTContext.h"
-#include "polarphp/ast/DiagnosticsFrontend.h"
-#include "polarphp/ast/IRGenOptions.h"
-#include "polarphp/ast/Module.h"
 #include "polarphp/ast/NameLookup.h"
 #include "polarphp/ast/NameLookupRequests.h"
 #include "polarphp/frontend/Frontend.h"

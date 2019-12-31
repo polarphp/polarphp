@@ -18,6 +18,22 @@ polar_collect_files(
 
 polar_merge_list(POLAR_FRONTEND_TOOL_SOURCES POLAR_HEADERS)
 
-polar_add_library(PolarFrontendTool SHARED
+polar_add_library(PolarFrontendTool STATIC
    ${POLAR_FRONTEND_TOOL_SOURCES}
-   LINK_LIBS PolarUtils PolarKernel)
+   LINK_LIBS
+   PolarUtils
+   PolarKernel
+   PolarBasic
+   PolarClangImporter
+   PolarDemangling
+   PolarFrontend
+   PolarIDE
+   PolarImmediate
+   PolarIndex
+   PolarIRGen
+   PolarOption
+   PolarSerialization
+   PolarPIL
+   PolarPILGen
+   PolarPILOptimizer
+   PolarTBDGen)
