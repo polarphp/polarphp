@@ -740,7 +740,7 @@ void printInlinesUnder(const MarkupAstNode *Node, llvm::raw_ostream &OS,
 
 
 template <typename ImplClass, typename RetTy = void, typename... Args>
-class MarkupASTVisitor {
+class MarkupAstVisitor {
 public:
   RetTy visit(const MarkupAstNode *Node, Args... args) {
     switch (Node->getKind()) {
@@ -755,7 +755,7 @@ public:
     }
   }
 
-  virtual ~MarkupASTVisitor() {}
+  virtual ~MarkupAstVisitor() {}
 };
 
 } // namespace polar::markup

@@ -424,12 +424,13 @@ bool FrontendInputsAndOutputs::hasCompiledSourcePath() const {
          return outs.CompiledSourceFilePath;
       });
 }
-bool FrontendInputsAndOutputs::hasObjCHeaderOutputPath() const {
-   return hasSupplementaryOutputPath(
-      [](const SupplementaryOutputPaths &outs) -> const std::string & {
-         return outs.ObjCHeaderOutputPath;
-      });
-}
+// @todo
+//bool FrontendInputsAndOutputs::hasObjCHeaderOutputPath() const {
+//   return hasSupplementaryOutputPath(
+//      [](const SupplementaryOutputPaths &outs) -> const std::string & {
+//         return outs.ObjCHeaderOutputPath;
+//      });
+//}
 bool FrontendInputsAndOutputs::hasLoadedModuleTracePath() const {
    return hasSupplementaryOutputPath(
       [](const SupplementaryOutputPaths &outs) -> const std::string & {

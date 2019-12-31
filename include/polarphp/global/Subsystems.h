@@ -41,12 +41,12 @@ namespace polar::llparser {
 class Parser;
 class Token;
 class PersistentParserState;
+class CodeCompletionCallbacksFactory;
 }
 
 namespace polar {
 class GenericSignatureBuilder;
 class AstContext;
-class CodeCompletionCallbacksFactory;
 class Decl;
 class DeclContext;
 class DiagnosticConsumer;
@@ -76,6 +76,7 @@ using polar::PrimarySpecificPaths;
 using polar::llparser::Parser;
 using polar::llparser::Token;
 using polar::llparser::PersistentParserState;
+using polar::llparser::CodeCompletionCallbacksFactory;
 
 namespace lowering {
 class TypeConverter;

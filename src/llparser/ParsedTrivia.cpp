@@ -15,7 +15,7 @@
 namespace polar::llparser {
 
 bool isCommentTriviaKind(TriviaKind kind) {
-   switch (Kind) {
+   switch (kind) {
       case TriviaKind::Space:
       case TriviaKind::Tab:
       case TriviaKind::VerticalTab:

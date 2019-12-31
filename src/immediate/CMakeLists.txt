@@ -12,17 +12,22 @@
 polar_collect_files(
    TYPE_BOTH
    DIR .
-   OUTPUT_VAR POLARPHP_IDE_SOURCES)
+   OUTPUT_VAR POLARPHP_IMMEDIATE_SOURCES)
 
-polar_merge_list(POLARPHP_IDE_SOURCES POLAR_HEADERS)
+polar_merge_list(POLARPHP_IMMEDIATE_SOURCES POLAR_HEADERS)
 
-polar_add_library(PolarIDE
-   ${POLARPHP_IDE_SOURCES}
+polar_add_library(PolarImmediate
+   ${POLARPHP_IMMEDIATE_SOURCES}
    LINK_LIBS
+   LLVMExecutionEngine
+   LLVMLinker
+   LLVMTransformUtils
+   LLVMMCJIT
+
    PolarBasic
    PolarUtils
-   PolarAST
-   PolarClangImporter
+   PolarIRGen
+   PolarPILGen
+   PolarIDE
    PolarFrontend
-   PolarLLParser
-   PolarSema)
+   PolarPILOptimizer)

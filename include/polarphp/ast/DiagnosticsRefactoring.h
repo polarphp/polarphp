@@ -24,7 +24,7 @@ namespace polar {
 namespace diag {
 // Declare common diagnostics objects with their appropriate types.
 #define DIAG(KIND,ID,Options,Text,Signature) \
-  extern internal:::DiagWithArguments<void Signature>::type ID;
+  extern internal::DiagWithArguments<void Signature>::type ID;
 #include "polarphp/ast/DiagnosticsRefactoringDefs.h"
 }
 } // polar

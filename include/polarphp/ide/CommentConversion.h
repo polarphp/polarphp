@@ -1,8 +1,50 @@
+//===--- CommentConversion.h - Conversion of comments to other formats ----===//
 //
-// Created by polarboy on 12/24/19.
+// This source file is part of the Swift.org open source project
 //
+// Copyright (c) 2014 - 2017 Apple Inc. and the Swift project authors
+// Licensed under Apache License v2.0 with Runtime Library Exception
+//
+// See https://swift.org/LICENSE.txt for license information
+// See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
+//
+//===----------------------------------------------------------------------===//
 
-#ifndef POLARPHP_COMMENTCONVERSION_H
-#define POLARPHP_COMMENTCONVERSION_H
+#ifndef POLARPHP_IDE_COMMENT_CONVERSION_H
+#define POLARPHP_IDE_COMMENT_CONVERSION_H
 
-#endif //POLARPHP_COMMENTCONVERSION_H
+#include "polarphp/basic/LLVM.h"
+#include <memory>
+#include <string>
+
+namespace polar {
+
+class Decl;
+class DocComment;
+
+namespace ide {
+
+/// If the declaration has a documentation comment, prints the comment to \p OS
+/// in Clang-like XML format.
+///
+/// \returns true if the declaration has a documentation comment.
+bool getDocumentationCommentAsXML(const Decl *D, raw_ostream &OS);
+
+/// If the declaration has a documentation comment and a localization key,
+/// print it into the given output stream and return true. Else, return false.
+bool getLocalizationKey(const Decl *D, raw_ostream &OS);
+
+/// Converts the given comment to Doxygen.
+void getDocumentationCommentAsDoxygen(const DocComment *DC, raw_ostream &OS);
+
+/// Extract and normalize text from the given comment.
+std::string extractPlainTextFromComment(const StringRef Text);
+
+/// Given the raw text in markup format, convert its content to xml.
+bool convertMarkupToXML(StringRef Text, raw_ostream &OS);
+
+} // namespace ide
+} // namespace polar
+
+#endif // POLARPHP_IDE_COMMENT_CONVERSION_H
+

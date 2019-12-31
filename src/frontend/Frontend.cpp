@@ -89,11 +89,11 @@ const {
    return getPrimarySpecificPathsForAtMostOnePrimary()
       .mainInputFilenameForDebugInfo;
 }
-std::string
-CompilerInvocation::getObjCHeaderOutputPathForAtMostOnePrimary() const {
-   return getPrimarySpecificPathsForAtMostOnePrimary()
-      .supplementaryOutputs.ObjCHeaderOutputPath;
-}
+//std::string
+//CompilerInvocation::getObjCHeaderOutputPathForAtMostOnePrimary() const {
+//   return getPrimarySpecificPathsForAtMostOnePrimary()
+//      .supplementaryOutputs.ObjCHeaderOutputPath;
+//}
 std::string CompilerInvocation::getModuleOutputPathForAtMostOnePrimary() const {
    return getPrimarySpecificPathsForAtMostOnePrimary()
       .supplementaryOutputs.ModuleOutputPath;
@@ -1244,6 +1244,7 @@ bool CompilerInstance::emitPHPRanges(DiagnosticEngine &diags,
    return incremental_ranges::PHPRangesEmitter(outputPath, primaryFile,
                                                  SourceMgr, diags)
       .emit();
+
    return false;
 }
 

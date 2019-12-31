@@ -1,8 +1,19 @@
+//===---------- IDETypeIDZone.def ------------------------------*- C++ -*-===//
 //
-// Created by polarboy on 12/24/19.
+// This source file is part of the Swift.org open source project
 //
+// Copyright (c) 2014 - 2019 Apple Inc. and the Swift project authors
+// Licensed under Apache License v2.0 with Runtime Library Exception
+//
+// See https://swift.org/LICENSE.txt for license information
+// See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
+//
+//===----------------------------------------------------------------------===//
+//
+//  This definition file describes the types in the IDE type
+//  TypeID zone, for use with the TypeID template.
+//
+//===----------------------------------------------------------------------===//
 
-#ifndef POLARPHP_IDETYPEIDZONEDEF_H
-#define POLARPHP_IDETYPEIDZONEDEF_H
-
-#endif //POLARPHP_IDETYPEIDZONEDEF_H
+POLAR_TYPEID_NAMED(ide::ResolvedCursorInfo, ResolvedCursorInfo)
+POLAR_TYPEID_NAMED(ide::ResolvedRangeInfo, ResolvedRangeInfo)

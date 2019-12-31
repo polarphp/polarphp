@@ -393,10 +393,11 @@ SupplementaryOutputPathsComputer::computeOutputPathsForOneInput(
    // There is no non-path form of -emit-fixits-path
    auto fixItsOutputPath = pathsFromArguments.FixItsOutputPath;
 
-   auto objcHeaderOutputPath = determineSupplementaryOutputFilename(
-      OPT_emit_objc_header, pathsFromArguments.ObjCHeaderOutputPath,
-      filetypes::TY_ObjCHeader, "",
-      defaultSupplementaryOutputPathExcludingExtension);
+   // @todo
+//   auto objcHeaderOutputPath = determineSupplementaryOutputFilename(
+//      OPT_emit_objc_header, pathsFromArguments.ObjCHeaderOutputPath,
+//      filetypes::TY_ObjCHeader, "",
+//      defaultSupplementaryOutputPathExcludingExtension);
 
    auto loadedModuleTracePath = determineSupplementaryOutputFilename(
       OPT_emit_loaded_module_trace, pathsFromArguments.LoadedModuleTracePath,
@@ -433,7 +434,7 @@ SupplementaryOutputPathsComputer::computeOutputPathsForOneInput(
       defaultSupplementaryOutputPathExcludingExtension);
 
    SupplementaryOutputPaths sop;
-   sop.ObjCHeaderOutputPath = objcHeaderOutputPath;
+//   sop.ObjCHeaderOutputPath = objcHeaderOutputPath;
    sop.ModuleOutputPath = moduleOutputPath;
    sop.ModuleDocOutputPath = moduleDocOutputPath;
    sop.DependenciesFilePath = dependenciesFilePath;
@@ -512,7 +513,7 @@ createFromTypeToPathMap(const TypeToPathMap *map) {
    if (!map)
       return paths;
    const std::pair<filetypes::FileTypeId , std::string &> typesAndStrings[] = {
-      {filetypes::TY_ObjCHeader, paths.ObjCHeaderOutputPath},
+//      {filetypes::TY_ObjCHeader, paths.ObjCHeaderOutputPath},
       {filetypes::TY_PHPModuleFile, paths.ModuleOutputPath},
       {filetypes::TY_PHPModuleDocFile, paths.ModuleDocOutputPath},
       {filetypes::TY_PHPSourceInfoFile, paths.ModuleSourceInfoOutputPath},

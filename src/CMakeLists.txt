@@ -35,4 +35,7 @@ add_subdirectory(reflection)
 #add_subdirectory(parser)
 add_subdirectory(llparser)
 add_subdirectory(tbdgen)
+add_subdirectory(ide)
+add_subdirectory(index)
+add_subdirectory(immediate)
 
