@@ -18,32 +18,42 @@ namespace polar::sys {
 
 using llvm::ArrayRef;
 
+// Platform-independent implementation of Task,
+// a particular platform can provide its own more efficient version.
 class Task {
 public:
    /// The path to the executable which this Task will execute.
-   const char *execPath;
+   const char *ExecPath;
 
    /// Any arguments which should be passed during execution.
-   ArrayRef<const char *> args;
+   ArrayRef<const char *> Args;
 
    /// The environment which should be used during execution. If empty,
    /// the current process's environment will be used instead.
-   ArrayRef<const char *> env;
+   ArrayRef<const char *> Env;
 
-   /// True if the errors of the Task should be stored in Errors instead of Output.
-   bool separateErrors;
+   /// Context associated with this Task.
+   void *Context;
 
-   /// context associated with this Task.
-   void *context;
+   /// True if the errors of the Task should be stored in Errors instead of
+   /// Output.
+   bool SeparateErrors;
 
-   Task(const char *execPath, ArrayRef<const char *> args,
-        ArrayRef<const char *> env = llvm::None, void *context = nullptr, bool separateErrors = false)
-      : execPath(execPath),
-        args(args),
-        env(env),
-        separateErrors(separateErrors),
-        context(context)
-   {}
+   SmallString<64> StdoutPath;
+
+   SmallString<64> StderrPath;
+
+   llvm::sys::ProcessInfo PI;
+
+   Task(const char *ExecPath, ArrayRef<const char *> Args,
+        ArrayRef<const char *> Env = None, void *Context = nullptr,
+        bool SeparateErrors = false)
+      : ExecPath(ExecPath), Args(Args), Env(Env), Context(Context),
+        SeparateErrors(SeparateErrors) {}
+
+   /// Begins execution of this Task.
+   /// \returns true on error.
+   bool execute();
 };
 
 } // polar::sys

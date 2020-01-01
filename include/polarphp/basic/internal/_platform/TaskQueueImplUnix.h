@@ -26,97 +26,64 @@ namespace polar::sys {
 using llvm::ArrayRef;
 using llvm::StringRef;
 
-class Task
-{
+class Task {
    /// The path to the executable which this Task will execute.
-   const char *m_execPath;
+   const char *ExecPath;
 
    /// Any arguments which should be passed during execution.
-   ArrayRef<const char *> m_args;
+   ArrayRef<const char *> Args;
 
    /// The environment which will be used during execution. If empty, uses
    /// this process's environment.
-   ArrayRef<const char *> m_env;
+   ArrayRef<const char *> Env;
 
-   /// m_context which should be associated with this task.
-   void *m_context;
+   /// Context which should be associated with this task.
+   void *Context;
 
-   /// True if the errors of the Task should be stored in m_errors instead of m_output.
-   bool m_separateErrors;
+   /// True if the errors of the Task should be stored in Errors instead of Output.
+   bool SeparateErrors;
 
    /// The pid of this Task when executing.
-   pid_t m_pid;
+   pid_t Pid;
 
-   /// A m_pipe for reading output from the child process.
-   int m_pipe;
+   /// A pipe for reading output from the child process.
+   int Pipe;
 
-   /// A m_pipe for reading errors from the child prcess, if m_separateErrors is true.
-   int m_errorPipe;
+   /// A pipe for reading errors from the child prcess, if SeparateErrors is true.
+   int ErrorPipe;
 
-   /// The current m_state of the Task.
-   enum class TaskState { Preparing, Executing, Finished } m_state;
+   /// The current state of the Task.
+   enum class TaskState { Preparing, Executing, Finished } State;
 
    /// Once the Task has finished, this contains the buffered output of the Task.
-   std::string m_output;
+   std::string Output;
 
-   /// Once the Task has finished, if m_separateErrors is true, this contains the
+   /// Once the Task has finished, if SeparateErrors is true, this contains the
    /// errors from the Task.
-   std::string m_errors;
+   std::string Errors;
 
    /// Optional place to count I/O and subprocess events.
-   UnifiedStatsReporter *m_stats;
+   UnifiedStatsReporter *Stats;
 
 public:
-   Task(const char *execPath, ArrayRef<const char *> args,
-        ArrayRef<const char *> env, void *context, bool separateErrors,
-        UnifiedStatsReporter *usr)
-      : m_execPath(execPath), m_args(args), m_env(env), m_context(context),
-        m_separateErrors(separateErrors), m_pid(-1), m_pipe(-1), m_errorPipe(-1),
-        m_state(TaskState::Preparing), m_stats(usr)
-   {
-      assert((m_env.empty() || m_env.back() == nullptr) &&
-             "m_env must either be empty or null-terminated!");
+   Task(const char *ExecPath, ArrayRef<const char *> Args,
+        ArrayRef<const char *> Env, void *Context, bool SeparateErrors,
+        UnifiedStatsReporter *USR)
+      : ExecPath(ExecPath), Args(Args), Env(Env), Context(Context),
+        SeparateErrors(SeparateErrors), Pid(-1), Pipe(-1), ErrorPipe(-1),
+        State(TaskState::Preparing), Stats(USR) {
+      assert((Env.empty() || Env.back() == nullptr) &&
+             "Env must either be empty or null-terminated!");
    }
 
-   const char *getExecPath() const
-   {
-      return m_execPath;
-   }
-
-   ArrayRef<const char *> getArgs() const
-   {
-      return m_args;
-   }
-
-   StringRef getOutput() const
-   {
-      return m_output;
-   }
-
-   StringRef getErrors() const
-   {
-      return m_errors;
-   }
-
-   void *getContext() const
-   {
-      return m_context;
-   }
-
-   pid_t getPid() const
-   {
-      return m_pid;
-   }
-
-   int getPipe() const
-   {
-      return m_pipe;
-   }
-
-   int getErrorPipe() const
-   {
-      return m_errorPipe;
-   }
+   const char *getExecPath() const { return ExecPath; }
+   ArrayRef<const char *> getArgs() const { return Args; }
+   StringRef getOutput() const { return Output; }
+   StringRef getErrors() const { return Errors; }
+   void *getContext() const { return Context; }
+   pid_t getPid() const { return Pid; }
+   int getPipe() const { return Pipe; }
+   int getErrorPipe() const { return ErrorPipe; }
 
    /// Begins execution of this Task.
    /// \returns true on error.
@@ -124,13 +91,13 @@ public:
 
    /// Reads data from the pipes, if any is available.
    ///
-   /// If \p untilEnd is true, reads until the end of the stream; otherwise reads
+   /// If \p UntilEnd is true, reads until the end of the stream; otherwise reads
    /// once (possibly with a retry on EINTR), and returns.
    /// \returns true on error.
-   bool readFromPipes(bool untilEnd);
+   bool readFromPipes(bool UntilEnd);
 
    /// Performs any post-execution work for this Task, such as reading
-   /// piped output and closing the m_pipe.
+   /// piped output and closing the pipe.
    void finishExecution();
 };
 

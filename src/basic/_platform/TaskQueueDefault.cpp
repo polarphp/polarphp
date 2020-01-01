@@ -9,16 +9,6 @@
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
 //===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
-//
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/11/30.
 ///
 /// \file
 /// This file contains a platform-agnostic implementation of TaskQueue
@@ -33,145 +23,134 @@
 #include "polarphp/basic/TaskQueue.h"
 #include "polarphp/basic/internal/_platform/TaskQueueImplDefault.h"
 #include "polarphp/basic/LLVM.h"
-
 #include "llvm/ADT/StringExtras.h"
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/MemoryBuffer.h"
 #include "llvm/Support/Signals.h"
 
-namespace polar::sys {
+#if defined(_WIN32)
+#define NOMINMAX
+#include <Windows.h>
+#include <psapi.h>
+#endif
 
 using namespace llvm::sys;
+using namespace polar::sys;
 
-bool TaskQueue::supportsBufferingOutput()
-{
+bool TaskQueue::supportsBufferingOutput() {
    // The default implementation supports buffering output.
    return true;
 }
 
-bool TaskQueue::supportsParallelExecution()
-{
+bool TaskQueue::supportsParallelExecution() {
    // The default implementation does not support parallel execution.
    return false;
 }
 
-unsigned TaskQueue::getNumberOfParallelTasks() const
-{
+unsigned TaskQueue::getNumberOfParallelTasks() const {
    // The default implementation does not support parallel execution.
    return 1;
 }
 
-void TaskQueue::addTask(const char *execPath, ArrayRef<const char *> args,
-                        ArrayRef<const char *> env, void *context,
-                        bool separateErrors)
-{
-   std::unique_ptr<Task> T(new Task(execPath, args, env, context, separateErrors));
-   m_queuedTasks.push(std::move(T));
+void TaskQueue::addTask(const char *ExecPath, ArrayRef<const char *> Args,
+                        ArrayRef<const char *> Env, void *Context,
+                        bool SeparateErrors) {
+   auto T = std::make_unique<Task>(ExecPath, Args, Env, Context, SeparateErrors);
+   QueuedTasks.push(std::move(T));
 }
 
-bool TaskQueue::execute(TaskBeganCallback began, TaskFinishedCallback finished,
-                        TaskSignalledCallback signalled)
-{
-   bool continueExecution = true;
+bool TaskQueue::execute(TaskBeganCallback Began, TaskFinishedCallback Finished,
+                        TaskSignalledCallback Signalled) {
+   bool ContinueExecution = true;
 
    // This implementation of TaskQueue doesn't support parallel execution.
-   // We need to reference m_numberOfParallelTasks to avoid warnings, though.
-   (void)m_numberOfParallelTasks;
+   // We need to reference NumberOfParallelTasks to avoid warnings, though.
+   (void)NumberOfParallelTasks;
 
-   while (!m_queuedTasks.empty() && continueExecution) {
-      std::unique_ptr<Task> T(m_queuedTasks.front().release());
-      m_queuedTasks.pop();
+   while (!QueuedTasks.empty() && ContinueExecution) {
+      std::unique_ptr<Task> T(QueuedTasks.front().release());
+      QueuedTasks.pop();
+      bool ExecutionFailed = T->execute();
 
-      SmallVector<const char *, 128> argv;
-      argv.push_back(T->execPath);
-      argv.append(T->args.begin(), T->args.end());
-      argv.push_back(nullptr);
-
-      llvm::Optional<llvm::ArrayRef<llvm::StringRef>> Envp =
-            T->env.empty() ? decltype(Envp)(None)
-                           : decltype(Envp)(llvm::toStringRefArray(T->env.data()));
-
-      llvm::SmallString<64> stdoutPath;
-      if (fs::createTemporaryFile("stdout", "tmp",  stdoutPath)) {
+      if (ExecutionFailed) {
          return true;
       }
 
-      llvm::sys::RemoveFileOnSignal(stdoutPath);
-
-      llvm::SmallString<64> stderrPath;
-      if (T->separateErrors) {
-         if (fs::createTemporaryFile("stderr", "tmp", stdoutPath)) {
-            return true;
-         }
-         llvm::sys::RemoveFileOnSignal(stderrPath);
+      if (Began) {
+         Began(T->PI.Pid, T->Context);
       }
 
-      Optional<StringRef> redirects[] = {None, {stdoutPath}, {T->separateErrors ? stderrPath : stdoutPath}};
+      std::string ErrMsg;
+      T->PI = Wait(T->PI, 0, true, &ErrMsg);
+      int ReturnCode = T->PI.ReturnCode;
 
-      bool executionFailed = false;
-      ProcessInfo processInfo = ExecuteNoWait(T->execPath,
-                                              llvm::toStringRefArray(argv.data()), Envp,
-                                              /*redirects*/redirects, /*memoryLimit*/0,
-                                              /*errMsg*/nullptr, &executionFailed);
-      if (executionFailed) {
-         return true;
-      }
+      auto StdoutBuffer = llvm::MemoryBuffer::getFile(T->StdoutPath);
+      StringRef StdoutContents = StdoutBuffer.get()->getBuffer();
 
-      if (began) {
-         began(processInfo.Pid, T->context);
-      }
-
-      std::string errMsg;
-      processInfo = Wait(processInfo, 0, true, &errMsg);
-      int ReturnCode = processInfo.ReturnCode;
-
-      auto stdoutBuffer = llvm::MemoryBuffer::getFile(stdoutPath);
-      StringRef stdoutContents = stdoutBuffer.get()->getBuffer();
-
-      StringRef stderrContents;
-      if (T->separateErrors) {
-         auto stderrBuffer = llvm::MemoryBuffer::getFile(stderrPath);
-         stderrContents = stderrBuffer.get()->getBuffer();
+      StringRef StderrContents;
+      if (T->SeparateErrors) {
+         auto StderrBuffer = llvm::MemoryBuffer::getFile(T->StderrPath);
+         StderrContents = StderrBuffer.get()->getBuffer();
       }
 
 #if defined(_WIN32)
       // Wait() sets the upper two bits of the return code to indicate warnings
-      // (10) and errors (11).
-      //
-      // This isn't a true signal on Windows, but we'll treat it as such so that
-      // we clean up after it properly
-      bool crashed = ReturnCode & 0xC0000000;
+    // (10) and errors (11).
+    //
+    // This isn't a true signal on Windows, but we'll treat it as such so that
+    // we clean up after it properly
+    bool Crashed = ReturnCode & 0xC0000000;
+
+    FILETIME CreationTime;
+    FILETIME ExitTime;
+    FILETIME UtimeTicks;
+    FILETIME StimeTicks;
+    PROCESS_MEMORY_COUNTERS Counters = {};
+    GetProcessTimes(T->PI.Process, &CreationTime, &ExitTime, &StimeTicks,
+                    &UtimeTicks);
+    // Each tick is 100ns
+    uint64_t Utime =
+        ((uint64_t)UtimeTicks.dwHighDateTime << 32 | UtimeTicks.dwLowDateTime) /
+        10;
+    uint64_t Stime =
+        ((uint64_t)StimeTicks.dwHighDateTime << 32 | StimeTicks.dwLowDateTime) /
+        10;
+    GetProcessMemoryInfo(T->PI.Process, &Counters, sizeof(Counters));
+
+    TaskProcessInformation TPI(T->PI.Pid, Utime, Stime,
+                               Counters.PeakWorkingSetSize);
 #else
       // Wait() returning a return code of -2 indicates the process received
       // a signal during execution.
-      bool crashed = ReturnCode == -2;
+      bool Crashed = ReturnCode == -2;
+      TaskProcessInformation TPI(T->PI.Pid);
 #endif
-      if (crashed) {
-         if (signalled) {
+      if (Crashed) {
+         if (Signalled) {
             TaskFinishedResponse Response =
-                  signalled(processInfo.Pid, errMsg, stdoutContents, stderrContents, T->context, ReturnCode, TaskProcessInformation(processInfo.Pid));
-            continueExecution = Response != TaskFinishedResponse::StopExecution;
+               Signalled(T->PI.Pid, ErrMsg, StdoutContents, StderrContents,
+                         T->Context, ReturnCode, TPI);
+            ContinueExecution = Response != TaskFinishedResponse::StopExecution;
          } else {
-            // If we don't have a signalled callback, unconditionally stop.
-            continueExecution = false;
+            // If we don't have a Signalled callback, unconditionally stop.
+            ContinueExecution = false;
          }
       } else {
          // Wait() returned a normal return code, so just indicate that the task
          // finished.
-         if (finished) {
-            TaskFinishedResponse Response = finished(processInfo.Pid, processInfo.ReturnCode,
-                                                     stdoutContents, stderrContents, TaskProcessInformation(processInfo.Pid), T->context);
-            continueExecution = Response != TaskFinishedResponse::StopExecution;
-         } else if (processInfo.ReturnCode != 0) {
-            continueExecution = false;
+         if (Finished) {
+            TaskFinishedResponse Response =
+               Finished(T->PI.Pid, T->PI.ReturnCode, StdoutContents,
+                        StderrContents, TPI, T->Context);
+            ContinueExecution = Response != TaskFinishedResponse::StopExecution;
+         } else if (T->PI.ReturnCode != 0) {
+            ContinueExecution = false;
          }
       }
-      llvm::sys::fs::remove(stdoutPath);
-      if (T->separateErrors) {
-         llvm::sys::fs::remove(stderrPath);
-      }
+      llvm::sys::fs::remove(T->StdoutPath);
+      if (T->SeparateErrors)
+         llvm::sys::fs::remove(T->StderrPath);
    }
-   return !continueExecution;
-}
 
-} // polar::sys
+   return !ContinueExecution;
+}

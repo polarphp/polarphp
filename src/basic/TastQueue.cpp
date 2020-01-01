@@ -7,17 +7,7 @@
 //
 // See https://swift.org/LICENSE.txt for license information
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
-//===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/04/25.
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -28,6 +18,11 @@
 //===----------------------------------------------------------------------===//
 
 #include "polarphp/basic/TaskQueue.h"
+
+using namespace polar;
+using namespace polar::sys;
+
+// Include the correct TaskQueue implementation.
 // Include the correct TaskQueue implementation.
 #if LLVM_ON_UNIX && !defined(__CYGWIN__) && !defined(__HAIKU__)
 #include "polarphp/basic/internal/_platform/TaskQueueImplUnix.h"
@@ -35,92 +30,83 @@
 #include "polarphp/basic/internal/_platform/TaskQueueImplDefault.h"
 #endif
 
-namespace polar::sys {
-
-using polar::json::Output;
-
-void TaskProcessInformation::ResourceUsage::provideMapping(Output &out)
-{
-   out.mapRequired("utime", utime);
-   out.mapRequired("stime", stime);
-   out.mapRequired("maxrss", maxrss);
+namespace polar {
+namespace sys {
+void TaskProcessInformation::ResourceUsage::provideMapping(json::Output &out) {
+   out.mapRequired("utime", Utime);
+   out.mapRequired("stime", Stime);
+   out.mapRequired("maxrss", Maxrss);
 }
 
-void TaskProcessInformation::provideMapping(Output &out)
-{
-   out.mapRequired("real_pid", m_osPid);
-   if (m_processUsage.hasValue()) {
-      out.mapRequired("usage", m_processUsage.getValue());
-   }
+void TaskProcessInformation::provideMapping(json::Output &out) {
+   out.mapRequired("real_pid", OSPid);
+   if (ProcessUsage.hasValue())
+      out.mapRequired("usage", ProcessUsage.getValue());
+}
+}
 }
 
-TaskQueue::TaskQueue(unsigned numberOfParallelTasks,
-                     UnifiedStatsReporter *usr)
-   : m_numberOfParallelTasks(numberOfParallelTasks),
-     m_stats(usr)
-{}
+TaskQueue::TaskQueue(unsigned NumberOfParallelTasks,
+                     UnifiedStatsReporter *USR)
+   : NumberOfParallelTasks(NumberOfParallelTasks),
+     Stats(USR){}
 
 TaskQueue::~TaskQueue() = default;
 
 // DummyTaskQueue implementation
 
-DummyTaskQueue::DummyTaskQueue(unsigned numberOfParallelTasks)
-   : TaskQueue(numberOfParallelTasks)
-{}
+DummyTaskQueue::DummyTaskQueue(unsigned NumberOfParallelTasks)
+   : TaskQueue(NumberOfParallelTasks) {}
 
 DummyTaskQueue::~DummyTaskQueue() = default;
 
-void DummyTaskQueue::addTask(const char *execPath, ArrayRef<const char *> args,
-                             ArrayRef<const char *> env, void *context,
-                             bool separateErrors)
-{
-   m_queuedTasks.emplace(std::unique_ptr<DummyTask>(
-                            new DummyTask(execPath, args, env, context, separateErrors)));
+void DummyTaskQueue::addTask(const char *ExecPath, ArrayRef<const char *> Args,
+                             ArrayRef<const char *> Env, void *Context,
+                             bool SeparateErrors) {
+   QueuedTasks.emplace(std::unique_ptr<DummyTask>(
+      new DummyTask(ExecPath, Args, Env, Context, SeparateErrors)));
 }
 
-bool DummyTaskQueue::execute(TaskQueue::TaskBeganCallback began,
-                             TaskQueue::TaskFinishedCallback finished,
-                             TaskQueue::TaskSignalledCallback signalled)
-{
+bool DummyTaskQueue::execute(TaskQueue::TaskBeganCallback Began,
+                             TaskQueue::TaskFinishedCallback Finished,
+                             TaskQueue::TaskSignalledCallback Signalled) {
    using PidTaskPair = std::pair<ProcessId, std::unique_ptr<DummyTask>>;
-   std::queue<PidTaskPair> executingTasks;
+   std::queue<PidTaskPair> ExecutingTasks;
 
-   bool subtaskFailed = false;
+   bool SubtaskFailed = false;
 
-   static ProcessId pid = 0;
+   static ProcessId Pid = 0;
 
-   unsigned maxNumberOfParallelTasks = getNumberOfParallelTasks();
+   unsigned MaxNumberOfParallelTasks = getNumberOfParallelTasks();
 
-   while ((!m_queuedTasks.empty() && !subtaskFailed) ||
-          !executingTasks.empty()) {
+   while ((!QueuedTasks.empty() && !SubtaskFailed) ||
+          !ExecutingTasks.empty()) {
       // Enqueue additional tasks if we have additional tasks, we aren't already
       // at the parallel limit, and no earlier subtasks have failed.
-      while (!subtaskFailed && !m_queuedTasks.empty() &&
-             executingTasks.size() < maxNumberOfParallelTasks) {
-         std::unique_ptr<DummyTask> T(m_queuedTasks.front().release());
-         m_queuedTasks.pop();
+      while (!SubtaskFailed && !QueuedTasks.empty() &&
+             ExecutingTasks.size() < MaxNumberOfParallelTasks) {
+         std::unique_ptr<DummyTask> T(QueuedTasks.front().release());
+         QueuedTasks.pop();
 
-         if (began) {
-            began(++pid, T->context);
-         }
-         executingTasks.push(PidTaskPair(pid, std::move(T)));
+         if (Began)
+            Began(++Pid, T->Context);
+
+         ExecutingTasks.push(PidTaskPair(Pid, std::move(T)));
       }
 
       // Finish the first scheduled task.
-      PidTaskPair taskPair = std::move(executingTasks.front());
-      executingTasks.pop();
+      PidTaskPair P = std::move(ExecutingTasks.front());
+      ExecutingTasks.pop();
 
-      if (finished) {
-         std::string output = "output placeholder\n";
-         std::string errors =
-               taskPair.second->separateErrors ? "Error placeholder\n" : "";
-         if (finished(taskPair.first, 0, output, errors, TaskProcessInformation(pid),
-                      taskPair.second->context) == TaskFinishedResponse::StopExecution) {
-            subtaskFailed = true;
-         }
+      if (Finished) {
+         std::string Output = "Output placeholder\n";
+         std::string Errors =
+            P.second->SeparateErrors ? "Error placeholder\n" : "";
+         if (Finished(P.first, 0, Output, Errors, TaskProcessInformation(Pid),
+                      P.second->Context) == TaskFinishedResponse::StopExecution)
+            SubtaskFailed = true;
       }
    }
+
    return false;
 }
-
-} // polar::sys

@@ -18,6 +18,7 @@ set(platformDir ${CMAKE_CURRENT_SOURCE_DIR}/_platform)
 
 polar_merge_list(POLARPHP_BASIC_SOURCES POLAR_HEADERS)
 if (UNIX)
+# TODO #if LLVM_ON_UNIX && !defined(__CYGWIN__) && !defined(__HAIKU__)
    list(APPEND POLARPHP_BASIC_SOURCES ${platformDir}/TaskQueueUnix.cpp)
 else()
    list(APPEND POLARPHP_BASIC_SOURCES ${platformDir}/TaskQueueDefault.cpp)
