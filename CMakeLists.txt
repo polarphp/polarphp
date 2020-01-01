@@ -473,7 +473,7 @@ include_directories(${POLAR_SOURCE_DIR}
 include(ImportLLVM)
 include(ImportClang)
 include(ImportThirdparty)
-include(AddPolarphpTableGen)
+include(PolarAddTableGen)
 
 add_subdirectory(devtools)
 add_subdirectory(assets)
