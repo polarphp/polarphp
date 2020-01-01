@@ -56,7 +56,7 @@ SourceFileDepGraph::getSourceFileNodePair() const {
                                                                  getNode(1));
 }
 
-StringRef SourceFileDepGraph::getSwiftDepsFromSourceFileProvide() const {
+StringRef SourceFileDepGraph::getPHPDepsFromSourceFileProvide() const {
    return getSourceFileNodePair()
       .getInterface()
       ->getKey()

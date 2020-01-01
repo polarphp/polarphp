@@ -10,84 +10,68 @@
 //
 //===----------------------------------------------------------------------===//
 
-
 #ifndef POLARPHP_DRIVER_PRETTYSTACKTRACE_H
 #define POLARPHP_DRIVER_PRETTYSTACKTRACE_H
 
 #include "polarphp/basic/FileTypes.h"
 #include "llvm/Support/PrettyStackTrace.h"
 
-namespace polar::driver {
+namespace polar {
+namespace driver {
 
 class Action;
 class Job;
 class CommandOutput;
 
-class PrettyStackTraceDriverAction : public llvm::PrettyStackTraceEntry
-{
-public:
-   PrettyStackTraceDriverAction(const char *desc, const Action *action)
-      : m_theAction(action),
-        m_description(desc)
-   {}
+class PrettyStackTraceDriverAction : public llvm::PrettyStackTraceEntry {
+   const Action *TheAction;
+   const char *Description;
 
+public:
+   PrettyStackTraceDriverAction(const char *desc, const Action *A)
+      : TheAction(A), Description(desc) {}
    void print(llvm::raw_ostream &OS) const override;
-private:
-   const Action *m_theAction;
-   const char *m_description;
 };
 
-class PrettyStackTraceDriverJob : public llvm::PrettyStackTraceEntry
-{
+class PrettyStackTraceDriverJob : public llvm::PrettyStackTraceEntry {
+   const Job *TheJob;
+   const char *Description;
+
 public:
-   PrettyStackTraceDriverJob(const char *desc, const Job *job)
-      : m_theJob(job),
-        m_description(desc) {}
-   void print(llvm::raw_ostream &stream) const override;
-private:
-   const Job *m_theJob;
-   const char *m_description;
+   PrettyStackTraceDriverJob(const char *desc, const Job *A)
+      : TheJob(A), Description(desc) {}
+   void print(llvm::raw_ostream &OS) const override;
 };
 
-class PrettyStackTraceDriverCommandOutput : public llvm::PrettyStackTraceEntry
-{
-public:
-   PrettyStackTraceDriverCommandOutput(const char *desc, const CommandOutput *output)
-      : m_theCommandOutput(output),
-        m_description(desc)
-   {}
+class PrettyStackTraceDriverCommandOutput : public llvm::PrettyStackTraceEntry {
+   const CommandOutput *TheCommandOutput;
+   const char *Description;
 
+public:
+   PrettyStackTraceDriverCommandOutput(const char *desc, const CommandOutput *A)
+      : TheCommandOutput(A), Description(desc) {}
    void print(llvm::raw_ostream &OS) const override;
-private:
-   const CommandOutput *m_theCommandOutput;
-   const char *m_description;
 };
 
 class PrettyStackTraceDriverCommandOutputAddition
-      : public llvm::PrettyStackTraceEntry
-{
+   : public llvm::PrettyStackTraceEntry {
+   const CommandOutput *TheCommandOutput;
+   StringRef PrimaryInput;
+   filetypes::FileTypeId NewOutputType;
+   StringRef NewOutputName;
+   const char *Description;
+
 public:
    PrettyStackTraceDriverCommandOutputAddition(const char *desc,
-                                               const CommandOutput *output,
+                                               const CommandOutput *A,
                                                StringRef Primary,
                                                filetypes::FileTypeId type,
-                                               StringRef newOutputType)
-      : m_theCommandOutput(output),
-        m_primaryInput(Primary),
-        m_newOutputType(type),
-        m_newOutputName(newOutputType),
-        m_description(desc)
-   {}
-
-   void print(llvm::raw_ostream &outStream) const override;
-private:
-   const CommandOutput *m_theCommandOutput;
-   StringRef m_primaryInput;
-   filetypes::FileTypeId m_newOutputType;
-   StringRef m_newOutputName;
-   const char *m_description;
+                                               StringRef New)
+      : TheCommandOutput(A), PrimaryInput(Primary), NewOutputType(type),
+        NewOutputName(New), Description(desc) {}
+   void print(llvm::raw_ostream &OS) const override;
 };
-
-} // polar::driver
+} // driver
+} // polar
 
 #endif // POLARPHP_DRIVER_PRETTYSTACKTRACE_H

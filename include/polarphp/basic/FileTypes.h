@@ -78,6 +78,18 @@ static inline void for_all_types(llvm::function_ref<void(filetypes::FileTypeId)>
    }
 }
 
+/// Some files are produced by the frontend and read by the driver in order to
+/// support incremental compilation. Invoke the passed-in function for every
+/// such file type.
+static inline void
+for_each_incremental_output_type(llvm::function_ref<void(filetypes::FileTypeId)> fn) {
+  static const std::vector<filetypes::FileTypeId> incrementalOutputTypes = {
+     filetypes::TY_PHPDeps, filetypes::TY_PHPRanges,
+     filetypes::TY_CompiledSource};
+  for (auto type : incrementalOutputTypes)
+    fn(type);
+}
+
 } // polar::filetypes
 
 namespace llvm {

@@ -2,23 +2,13 @@
 //
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2014 - 2018 Apple Inc. and the Swift project authors
+// Copyright (c) 2014 - 2019 Apple Inc. and the Swift project authors
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://swift.org/LICENSE.txt for license information
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
 //===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
-//
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/12/03.
 
 #include "polarphp/driver/internal/ToolChains.h"
 
@@ -44,145 +34,131 @@
 #include "llvm/Support/Process.h"
 #include "llvm/Support/Program.h"
 
-using namespace llvm::opt;
+using namespace polar;
 using namespace polar::driver;
+using namespace llvm::opt;
 
-namespace polar::driver {
-
-using polar::interleave;
-
-bool ToolChain::JobContext::shouldUseInputFileList() const
-{
-   return getTopLevelInputFiles().size() > m_compilation.getFilelistThreshold();
+bool ToolChain::JobContext::shouldUseInputFileList() const {
+   return getTopLevelInputFiles().size() > C.getFilelistThreshold();
 }
 
-bool ToolChain::JobContext::shouldUsePrimaryInputFileListInFrontendInvocation() const
-{
-   return inputActions.size() > m_compilation.getFilelistThreshold();
+bool ToolChain::JobContext::shouldUsePrimaryInputFileListInFrontendInvocation()
+const {
+   return InputActions.size() > C.getFilelistThreshold();
 }
 
-bool ToolChain::JobContext::shouldUseMainOutputFileListInFrontendInvocation() const
-{
-   return output.getPrimaryOutputFilenames().size() > m_compilation.getFilelistThreshold();
+bool ToolChain::JobContext::shouldUseMainOutputFileListInFrontendInvocation()
+const {
+   return Output.getPrimaryOutputFilenames().size() > C.getFilelistThreshold();
 }
 
-bool ToolChain::JobContext::shouldUseSupplementaryOutputFileMapInFrontendInvocation() const
-{
+bool ToolChain::JobContext::
+shouldUseSupplementaryOutputFileMapInFrontendInvocation() const {
    static const unsigned UpperBoundOnSupplementaryOutputFileTypes =
-         filetypes::TY_INVALID;
-   return inputActions.size() * UpperBoundOnSupplementaryOutputFileTypes >
-         m_compilation.getFilelistThreshold();
+      filetypes::TY_INVALID;
+   return InputActions.size() * UpperBoundOnSupplementaryOutputFileTypes >
+          C.getFilelistThreshold();
 }
 
-bool ToolChain::JobContext::shouldFilterFrontendInputsByType() const
-{
+bool ToolChain::JobContext::shouldFilterFrontendInputsByType() const {
    // FIXME: SingleCompile has not filtered its inputs in the past and now people
    // rely upon that. But we would like the compilation modes to be consistent.
-   return outputInfo.compilerMode != OutputInfo::Mode::SingleCompile;
+   return OI.CompilerMode != OutputInfo::Mode::SingleCompile;
 }
 
-void ToolChain::addInputsOfType(ArgStringList &arguments,
-                                ArrayRef<const Action *> inputs,
-                                filetypes::FileTypeId inputType,
-                                const char *prefixArgument) const
-{
-   for (auto &input : inputs) {
-      if (input->getType() != inputType) {
+void ToolChain::addInputsOfType(ArgStringList &Arguments,
+                                ArrayRef<const Action *> Inputs,
+                                filetypes::FileTypeId InputType,
+                                const char *PrefixArgument) const {
+   for (auto &Input : Inputs) {
+      if (Input->getType() != InputType)
          continue;
-      }
-      if (prefixArgument) {
-         arguments.push_back(prefixArgument);
-      }
-      arguments.push_back(cast<InputAction>(input)->getInputArg().getValue());
+      if (PrefixArgument)
+         Arguments.push_back(PrefixArgument);
+      Arguments.push_back(cast<InputAction>(Input)->getInputArg().getValue());
    }
 }
 
-void ToolChain::addInputsOfType(ArgStringList &arguments,
-                                ArrayRef<const Job *> jobs,
-                                const llvm::opt::ArgList &args,
-                                filetypes::FileTypeId inputType,
-                                const char *prefixArgument) const
-{
-   for (const Job *cmd : jobs) {
-      auto output = cmd->getOutput().getAnyOutputForType(inputType);
+void ToolChain::addInputsOfType(ArgStringList &Arguments,
+                                ArrayRef<const Job *> Jobs,
+                                const llvm::opt::ArgList &Args,
+                                filetypes::FileTypeId InputType,
+                                const char *PrefixArgument) const {
+   for (const Job *Cmd : Jobs) {
+      auto output = Cmd->getOutput().getAnyOutputForType(InputType);
       if (!output.empty()) {
-         if (prefixArgument) {
-            arguments.push_back(prefixArgument);
-         }
-         arguments.push_back(args.MakeArgString(output));
+         if (PrefixArgument)
+            Arguments.push_back(PrefixArgument);
+         Arguments.push_back(Args.MakeArgString(output));
       }
    }
 }
 
-void ToolChain::addPrimaryInputsOfType(ArgStringList &arguments,
-                                       ArrayRef<const Job *> jobs,
-                                       const llvm::opt::ArgList &args,
-                                       filetypes::FileTypeId inputType,
-                                       const char *prefixArgument) const
-{
-   for (const Job *cmd : jobs) {
-      auto &outputInfo = cmd->getOutput();
-      if (outputInfo.getPrimaryOutputType() == inputType) {
-         for (auto output : outputInfo.getPrimaryOutputFilenames()) {
-            if (prefixArgument) {
-               arguments.push_back(prefixArgument);
-            }
-            arguments.push_back(args.MakeArgString(output));
+void ToolChain::addPrimaryInputsOfType(ArgStringList &Arguments,
+                                       ArrayRef<const Job *> Jobs,
+                                       const llvm::opt::ArgList &Args,
+                                       filetypes::FileTypeId InputType,
+                                       const char *PrefixArgument) const {
+   for (const Job *Cmd : Jobs) {
+      auto &outputInfo = Cmd->getOutput();
+      if (outputInfo.getPrimaryOutputType() == InputType) {
+         for (auto Output : outputInfo.getPrimaryOutputFilenames()) {
+            if (PrefixArgument)
+               Arguments.push_back(PrefixArgument);
+            Arguments.push_back(Args.MakeArgString(Output));
          }
       }
    }
 }
 
-static bool add_outputs_of_type(ArgStringList &arguments,
-                                CommandOutput const &output,
-                                const llvm::opt::ArgList &args,
-                                filetypes::FileTypeId outputType,
-                                const char *prefixArgument = nullptr)
-{
-   bool added = false;
-   for (auto output : output.getAdditionalOutputsForType(outputType)) {
-      assert(!output.empty());
-      if (prefixArgument) {
-         arguments.push_back(prefixArgument);
-      }
-      arguments.push_back(args.MakeArgString(output));
-      added = true;
+static bool addOutputsOfType(ArgStringList &Arguments,
+                             CommandOutput const &Output,
+                             const llvm::opt::ArgList &Args,
+                             filetypes::FileTypeId OutputType,
+                             const char *PrefixArgument = nullptr) {
+   bool Added = false;
+   for (auto Output : Output.getAdditionalOutputsForType(OutputType)) {
+      assert(!Output.empty());
+      if (PrefixArgument)
+         Arguments.push_back(PrefixArgument);
+      Arguments.push_back(Args.MakeArgString(Output));
+      Added = true;
    }
-   return added;
+   return Added;
 }
 
 /// Handle arguments common to all invocations of the frontend (compilation,
 /// module-merging, LLDB's REPL, etc).
-static void add_common_frontend_args(const ToolChain &toolchain, const OutputInfo &outputInfo,
-                                     const CommandOutput &output,
-                                     const ArgList &inputArgs,
-                                     ArgStringList &arguments) {
-   const llvm::Triple &triple = toolchain.getTriple();
+static void addCommonFrontendArgs(const ToolChain &TC, const OutputInfo &OI,
+                                  const CommandOutput &output,
+                                  const ArgList &inputArgs,
+                                  ArgStringList &arguments) {
+   const llvm::Triple &Triple = TC.getTriple();
 
    // Only pass -target to the REPL or immediate modes if it was explicitly
    // specified on the command line.
-   switch (outputInfo.compilerMode) {
-   case OutputInfo::Mode::REPL:
-   case OutputInfo::Mode::Immediate:
-      if (!inputArgs.hasArg(options::OPT_target))
+   switch (OI.CompilerMode) {
+      case OutputInfo::Mode::REPL:
+      case OutputInfo::Mode::Immediate:
+         if (!inputArgs.hasArg(options::OPT_target))
+            break;
+         LLVM_FALLTHROUGH;
+      case OutputInfo::Mode::StandardCompile:
+      case OutputInfo::Mode::SingleCompile:
+      case OutputInfo::Mode::BatchModeCompile:
+         arguments.push_back("-target");
+         arguments.push_back(inputArgs.MakeArgString(Triple.str()));
          break;
-      LLVM_FALLTHROUGH;
-   case OutputInfo::Mode::StandardCompile:
-   case OutputInfo::Mode::SingleCompile:
-   case OutputInfo::Mode::BatchModeCompile:
-      arguments.push_back("-target");
-      arguments.push_back(inputArgs.MakeArgString(triple.str()));
-      break;
    }
 
    // Enable address top-byte ignored in the ARM64 backend.
-   if (triple.getArch() == llvm::Triple::aarch64) {
+   if (Triple.getArch() == llvm::Triple::aarch64) {
       arguments.push_back("-Xllvm");
       arguments.push_back("-aarch64-use-tbi");
    }
 
    // Enable or disable ObjC interop appropriately for the platform
-   if (triple.isOSDarwin()) {
+   if (Triple.isOSDarwin()) {
       arguments.push_back("-enable-objc-interop");
    } else {
       arguments.push_back("-disable-objc-interop");
@@ -191,9 +167,13 @@ static void add_common_frontend_args(const ToolChain &toolchain, const OutputInf
    // Handle the CPU and its preferences.
    inputArgs.AddLastArg(arguments, options::OPT_target_cpu);
 
-   if (!outputInfo.sdkPath.empty()) {
+   if (!OI.SDKPath.empty()) {
       arguments.push_back("-sdk");
-      arguments.push_back(inputArgs.MakeArgString(outputInfo.sdkPath));
+      arguments.push_back(inputArgs.MakeArgString(OI.SDKPath));
+   }
+
+   if (llvm::sys::Process::StandardErrHasColors()) {
+      arguments.push_back("-color-diagnostics");
    }
 
    inputArgs.AddAllArgs(arguments, options::OPT_I);
@@ -201,14 +181,20 @@ static void add_common_frontend_args(const ToolChain &toolchain, const OutputInf
 
    inputArgs.AddLastArg(arguments, options::OPT_AssertConfig);
    inputArgs.AddLastArg(arguments, options::OPT_autolink_force_load);
-   inputArgs.AddLastArg(arguments, options::OPT_color_diagnostics);
+   inputArgs.AddLastArg(arguments,
+                        options::OPT_color_diagnostics,
+                        options::OPT_no_color_diagnostics);
    inputArgs.AddLastArg(arguments, options::OPT_fixit_all);
+//   inputArgs.AddLastArg(arguments,
+//                        options::OPT_warn_swift3_objc_inference_minimal,
+//                        options::OPT_warn_swift3_objc_inference_complete);
    inputArgs.AddLastArg(arguments, options::OPT_warn_implicit_overrides);
    inputArgs.AddLastArg(arguments, options::OPT_typo_correction_limit);
    inputArgs.AddLastArg(arguments, options::OPT_enable_app_extension);
    inputArgs.AddLastArg(arguments, options::OPT_enable_library_evolution);
    inputArgs.AddLastArg(arguments, options::OPT_enable_testing);
    inputArgs.AddLastArg(arguments, options::OPT_enable_private_imports);
+   inputArgs.AddLastArg(arguments, options::OPT_enable_cxx_interop);
    inputArgs.AddLastArg(arguments, options::OPT_g_Group);
    inputArgs.AddLastArg(arguments, options::OPT_debug_info_format);
    inputArgs.AddLastArg(arguments, options::OPT_import_underlying_module);
@@ -219,6 +205,7 @@ static void add_common_frontend_args(const ToolChain &toolchain, const OutputInf
    inputArgs.AddLastArg(arguments, options::OPT_resource_dir);
    inputArgs.AddLastArg(arguments, options::OPT_solver_memory_threshold);
    inputArgs.AddLastArg(arguments, options::OPT_value_recursion_threshold);
+//   inputArgs.AddLastArg(arguments, options::OPT_warn_swift3_objc_inference);
    inputArgs.AddLastArg(arguments, options::OPT_Rpass_EQ);
    inputArgs.AddLastArg(arguments, options::OPT_Rpass_missed_EQ);
    inputArgs.AddLastArg(arguments, options::OPT_suppress_warnings);
@@ -227,9 +214,10 @@ static void add_common_frontend_args(const ToolChain &toolchain, const OutputInf
    inputArgs.AddLastArg(arguments, options::OPT_profile_coverage_mapping);
    inputArgs.AddLastArg(arguments, options::OPT_warnings_as_errors);
    inputArgs.AddLastArg(arguments, options::OPT_sanitize_EQ);
+   inputArgs.AddLastArg(arguments, options::OPT_sanitize_recover_EQ);
    inputArgs.AddLastArg(arguments, options::OPT_sanitize_coverage_EQ);
    inputArgs.AddLastArg(arguments, options::OPT_static);
-   inputArgs.AddLastArg(arguments, options::OPT_polarphp_version);
+   inputArgs.AddLastArg(arguments, options::OPT_php_version);
    inputArgs.AddLastArg(arguments, options::OPT_enforce_exclusivity_EQ);
    inputArgs.AddLastArg(arguments, options::OPT_stats_output_dir);
    inputArgs.AddLastArg(arguments, options::OPT_trace_stats_events);
@@ -241,11 +229,15 @@ static void add_common_frontend_args(const ToolChain &toolchain, const OutputInf
    inputArgs.AddLastArg(arguments, options::OPT_RemoveRuntimeAsserts);
    inputArgs.AddLastArg(arguments, options::OPT_AssumeSingleThreaded);
    inputArgs.AddLastArg(arguments,
-                        options::OPT_enable_experimental_dependencies);
+                        options::OPT_enable_fine_grained_dependencies);
    inputArgs.AddLastArg(arguments,
-                        options::OPT_experimental_dependency_include_intrafile);
+                        options::OPT_fine_grained_dependency_include_intrafile);
    inputArgs.AddLastArg(arguments, options::OPT_package_description_version);
    inputArgs.AddLastArg(arguments, options::OPT_serialize_diagnostics_path);
+   inputArgs.AddLastArg(arguments, options::OPT_debug_diagnostic_names);
+   inputArgs.AddLastArg(arguments, options::OPT_enable_astscope_lookup);
+   inputArgs.AddLastArg(arguments, options::OPT_disable_astscope_lookup);
+   inputArgs.AddLastArg(arguments, options::OPT_disable_parser_lookup);
 
    // Pass on any build config options
    inputArgs.AddAllArgs(arguments, options::OPT_D);
@@ -281,657 +273,756 @@ static void add_common_frontend_args(const ToolChain &toolchain, const OutputInf
    // Pass through any subsystem flags.
    inputArgs.AddAllArgs(arguments, options::OPT_Xllvm);
    inputArgs.AddAllArgs(arguments, options::OPT_Xcc);
+}
 
-   if (llvm::sys::Process::StandardErrHasColors()) {
-      arguments.push_back("-color-diagnostics");
+static void addRuntimeLibraryFlags(const OutputInfo &OI,
+                                   ArgStringList &Arguments) {
+   if (!OI.RuntimeVariant)
+      return;
+
+   const OutputInfo::MSVCRuntime RT = OI.RuntimeVariant.getValue();
+
+   Arguments.push_back("-autolink-library");
+   Arguments.push_back("oldnames");
+
+   Arguments.push_back("-autolink-library");
+   switch (RT) {
+      case OutputInfo::MSVCRuntime::MultiThreaded:
+         Arguments.push_back("libcmt");
+         break;
+
+      case OutputInfo::MSVCRuntime::MultiThreadedDebug:
+         Arguments.push_back("libcmtd");
+         break;
+
+      case OutputInfo::MSVCRuntime::MultiThreadedDLL:
+         Arguments.push_back("msvcrt");
+         break;
+
+      case OutputInfo::MSVCRuntime::MultiThreadedDebugDLL:
+         Arguments.push_back("msvcrtd");
+         break;
+   }
+
+   // NOTE(compnerd) we do not support /ML and /MLd
+   Arguments.push_back("-Xcc");
+   Arguments.push_back("-D_MT");
+
+   if (RT == OutputInfo::MSVCRuntime::MultiThreadedDLL ||
+       RT == OutputInfo::MSVCRuntime::MultiThreadedDebugDLL) {
+      Arguments.push_back("-Xcc");
+      Arguments.push_back("-D_DLL");
    }
 }
 
 ToolChain::InvocationInfo
 ToolChain::constructInvocation(const CompileJobAction &job,
-                               const JobContext &context) const
-{
-   InvocationInfo invocationInfo{POLARPHP_EXECUTABLE_NAME};
-   ArgStringList &arguments = invocationInfo.arguments;
-   invocationInfo.allowsResponseFiles = true;
+                               const JobContext &context) const {
+   InvocationInfo II{POLARPHP_EXECUTABLE_NAME};
+   ArgStringList &Arguments = II.Arguments;
+   II.allowsResponseFiles = true;
 
-   for (auto &s : getDriver().getPolarphpProgramArgs()) {
-      arguments.push_back(s.c_str());
-   }
-   arguments.push_back("-frontend");
+   for (auto &s : getDriver().getSwiftProgramArgs())
+      Arguments.push_back(s.c_str());
+   Arguments.push_back("-frontend");
+
    {
       // Determine the frontend mode option.
-      const char *frontendModeOption = context.computeFrontendModeForCompile();
-      assert(frontendModeOption != nullptr &&
-            "No frontend mode option specified!");
-      arguments.push_back(frontendModeOption);
+      const char *FrontendModeOption = context.computeFrontendModeForCompile();
+      assert(FrontendModeOption != nullptr &&
+             "No frontend mode option specified!");
+      Arguments.push_back(FrontendModeOption);
    }
 
-   context.addFrontendInputAndOutputArguments(arguments, invocationInfo.filelistInfos);
+   context.addFrontendInputAndOutputArguments(Arguments, II.FilelistInfos);
 
    // Forward migrator flags.
-   if (auto dataPath =
-       context.args.getLastArg(options::OPT_api_diff_data_file)) {
-      arguments.push_back("-api-diff-data-file");
-      arguments.push_back(dataPath->getValue());
+   if (auto DataPath =
+      context.Args.getLastArg(options::OPT_api_diff_data_file)) {
+      Arguments.push_back("-api-diff-data-file");
+      Arguments.push_back(DataPath->getValue());
    }
-   if (auto DataDir = context.args.getLastArg(options::OPT_api_diff_data_dir)) {
-      arguments.push_back("-api-diff-data-dir");
-      arguments.push_back(DataDir->getValue());
+   if (auto DataDir = context.Args.getLastArg(options::OPT_api_diff_data_dir)) {
+      Arguments.push_back("-api-diff-data-dir");
+      Arguments.push_back(DataDir->getValue());
    }
-   if (context.args.hasArg(options::OPT_dump_usr)) {
-      arguments.push_back("-dump-usr");
-   }
-
-   if (context.args.hasArg(options::OPT_parse_stdlib)) {
-      arguments.push_back("-disable-objc-attr-requires-foundation-module");
-   }
-   add_common_frontend_args(*this, context.outputInfo, context.output, context.args,
-                            arguments);
-
-   if (context.args.hasArg(options::OPT_parse_as_library) ||
-       context.args.hasArg(options::OPT_emit_library)) {
-      arguments.push_back("-parse-as-library");
+   if (context.Args.hasArg(options::OPT_dump_usr)) {
+      Arguments.push_back("-dump-usr");
    }
 
-   context.args.AddLastArg(arguments, options::OPT_parse_sil);
+   if (context.Args.hasArg(options::OPT_parse_stdlib))
+      Arguments.push_back("-disable-objc-attr-requires-foundation-module");
 
-   arguments.push_back("-module-name");
-   arguments.push_back(context.args.MakeArgString(context.outputInfo.moduleName));
+   addCommonFrontendArgs(*this, context.OI, context.Output, context.Args,
+                         Arguments);
+   addRuntimeLibraryFlags(context.OI, Arguments);
 
-   add_outputs_of_type(arguments, context.output, context.args,
-                       filetypes::TY_OptRecord, "-save-optimization-record-path");
-
-   if (context.args.hasArg(options::OPT_migrate_keep_objc_visibility)) {
-      arguments.push_back("-migrate-keep-objc-visibility");
-   }
-
-   add_outputs_of_type(arguments, context.output, context.args,
-                       filetypes::TY_Remapping, "-emit-remap-file-path");
-
-   if (context.outputInfo.numThreads > 0) {
-      arguments.push_back("-num-threads");
-      arguments.push_back(
-               context.args.MakeArgString(Twine(context.outputInfo.numThreads)));
-   }
-
-   // Add the output file argument if necessary.
-   if (context.output.getPrimaryOutputType() != filetypes::TY_Nothing) {
-      if (context.shouldUseMainOutputFileListInFrontendInvocation()) {
-         arguments.push_back("-output-filelist");
-         arguments.push_back(context.getTemporaryFilePath("outputs", ""));
-         invocationInfo.filelistInfos.push_back({arguments.back(),
-                                                 context.output.getPrimaryOutputType(),
-                                                 FilelistInfo::WhichFiles::Output});
-      } else {
-         for (auto FileName : context.output.getPrimaryOutputFilenames()) {
-            arguments.push_back("-o");
-            arguments.push_back(context.args.MakeArgString(FileName));
+   // Pass along an -import-objc-header arg, replacing the argument with the name
+   // of any input PCH to the current action if one is present.
+   if (context.Args.hasArgNoClaim(options::OPT_import_objc_header)) {
+      bool ForwardAsIs = true;
+      bool bridgingPCHIsEnabled =
+         context.Args.hasFlag(options::OPT_enable_bridging_pch,
+                              options::OPT_disable_bridging_pch, true);
+      bool usePersistentPCH = bridgingPCHIsEnabled &&
+                              context.Args.hasArg(options::OPT_pch_output_dir);
+      if (!usePersistentPCH) {
+         for (auto *IJ : context.Inputs) {
+            if (!IJ->getOutput().getAnyOutputForType(filetypes::TY_PCH).empty()) {
+               Arguments.push_back("-import-objc-header");
+               addInputsOfType(Arguments, context.Inputs, context.Args,
+                               filetypes::TY_PCH);
+               ForwardAsIs = false;
+               break;
+            }
+         }
+      }
+      if (ForwardAsIs) {
+         context.Args.AddLastArg(Arguments, options::OPT_import_objc_header);
+      }
+      if (usePersistentPCH) {
+         context.Args.AddLastArg(Arguments, options::OPT_pch_output_dir);
+         if (context.OI.CompilerMode == OutputInfo::Mode::StandardCompile) {
+            // In the 'multiple invocations for each file' mode we don't need to
+            // validate the PCH every time, it has been validated with the initial
+            // -emit-pch invocation.
+            Arguments.push_back("-pch-disable-validation");
          }
       }
    }
 
-   if (context.args.hasArg(options::OPT_embed_bitcode_marker)) {
-      arguments.push_back("-embed-bitcode-marker");
-   }
-   // For `-index-file` mode add `-disable-typo-correction`, since the errors
-   // will be ignored and it can be expensive to do typo-correction.
-   if (job.getType() == filetypes::TY_IndexData) {
-      arguments.push_back("-disable-typo-correction");
+   if (context.Args.hasArg(options::OPT_parse_as_library) ||
+       context.Args.hasArg(options::OPT_emit_library))
+      Arguments.push_back("-parse-as-library");
+
+   context.Args.AddLastArg(Arguments, options::OPT_parse_pil);
+
+   Arguments.push_back("-module-name");
+   Arguments.push_back(context.Args.MakeArgString(context.OI.ModuleName));
+
+   if (context.Args.hasArg(options::OPT_CrossModuleOptimization)) {
+      Arguments.push_back("-cross-module-optimization");
    }
 
-   if (context.args.hasArg(options::OPT_index_store_path)) {
-      context.args.AddLastArg(arguments, options::OPT_index_store_path);
-      if (!context.args.hasArg(options::OPT_index_ignore_system_modules)) {
-         arguments.push_back("-index-system-modules");
+   addOutputsOfType(Arguments, context.Output, context.Args,
+                    filetypes::TY_OptRecord, "-save-optimization-record-path");
+
+   if (context.Args.hasArg(options::OPT_migrate_keep_objc_visibility)) {
+      Arguments.push_back("-migrate-keep-objc-visibility");
+   }
+
+   addOutputsOfType(Arguments, context.Output, context.Args,
+                    filetypes::TY_Remapping, "-emit-remap-file-path");
+
+   if (context.OI.numThreads > 0) {
+      Arguments.push_back("-num-threads");
+      Arguments.push_back(
+         context.Args.MakeArgString(Twine(context.OI.numThreads)));
+   }
+
+   // Add the output file argument if necessary.
+   if (context.Output.getPrimaryOutputType() != filetypes::TY_Nothing) {
+      if (context.shouldUseMainOutputFileListInFrontendInvocation()) {
+         Arguments.push_back("-output-filelist");
+         Arguments.push_back(context.getTemporaryFilePath("outputs", ""));
+         II.FilelistInfos.push_back({Arguments.back(),
+                                     context.Output.getPrimaryOutputType(),
+                                     FilelistInfo::WhichFiles::Output});
+      } else {
+         for (auto FileName : context.Output.getPrimaryOutputFilenames()) {
+            Arguments.push_back("-o");
+            Arguments.push_back(context.Args.MakeArgString(FileName));
+         }
       }
    }
 
-   if (context.args.hasArg(options::OPT_debug_info_store_invocation) ||
+   if (context.Args.hasArg(options::OPT_embed_bitcode_marker))
+      Arguments.push_back("-embed-bitcode-marker");
+
+   // For `-index-file` mode add `-disable-typo-correction`, since the errors
+   // will be ignored and it can be expensive to do typo-correction.
+   if (job.getType() == filetypes::TY_IndexData) {
+      Arguments.push_back("-disable-typo-correction");
+   }
+
+   if (context.Args.hasArg(options::OPT_index_store_path)) {
+      context.Args.AddLastArg(Arguments, options::OPT_index_store_path);
+      if (!context.Args.hasArg(options::OPT_index_ignore_system_modules))
+         Arguments.push_back("-index-system-modules");
+   }
+
+   if (context.Args.hasArg(options::OPT_debug_info_store_invocation) ||
        shouldStoreInvocationInDebugInfo()) {
-      arguments.push_back("-debug-info-store-invocation");
+      Arguments.push_back("-debug-info-store-invocation");
    }
 
-   if (context.args.hasArg(
-          options::OPT_disable_autolinking_runtime_compatibility)) {
-      arguments.push_back("-disable-autolinking-runtime-compatibility");
+   if (context.Args.hasArg(
+      options::OPT_disable_autolinking_runtime_compatibility)) {
+      Arguments.push_back("-disable-autolinking-runtime-compatibility");
    }
 
-   if (auto arg = context.args.getLastArg(
-          options::OPT_runtime_compatibility_version)) {
-      arguments.push_back("-runtime-compatibility-version");
-      arguments.push_back(arg->getValue());
+   if (auto arg = context.Args.getLastArg(
+      options::OPT_runtime_compatibility_version)) {
+      Arguments.push_back("-runtime-compatibility-version");
+      Arguments.push_back(arg->getValue());
    }
 
-   context.args.AddLastArg(
-            arguments,
-            options::
-            OPT_disable_autolinking_runtime_compatibility_dynamic_replacements);
+   context.Args.AddLastArg(
+      Arguments,
+      options::
+      OPT_disable_autolinking_runtime_compatibility_dynamic_replacements);
 
-   return invocationInfo;
+   return II;
 }
 
 const char *ToolChain::JobContext::computeFrontendModeForCompile() const {
-   switch (outputInfo.compilerMode) {
-   case OutputInfo::Mode::StandardCompile:
-   case OutputInfo::Mode::SingleCompile:
-   case OutputInfo::Mode::BatchModeCompile:
-      break;
-   case OutputInfo::Mode::Immediate:
-   case OutputInfo::Mode::REPL:
-      llvm_unreachable("REPL and immediate modes handled elsewhere");
+   switch (OI.CompilerMode) {
+      case OutputInfo::Mode::StandardCompile:
+      case OutputInfo::Mode::SingleCompile:
+      case OutputInfo::Mode::BatchModeCompile:
+         break;
+      case OutputInfo::Mode::Immediate:
+      case OutputInfo::Mode::REPL:
+         llvm_unreachable("REPL and immediate modes handled elsewhere");
    }
-   switch (output.getPrimaryOutputType()) {
-   case filetypes::TY_Object:
-      return "-c";
-   case filetypes::TY_PCH:
-      return "-emit-pch";
-   case filetypes::TY_ASTDump:
-      return "-dump-ast";
-   case filetypes::TY_RawPIL:
-      return "-emit-pilgen";
-   case filetypes::TY_PIL:
-      return "-emit-pil";
-   case filetypes::TY_RawPIB:
-      return "-emit-pibgen";
-   case filetypes::TY_PIB:
-      return "-emit-pib";
-   case filetypes::TY_LLVM_IR:
-      return "-emit-ir";
-   case filetypes::TY_LLVM_BC:
-      return "-emit-bc";
-   case filetypes::TY_Assembly:
-      return "-S";
-   case filetypes::TY_PolarModuleFile:
-      // Since this is our primary output, we need to specify the option here.
-      return "-emit-module";
-   case filetypes::TY_ImportedModules:
-      return "-emit-imported-modules";
-   case filetypes::TY_IndexData:
-      return "-typecheck";
-   case filetypes::TY_Remapping:
-      return "-update-code";
-   case filetypes::TY_Nothing:
-      // We were told to output nothing, so get the last mode option and use that.
-      if (const Arg *A = args.getLastArg(options::OPT_modes_Group))
-         return A->getSpelling().data();
-      else
-         llvm_unreachable("We were told to perform a standard compile, "
-                          "but no mode option was passed to the driver.");
-   case filetypes::TY_Polar:
-   case filetypes::TY_dSYM:
-   case filetypes::TY_AutolinkFile:
-   case filetypes::TY_Dependencies:
-   case filetypes::TY_PolarModuleDocFile:
-   case filetypes::TY_ClangModuleFile:
-   case filetypes::TY_SerializedDiagnostics:
-   case filetypes::TY_ObjCHeader:
-   case filetypes::TY_Image:
-   case filetypes::TY_PolarDeps:
-   case filetypes::TY_ModuleTrace:
-   case filetypes::TY_TBD:
-   case filetypes::TY_OptRecord:
-   case filetypes::TY_PolarParseableInterfaceFile:
-      llvm_unreachable("output type can never be primary output.");
-   case filetypes::TY_INVALID:
-      llvm_unreachable("Invalid type ID");
+   switch (Output.getPrimaryOutputType()) {
+      case filetypes::TY_Object:
+         return "-c";
+      case filetypes::TY_PCH:
+         return "-emit-pch";
+      case filetypes::TY_ASTDump:
+         return "-dump-ast";
+      case filetypes::TY_RawPIL:
+         return "-emit-silgen";
+      case filetypes::TY_PIL:
+         return "-emit-sil";
+      case filetypes::TY_RawPIB:
+         return "-emit-sibgen";
+      case filetypes::TY_PIB:
+         return "-emit-sib";
+      case filetypes::TY_LLVM_IR:
+         return "-emit-ir";
+      case filetypes::TY_LLVM_BC:
+         return "-emit-bc";
+      case filetypes::TY_ClangModuleFile:
+         return "-emit-pcm";
+      case filetypes::TY_Assembly:
+         return "-S";
+      case filetypes::TY_PHPModuleFile:
+         // Since this is our primary output, we need to specify the option here.
+         return "-emit-module";
+      case filetypes::TY_ImportedModules:
+         return "-emit-imported-modules";
+      case filetypes::TY_IndexData:
+         return "-typecheck";
+      case filetypes::TY_Remapping:
+         return "-update-code";
+      case filetypes::TY_Nothing:
+         // We were told to output nothing, so get the last mode option and use that.
+         if (const Arg *A = Args.getLastArg(options::OPT_modes_Group))
+            return A->getSpelling().data();
+         else
+            llvm_unreachable("We were told to perform a standard compile, "
+                             "but no mode option was passed to the driver.");
+      case filetypes::TY_PHP:
+      case filetypes::TY_dSYM:
+      case filetypes::TY_AutolinkFile:
+      case filetypes::TY_Dependencies:
+      case filetypes::TY_PHPModuleDocFile:
+      case filetypes::TY_SerializedDiagnostics:
+//      case filetypes::TY_ObjCHeader:
+      case filetypes::TY_Image:
+      case filetypes::TY_PHPDeps:
+      case filetypes::TY_PHPRanges:
+      case filetypes::TY_CompiledSource:
+      case filetypes::TY_ModuleTrace:
+      case filetypes::TY_TBD:
+      case filetypes::TY_OptRecord:
+      case filetypes::TY_PHPModuleInterfaceFile:
+      case filetypes::TY_PHPSourceInfoFile:
+         llvm_unreachable("Output type can never be primary output.");
+      case filetypes::TY_INVALID:
+         llvm_unreachable("Invalid type ID");
    }
    llvm_unreachable("unhandled output type");
 }
 
 void ToolChain::JobContext::addFrontendInputAndOutputArguments(
-      ArgStringList &arguments, std::vector<FilelistInfo> &filelistInfos) const
-{
+   ArgStringList &Arguments, std::vector<FilelistInfo> &FilelistInfos) const {
 
-   switch (outputInfo.compilerMode) {
-   case OutputInfo::Mode::StandardCompile:
-      assert(inputActions.size() == 1 &&
-             "Standard-compile mode takes exactly one input (the primary file)");
-      break;
-   case OutputInfo::Mode::BatchModeCompile:
-   case OutputInfo::Mode::SingleCompile:
-      break;
-   case OutputInfo::Mode::Immediate:
-   case OutputInfo::Mode::REPL:
-      llvm_unreachable("REPL and immediate modes handled elsewhere");
+   switch (OI.CompilerMode) {
+      case OutputInfo::Mode::StandardCompile:
+         assert(InputActions.size() == 1 &&
+                "Standard-compile mode takes exactly one input (the primary file)");
+         break;
+      case OutputInfo::Mode::BatchModeCompile:
+      case OutputInfo::Mode::SingleCompile:
+         break;
+      case OutputInfo::Mode::Immediate:
+      case OutputInfo::Mode::REPL:
+         llvm_unreachable("REPL and immediate modes handled elsewhere");
    }
 
-   const bool useFileList = shouldUseInputFileList();
-   const bool mayHavePrimaryInputs = outputInfo.mightHaveExplicitPrimaryInputs(output);
-   const bool usePrimaryFileList =
-         mayHavePrimaryInputs &&
-         shouldUsePrimaryInputFileListInFrontendInvocation();
-   const bool filterInputsByType = shouldFilterFrontendInputsByType();
-   const bool useSupplementaryOutputFileList =
-         shouldUseSupplementaryOutputFileMapInFrontendInvocation();
+   const bool UseFileList = shouldUseInputFileList();
+   const bool MayHavePrimaryInputs = OI.mightHaveExplicitPrimaryInputs(Output);
+   const bool UsePrimaryFileList =
+      MayHavePrimaryInputs &&
+      shouldUsePrimaryInputFileListInFrontendInvocation();
+   const bool FilterInputsByType = shouldFilterFrontendInputsByType();
+   const bool UseSupplementaryOutputFileList =
+      shouldUseSupplementaryOutputFileMapInFrontendInvocation();
 
-   assert(((m_compilation.getFilelistThreshold() != Compilation::NEVER_USE_FILELIST) ||
-         (!useFileList && !usePrimaryFileList &&
-          !useSupplementaryOutputFileList)) &&
+   assert((C.getFilelistThreshold() != Compilation::NEVER_USE_FILELIST ||
+           !UseFileList && !UsePrimaryFileList &&
+           !UseSupplementaryOutputFileList) &&
           "No filelists are used if FilelistThreshold=NEVER_USE_FILELIST");
 
-   if (useFileList) {
-      arguments.push_back("-filelist");
-      arguments.push_back(getAllSourcesPath());
+   if (UseFileList) {
+      Arguments.push_back("-filelist");
+      Arguments.push_back(getAllSourcesPath());
    }
-   if (usePrimaryFileList) {
-      arguments.push_back("-primary-filelist");
-      arguments.push_back(getTemporaryFilePath("primaryInputs", ""));
-      filelistInfos.push_back({arguments.back(), filetypes::TY_Polar,
-                               FilelistInfo::WhichFiles::PrimaryInputs});
+   if (UsePrimaryFileList) {
+      Arguments.push_back("-primary-filelist");
+      Arguments.push_back(getTemporaryFilePath("primaryInputs", ""));
+      FilelistInfos.push_back({Arguments.back(), filetypes::TY_PHP,
+                               FilelistInfo::WhichFiles::SourceInputActions});
    }
-   if (!useFileList || !usePrimaryFileList) {
-      addFrontendCommandLineInputArguments(mayHavePrimaryInputs, useFileList,
-                                           usePrimaryFileList, filterInputsByType,
-                                           arguments);
+   if (!UseFileList || !UsePrimaryFileList) {
+      addFrontendCommandLineInputArguments(MayHavePrimaryInputs, UseFileList,
+                                           UsePrimaryFileList, FilterInputsByType,
+                                           Arguments);
    }
 
-   if (useSupplementaryOutputFileList) {
-      arguments.push_back("-supplementary-output-file-map");
-      arguments.push_back(getTemporaryFilePath("supplementaryOutputs", ""));
-      filelistInfos.push_back({arguments.back(), filetypes::TY_INVALID,
+   if (UseSupplementaryOutputFileList) {
+      Arguments.push_back("-supplementary-output-file-map");
+      Arguments.push_back(getTemporaryFilePath("supplementaryOutputs", ""));
+      FilelistInfos.push_back({Arguments.back(), filetypes::TY_INVALID,
                                FilelistInfo::WhichFiles::SupplementaryOutput});
    } else {
-      addFrontendSupplementaryOutputArguments(arguments);
+      addFrontendSupplementaryOutputArguments(Arguments);
    }
 }
 
 void ToolChain::JobContext::addFrontendCommandLineInputArguments(
-      const bool mayHavePrimaryInputs, const bool useFileList,
-      const bool usePrimaryFileList, const bool filterByType,
-      ArgStringList &arguments) const
-{
+   const bool mayHavePrimaryInputs, const bool useFileList,
+   const bool usePrimaryFileList, const bool filterByType,
+   ArgStringList &arguments) const {
    llvm::DenseSet<StringRef> primaries;
 
    if (mayHavePrimaryInputs) {
-      for (const Action *action : inputActions) {
-         const auto *inputAction = cast<InputAction>(action);
-         const llvm::opt::Arg &InArg = inputAction->getInputArg();
+      for (const Action *A : InputActions) {
+         const auto *IA = cast<InputAction>(A);
+         const llvm::opt::Arg &InArg = IA->getInputArg();
          primaries.insert(InArg.getValue());
       }
    }
    // -index-file compilations are weird. They are processed as SingleCompiles
    // (WMO), but must indicate that there is one primary file, designated by
    // -index-file-path.
-   if (Arg *arg = args.getLastArg(options::OPT_index_file_path)) {
+   if (Arg *A = Args.getLastArg(options::OPT_index_file_path)) {
       assert(primaries.empty() &&
              "index file jobs should be treated as single (WMO) compiles");
-      primaries.insert(arg->getValue());
+      primaries.insert(A->getValue());
    }
    for (auto inputPair : getTopLevelInputFiles()) {
-      if (filterByType && !filetypes::is_part_of_polarphp_compilation(inputPair.first)) {
+      if (filterByType && !filetypes::is_part_of_php_compilation(inputPair.first))
          continue;
-      }
       const char *inputName = inputPair.second->getValue();
       const bool isPrimary = primaries.count(inputName);
       if (isPrimary && !usePrimaryFileList) {
          arguments.push_back("-primary-file");
          arguments.push_back(inputName);
       }
-      if ((!isPrimary || usePrimaryFileList) && !useFileList) {
+      if ((!isPrimary || usePrimaryFileList) && !useFileList)
          arguments.push_back(inputName);
-      }
    }
 }
 
 void ToolChain::JobContext::addFrontendSupplementaryOutputArguments(
-      ArgStringList &arguments) const
-{
+   ArgStringList &arguments) const {
    // FIXME: Get these and other argument strings from the same place for both
    // driver and frontend.
-   add_outputs_of_type(arguments, output, args, filetypes::FileTypeId::TY_PolarModuleFile,
-                       "-emit-module-path");
+   addOutputsOfType(arguments, Output, Args, filetypes::FileTypeId::TY_PHPModuleFile,
+                    "-emit-module-path");
 
-   add_outputs_of_type(arguments, output, args, filetypes::TY_PolarModuleDocFile,
-                       "-emit-module-doc-path");
+   addOutputsOfType(arguments, Output, Args, filetypes::TY_PHPModuleDocFile,
+                    "-emit-module-doc-path");
 
-   add_outputs_of_type(arguments, output, args,
-                       filetypes::FileTypeId::TY_PolarParseableInterfaceFile,
-                       "-emit-parseable-module-interface-path");
+   addOutputsOfType(arguments, Output, Args, filetypes::TY_PHPSourceInfoFile,
+                    "-emit-module-source-info-path");
 
-   add_outputs_of_type(arguments, output, args,
-                       filetypes::TY_SerializedDiagnostics,
-                       "-serialize-diagnostics-path");
+   addOutputsOfType(arguments, Output, Args,
+                    filetypes::FileTypeId::TY_PHPModuleInterfaceFile,
+                    "-emit-module-interface-path");
 
-   if (add_outputs_of_type(arguments, output, args, filetypes::FileTypeId::TY_ObjCHeader,
-                           "-emit-objc-header-path")) {
-      assert(outputInfo.compilerMode == OutputInfo::Mode::SingleCompile &&
-             "The polarphp tool should only emit an Obj-C header in single compile"
-             "mode!");
-   }
+   addOutputsOfType(arguments, Output, Args,
+                    filetypes::TY_SerializedDiagnostics,
+                    "-serialize-diagnostics-path");
 
-   add_outputs_of_type(arguments, output, args, filetypes::TY_Dependencies,
-                       "-emit-dependencies-path");
-   add_outputs_of_type(arguments, output, args, filetypes::TY_PolarDeps,
-                       "-emit-reference-dependencies-path");
-   add_outputs_of_type(arguments, output, args, filetypes::TY_ModuleTrace,
-                       "-emit-loaded-module-trace-path");
-   add_outputs_of_type(arguments, output, args, filetypes::TY_TBD,
-                       "-emit-tbd-path");
+//   if (addOutputsOfType(arguments, Output, Args, filetypes::FileTypeId::TY_ObjCHeader,
+//                        "-emit-objc-header-path")) {
+//      assert(OI.CompilerMode == OutputInfo::Mode::SingleCompile &&
+//             "The Swift tool should only emit an Obj-C header in single compile"
+//             "mode!");
+//   }
+
+   addOutputsOfType(arguments, Output, Args, filetypes::TY_Dependencies,
+                    "-emit-dependencies-path");
+   addOutputsOfType(arguments, Output, Args, filetypes::TY_PHPDeps,
+                    "-emit-reference-dependencies-path");
+   addOutputsOfType(arguments, Output, Args, filetypes::TY_PHPRanges,
+                    "-emit-swift-ranges-path");
+   addOutputsOfType(arguments, Output, Args, filetypes::TY_CompiledSource,
+                    "-emit-compiled-source-path");
+   addOutputsOfType(arguments, Output, Args, filetypes::TY_ModuleTrace,
+                    "-emit-loaded-module-trace-path");
+   addOutputsOfType(arguments, Output, Args, filetypes::TY_TBD,
+                    "-emit-tbd-path");
 }
 
 ToolChain::InvocationInfo
 ToolChain::constructInvocation(const InterpretJobAction &job,
                                const JobContext &context) const {
-   assert(context.outputInfo.compilerMode == OutputInfo::Mode::Immediate);
+   assert(context.OI.CompilerMode == OutputInfo::Mode::Immediate);
 
-   InvocationInfo invocationInfo{POLARPHP_EXECUTABLE_NAME};
-   ArgStringList &arguments = invocationInfo.arguments;
-   invocationInfo.allowsResponseFiles = true;
+   InvocationInfo II{POLARPHP_EXECUTABLE_NAME};
+   ArgStringList &Arguments = II.Arguments;
+   II.allowsResponseFiles = true;
 
-   for (auto &s : getDriver().getPolarphpProgramArgs()) {
-      arguments.push_back(s.c_str());
-   }
-   arguments.push_back("-frontend");
-   arguments.push_back("-interpret");
+   for (auto &s : getDriver().getSwiftProgramArgs())
+      Arguments.push_back(s.c_str());
+   Arguments.push_back("-frontend");
+   Arguments.push_back("-interpret");
 
-   assert(context.inputs.empty() &&
-          "The polarphp frontend does not expect to be fed any input jobs!");
+   assert(context.Inputs.empty() &&
+          "The Swift frontend does not expect to be fed any input Jobs!");
 
-   for (const Action *action : context.inputActions) {
-      cast<InputAction>(action)->getInputArg().render(context.args, arguments);
-   }
-
-   if (context.args.hasArg(options::OPT_parse_stdlib)) {
-      arguments.push_back("-disable-objc-attr-requires-foundation-module");
+   for (const Action *A : context.InputActions) {
+      cast<InputAction>(A)->getInputArg().render(context.Args, Arguments);
    }
 
-   add_common_frontend_args(*this, context.outputInfo, context.output, context.args,
-                            arguments);
+   if (context.Args.hasArg(options::OPT_parse_stdlib))
+      Arguments.push_back("-disable-objc-attr-requires-foundation-module");
 
-   context.args.AddLastArg(arguments, options::OPT_parse_sil);
+   addCommonFrontendArgs(*this, context.OI, context.Output, context.Args,
+                         Arguments);
+   addRuntimeLibraryFlags(context.OI, Arguments);
 
-   arguments.push_back("-module-name");
-   arguments.push_back(context.args.MakeArgString(context.outputInfo.moduleName));
+   context.Args.AddLastArg(Arguments, options::OPT_import_objc_header);
 
-   context.args.AddAllArgs(arguments, options::OPT_l, options::OPT_framework);
+   context.Args.AddLastArg(Arguments, options::OPT_parse_pil);
+
+   Arguments.push_back("-module-name");
+   Arguments.push_back(context.Args.MakeArgString(context.OI.ModuleName));
+
+   context.Args.AddAllArgs(Arguments, options::OPT_l, options::OPT_framework);
+
    // The immediate arguments must be last.
-   context.args.AddLastArg(arguments, options::OPT__DASH_DASH);
-   return invocationInfo;
+   context.Args.AddLastArg(Arguments, options::OPT__DASH_DASH);
+
+   return II;
 }
 
 ToolChain::InvocationInfo
 ToolChain::constructInvocation(const BackendJobAction &job,
-                               const JobContext &context) const
-{
-   assert(context.args.hasArg(options::OPT_embed_bitcode));
-   ArgStringList arguments;
+                               const JobContext &context) const {
+   assert(context.Args.hasArg(options::OPT_embed_bitcode));
+   ArgStringList Arguments;
 
-   for (auto &s : getDriver().getPolarphpProgramArgs()) {
-      arguments.push_back(s.c_str());
-   }
-   arguments.push_back("-frontend");
+   for (auto &s : getDriver().getSwiftProgramArgs())
+      Arguments.push_back(s.c_str());
+   Arguments.push_back("-frontend");
+
    // Determine the frontend mode option.
-   const char *frontendModeOption = nullptr;
-   switch (context.outputInfo.compilerMode) {
-   case OutputInfo::Mode::StandardCompile:
-   case OutputInfo::Mode::SingleCompile: {
-      switch (context.output.getPrimaryOutputType()) {
-      case filetypes::TY_Object:
-         frontendModeOption = "-c";
-         break;
-      case filetypes::TY_LLVM_IR:
-         frontendModeOption = "-emit-ir";
-         break;
-      case filetypes::TY_LLVM_BC:
-         frontendModeOption = "-emit-bc";
-         break;
-      case filetypes::TY_Assembly:
-         frontendModeOption = "-S";
-         break;
-      case filetypes::TY_Nothing:
-         // We were told to output nothing, so get the last mode option and use
-         // that.
-         if (const Arg *A = context.args.getLastArg(options::OPT_modes_Group))
-            frontendModeOption = A->getSpelling().data();
-         else
-            llvm_unreachable("We were told to perform a standard compile, "
-                             "but no mode option was passed to the driver.");
-         break;
+   const char *FrontendModeOption = nullptr;
+   switch (context.OI.CompilerMode) {
+      case OutputInfo::Mode::StandardCompile:
+      case OutputInfo::Mode::SingleCompile: {
+         switch (context.Output.getPrimaryOutputType()) {
+            case filetypes::TY_Object:
+               FrontendModeOption = "-c";
+               break;
+            case filetypes::TY_LLVM_IR:
+               FrontendModeOption = "-emit-ir";
+               break;
+            case filetypes::TY_LLVM_BC:
+               FrontendModeOption = "-emit-bc";
+               break;
+            case filetypes::TY_Assembly:
+               FrontendModeOption = "-S";
+               break;
+            case filetypes::TY_Nothing:
+               // We were told to output nothing, so get the last mode option and use
+               // that.
+               if (const Arg *A = context.Args.getLastArg(options::OPT_modes_Group))
+                  FrontendModeOption = A->getSpelling().data();
+               else
+                  llvm_unreachable("We were told to perform a standard compile, "
+                                   "but no mode option was passed to the driver.");
+               break;
 
-      case filetypes::TY_ImportedModules:
-      case filetypes::TY_TBD:
-      case filetypes::TY_PolarModuleFile:
-      case filetypes::TY_ASTDump:
-      case filetypes::TY_RawPIL:
-      case filetypes::TY_RawPIB:
-      case filetypes::TY_PIL:
-      case filetypes::TY_PIB:
-      case filetypes::TY_PCH:
-      case filetypes::TY_IndexData:
-         llvm_unreachable("Cannot be output from backend job");
-      case filetypes::TY_Polar:
-      case filetypes::TY_dSYM:
-      case filetypes::TY_AutolinkFile:
-      case filetypes::TY_Dependencies:
-      case filetypes::TY_PolarModuleDocFile:
-      case filetypes::TY_ClangModuleFile:
-      case filetypes::TY_SerializedDiagnostics:
-      case filetypes::TY_ObjCHeader:
-      case filetypes::TY_Image:
-      case filetypes::TY_PolarDeps:
-      case filetypes::TY_Remapping:
-      case filetypes::TY_ModuleTrace:
-      case filetypes::TY_OptRecord:
-      case filetypes::TY_PolarParseableInterfaceFile:
-         llvm_unreachable("output type can never be primary output.");
-      case filetypes::TY_INVALID:
-         llvm_unreachable("Invalid type ID");
+            case filetypes::TY_ImportedModules:
+            case filetypes::TY_TBD:
+            case filetypes::TY_PHPModuleFile:
+            case filetypes::TY_ASTDump:
+            case filetypes::TY_RawPIL:
+            case filetypes::TY_RawPIB:
+            case filetypes::TY_PIL:
+            case filetypes::TY_PIB:
+            case filetypes::TY_PCH:
+            case filetypes::TY_ClangModuleFile:
+            case filetypes::TY_IndexData:
+               llvm_unreachable("Cannot be output from backend job");
+            case filetypes::TY_PHP:
+            case filetypes::TY_dSYM:
+            case filetypes::TY_AutolinkFile:
+            case filetypes::TY_Dependencies:
+            case filetypes::TY_PHPModuleDocFile:
+            case filetypes::TY_SerializedDiagnostics:
+//            case filetypes::TY_ObjCHeader:
+            case filetypes::TY_Image:
+            case filetypes::TY_PHPDeps:
+            case filetypes::TY_PHPRanges:
+            case filetypes::TY_CompiledSource:
+            case filetypes::TY_Remapping:
+            case filetypes::TY_ModuleTrace:
+            case filetypes::TY_OptRecord:
+            case filetypes::TY_PHPModuleInterfaceFile:
+            case filetypes::TY_PHPSourceInfoFile:
+               llvm_unreachable("Output type can never be primary output.");
+            case filetypes::TY_INVALID:
+               llvm_unreachable("Invalid type ID");
+         }
+         break;
       }
-      break;
-   }
-   case OutputInfo::Mode::BatchModeCompile:
-   case OutputInfo::Mode::Immediate:
-   case OutputInfo::Mode::REPL:
-      llvm_unreachable("invalid mode for backend job");
+      case OutputInfo::Mode::BatchModeCompile:
+      case OutputInfo::Mode::Immediate:
+      case OutputInfo::Mode::REPL:
+         llvm_unreachable("invalid mode for backend job");
    }
 
-   assert(frontendModeOption != nullptr && "No frontend mode option specified!");
+   assert(FrontendModeOption != nullptr && "No frontend mode option specified!");
 
-   arguments.push_back(frontendModeOption);
+   Arguments.push_back(FrontendModeOption);
 
    // Add input arguments.
-   switch (context.outputInfo.compilerMode) {
-   case OutputInfo::Mode::StandardCompile: {
-      assert(context.inputs.size() == 1 && "The backend expects one input!");
-      arguments.push_back("-primary-file");
-      const Job *cmd = context.inputs.front();
-      arguments.push_back(context.args.MakeArgString(
-                             cmd->getOutput().getPrimaryOutputFilename()));
-      break;
-   }
-   case OutputInfo::Mode::SingleCompile: {
-      assert(context.inputs.size() == 1 && "The backend expects one input!");
-      arguments.push_back("-primary-file");
-      const Job *cmd = context.inputs.front();
+   switch (context.OI.CompilerMode) {
+      case OutputInfo::Mode::StandardCompile: {
+         assert(context.Inputs.size() == 1 && "The backend expects one input!");
+         Arguments.push_back("-primary-file");
+         const Job *Cmd = context.Inputs.front();
+         Arguments.push_back(context.Args.MakeArgString(
+            Cmd->getOutput().getPrimaryOutputFilename()));
+         break;
+      }
+      case OutputInfo::Mode::SingleCompile: {
+         assert(context.Inputs.size() == 1 && "The backend expects one input!");
+         Arguments.push_back("-primary-file");
+         const Job *Cmd = context.Inputs.front();
 
-      // In multi-threaded compilation, the backend job must select the correct
-      // output file of the compilation job.
-      auto OutNames = cmd->getOutput().getPrimaryOutputFilenames();
-      arguments.push_back(
-               context.args.MakeArgString(OutNames[job.getInputIndex()]));
-      break;
-   }
-   case OutputInfo::Mode::BatchModeCompile:
-   case OutputInfo::Mode::Immediate:
-   case OutputInfo::Mode::REPL:
-      llvm_unreachable("invalid mode for backend job");
+         // In multi-threaded compilation, the backend job must select the correct
+         // output file of the compilation job.
+         auto OutNames = Cmd->getOutput().getPrimaryOutputFilenames();
+         Arguments.push_back(
+            context.Args.MakeArgString(OutNames[job.getInputIndex()]));
+         break;
+      }
+      case OutputInfo::Mode::BatchModeCompile:
+      case OutputInfo::Mode::Immediate:
+      case OutputInfo::Mode::REPL:
+         llvm_unreachable("invalid mode for backend job");
    }
 
    // Add flags implied by -embed-bitcode.
-   arguments.push_back("-embed-bitcode");
+   Arguments.push_back("-embed-bitcode");
 
    // -embed-bitcode only supports a restricted set of flags.
-   arguments.push_back("-target");
-   arguments.push_back(context.args.MakeArgString(getTriple().str()));
+   Arguments.push_back("-target");
+   Arguments.push_back(context.Args.MakeArgString(getTriple().str()));
 
    // Enable address top-byte ignored in the ARM64 backend.
    if (getTriple().getArch() == llvm::Triple::aarch64) {
-      arguments.push_back("-Xllvm");
-      arguments.push_back("-aarch64-use-tbi");
+      Arguments.push_back("-Xllvm");
+      Arguments.push_back("-aarch64-use-tbi");
    }
 
    // Handle the CPU and its preferences.
-   context.args.AddLastArg(arguments, options::OPT_target_cpu);
+   context.Args.AddLastArg(Arguments, options::OPT_target_cpu);
 
    // Enable optimizations, but disable all LLVM-IR-level transformations.
-   context.args.AddLastArg(arguments, options::OPT_O_Group);
-   arguments.push_back("-disable-llvm-optzns");
+   context.Args.AddLastArg(Arguments, options::OPT_O_Group);
+   Arguments.push_back("-disable-llvm-optzns");
 
-   context.args.AddLastArg(arguments, options::OPT_parse_stdlib);
+   context.Args.AddLastArg(Arguments, options::OPT_parse_stdlib);
 
-   arguments.push_back("-module-name");
-   arguments.push_back(context.args.MakeArgString(context.outputInfo.moduleName));
+   Arguments.push_back("-module-name");
+   Arguments.push_back(context.Args.MakeArgString(context.OI.ModuleName));
 
    // Add the output file argument if necessary.
-   if (context.output.getPrimaryOutputType() != filetypes::TY_Nothing) {
-      for (auto FileName : context.output.getPrimaryOutputFilenames()) {
-         arguments.push_back("-o");
-         arguments.push_back(context.args.MakeArgString(FileName));
+   if (context.Output.getPrimaryOutputType() != filetypes::TY_Nothing) {
+      for (auto FileName : context.Output.getPrimaryOutputFilenames()) {
+         Arguments.push_back("-o");
+         Arguments.push_back(context.Args.MakeArgString(FileName));
       }
    }
-   return {POLARPHP_EXECUTABLE_NAME, arguments};
+
+   return {POLARPHP_EXECUTABLE_NAME, Arguments};
 }
 
 ToolChain::InvocationInfo
 ToolChain::constructInvocation(const MergeModuleJobAction &job,
                                const JobContext &context) const {
-   InvocationInfo invocationInfo{POLARPHP_EXECUTABLE_NAME};
-   ArgStringList &arguments = invocationInfo.arguments;
-   invocationInfo.allowsResponseFiles = true;
+   InvocationInfo II{POLARPHP_EXECUTABLE_NAME};
+   ArgStringList &Arguments = II.Arguments;
+   II.allowsResponseFiles = true;
 
-   for (auto &s : getDriver().getPolarphpProgramArgs()) {
-      arguments.push_back(s.c_str());
-   }
-   arguments.push_back("-frontend");
+   for (auto &s : getDriver().getSwiftProgramArgs())
+      Arguments.push_back(s.c_str());
+   Arguments.push_back("-frontend");
 
-   arguments.push_back("-merge-modules");
-   arguments.push_back("-emit-module");
+   Arguments.push_back("-merge-modules");
+   Arguments.push_back("-emit-module");
 
    if (context.shouldUseInputFileList()) {
-      arguments.push_back("-filelist");
-      arguments.push_back(context.getTemporaryFilePath("inputs", ""));
-      invocationInfo.filelistInfos.push_back({arguments.back(),
-                                              filetypes::TY_PolarModuleFile,
-                                              FilelistInfo::WhichFiles::Input});
+      Arguments.push_back("-filelist");
+      Arguments.push_back(context.getTemporaryFilePath("inputs", ""));
+      II.FilelistInfos.push_back({Arguments.back(),
+                                  filetypes::TY_PHPModuleFile,
+                                  FilelistInfo::WhichFiles::InputJobs});
 
-      addInputsOfType(arguments, context.inputActions,
-                      filetypes::TY_PolarModuleFile);
+      addInputsOfType(Arguments, context.InputActions,
+                      filetypes::TY_PHPModuleFile);
    } else {
-      size_t origLen = arguments.size();
+      size_t origLen = Arguments.size();
       (void)origLen;
-      addInputsOfType(arguments, context.inputs, context.args,
-                      filetypes::TY_PolarModuleFile);
-      addInputsOfType(arguments, context.inputActions,
-                      filetypes::TY_PolarModuleFile);
-      assert(arguments.size() - origLen >=
-             context.inputs.size() + context.inputActions.size() ||
-             context.outputInfo.compilerOutputType == filetypes::TY_Nothing);
-      assert((arguments.size() - origLen == context.inputs.size() ||
-              context.outputInfo.compilerOutputType == filetypes::TY_Nothing ||
-              !context.inputActions.empty()) &&
-             "every input to MergeModule must generate a swiftmodule");
+      addInputsOfType(Arguments, context.Inputs, context.Args,
+                      filetypes::TY_PHPModuleFile);
+      addInputsOfType(Arguments, context.InputActions,
+                      filetypes::TY_PHPModuleFile);
+      assert(Arguments.size() - origLen >=
+             context.Inputs.size() + context.InputActions.size() ||
+             context.OI.CompilerOutputType == filetypes::TY_Nothing);
+      assert((Arguments.size() - origLen == context.Inputs.size() ||
+              context.OI.CompilerOutputType == filetypes::TY_Nothing ||
+              !context.InputActions.empty()) &&
+             "every input to MergeModule must generate a phpmodule");
    }
 
    // Tell all files to parse as library, which is necessary to load them as
    // serialized ASTs.
-   arguments.push_back("-parse-as-library");
+   Arguments.push_back("-parse-as-library");
 
    // Merge serialized PIL from partial modules.
-   arguments.push_back("-sil-merge-partial-modules");
+   Arguments.push_back("-sil-merge-partial-modules");
 
    // Disable PIL optimization passes; we've already optimized the code in each
    // partial mode.
-   arguments.push_back("-disable-diagnostic-passes");
-   arguments.push_back("-disable-sil-perf-optzns");
+   Arguments.push_back("-disable-diagnostic-passes");
+   Arguments.push_back("-disable-sil-perf-optzns");
 
-   add_common_frontend_args(*this, context.outputInfo, context.output, context.args,
-                            arguments);
-   add_outputs_of_type(arguments, context.output, context.args,
-                       filetypes::TY_PolarModuleDocFile, "-emit-module-doc-path");
-   add_outputs_of_type(arguments, context.output, context.args,
-                       filetypes::FileTypeId::TY_PolarParseableInterfaceFile,
-                       "-emit-parseable-module-interface-path");
-   add_outputs_of_type(arguments, context.output, context.args,
-                       filetypes::TY_SerializedDiagnostics,
-                       "-serialize-diagnostics-path");
-   add_outputs_of_type(arguments, context.output, context.args,
-                       filetypes::TY_ObjCHeader, "-emit-objc-header-path");
-   add_outputs_of_type(arguments, context.output, context.args, filetypes::TY_TBD,
-                       "-emit-tbd-path");
-   arguments.push_back("-module-name");
-   arguments.push_back(context.args.MakeArgString(context.outputInfo.moduleName));
+   addCommonFrontendArgs(*this, context.OI, context.Output, context.Args,
+                         Arguments);
+   addRuntimeLibraryFlags(context.OI, Arguments);
 
-   assert(context.output.getPrimaryOutputType() ==
-          filetypes::TY_PolarModuleFile &&
-          "The MergeModule tool only produces swiftmodule files!");
-   arguments.push_back("-o");
-   arguments.push_back(
-            context.args.MakeArgString(context.output.getPrimaryOutputFilename()));
-   return invocationInfo;
+   addOutputsOfType(Arguments, context.Output, context.Args,
+                    filetypes::TY_PHPModuleDocFile, "-emit-module-doc-path");
+   addOutputsOfType(Arguments, context.Output, context.Args,
+                    filetypes::TY_PHPSourceInfoFile,
+                    "-emit-module-source-info-path");
+   addOutputsOfType(Arguments, context.Output, context.Args,
+                    filetypes::FileTypeId::TY_PHPModuleInterfaceFile,
+                    "-emit-module-interface-path");
+   addOutputsOfType(Arguments, context.Output, context.Args,
+                    filetypes::TY_SerializedDiagnostics,
+                    "-serialize-diagnostics-path");
+//   addOutputsOfType(Arguments, context.Output, context.Args,
+//                    filetypes::TY_ObjCHeader, "-emit-objc-header-path");
+   addOutputsOfType(Arguments, context.Output, context.Args, filetypes::TY_TBD,
+                    "-emit-tbd-path");
+
+   context.Args.AddLastArg(Arguments, options::OPT_import_objc_header);
+
+   Arguments.push_back("-module-name");
+   Arguments.push_back(context.Args.MakeArgString(context.OI.ModuleName));
+
+   assert(context.Output.getPrimaryOutputType() ==
+          filetypes::TY_PHPModuleFile &&
+          "The MergeModule tool only produces phpmodule files!");
+
+   Arguments.push_back("-o");
+   Arguments.push_back(
+      context.Args.MakeArgString(context.Output.getPrimaryOutputFilename()));
+
+   return II;
 }
 
 ToolChain::InvocationInfo
 ToolChain::constructInvocation(const ModuleWrapJobAction &job,
-                               const JobContext &context) const
-{
-   InvocationInfo invocationInfo{POLARPHP_EXECUTABLE_NAME};
-   ArgStringList &arguments = invocationInfo.arguments;
-   invocationInfo.allowsResponseFiles = true;
+                               const JobContext &context) const {
+   InvocationInfo II{POLARPHP_EXECUTABLE_NAME};
+   ArgStringList &Arguments = II.Arguments;
+   II.allowsResponseFiles = true;
 
-   for (auto &s : getDriver().getPolarphpProgramArgs()) {
-      arguments.push_back(s.c_str());
-   }
-   arguments.push_back("-modulewrap");
-   addInputsOfType(arguments, context.inputs, context.args,
-                   filetypes::TY_PolarModuleFile);
-   addInputsOfType(arguments, context.inputActions,
-                   filetypes::TY_PolarModuleFile);
-   assert(arguments.size() == 2 &&
-          "ModuleWrap expects exactly one merged swiftmodule as input");
-   assert(context.output.getPrimaryOutputType() == filetypes::TY_Object &&
+   for (auto &s : getDriver().getSwiftProgramArgs())
+      Arguments.push_back(s.c_str());
+   Arguments.push_back("-modulewrap");
+
+   addInputsOfType(Arguments, context.Inputs, context.Args,
+                   filetypes::TY_PHPModuleFile);
+   addInputsOfType(Arguments, context.InputActions,
+                   filetypes::TY_PHPModuleFile);
+   assert(Arguments.size() == 2 &&
+          "ModuleWrap expects exactly one merged phpmodule as input");
+
+   assert(context.Output.getPrimaryOutputType() == filetypes::TY_Object &&
           "The -modulewrap mode only produces object files");
-   arguments.push_back("-target");
-   arguments.push_back(context.args.MakeArgString(getTriple().str()));
-   arguments.push_back("-o");
-   arguments.push_back(
-            context.args.MakeArgString(context.output.getPrimaryOutputFilename()));
-   return invocationInfo;
+
+   Arguments.push_back("-target");
+   Arguments.push_back(context.Args.MakeArgString(getTriple().str()));
+
+   Arguments.push_back("-o");
+   Arguments.push_back(
+      context.Args.MakeArgString(context.Output.getPrimaryOutputFilename()));
+
+   return II;
 }
 
 ToolChain::InvocationInfo
 ToolChain::constructInvocation(const REPLJobAction &job,
-                               const JobContext &context) const
-{
-   assert(context.inputs.empty());
-   assert(context.inputActions.empty());
+                               const JobContext &context) const {
+   assert(context.Inputs.empty());
+   assert(context.InputActions.empty());
 
    bool useLLDB;
 
    switch (job.getRequestedMode()) {
-   case REPLJobAction::Mode::Integrated:
-      useLLDB = false;
-      break;
-   case REPLJobAction::Mode::RequireLLDB:
-      useLLDB = true;
-      break;
-   case REPLJobAction::Mode::PreferLLDB:
-      useLLDB = !findProgramRelativeToSwift("lldb").empty();
-      break;
+      case REPLJobAction::Mode::Integrated:
+         useLLDB = false;
+         break;
+      case REPLJobAction::Mode::RequireLLDB:
+         useLLDB = true;
+         break;
+      case REPLJobAction::Mode::PreferLLDB:
+         useLLDB = !findProgramRelativeToPHP("lldb").empty();
+         break;
    }
 
    ArgStringList FrontendArgs;
-   for (auto &s : getDriver().getPolarphpProgramArgs())
+   for (auto &s : getDriver().getSwiftProgramArgs())
       FrontendArgs.push_back(s.c_str());
-   add_common_frontend_args(*this, context.outputInfo, context.output, context.args,
-                            FrontendArgs);
-   context.args.AddAllArgs(FrontendArgs, options::OPT_l, options::OPT_framework,
+
+   addCommonFrontendArgs(*this, context.OI, context.Output, context.Args,
+                         FrontendArgs);
+   addRuntimeLibraryFlags(context.OI, FrontendArgs);
+
+   context.Args.AddLastArg(FrontendArgs, options::OPT_import_objc_header);
+   context.Args.AddAllArgs(FrontendArgs, options::OPT_l, options::OPT_framework,
                            options::OPT_L);
 
    if (!useLLDB) {
       FrontendArgs.insert(FrontendArgs.begin(), {"-frontend", "-repl"});
       FrontendArgs.push_back("-module-name");
-      FrontendArgs.push_back(context.args.MakeArgString(context.outputInfo.moduleName));
+      FrontendArgs.push_back(context.Args.MakeArgString(context.OI.ModuleName));
       return {POLARPHP_EXECUTABLE_NAME, FrontendArgs};
    }
 
@@ -942,132 +1033,128 @@ ToolChain::constructInvocation(const REPLJobAction &job,
       Job::printArguments(os, FrontendArgs);
    }
 
-   ArgStringList arguments;
-   arguments.push_back(context.args.MakeArgString(std::move(SingleArg)));
-   return {"lldb", arguments};
+   ArgStringList Arguments;
+   Arguments.push_back(context.Args.MakeArgString(std::move(SingleArg)));
+
+   return {"lldb", Arguments};
 }
 
 ToolChain::InvocationInfo
 ToolChain::constructInvocation(const GenerateDSYMJobAction &job,
-                               const JobContext &context) const
-{
-   assert(context.inputs.size() == 1);
-   assert(context.inputActions.empty());
-   assert(context.output.getPrimaryOutputType() == filetypes::TY_dSYM);
+                               const JobContext &context) const {
+   assert(context.Inputs.size() == 1);
+   assert(context.InputActions.empty());
+   assert(context.Output.getPrimaryOutputType() == filetypes::TY_dSYM);
 
-   ArgStringList arguments;
+   ArgStringList Arguments;
 
    auto inputPath =
-         context.inputs.front()->getOutput().getPrimaryOutputFilename();
-   arguments.push_back(context.args.MakeArgString(inputPath));
+      context.Inputs.front()->getOutput().getPrimaryOutputFilename();
+   Arguments.push_back(context.Args.MakeArgString(inputPath));
 
-   arguments.push_back("-o");
-   arguments.push_back(
-            context.args.MakeArgString(context.output.getPrimaryOutputFilename()));
+   Arguments.push_back("-o");
+   Arguments.push_back(
+      context.Args.MakeArgString(context.Output.getPrimaryOutputFilename()));
 
-   return {"dsymutil", arguments};
+   return {"dsymutil", Arguments};
 }
 
 ToolChain::InvocationInfo
 ToolChain::constructInvocation(const VerifyDebugInfoJobAction &job,
-                               const JobContext &context) const
-{
-   assert(context.inputs.size() == 1);
-   assert(context.inputActions.empty());
+                               const JobContext &context) const {
+   assert(context.Inputs.size() == 1);
+   assert(context.InputActions.empty());
 
    // This mirrors the clang driver's --verify-debug-info option.
-   ArgStringList arguments;
-   arguments.push_back("--verify");
-   arguments.push_back("--debug-info");
-   arguments.push_back("--eh-frame");
-   arguments.push_back("--quiet");
+   ArgStringList Arguments;
+   Arguments.push_back("--verify");
+   Arguments.push_back("--debug-info");
+   Arguments.push_back("--eh-frame");
+   Arguments.push_back("--quiet");
 
    auto inputPath =
-         context.inputs.front()->getOutput().getPrimaryOutputFilename();
-   arguments.push_back(context.args.MakeArgString(inputPath));
+      context.Inputs.front()->getOutput().getPrimaryOutputFilename();
+   Arguments.push_back(context.Args.MakeArgString(inputPath));
 
-   return {"dwarfdump", arguments};
+   return {"dwarfdump", Arguments};
 }
 
 ToolChain::InvocationInfo
 ToolChain::constructInvocation(const GeneratePCHJobAction &job,
-                               const JobContext &context) const
-{
-   assert(context.inputs.empty());
-   assert(context.inputActions.size() == 1);
+                               const JobContext &context) const {
+   assert(context.Inputs.empty());
+   assert(context.InputActions.size() == 1);
    assert((!job.isPersistentPCH() &&
-           context.output.getPrimaryOutputType() == filetypes::TY_PCH) ||
+           context.Output.getPrimaryOutputType() == filetypes::TY_PCH) ||
           (job.isPersistentPCH() &&
-           context.output.getPrimaryOutputType() == filetypes::TY_Nothing));
+           context.Output.getPrimaryOutputType() == filetypes::TY_Nothing));
 
-   InvocationInfo invocationInfo{POLARPHP_EXECUTABLE_NAME};
-   ArgStringList &arguments = invocationInfo.arguments;
-   invocationInfo.allowsResponseFiles = true;
+   InvocationInfo II{POLARPHP_EXECUTABLE_NAME};
+   ArgStringList &Arguments = II.Arguments;
+   II.allowsResponseFiles = true;
 
-   for (auto &s : getDriver().getPolarphpProgramArgs()) {
-      arguments.push_back(s.c_str());
-   }
-   arguments.push_back("-frontend");
-   add_common_frontend_args(*this, context.outputInfo, context.output, context.args,
-                            arguments);
-   add_outputs_of_type(arguments, context.output, context.args,
-                       filetypes::TY_SerializedDiagnostics,
-                       "-serialize-diagnostics-path");
+   for (auto &s : getDriver().getSwiftProgramArgs())
+      Arguments.push_back(s.c_str());
+   Arguments.push_back("-frontend");
 
-   addInputsOfType(arguments, context.inputActions, filetypes::TY_ObjCHeader);
-   context.args.AddLastArg(arguments, options::OPT_index_store_path);
+   addCommonFrontendArgs(*this, context.OI, context.Output, context.Args,
+                         Arguments);
+   addRuntimeLibraryFlags(context.OI, Arguments);
+
+   addOutputsOfType(Arguments, context.Output, context.Args,
+                    filetypes::TY_SerializedDiagnostics,
+                    "-serialize-diagnostics-path");
+
+//   addInputsOfType(Arguments, context.InputActions, filetypes::TY_ObjCHeader);
+   context.Args.AddLastArg(Arguments, options::OPT_index_store_path);
+
    if (job.isPersistentPCH()) {
-      arguments.push_back("-emit-pch");
-      arguments.push_back("-pch-output-dir");
-      arguments.push_back(context.args.MakeArgString(job.getPersistentPCHDir()));
+      Arguments.push_back("-emit-pch");
+      Arguments.push_back("-pch-output-dir");
+      Arguments.push_back(context.Args.MakeArgString(job.getPersistentPCHDir()));
    } else {
-      arguments.push_back("-emit-pch");
-      arguments.push_back("-o");
-      arguments.push_back(
-               context.args.MakeArgString(context.output.getPrimaryOutputFilename()));
+      Arguments.push_back("-emit-pch");
+      Arguments.push_back("-o");
+      Arguments.push_back(
+         context.Args.MakeArgString(context.Output.getPrimaryOutputFilename()));
    }
-   return invocationInfo;
+
+   return II;
 }
 
 ToolChain::InvocationInfo
 ToolChain::constructInvocation(const AutolinkExtractJobAction &job,
-                               const JobContext &context) const
-{
+                               const JobContext &context) const {
    llvm_unreachable("autolink extraction not implemented for this toolchain");
 }
 
 ToolChain::InvocationInfo
 ToolChain::constructInvocation(const DynamicLinkJobAction &job,
-                               const JobContext &context) const
-{
+                               const JobContext &context) const {
    llvm_unreachable("linking not implemented for this toolchain");
 }
 
 ToolChain::InvocationInfo
 ToolChain::constructInvocation(const StaticLinkJobAction &job,
-                               const JobContext &context) const
-{
+                               const JobContext &context) const {
    llvm_unreachable("archiving not implemented for this toolchain");
 }
 
 void ToolChain::addPathEnvironmentVariableIfNeeded(
-      Job::EnvironmentVector &env, const char *name, const char *separator,
-      options::ID optionID, const ArgList &args,
-      ArrayRef<std::string> extraEntries) const
-{
+   Job::EnvironmentVector &env, const char *name, const char *separator,
+   options::FileTypeId optionID, const ArgList &args,
+   ArrayRef<std::string> extraEntries) const {
    auto linkPathOptions = args.filtered(optionID);
-   if (linkPathOptions.begin() == linkPathOptions.end() && extraEntries.empty()) {
+   if (linkPathOptions.begin() == linkPathOptions.end() && extraEntries.empty())
       return;
-   }
 
    std::string newPaths;
    interleave(linkPathOptions,
               [&](const Arg *arg) { newPaths.append(arg->getValue()); },
-   [&] { newPaths.append(separator); });
+              [&] { newPaths.append(separator); });
    for (auto extraEntry : extraEntries) {
-      if (!newPaths.empty()) {
+      if (!newPaths.empty())
          newPaths.append(separator);
-      }
       newPaths.append(extraEntry.data(), extraEntry.size());
    }
    if (auto currentPaths = llvm::sys::Process::GetEnv(name)) {
@@ -1077,75 +1164,74 @@ void ToolChain::addPathEnvironmentVariableIfNeeded(
    env.emplace_back(name, args.MakeArgString(newPaths));
 }
 
-void ToolChain::addLinkRuntimeLib(const ArgList &args, ArgStringList &arguments,
-                                  StringRef LibName) const
-{
+void ToolChain::addLinkRuntimeLib(const ArgList &Args, ArgStringList &Arguments,
+                                  StringRef LibName) const {
    SmallString<128> P;
-   getClangLibraryPath(args, P);
+   getClangLibraryPath(Args, P);
    llvm::sys::path::append(P, LibName);
-   arguments.push_back(args.MakeArgString(P));
+   Arguments.push_back(Args.MakeArgString(P));
 }
 
-void ToolChain::getClangLibraryPath(const ArgList &args,
-                                    SmallString<128> &libPath) const
-{
-   const llvm::Triple &triple = getTriple();
+void ToolChain::getClangLibraryPath(const ArgList &Args,
+                                    SmallString<128> &LibPath) const {
+   const llvm::Triple &T = getTriple();
 
-   getResourceDirPath(libPath, args, /*Shared=*/true);
+   getResourceDirPath(LibPath, Args, /*Shared=*/true);
    // Remove platform name.
-   llvm::sys::path::remove_filename(libPath);
-   llvm::sys::path::append(libPath, "clang", "lib",
-                           triple.isOSDarwin() ? "darwin"
-                                               : polar::get_platform_name_for_triple(triple));
+   llvm::sys::path::remove_filename(LibPath);
+   llvm::sys::path::append(LibPath, "clang", "lib",
+                           T.isOSDarwin() ? "darwin"
+                                          : get_platform_name_for_triple(T));
 }
 
 /// Get the runtime library link path, which is platform-specific and found
 /// relative to the compiler.
 void ToolChain::getResourceDirPath(SmallVectorImpl<char> &resourceDirPath,
                                    const llvm::opt::ArgList &args,
-                                   bool shared) const
-{
+                                   bool shared) const {
    // FIXME: Duplicated from CompilerInvocation, but in theory the runtime
    // library link path and the standard library module import path don't
    // need to be the same.
    if (const Arg *A = args.getLastArg(options::OPT_resource_dir)) {
       StringRef value = A->getValue();
       resourceDirPath.append(value.begin(), value.end());
+   } else if (!getTriple().isOSDarwin() && args.hasArg(options::OPT_sdk)) {
+      StringRef value = args.getLastArg(options::OPT_sdk)->getValue();
+      resourceDirPath.append(value.begin(), value.end());
+      llvm::sys::path::append(resourceDirPath, "usr", "lib",
+                              shared ? "polar" : "polar_static");
    } else {
-      auto programPath = getDriver().getPolarphpProgramPath();
+      auto programPath = getDriver().getPHPProgramPath();
       resourceDirPath.append(programPath.begin(), programPath.end());
       llvm::sys::path::remove_filename(resourceDirPath); // remove /swift
       llvm::sys::path::remove_filename(resourceDirPath); // remove /bin
       llvm::sys::path::append(resourceDirPath, "lib",
-                              shared ? "swift" : "swift_static");
+                              shared ? "polar" : "polar_static");
    }
    llvm::sys::path::append(resourceDirPath,
-                           polar::get_platform_name_for_triple(getTriple()));
+                           get_platform_name_for_triple(getTriple()));
 }
 
 void ToolChain::getRuntimeLibraryPaths(SmallVectorImpl<std::string> &runtimeLibPaths,
                                        const llvm::opt::ArgList &args,
-                                       StringRef sdkPath, bool shared) const
-{
+                                       StringRef SDKPath, bool shared) const {
    SmallString<128> scratchPath;
    getResourceDirPath(scratchPath, args, shared);
    runtimeLibPaths.push_back(scratchPath.str());
-   if (!sdkPath.empty()) {
-      scratchPath = sdkPath;
-      llvm::sys::path::append(scratchPath, "usr", "lib", "polarphp");
+
+   if (!SDKPath.empty()) {
+      scratchPath = SDKPath;
+      llvm::sys::path::append(scratchPath, "usr", "lib", "swift");
       runtimeLibPaths.push_back(scratchPath.str());
    }
 }
 
 bool ToolChain::sanitizerRuntimeLibExists(const ArgList &args,
                                           StringRef sanitizerName,
-                                          bool shared) const
-{
+                                          bool shared) const {
    SmallString<128> sanitizerLibPath;
    getClangLibraryPath(args, sanitizerLibPath);
    llvm::sys::path::append(sanitizerLibPath,
                            sanitizerRuntimeLibName(sanitizerName, shared));
    return llvm::sys::fs::exists(sanitizerLibPath.str());
 }
-
-} // polar::driver

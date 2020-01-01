@@ -9,32 +9,20 @@
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
 //===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
-//
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/11/26.
 
-#ifndef POLARPHP_DRIVER_FRONTEND_UTIL_H
-#define POLARPHP_DRIVER_FRONTEND_UTIL_H
+#ifndef POLARPHP_DRIVER_FRONTENDUTIL_H
+#define POLARPHP_DRIVER_FRONTENDUTIL_H
 
 #include "polarphp/basic/LLVM.h"
 #include "llvm/ADT/STLExtras.h"
 
 #include <memory>
 
-namespace polar::ast {
+namespace polar {
+
 class DiagnosticEngine;
-} // polar::driver
 
-namespace polar::driver {
-
-using polar::ast::DiagnosticEngine;
+namespace driver {
 
 /// Generates the list of arguments that would be passed to the compiler
 /// frontend from the given driver arguments.
@@ -50,10 +38,11 @@ using polar::ast::DiagnosticEngine;
 ///
 /// \note This function is not intended to create invocations which are
 /// suitable for use in REPL or immediate modes.
-bool get_single_frontend_invocation_from_driver_arguments(
-      ArrayRef<const char *> argList, DiagnosticEngine &diags,
-      llvm::function_ref<bool(ArrayRef<const char *> FrontendArgs)> action);
+bool getSingleFrontendInvocationFromDriverArguments(
+   ArrayRef<const char *> ArgList, DiagnosticEngine &Diags,
+   llvm::function_ref<bool(ArrayRef<const char *> FrontendArgs)> Action);
 
-} // polar::frontend
+} // end namespace driver
+} // end namespace polar
 
-#endif // POLARPHP_DRIVER_FRONTEND_UTIL_H
+#endif // POLARPHP_DRIVER_FRONTENDUTIL_H

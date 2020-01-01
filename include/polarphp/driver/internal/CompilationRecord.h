@@ -9,50 +9,40 @@
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
 //===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
-//
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/12/02.
 
-#ifndef POLARPHP_DRIVER_COMPILATION_RECORD_H
-#define POLARPHP_DRIVER_COMPILATION_RECORD_H
+#ifndef POLARPHP_DRIVER_INTERNAL_COMPILATIONRECORD_H
+#define POLARPHP_DRIVER_INTERNAL_COMPILATIONRECORD_H
 
 #include "polarphp/driver/Action.h"
 
-namespace polar::driver::compilationrecord {
+namespace polar {
+namespace driver {
+namespace compilation_record {
 
 /// Compilation record files (-master.swiftdeps files) are YAML files composed
 /// of these top-level keys.
-enum class TopLevelKey
-{
-   /// The key for the Polarphp compiler version used to produce the compilation
+enum class TopLevelKey {
+   /// The key for the Swift compiler version used to produce the compilation
    /// record.
-   Version,
-   /// The key for the list of arguments passed to the Polarphp compiler when
+      Version,
+   /// The key for the list of arguments passed to the Swift compiler when
    /// producing the compilation record.
-   Options,
+      Options,
    /// The key for the time at which the build that produced the compilation
    /// record started.
-   BuildTime,
+      BuildTime,
    /// The key for the list of inputs to the compilation that produced the
    /// compilation record.
-   Inputs,
+      Inputs,
 };
 
 /// \returns A string representation of the given key.
-inline static StringRef get_name(TopLevelKey Key)
-{
+inline static StringRef getName(TopLevelKey Key) {
    switch (Key) {
-   case TopLevelKey::Version: return "version";
-   case TopLevelKey::Options: return "options";
-   case TopLevelKey::BuildTime: return "build_time";
-   case TopLevelKey::Inputs: return "inputs";
+      case TopLevelKey::Version: return "version";
+      case TopLevelKey::Options: return "options";
+      case TopLevelKey::BuildTime: return "build_time";
+      case TopLevelKey::Inputs: return "inputs";
    }
 
    // Work around MSVC warning: not all control paths return a value
@@ -62,21 +52,20 @@ inline static StringRef get_name(TopLevelKey Key)
 /// \returns The string identifier used to represent the given status in a
 /// compilation record file (.swiftdeps file).
 ///
-/// \note Not every InputInfo::status has a unique identifier. For example,
+/// \note Not every InputInfo::Status has a unique identifier. For example,
 /// both NewlyAdded and NeedsCascadingBuild are represented as "!dirty".
-/// Therefore, this will not cleanly round-trip between InputInfo::status and
+/// Therefore, this will not cleanly round-trip between InputInfo::Status and
 /// string identifiers.
 inline static StringRef
-get_identifier_for_input_info_status(CompileJobAction::InputInfo::Status status)
-{
-   switch (status) {
-   case CompileJobAction::InputInfo::UpToDate:
-      return "";
-   case CompileJobAction::InputInfo::NewlyAdded:
-   case CompileJobAction::InputInfo::NeedsCascadingBuild:
-      return "!dirty";
-   case CompileJobAction::InputInfo::NeedsNonCascadingBuild:
-      return "!private";
+getIdentifierForInputInfoStatus(CompileJobAction::InputInfo::Status Status) {
+   switch (Status) {
+      case CompileJobAction::InputInfo::UpToDate:
+         return "";
+      case CompileJobAction::InputInfo::NewlyAdded:
+      case CompileJobAction::InputInfo::NeedsCascadingBuild:
+         return "!dirty";
+      case CompileJobAction::InputInfo::NeedsNonCascadingBuild:
+         return "!private";
    }
 
    // Work around MSVC warning: not all control paths return a value
@@ -86,15 +75,17 @@ get_identifier_for_input_info_status(CompileJobAction::InputInfo::Status status)
 /// \returns The status corresponding to the string identifier used in a
 /// compilation record file (.swiftdeps file).
 inline static Optional<CompileJobAction::InputInfo::Status>
-get_info_statu_for_identifier(StringRef identifier)
-{
-   return llvm::StringSwitch<Optional<CompileJobAction::InputInfo::Status>>(identifier)
+getInfoStatusForIdentifier(StringRef Identifier) {
+   return llvm::StringSwitch<Optional<
+      CompileJobAction::InputInfo::Status>>(Identifier)
       .Case("", CompileJobAction::InputInfo::UpToDate)
       .Case("!dirty", CompileJobAction::InputInfo::NeedsCascadingBuild)
       .Case("!private", CompileJobAction::InputInfo::NeedsNonCascadingBuild)
       .Default(None);
 }
 
-} // polar::driver
+} // end namespace compilation_record
+} // end namespace driver
+} // end namespace polar
 
-#endif // POLARPHP_DRIVER_COMPILATION_RECORD_H
+#endif // POLARPHP_DRIVER_INTERNAL_COMPILATIONRECORD_H

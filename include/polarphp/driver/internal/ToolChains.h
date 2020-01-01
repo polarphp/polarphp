@@ -9,49 +9,66 @@
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
 //===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
-//
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/12/03.
 
 #ifndef POLARPHP_DRIVER_INTERNAL_TOOLCHAINS_H
 #define POLARPHP_DRIVER_INTERNAL_TOOLCHAINS_H
 
 #include "polarphp/basic/LLVM.h"
 #include "polarphp/driver/ToolChain.h"
+#include "llvm/Option/ArgList.h"
 #include "llvm/Support/Compiler.h"
 
-namespace polar::driver::toolchains {
+namespace polar {
+class DiagnosticEngine;
 
-class LLVM_LIBRARY_VISIBILITY Darwin : public ToolChain
-{
+namespace driver {
+namespace toolchains {
+
+class LLVM_LIBRARY_VISIBILITY Darwin : public ToolChain {
 protected:
+
+   void addLinkerInputArgs(InvocationInfo &II,
+                           const JobContext &context) const;
+
+   void addArgsToLinkARCLite(llvm::opt::ArgStringList &Arguments,
+                             const JobContext &context) const;
+
+   void addSanitizerArgs(llvm::opt::ArgStringList &Arguments,
+                         const DynamicLinkJobAction &job,
+                         const JobContext &context) const;
+
+   void addArgsToLinkStdlib(llvm::opt::ArgStringList &Arguments,
+                            const DynamicLinkJobAction &job,
+                            const JobContext &context) const;
+
+   void addProfileGenerationArgs(llvm::opt::ArgStringList &Arguments,
+                                 const JobContext &context) const;
+
+   void addDeploymentTargetArgs(llvm::opt::ArgStringList &Arguments,
+                                const JobContext &context) const;
+
    InvocationInfo constructInvocation(const InterpretJobAction &job,
                                       const JobContext &context) const override;
    InvocationInfo constructInvocation(const DynamicLinkJobAction &job,
                                       const JobContext &context) const override;
    InvocationInfo constructInvocation(const StaticLinkJobAction &job,
                                       const JobContext &context) const override;
-   std::string findProgramRelativeToPolarphpImpl(StringRef name) const override;
+
+   void validateArguments(DiagnosticEngine &diags,
+                          const llvm::opt::ArgList &args) const override;
+
+   std::string findProgramRelativeToPHPImpl(StringRef name) const override;
+
    bool shouldStoreInvocationInDebugInfo() const override;
 
 public:
-   Darwin(const Driver &driver, const llvm::Triple &triple)
-      : ToolChain(driver, triple)
-   {}
-   ~Darwin() override = default;
-   std::string sanitizerRuntimeLibName(StringRef sanitizer,
+   Darwin(const Driver &D, const llvm::Triple &Triple) : ToolChain(D, Triple) {}
+   ~Darwin() = default;
+   std::string sanitizerRuntimeLibName(StringRef Sanitizer,
                                        bool shared = true) const override;
 };
 
-class LLVM_LIBRARY_VISIBILITY Windows : public ToolChain
-{
+class LLVM_LIBRARY_VISIBILITY Windows : public ToolChain {
 protected:
    InvocationInfo constructInvocation(const DynamicLinkJobAction &job,
                                       const JobContext &context) const override;
@@ -59,16 +76,13 @@ protected:
                                       const JobContext &context) const override;
 
 public:
-   Windows(const Driver &driver, const llvm::Triple &triple)
-      : ToolChain(driver, triple)
-   {}
-   ~Windows() override = default;
-   std::string sanitizerRuntimeLibName(StringRef sanitizer,
+   Windows(const Driver &D, const llvm::Triple &Triple) : ToolChain(D, Triple) {}
+   ~Windows() = default;
+   std::string sanitizerRuntimeLibName(StringRef Sanitizer,
                                        bool shared = true) const override;
 };
 
-class LLVM_LIBRARY_VISIBILITY GenericUnix : public ToolChain
-{
+class LLVM_LIBRARY_VISIBILITY GenericUnix : public ToolChain {
 protected:
    InvocationInfo constructInvocation(const InterpretJobAction &job,
                                       const JobContext &context) const override;
@@ -102,39 +116,39 @@ protected:
                                       const JobContext &context) const override;
 
 public:
-   GenericUnix(const Driver &driver, const llvm::Triple &triple)
-      : ToolChain(driver, triple) {}
-   ~GenericUnix() override = default;
-   std::string sanitizerRuntimeLibName(StringRef sanitizer,
+   GenericUnix(const Driver &D, const llvm::Triple &Triple)
+      : ToolChain(D, Triple) {}
+   ~GenericUnix() = default;
+   std::string sanitizerRuntimeLibName(StringRef Sanitizer,
                                        bool shared = true) const override;
 };
 
-class LLVM_LIBRARY_VISIBILITY Android : public GenericUnix
-{
+class LLVM_LIBRARY_VISIBILITY Android : public GenericUnix {
 protected:
    std::string getTargetForLinker() const override;
 
    bool shouldProvideRPathToLinker() const override;
 
 public:
-   Android(const Driver &driver, const llvm::Triple &triple)
-      : GenericUnix(driver, triple) {}
-   ~Android() override = default;
+   Android(const Driver &D, const llvm::Triple &Triple)
+      : GenericUnix(D, Triple) {}
+   ~Android() = default;
 };
 
-class LLVM_LIBRARY_VISIBILITY Cygwin : public GenericUnix
-{
+class LLVM_LIBRARY_VISIBILITY Cygwin : public GenericUnix {
 protected:
    std::string getDefaultLinker() const override;
 
    std::string getTargetForLinker() const override;
 
 public:
-   Cygwin(const Driver &driver, const llvm::Triple &triple)
-      : GenericUnix(driver, triple) {}
-   ~Cygwin() override = default;
+   Cygwin(const Driver &D, const llvm::Triple &Triple)
+      : GenericUnix(D, Triple) {}
+   ~Cygwin() = default;
 };
 
-} // polar::driver::toolchains
+} // end namespace toolchains
+} // end namespace driver
+} // end namespace polar
 
 #endif // POLARPHP_DRIVER_INTERNAL_TOOLCHAINS_H

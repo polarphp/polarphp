@@ -9,16 +9,6 @@
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
 //===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
-//
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/12/02.
 
 #include "polarphp/basic/ReferenceDependencyKeys.h"
 #include "polarphp/basic/Statistic.h"
@@ -33,34 +23,28 @@
 #include "llvm/Support/SourceMgr.h"
 #include "llvm/Support/YAMLParser.h"
 
-namespace polar::driver {
+using namespace polar;
 
-enum class DependencyGraphImpl::DependencyKind : uint8_t
-{
+enum class DependencyGraphImpl::DependencyKind : uint8_t {
    TopLevelName = 1 << 0,
    DynamicLookupName = 1 << 1,
    NominalType = 1 << 2,
    NominalTypeMember = 1 << 3,
    ExternalFile = 1 << 4,
 };
-
-enum class DependencyGraphImpl::DependencyFlags : uint8_t
-{
-   isCascading = 1 << 0
+enum class DependencyGraphImpl::DependencyFlags : uint8_t {
+   IsCascading = 1 << 0
 };
 
-class DependencyGraphImpl::MarkTracerImpl::Entry
-{
+class DependencyGraphImpl::MarkTracerImpl::Entry {
 public:
-   const void *node;
-   StringRef name;
-   DependencyMaskTy kindMask;
+   const void *Node;
+   StringRef Name;
+   DependencyMaskTy KindMask;
 };
 
-DependencyGraphImpl::MarkTracerImpl::MarkTracerImpl(UnifiedStatsReporter *stats)
-   : m_stats(stats)
-{}
-
+DependencyGraphImpl::MarkTracerImpl::MarkTracerImpl(UnifiedStatsReporter *Stats)
+   : Stats(Stats) {}
 DependencyGraphImpl::MarkTracerImpl::~MarkTracerImpl() = default;
 
 using LoadResult = DependencyGraphImpl::LoadResult;
@@ -72,22 +56,20 @@ static LoadResult
 parseDependencyFile(llvm::MemoryBuffer &buffer,
                     llvm::function_ref<DependencyCallbackTy> providesCallback,
                     llvm::function_ref<DependencyCallbackTy> dependsCallback,
-                    llvm::function_ref<InterfaceHashCallbackTy> interfaceHashCallback)
-{
+                    llvm::function_ref<InterfaceHashCallbackTy> interfaceHashCallback) {
    namespace yaml = llvm::yaml;
 
    // FIXME: Switch to a format other than YAML.
-   llvm::SourceMgr sourceMgr;
-   yaml::Stream stream(buffer.getMemBufferRef(), sourceMgr);
-   auto iter = stream.begin();
-   if (iter == stream.end() || !iter->getRoot())
+   llvm::SourceMgr SM;
+   yaml::Stream stream(buffer.getMemBufferRef(), SM);
+   auto I = stream.begin();
+   if (I == stream.end() || !I->getRoot())
       return LoadResult::HadError;
 
-   auto *topLevelMap = dyn_cast<yaml::MappingNode>(iter->getRoot());
+   auto *topLevelMap = dyn_cast<yaml::MappingNode>(I->getRoot());
    if (!topLevelMap) {
-      if (isa<yaml::NullNode>(iter->getRoot())) {
+      if (isa<yaml::NullNode>(I->getRoot()))
          return LoadResult::UpToDate;
-      }
       return LoadResult::HadError;
    }
 
@@ -98,36 +80,36 @@ parseDependencyFile(llvm::MemoryBuffer &buffer,
    // Update the "result" variable above.
    // This is a macro rather than a lambda because it contains a return.
 #define UPDATE_RESULT(update) switch (update) {\
-   case LoadResult::HadError: \
-   return LoadResult::HadError; \
-   case LoadResult::UpToDate: \
-   break; \
-   case LoadResult::AffectsDownstream: \
-   result = LoadResult::AffectsDownstream; \
-   break; \
-} \
+    case LoadResult::HadError: \
+      return LoadResult::HadError; \
+    case LoadResult::UpToDate: \
+      break; \
+    case LoadResult::AffectsDownstream: \
+      result = LoadResult::AffectsDownstream; \
+      break; \
+    } \
 
    // FIXME: LLVM's YAML support does incremental parsing in such a way that
    // for-range loops break.
    for (auto i = topLevelMap->begin(), e = topLevelMap->end(); i != e; ++i) {
-      if (isa<yaml::NullNode>(i->getValue())) {
+      if (isa<yaml::NullNode>(i->getValue()))
          continue;
-      }
+
       auto *key = dyn_cast<yaml::ScalarNode>(i->getKey());
       if (!key)
          return LoadResult::HadError;
       StringRef keyString = key->getValue(scratch);
 
-      using namespace polar::referencedependencykeys;
+      using namespace referencedependencykeys;
 
       if (keyString == interfaceHash) {
          auto *value = dyn_cast<yaml::ScalarNode>(i->getValue());
-         if (!value) {
+         if (!value)
             return LoadResult::HadError;
-         }
 
          StringRef valueString = value->getValue(scratch);
-         UPDATE_RESULT(interfaceHashCallback(valueString))
+         UPDATE_RESULT(interfaceHashCallback(valueString));
+
       } else {
          enum class DependencyDirection : bool {
             Depends,
@@ -136,35 +118,35 @@ parseDependencyFile(llvm::MemoryBuffer &buffer,
          using KindPair = std::pair<DependencyKind, DependencyDirection>;
 
          KindPair dirAndKind = llvm::StringSwitch<KindPair>(key->getValue(scratch))
-               .Case(dependsTopLevel,
-                     std::make_pair(DependencyKind::TopLevelName,
-                                    DependencyDirection::Depends))
-               .Case(dependsNominal,
-                     std::make_pair(DependencyKind::NominalType,
-                                    DependencyDirection::Depends))
-               .Case(dependsMember,
-                     std::make_pair(DependencyKind::NominalTypeMember,
-                                    DependencyDirection::Depends))
-               .Case(dependsDynamicLookup,
-                     std::make_pair(DependencyKind::DynamicLookupName,
-                                    DependencyDirection::Depends))
-               .Case(dependsExternal,
-                     std::make_pair(DependencyKind::ExternalFile,
-                                    DependencyDirection::Depends))
-               .Case(providesTopLevel,
-                     std::make_pair(DependencyKind::TopLevelName,
-                                    DependencyDirection::Provides))
-               .Case(providesNominal,
-                     std::make_pair(DependencyKind::NominalType,
-                                    DependencyDirection::Provides))
-               .Case(providesMember,
-                     std::make_pair(DependencyKind::NominalTypeMember,
-                                    DependencyDirection::Provides))
-               .Case(providesDynamicLookup,
-                     std::make_pair(DependencyKind::DynamicLookupName,
-                                    DependencyDirection::Provides))
-               .Default(std::make_pair(DependencyKind(),
-                                       DependencyDirection::Depends));
+            .Case(dependsTopLevel,
+                  std::make_pair(DependencyKind::TopLevelName,
+                                 DependencyDirection::Depends))
+            .Case(dependsNominal,
+                  std::make_pair(DependencyKind::NominalType,
+                                 DependencyDirection::Depends))
+            .Case(dependsMember,
+                  std::make_pair(DependencyKind::NominalTypeMember,
+                                 DependencyDirection::Depends))
+            .Case(dependsDynamicLookup,
+                  std::make_pair(DependencyKind::DynamicLookupName,
+                                 DependencyDirection::Depends))
+            .Case(dependsExternal,
+                  std::make_pair(DependencyKind::ExternalFile,
+                                 DependencyDirection::Depends))
+            .Case(providesTopLevel,
+                  std::make_pair(DependencyKind::TopLevelName,
+                                 DependencyDirection::Provides))
+            .Case(providesNominal,
+                  std::make_pair(DependencyKind::NominalType,
+                                 DependencyDirection::Provides))
+            .Case(providesMember,
+                  std::make_pair(DependencyKind::NominalTypeMember,
+                                 DependencyDirection::Provides))
+            .Case(providesDynamicLookup,
+                  std::make_pair(DependencyKind::DynamicLookupName,
+                                 DependencyDirection::Provides))
+            .Default(std::make_pair(DependencyKind(),
+                                    DependencyDirection::Depends));
          if (dirAndKind.first == DependencyKind())
             return LoadResult::HadError;
 
@@ -179,20 +161,18 @@ parseDependencyFile(llvm::MemoryBuffer &buffer,
                bool isCascading = rawEntry.getRawTag() != "!private";
 
                auto *entry = dyn_cast<yaml::SequenceNode>(&rawEntry);
-               if (!entry) {
+               if (!entry)
                   return LoadResult::HadError;
-               }
+
                auto iter = entry->begin();
                auto *base = dyn_cast<yaml::ScalarNode>(&*iter);
-               if (!base) {
+               if (!base)
                   return LoadResult::HadError;
-               }
                ++iter;
-               auto *member = dyn_cast<yaml::ScalarNode>(&*iter);
-               if (!member) {
-                  return LoadResult::HadError;
-               }
 
+               auto *member = dyn_cast<yaml::ScalarNode>(&*iter);
+               if (!member)
+                  return LoadResult::HadError;
                ++iter;
 
                // FIXME: LLVM's YAML support doesn't implement == correctly for end
@@ -220,6 +200,7 @@ parseDependencyFile(llvm::MemoryBuffer &buffer,
 
                bool isDepends = dirAndKind.second == DependencyDirection::Depends;
                auto &callback = isDepends ? dependsCallback : providesCallback;
+
                UPDATE_RESULT(callback(entry->getValue(scratch), dirAndKind.first,
                                       entry->getRawTag() != "!private"));
             }
@@ -230,42 +211,38 @@ parseDependencyFile(llvm::MemoryBuffer &buffer,
    return result;
 }
 
-LoadResult DependencyGraphImpl::loadFromPath(const void *node, StringRef path)
-{
+LoadResult DependencyGraphImpl::loadFromPath(const void *node, StringRef path) {
    auto buffer = llvm::MemoryBuffer::getFile(path);
-   if (!buffer) {
+   if (!buffer)
       return LoadResult::HadError;
-   }
    return loadFromBuffer(node, *buffer.get());
 }
 
 LoadResult
-DependencyGraphImpl::loadFromString(const void *node, StringRef data)
-{
+DependencyGraphImpl::loadFromString(const void *node, StringRef data) {
    auto buffer = llvm::MemoryBuffer::getMemBuffer(data);
    return loadFromBuffer(node, *buffer);
 }
 
 LoadResult DependencyGraphImpl::loadFromBuffer(const void *node,
-                                               llvm::MemoryBuffer &buffer)
-{
-   auto &provides = m_provides[node];
+                                               llvm::MemoryBuffer &buffer) {
+   auto &provides = Provides[node];
 
    auto dependsCallback = [this, node](StringRef name, DependencyKind kind,
-         bool isCascading) -> LoadResult {
+                                       bool isCascading) -> LoadResult {
       if (kind == DependencyKind::ExternalFile)
-         m_externalDependencies.insert(name);
+         ExternalDependencies.insert(name);
 
-      auto &entries = m_dependencies[name];
+      auto &entries = Dependencies[name];
       auto iter = std::find_if(entries.first.begin(), entries.first.end(),
                                [node](const DependencyEntryTy &entry) -> bool {
-         return node == entry.node;
-      });
+                                  return node == entry.node;
+                               });
 
       DependencyFlagsTy flags;
-      if (isCascading) {
-         flags |= DependencyFlags::isCascading;
-      }
+      if (isCascading)
+         flags |= DependencyFlags::IsCascading;
+
       if (iter == entries.first.end()) {
          entries.first.push_back({node, kind, flags});
       } else {
@@ -273,31 +250,30 @@ LoadResult DependencyGraphImpl::loadFromBuffer(const void *node,
          iter->flags |= flags;
       }
 
-      if (isCascading && (entries.second & kind)) {
+      if (isCascading && (entries.second & kind))
          return LoadResult::AffectsDownstream;
-      }
       return LoadResult::UpToDate;
    };
 
    auto providesCallback =
-         [&provides](StringRef name, DependencyKind kind,
-         bool isCascading) -> LoadResult {
-      assert(isCascading);
-      auto iter = std::find_if(provides.begin(), provides.end(),
-                               [name](const ProvidesEntryTy &entry) -> bool {
-         return name == entry.name;
-      });
+      [&provides](StringRef name, DependencyKind kind,
+                  bool isCascading) -> LoadResult {
+         assert(isCascading);
+         auto iter = std::find_if(provides.begin(), provides.end(),
+                                  [name](const ProvidesEntryTy &entry) -> bool {
+                                     return name == entry.name;
+                                  });
 
-      if (iter == provides.end()) {
-         provides.push_back({name, kind});
-      } else {
-         iter->kindMask |= kind;
-      }
-      return LoadResult::UpToDate;
-   };
+         if (iter == provides.end())
+            provides.push_back({name, kind});
+         else
+            iter->kindMask |= kind;
+
+         return LoadResult::UpToDate;
+      };
 
    auto interfaceHashCallback = [this, node](StringRef hash) -> LoadResult {
-      auto insertResult = m_interfaceHashes.insert(std::make_pair(node, hash));
+      auto insertResult = InterfaceHashes.insert(std::make_pair(node, hash));
 
       if (insertResult.second) {
          // Treat a newly-added hash as up-to-date. This includes the initial
@@ -319,70 +295,71 @@ LoadResult DependencyGraphImpl::loadFromBuffer(const void *node,
 }
 
 void DependencyGraphImpl::markExternal(SmallVectorImpl<const void *> &visited,
-                                       StringRef externalDependency)
-{
-   auto allDependents = m_dependencies.find(externalDependency);
-   assert(allDependents != m_dependencies.end() && "not a dependency!");
-   allDependents->second.second |= DependencyKind::ExternalFile;
+                                       StringRef externalDependency) {
+   forEachUnmarkedJobDirectlyDependentOnExternalPHPdeps(
+      externalDependency, [&](const void *node) {
+         visited.push_back(node);
+         markTransitive(visited, node);
+      });
+}
 
+void DependencyGraphImpl::forEachUnmarkedJobDirectlyDependentOnExternalPHPdeps(
+   StringRef externalPHPDeps, function_ref<void(const void *node)> fn) {
+   auto allDependents = Dependencies.find(externalPHPDeps);
+   assert(allDependents != Dependencies.end() && "not a dependency!");
+   allDependents->second.second |= DependencyKind::ExternalFile;
    for (const auto &dependent : allDependents->second.first) {
-      if (!dependent.kindMask.contains(DependencyKind::ExternalFile)) {
+      if (!dependent.kindMask.contains(DependencyKind::ExternalFile))
          continue;
-      }
-      if (isMarked(dependent.node)) {
+      if (isMarked(dependent.node))
          continue;
-      }
-      assert(dependent.flags & DependencyFlags::isCascading);
-      visited.push_back(dependent.node);
-      markTransitive(visited, dependent.node);
+      assert(dependent.flags & DependencyFlags::IsCascading);
+      fn(dependent.node);
    }
 }
 
 void
 DependencyGraphImpl::markTransitive(SmallVectorImpl<const void *> &visited,
-                                    const void *node, MarkTracerImpl *tracer)
-{
-   assert(m_provides.count(node) && "node is not in the graph");
+                                    const void *node, MarkTracerImpl *tracer) {
+   assert(Provides.count(node) && "node is not in the graph");
    llvm::SpecificBumpPtrAllocator<MarkTracerImpl::Entry> scratchAlloc;
 
    struct WorklistEntry {
-      ArrayRef<MarkTracerImpl::Entry> reason;
-      const void *node;
-      bool isCascading;
+      ArrayRef<MarkTracerImpl::Entry> Reason;
+      const void *Node;
+      bool IsCascading;
    };
 
    SmallVector<WorklistEntry, 16> worklist;
    SmallPtrSet<const void *, 16> visitedSet;
 
    auto addDependentsToWorklist = [&](const void *next,
-         ArrayRef<MarkTracerImpl::Entry> reason) {
-      auto allProvided = m_provides.find(next);
-      if (allProvided == m_provides.end()) {
+                                      ArrayRef<MarkTracerImpl::Entry> reason) {
+      auto allProvided = Provides.find(next);
+      if (allProvided == Provides.end())
          return;
-      }
+
       for (const auto &provided : allProvided->second) {
-         auto allDependents = m_dependencies.find(provided.name);
-         if (allDependents == m_dependencies.end()) {
+         auto allDependents = Dependencies.find(provided.name);
+         if (allDependents == Dependencies.end())
             continue;
-         }
-         if (allDependents->second.second.contains(provided.kindMask)) {
+
+         if (allDependents->second.second.contains(provided.kindMask))
             continue;
-         }
+
          // Record that we've traversed this dependency.
          allDependents->second.second |= provided.kindMask;
 
          for (const auto &dependent : allDependents->second.first) {
-            if (dependent.node == next) {
+            if (dependent.node == next)
                continue;
-            }
             auto intersectingKinds = provided.kindMask & dependent.kindMask;
-            if (!intersectingKinds) {
+            if (!intersectingKinds)
                continue;
-            }
-            if (isMarked(dependent.node)) {
+            if (isMarked(dependent.node))
                continue;
-            }
-            bool isCascading{dependent.flags & DependencyFlags::isCascading};
+            bool isCascading{dependent.flags & DependencyFlags::IsCascading};
+
             MutableArrayRef<MarkTracerImpl::Entry> newReason;
             if (tracer) {
                tracer->countStatsForNodeMarking(intersectingKinds, isCascading);
@@ -398,13 +375,13 @@ DependencyGraphImpl::markTransitive(SmallVectorImpl<const void *> &visited,
    };
 
    auto record = [&](WorklistEntry next) {
-      if (!visitedSet.insert(next.node).second)
+      if (!visitedSet.insert(next.Node).second)
          return;
-      visited.push_back(next.node);
+      visited.push_back(next.Node);
       if (tracer) {
-         auto &savedReason = tracer->m_table[next.node];
+         auto &savedReason = tracer->Table[next.Node];
          savedReason.clear();
-         savedReason.append(next.reason.begin(), next.reason.end());
+         savedReason.append(next.Reason.begin(), next.Reason.end());
       }
    };
 
@@ -416,85 +393,71 @@ DependencyGraphImpl::markTransitive(SmallVectorImpl<const void *> &visited,
       auto next = worklist.pop_back_val();
 
       // Is this a non-cascading dependency?
-      if (!next.isCascading) {
-         if (!isMarked(next.node)) {
+      if (!next.IsCascading) {
+         if (!isMarked(next.Node))
             record(next);
-         }
          continue;
       }
 
-      addDependentsToWorklist(next.node, next.reason);
-      if (!markIntransitive(next.node)) {
+      addDependentsToWorklist(next.Node, next.Reason);
+      if (!markIntransitive(next.Node))
          continue;
-      }
       record(next);
    }
 }
 
 void DependencyGraphImpl::MarkTracerImpl::countStatsForNodeMarking(
-      const OptionSet<DependencyKind> &Kind, bool isCascading) const
-{
+   const OptionSet<DependencyKind> &Kind, bool IsCascading) const {
 
-   if (!m_stats) {
+   if (!Stats)
       return;
-   }
-   auto &counter = m_stats->getDriverCounters();
-   if (isCascading) {
-      if (Kind & DependencyKind::TopLevelName) {
-         counter.DriverDepCascadingTopLevel++;
-      }
-      if (Kind & DependencyKind::DynamicLookupName) {
-         counter.DriverDepCascadingDynamic++;
-      }
-      if (Kind & DependencyKind::NominalType) {
-         counter.DriverDepCascadingNominal++;
-      }
-      if (Kind & DependencyKind::NominalTypeMember) {
-         counter.DriverDepCascadingMember++;
-      }
-      if (Kind & DependencyKind::NominalTypeMember) {
-         counter.DriverDepCascadingExternal++;
-      }
+
+   auto &D = Stats->getDriverCounters();
+   if (IsCascading) {
+      if (Kind & DependencyKind::TopLevelName)
+         D.DriverDepCascadingTopLevel++;
+      if (Kind & DependencyKind::DynamicLookupName)
+         D.DriverDepCascadingDynamic++;
+      if (Kind & DependencyKind::NominalType)
+         D.DriverDepCascadingNominal++;
+      if (Kind & DependencyKind::NominalTypeMember)
+         D.DriverDepCascadingMember++;
+      if (Kind & DependencyKind::NominalTypeMember)
+         D.DriverDepCascadingExternal++;
    } else {
-      if (Kind & DependencyKind::TopLevelName) {
-         counter.DriverDepTopLevel++;
-      }
-      if (Kind & DependencyKind::DynamicLookupName) {
-         counter.DriverDepDynamic++;
-      }
-      if (Kind & DependencyKind::NominalType) {
-         counter.DriverDepNominal++;
-      }
-      if (Kind & DependencyKind::NominalTypeMember) {
-         counter.DriverDepMember++;
-      }
-      if (Kind & DependencyKind::NominalTypeMember) {
-          counter.DriverDepExternal++;
-      }
+      if (Kind & DependencyKind::TopLevelName)
+         D.DriverDepTopLevel++;
+      if (Kind & DependencyKind::DynamicLookupName)
+         D.DriverDepDynamic++;
+      if (Kind & DependencyKind::NominalType)
+         D.DriverDepNominal++;
+      if (Kind & DependencyKind::NominalTypeMember)
+         D.DriverDepMember++;
+      if (Kind & DependencyKind::NominalTypeMember)
+         D.DriverDepExternal++;
    }
 }
 
 void DependencyGraphImpl::MarkTracerImpl::printPath(
-      raw_ostream &out,
-      const void *item,
-      llvm::function_ref<void (const void *)> printItem) const
-{
-   for (const Entry &entry : m_table.lookup(item)) {
+   raw_ostream &out,
+   const void *item,
+   llvm::function_ref<void (const void *)> printItem) const {
+   for (const Entry &entry : Table.lookup(item)) {
       out << "\t";
-      printItem(entry.node);
-      if (entry.kindMask.contains(DependencyKind::TopLevelName)) {
-         out << " provides top-level name '" << entry.name << "'\n";
-      } else if (entry.kindMask.contains(DependencyKind::NominalType)) {
-         SmallString<64> name{entry.name};
-         if (name.front() == 'P') {
+      printItem(entry.Node);
+      if (entry.KindMask.contains(DependencyKind::TopLevelName)) {
+         out << " provides top-level name '" << entry.Name << "'\n";
+
+      } else if (entry.KindMask.contains(DependencyKind::NominalType)) {
+         SmallString<64> name{entry.Name};
+         if (name.front() == 'P')
             name.push_back('_');
-         }
          out << " provides type '"
-//             << polar::demangling::demangle_type_as_string(name.str())
+             << polar::demangling::demangleTypeAsString(name.str())
              << "'\n";
 
-      } else if (entry.kindMask.contains(DependencyKind::NominalTypeMember)) {
-         SmallString<64> name{entry.name};
+      } else if (entry.KindMask.contains(DependencyKind::NominalTypeMember)) {
+         SmallString<64> name{entry.Name};
          size_t splitPoint = name.find('\0');
          assert(splitPoint != StringRef::npos);
 
@@ -509,19 +472,18 @@ void DependencyGraphImpl::MarkTracerImpl::printPath(
 
          if (memberPart.empty()) {
             out << " provides non-private members of type '"
-//                << polar::demangling::demangle_type_as_string(typePart)
+                << polar::demangling::demangleTypeAsString(typePart)
                 << "'\n";
          } else {
             out << " provides member '" << memberPart << "' of type '"
-//                << polar::demangling::demangle_type_as_string(typePart)
+                << polar::demangling::demangleTypeAsString(typePart)
                 << "'\n";
          }
-      } else if (entry.kindMask.contains(DependencyKind::DynamicLookupName)) {
-         out << " provides AnyObject member '" << entry.name << "'\n";
+      } else if (entry.KindMask.contains(DependencyKind::DynamicLookupName)) {
+         out << " provides AnyObject member '" << entry.Name << "'\n";
+
       } else {
          llvm_unreachable("not a dependency kind between nodes");
       }
    }
 }
-
-} // polar::driver

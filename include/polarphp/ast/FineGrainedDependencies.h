@@ -746,7 +746,7 @@ public:
   InterfaceAndImplementationPair<SourceFileDepGraphNode>
   getSourceFileNodePair() const;
 
-  StringRef getSwiftDepsFromSourceFileProvide() const;
+  StringRef getPHPDepsFromSourceFileProvide() const;
 
   std::string getGraphID() const {
     return getSourceFileNodePair().getInterface()->getKey().humanReadableName();

@@ -9,15 +9,20 @@
 #
 # Created by polarboy on 2019/11/26.
 
-#set(POLAR_DRIVER_SOURCES)
+set(POLAR_DRIVER_SOURCES)
 
-#polar_collect_files(
-#   TYPE_BOTH
-#   DIR .
-#   OUTPUT_VAR POLAR_DRIVER_SOURCES)
+polar_collect_files(
+   TYPE_BOTH
+   DIR .
+   OUTPUT_VAR POLAR_DRIVER_SOURCES)
 
-#polar_merge_list(POLAR_DRIVER_SOURCES POLAR_HEADERS)
+polar_merge_list(POLAR_DRIVER_SOURCES POLAR_HEADERS)
 
-#polar_add_library(PolarDriver SHARED
-#   ${POLAR_DRIVER_SOURCES}
-#   LINK_LIBS PolarUtils PolarKernel PolarSyntax PolarParser PolarOption LLVMOption)
+polar_add_library(PolarDriver STATIC
+   ${POLAR_DRIVER_SOURCES}
+   LINK_LIBS
+   PolarUtils
+   PolarKernel
+   PolarBasic
+   PolarAST
+   PolarOption)

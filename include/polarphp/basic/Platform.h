@@ -75,6 +75,11 @@ DarwinPlatformKind get_non_simulator_platform(DarwinPlatformKind platform);
 /// returned.
 StringRef get_platform_name_for_triple(const llvm::Triple &triple);
 
+/// Returns true if the given triple represents an OS that ships with
+/// ABI-stable php libraries (eg. in /usr/lib/swift).
+bool triple_requires_rpath_for_php_in_os(const llvm::Triple &triple);
+
+
 /// Returns the architecture component of the path for a given target triple.
 ///
 /// Typically this is used for mapping the architecture component of the

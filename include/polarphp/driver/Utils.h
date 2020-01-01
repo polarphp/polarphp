@@ -1,13 +1,14 @@
-// This source file is part of the polarphp.org open source project
+//===--- Util.h - Common Driver Utilities -----------------------*- C++ -*-===//
 //
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
+// This source file is part of the Swift.org open source project
+//
+// Copyright (c) 2014 - 2017 Apple Inc. and the Swift project authors
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
+// See https://swift.org/LICENSE.txt for license information
+// See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
-// Created by polarboy on 2019/11/26.
+//===----------------------------------------------------------------------===//
 
 #ifndef POLARPHP_DRIVER_UTILS_H
 #define POLARPHP_DRIVER_UTILS_H
@@ -16,19 +17,21 @@
 #include "polarphp/basic/LLVM.h"
 #include "llvm/ADT/SmallVector.h"
 
-namespace llvm::opt {
+namespace llvm {
+namespace opt {
 class Arg;
-} // end namespace llvm::opt
+} // end namespace opt
+} // end namespace llvm
 
-namespace polar::driver {
+namespace polar {
 
+namespace driver {
 /// An input argument from the command line and its inferred type.
 using InputPair = std::pair<filetypes::FileTypeId, const llvm::opt::Arg *>;
 /// Type used for a list of input arguments.
 using InputFileList = SmallVector<InputPair, 16>;
 
-enum class LinkKind
-{
+enum class LinkKind {
    None,
    Executable,
    DynamicLibrary,
@@ -40,18 +43,17 @@ enum class LinkKind
 ///
 /// The Compilation is responsible for generating this file before running
 /// the Job this info is attached to.
-struct FilelistInfo
-{
-   enum class WhichFiles : unsigned
-   {
-      Input,
-      PrimaryInputs,
+struct FilelistInfo {
+   enum class WhichFiles : unsigned {
+      InputJobs,
+      SourceInputActions,
+      InputJobsAndSourceInputActions,
       Output,
       /// Batch mode frontend invocations may have so many supplementary
       /// outputs that they don't comfortably fit as command-line arguments.
       /// In that case, add a FilelistInfo to record the path to the file.
       /// The type is ignored.
-      SupplementaryOutput,
+         SupplementaryOutput,
    };
 
    StringRef path;
@@ -59,6 +61,7 @@ struct FilelistInfo
    WhichFiles whichFiles;
 };
 
-} // polar::driver
+} // end namespace driver
+} // end namespace polar
 
 #endif // POLARPHP_DRIVER_UTILS_H

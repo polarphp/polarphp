@@ -1,13 +1,14 @@
-// This source file is part of the polarphp.org open source project
+//===--- ToolChain.h - Collections of tools for one platform ----*- C++ -*-===//
 //
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
+// This source file is part of the Swift.org open source project
+//
+// Copyright (c) 2014 - 2017 Apple Inc. and the Swift project authors
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
+// See https://swift.org/LICENSE.txt for license information
+// See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
-// Created by polarboy on 2019/11/26.
+//===----------------------------------------------------------------------===//
 
 #ifndef POLARPHP_DRIVER_TOOLCHAIN_H
 #define POLARPHP_DRIVER_TOOLCHAIN_H
@@ -18,11 +19,14 @@
 #include "polarphp/driver/Job.h"
 #include "polarphp/option/Options.h"
 #include "llvm/ADT/Triple.h"
+#include "llvm/Option/Option.h"
 
 #include <memory>
 
-namespace polar::driver {
+namespace polar {
+class DiagnosticEngine;
 
+namespace driver {
 class CommandOutput;
 class Compilation;
 class Driver;
@@ -30,7 +34,7 @@ class Job;
 class OutputInfo;
 
 /// A ToolChain is responsible for turning abstract Actions into concrete,
-/// runnable jobs.
+/// runnable Jobs.
 ///
 /// The primary purpose of a ToolChain is built around the
 /// \c constructInvocation family of methods. This is a set of callbacks
@@ -38,39 +42,38 @@ class OutputInfo;
 /// returns an executable name and arguments for the Job to be run. The base
 /// ToolChain knows how to perform most operations, but some (like linking)
 /// require platform-specific knowledge, provided in subclasses.
-class ToolChain
-{
+class ToolChain {
+   const Driver &D;
+   const llvm::Triple Triple;
+   mutable llvm::StringMap<std::string> ProgramLookupCache;
+
 protected:
-   ToolChain(const Driver &driver, const llvm::Triple &triple)
-      : m_driver(driver),
-        m_triple(triple)
-   {}
+   ToolChain(const Driver &D, const llvm::Triple &T) : D(D), Triple(T) {}
 
    /// A special name used to identify the Swift executable itself.
    constexpr static const char *const POLARPHP_EXECUTABLE_NAME = "polarphp";
 
    /// Packs together the supplementary information about the job being created.
-   class JobContext
-   {
+   class JobContext {
    private:
-      Compilation &m_compilation;
+      Compilation &C;
 
    public:
-      ArrayRef<const Job *> inputs;
-      ArrayRef<const Action *> inputActions;
-      const CommandOutput &output;
-      const OutputInfo &outputInfo;
+      ArrayRef<const Job *> Inputs;
+      ArrayRef<const Action *> InputActions;
+      const CommandOutput &Output;
+      const OutputInfo &OI;
 
       /// The arguments to the driver. Can also be used to create new strings with
       /// the same lifetime.
       ///
       /// This just caches C.getArgs().
-      const llvm::opt::ArgList &args;
+      const llvm::opt::ArgList &Args;
 
    public:
-      JobContext(Compilation &compilation, ArrayRef<const Job *> inputs,
-                 ArrayRef<const Action *> inputActions,
-                 const CommandOutput &output, const OutputInfo &outputInfo);
+      JobContext(Compilation &C, ArrayRef<const Job *> Inputs,
+                 ArrayRef<const Action *> InputActions,
+                 const CommandOutput &Output, const OutputInfo &OI);
 
       /// Forwards to Compilation::getInputFiles.
       ArrayRef<InputPair> getTopLevelInputFiles() const;
@@ -96,31 +99,30 @@ protected:
 
       /// Reify the existing behavior that SingleCompile compile actions do not
       /// filter, but batch-mode and single-file compilations do. Some clients are
-      /// relying on this (i.e., they pass inputs that don't have ".swift" as an
+      /// relying on this (i.e., they pass inputs that don't have ".php" as an
       /// extension.) It would be nice to eliminate this distinction someday.
       bool shouldFilterFrontendInputsByType() const;
 
       const char *computeFrontendModeForCompile() const;
 
       void addFrontendInputAndOutputArguments(
-            llvm::opt::ArgStringList &arguments,
-            std::vector<FilelistInfo> &filelistInfos) const;
+         llvm::opt::ArgStringList &Arguments,
+         std::vector<FilelistInfo> &FilelistInfos) const;
 
    private:
       void addFrontendCommandLineInputArguments(
-            bool mayHavePrimaryInputs, bool useFileList, bool usePrimaryFileList,
-            bool filterByType, llvm::opt::ArgStringList &arguments) const;
+         bool mayHavePrimaryInputs, bool useFileList, bool usePrimaryFileList,
+         bool filterByType, llvm::opt::ArgStringList &arguments) const;
       void addFrontendSupplementaryOutputArguments(
-            llvm::opt::ArgStringList &arguments) const;
+         llvm::opt::ArgStringList &arguments) const;
    };
 
    /// Packs together information chosen by toolchains to create jobs.
-   struct InvocationInfo
-   {
-      const char *executableName;
-      llvm::opt::ArgStringList arguments;
-      std::vector<std::pair<const char *, const char *>> extraEnvironment;
-      std::vector<FilelistInfo> filelistInfos;
+   struct InvocationInfo {
+      const char *ExecutableName;
+      llvm::opt::ArgStringList Arguments;
+      std::vector<std::pair<const char *, const char *>> ExtraEnvironment;
+      std::vector<FilelistInfo> FilelistInfos;
 
       // Not all platforms and jobs support the use of response files, so assume
       // "false" by default. If the executable specified in the InvocationInfo
@@ -129,9 +131,9 @@ protected:
       bool allowsResponseFiles = false;
 
       InvocationInfo(const char *name, llvm::opt::ArgStringList args = {},
-                     decltype(extraEnvironment) extraEnv = {})
-         : executableName(name), arguments(std::move(args)),
-           extraEnvironment(std::move(extraEnv)) {}
+                     decltype(ExtraEnvironment) extraEnv = {})
+         : ExecutableName(name), Arguments(std::move(args)),
+           ExtraEnvironment(std::move(extraEnv)) {}
    };
 
    virtual InvocationInfo constructInvocation(const CompileJobAction &job,
@@ -169,30 +171,30 @@ protected:
    ///
    /// This method caches its results.
    ///
-   /// \sa findProgramRelativeToSwiftImpl
-   std::string findProgramRelativeToSwift(StringRef name) const;
+   /// \sa findProgramRelativeToPHPtImpl
+   std::string findProgramRelativeToPHP(StringRef name) const;
 
    /// An override point for platform-specific subclasses to customize how to
    /// do relative searches for programs.
    ///
-   /// This method is invoked by findProgramRelativeToPolarphp().
-   virtual std::string findProgramRelativeToPolarphpImpl(StringRef name) const;
+   /// This method is invoked by findProgramRelativeToPHP().
+   virtual std::string findProgramRelativeToPHPImpl(StringRef name) const;
 
-   void addInputsOfType(llvm::opt::ArgStringList &arguments,
-                        ArrayRef<const Action *> inputs,
-                        filetypes::FileTypeId inputType,
-                        const char *prefixArgument = nullptr) const;
+   void addInputsOfType(llvm::opt::ArgStringList &Arguments,
+                        ArrayRef<const Action *> Inputs,
+                        filetypes::FileTypeId InputType,
+                        const char *PrefixArgument = nullptr) const;
 
-   void addInputsOfType(llvm::opt::ArgStringList &arguments,
-                        ArrayRef<const Job *> jobs,
-                        const llvm::opt::ArgList &args, filetypes::FileTypeId inputType,
-                        const char *prefixArgument = nullptr) const;
+   void addInputsOfType(llvm::opt::ArgStringList &Arguments,
+                        ArrayRef<const Job *> Jobs,
+                        const llvm::opt::ArgList &Args, filetypes::FileTypeId InputType,
+                        const char *PrefixArgument = nullptr) const;
 
-   void addPrimaryInputsOfType(llvm::opt::ArgStringList &arguments,
-                               ArrayRef<const Job *> jobs,
-                               const llvm::opt::ArgList &args,
-                               filetypes::FileTypeId inputType,
-                               const char *prefixArgument = nullptr) const;
+   void addPrimaryInputsOfType(llvm::opt::ArgStringList &Arguments,
+                               ArrayRef<const Job *> Jobs,
+                               const llvm::opt::ArgList &Args,
+                               filetypes::FileTypeId InputType,
+                               const char *PrefixArgument = nullptr) const;
 
    /// Get the resource dir link path, which is platform-specific and found
    /// relative to the compiler.
@@ -203,12 +205,12 @@ protected:
    /// dir path and the SDK.
    void getRuntimeLibraryPaths(SmallVectorImpl<std::string> &runtimeLibPaths,
                                const llvm::opt::ArgList &args,
-                               StringRef sdkPath, bool shared) const;
+                               StringRef SDKPath, bool shared) const;
 
    void addPathEnvironmentVariableIfNeeded(Job::EnvironmentVector &env,
                                            const char *name,
                                            const char *separator,
-                                           options::ID optionID,
+                                           options::FileTypeId optionID,
                                            const llvm::opt::ArgList &args,
                                            ArrayRef<std::string> extraEntries = {}) const;
 
@@ -229,15 +231,8 @@ protected:
 public:
    virtual ~ToolChain() = default;
 
-   const Driver &getDriver() const
-   {
-      return m_driver;
-   }
-
-   const llvm::Triple &getTriple() const
-   {
-      return m_triple;
-   }
+   const Driver &getDriver() const { return D; }
+   const llvm::Triple &getTriple() const { return Triple; }
 
    /// Construct a Job for the action \p JA, taking the given information into
    /// account.
@@ -248,7 +243,7 @@ public:
                                      SmallVectorImpl<const Job *> &&inputs,
                                      ArrayRef<const Action *> inputActions,
                                      std::unique_ptr<CommandOutput> output,
-                                     const OutputInfo &outputInfo) const;
+                                     const OutputInfo &OI) const;
 
    /// Return true iff the input \c Job \p A is an acceptable candidate for
    /// batching together into a BatchJob, via a call to \c
@@ -256,66 +251,68 @@ public:
    /// CompileJobAction in a \c Compilation \p C running in \c
    /// OutputInfo::Mode::StandardCompile output mode, with a single \c TY_Swift
    /// \c InputAction.
-   bool jobIsBatchable(const Compilation &comilation, const Job *action) const;
+   bool jobIsBatchable(const Compilation &C, const Job *A) const;
 
-   /// Equivalence relation that holds iff the two input jobs \p A and \p B are
+   /// Equivalence relation that holds iff the two input Jobs \p A and \p B are
    /// acceptable candidates for combining together into a \c BatchJob, via a
    /// call to \c constructBatchJob. This is true when each job independently
    /// satisfies \c jobIsBatchable, and the two jobs have identical executables,
    /// output types and environments (i.e. they are identical aside from their
    /// inputs).
-   bool jobsAreBatchCombinable(const Compilation &comilation, const Job *action,
-                               const Job *job) const;
+   bool jobsAreBatchCombinable(const Compilation &C, const Job *A,
+                               const Job *B) const;
 
-   /// Construct a \c BatchJob that subsumes the work of a set of jobs. Any pair
-   /// of elements in \p jobs are assumed to satisfy the equivalence relation \c
+   /// Construct a \c BatchJob that subsumes the work of a set of Jobs. Any pair
+   /// of elements in \p Jobs are assumed to satisfy the equivalence relation \c
    /// jobsAreBatchCombinable, i.e. they should all be "the same" job in in all
-   /// ways other than their choices of inputs. The provided \p nextQuasiPID
+   /// ways other than their choices of inputs. The provided \p NextQuasiPID
    /// should be a negative number that persists between calls; this method will
-   /// decrement it to assign quasi-PIDs to each of the \p jobs passed.
-   std::unique_ptr<Job> constructBatchJob(ArrayRef<const Job *> jobs,
-                                          int64_t &nextQuasiPID,
-                                          Compilation &compilation) const;
+   /// decrement it to assign quasi-PIDs to each of the \p Jobs passed.
+   std::unique_ptr<Job> constructBatchJob(ArrayRef<const Job *> Jobs,
+                                          int64_t &NextQuasiPID,
+                                          Compilation &C) const;
 
    /// Return the default language type to use for the given extension.
    /// If the extension is empty or is otherwise not recognized, return
    /// the invalid type \c TY_INVALID.
-   filetypes::FileTypeId lookupTypeForExtension(StringRef ext) const;
+   filetypes::FileTypeId lookupTypeForExtension(StringRef Ext) const;
 
    /// Copies the path for the directory clang libraries would be stored in on
    /// the current toolchain.
-   void getClangLibraryPath(const llvm::opt::ArgList &args,
-                            SmallString<128> &libPath) const;
+   void getClangLibraryPath(const llvm::opt::ArgList &Args,
+                            SmallString<128> &LibPath) const;
 
    /// Returns the name the clang library for a given sanitizer would have on
    /// the current toolchain.
    ///
-   /// \param sanitizer sanitizer name.
+   /// \param Sanitizer Sanitizer name.
    /// \param shared Whether the library is shared
-   virtual std::string sanitizerRuntimeLibName(StringRef sanitizer,
+   virtual std::string sanitizerRuntimeLibName(StringRef Sanitizer,
                                                bool shared = true) const = 0;
 
    /// Returns whether a given sanitizer exists for the current toolchain.
    ///
-   /// \param sanitizer sanitizer name.
+   /// \param sanitizer Sanitizer name.
    /// \param shared Whether the library is shared
    bool sanitizerRuntimeLibExists(const llvm::opt::ArgList &args,
                                   StringRef sanitizer, bool shared = true) const;
 
    /// Adds a runtime library to the arguments list for linking.
    ///
-   /// \param libName The library name
-   /// \param arguments The arguments list to append to
-   void addLinkRuntimeLib(const llvm::opt::ArgList &args,
-                          llvm::opt::ArgStringList &arguments,
-                          StringRef libName) const;
+   /// \param LibName The library name
+   /// \param Arguments The arguments list to append to
+   void addLinkRuntimeLib(const llvm::opt::ArgList &Args,
+                          llvm::opt::ArgStringList &Arguments,
+                          StringRef LibName) const;
 
-private:
-   const Driver &m_driver;
-   const llvm::Triple m_triple;
-   mutable llvm::StringMap<std::string> m_programLookupCache;
+   /// Validates arguments passed to the toolchain.
+   ///
+   /// An override point for platform-specific subclasses to customize the
+   /// validations that should be performed.
+   virtual void validateArguments(DiagnosticEngine &diags,
+                                  const llvm::opt::ArgList &args) const {}
 };
-
-} // polar::driver
+} // end namespace driver
+} // end namespace polar
 
 #endif // POLARPHP_DRIVER_TOOLCHAIN_H

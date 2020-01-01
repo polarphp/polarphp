@@ -9,18 +9,9 @@
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
 //===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
-//
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/12/01.
 
 #include "polarphp/basic/StlExtras.h"
+#include "polarphp/driver/DriverIncrementalRanges.h"
 #include "polarphp/driver/Job.h"
 #include "polarphp/driver/PrettyStackTrace.h"
 #include "llvm/ADT/STLExtras.h"
@@ -31,74 +22,62 @@
 #include "llvm/Support/Program.h"
 #include "llvm/Support/raw_ostream.h"
 
-namespace polar::driver {
+using namespace polar;
+using namespace polar::driver;
 
-using polar::interleave;
-
-StringRef CommandOutput::getOutputForInputAndType(StringRef primaryInputFile,
-                                                  filetypes::FileTypeId type) const
-{
-   if (type == filetypes::TY_Nothing) {
+StringRef CommandOutput::getOutputForInputAndType(StringRef PrimaryInputFile,
+                                                  filetypes::FileTypeId Type) const {
+   if (Type == filetypes::TY_Nothing)
       return StringRef();
-   }
-   auto const *map = m_derivedOutputMap.getOutputMapForInput(primaryInputFile);
-   if (!map) {
+   auto const *M = DerivedOutputMap.getOutputMapForInput(PrimaryInputFile);
+   if (!M)
       return StringRef();
-   }
-   auto const out = map->find(type);
-   if (out == map->end()) {
+   auto const Out = M->find(Type);
+   if (Out == M->end())
       return StringRef();
-   }
-   assert(!out->second.empty());
-   return StringRef(out->second);
+   assert(!Out->second.empty());
+   return StringRef(Out->second);
 }
 
-struct CommandOutputInvariantChecker
-{
-   CommandOutput const &out;
-   CommandOutputInvariantChecker(CommandOutput const &commandOut)
-      : out(commandOut)
-   {
+struct CommandOutputInvariantChecker {
+   CommandOutput const &Out;
+   CommandOutputInvariantChecker(CommandOutput const &CO) : Out(CO) {
 #ifndef NDEBUG
-      out.checkInvariants();
+      Out.checkInvariants();
 #endif
    }
-
-   ~CommandOutputInvariantChecker()
-   {
+   ~CommandOutputInvariantChecker() {
 #ifndef NDEBUG
-      out.checkInvariants();
+      Out.checkInvariants();
 #endif
    }
 };
 
-void CommandOutput::ensureEntry(StringRef primaryInputFile,
-                                filetypes::FileTypeId type,
-                                StringRef outputFile,
-                                bool overwrite)
-{
-   assert(!primaryInputFile.empty());
-   assert(!outputFile.empty());
-   assert(type != filetypes::TY_Nothing);
-   auto &map = m_derivedOutputMap.getOrCreateOutputMapForInput(primaryInputFile);
-   if (overwrite) {
-      map[type] = outputFile;
+void CommandOutput::ensureEntry(StringRef PrimaryInputFile,
+                                filetypes::FileTypeId Type,
+                                StringRef OutputFile,
+                                bool Overwrite) {
+   assert(!PrimaryInputFile.empty());
+   assert(!OutputFile.empty());
+   assert(Type != filetypes::TY_Nothing);
+   auto &M = DerivedOutputMap.getOrCreateOutputMapForInput(PrimaryInputFile);
+   if (Overwrite) {
+      M[Type] = OutputFile;
    } else {
-      auto res = map.insert(std::make_pair(type, outputFile));
+      auto res = M.insert(std::make_pair(Type, OutputFile));
       if (res.second) {
          // New entry, no need to compare.
       } else {
          // Existing entry, check equality with request.
-         assert(res.first->getSecond() == outputFile);
+         assert(res.first->getSecond() == OutputFile);
       }
    }
 }
 
-void CommandOutput::checkInvariants() const
-{
-   filetypes::for_all_types([&]( filetypes::FileTypeId type) {
+void CommandOutput::checkInvariants() const {
+   filetypes::for_all_types([&](filetypes::FileTypeId Type) {
       size_t numOutputsOfType = 0;
-      for (auto const &input : m_inputs) {
+      for (auto const &I : Inputs) {
          // FIXME: At the moment, empty primary input names correspond to
          // corner cases in the driver where it is doing TY_Nothing work
          // and isn't even given a primary input; but at some point we
@@ -107,286 +86,260 @@ void CommandOutput::checkInvariants() const
          // are presently (arbitrarily and wrongly) stored in entries
          // associated with the first primary input of the CommandOutput
          // that they were derived from.
-         assert(m_primaryOutputType == filetypes::TY_Nothing || !input.primary.empty());
-         auto const *map = m_derivedOutputMap.getOutputMapForInput(input.primary);
-         if (!map) {
+         assert(PrimaryOutputType == filetypes::TY_Nothing || !I.Primary.empty());
+         auto const *M = DerivedOutputMap.getOutputMapForInput(I.Primary);
+         if (!M)
             continue;
-         }
-         auto const out = map->find(type);
-         if (out == map->end()) {
+         auto const Out = M->find(Type);
+         if (Out == M->end())
             continue;
-         }
-         assert(!out->second.empty());
+         assert(!Out->second.empty());
          ++numOutputsOfType;
       }
       assert(numOutputsOfType == 0 ||
              numOutputsOfType == 1 ||
-             numOutputsOfType == m_inputs.size());
+             numOutputsOfType == Inputs.size());
    });
-   assert(m_additionalOutputTypes.count(m_primaryOutputType) == 0);
+   assert(AdditionalOutputTypes.count(PrimaryOutputType) == 0);
 }
 
 bool CommandOutput::hasSameAdditionalOutputTypes(
-      CommandOutput const &other) const
-{
+   CommandOutput const &other) const {
    bool sameAdditionalOutputTypes = true;
-   filetypes::for_all_types([&](filetypes::FileTypeId type) {
-      bool a = m_additionalOutputTypes.count(type) == 0;
-      bool b = other.m_additionalOutputTypes.count(type) == 0;
+   filetypes::for_all_types([&](filetypes::FileTypeId Type) {
+      bool a = AdditionalOutputTypes.count(Type) == 0;
+      bool b = other.AdditionalOutputTypes.count(Type) == 0;
       if (a != b)
          sameAdditionalOutputTypes = false;
    });
    return sameAdditionalOutputTypes;
 }
 
-void CommandOutput::addOutputs(CommandOutput const &other)
-{
+void CommandOutput::addOutputs(CommandOutput const &other) {
    CommandOutputInvariantChecker Check(*this);
-   assert(m_primaryOutputType == other.m_primaryOutputType);
-   assert(&m_derivedOutputMap == &other.m_derivedOutputMap);
-   m_inputs.append(other.m_inputs.begin(),
-                   other.m_inputs.end());
-   // Should only be called with an empty m_additionalOutputTypes
+   assert(PrimaryOutputType == other.PrimaryOutputType);
+   assert(&DerivedOutputMap == &other.DerivedOutputMap);
+   Inputs.append(other.Inputs.begin(),
+                 other.Inputs.end());
+   // Should only be called with an empty AdditionalOutputTypes
    // or one populated with the same types as other.
-   if (m_additionalOutputTypes.empty()) {
-      m_additionalOutputTypes = other.m_additionalOutputTypes;
+   if (AdditionalOutputTypes.empty()) {
+      AdditionalOutputTypes = other.AdditionalOutputTypes;
    } else {
       assert(hasSameAdditionalOutputTypes(other));
    }
 }
 
-CommandOutput::CommandOutput( filetypes::FileTypeId primaryOutputType,
-                              OutputFileMap &derived)
-   : m_primaryOutputType(primaryOutputType),
-     m_derivedOutputMap(derived)
-{
+CommandOutput::CommandOutput(filetypes::FileTypeId PrimaryOutputType,
+                             OutputFileMap &Derived)
+   : PrimaryOutputType(PrimaryOutputType), DerivedOutputMap(Derived) {
    CommandOutputInvariantChecker Check(*this);
 }
 
-filetypes::FileTypeId CommandOutput::getPrimaryOutputType() const
-{
-   return m_primaryOutputType;
+filetypes::FileTypeId CommandOutput::getPrimaryOutputType() const {
+   return PrimaryOutputType;
 }
 
-void CommandOutput::addPrimaryOutput(CommandInputPair input,
-                                     StringRef primaryOutputFile)
-{
+void CommandOutput::addPrimaryOutput(CommandInputPair Input,
+                                     StringRef PrimaryOutputFile) {
    PrettyStackTraceDriverCommandOutputAddition CrashInfo(
-            "primary", this, input.primary, m_primaryOutputType, primaryOutputFile);
-   if (m_primaryOutputType == filetypes::TY_Nothing) {
+      "primary", this, Input.Primary, PrimaryOutputType, PrimaryOutputFile);
+   if (PrimaryOutputType == filetypes::TY_Nothing) {
       // For TY_Nothing, we accumulate the inputs but do not add any outputs.
       // The invariant holds on either side of this action because all primary
       // outputs for this command will be absent (so the length == 0 case in the
       // invariant holds).
       CommandOutputInvariantChecker Check(*this);
-      m_inputs.push_back(input);
+      Inputs.push_back(Input);
       return;
    }
    // The invariant holds in the non-TY_Nothing case before an input is added and
    // _after the corresponding output is added_, but not inbetween. Don't try to
    // merge these two cases, they're different.
    CommandOutputInvariantChecker Check(*this);
-   m_inputs.push_back(input);
-   assert(!primaryOutputFile.empty());
-   assert(m_additionalOutputTypes.count(m_primaryOutputType) == 0);
-   ensureEntry(input.primary, m_primaryOutputType, primaryOutputFile, false);
+   Inputs.push_back(Input);
+   assert(!PrimaryOutputFile.empty());
+   assert(AdditionalOutputTypes.count(PrimaryOutputType) == 0);
+   ensureEntry(Input.Primary, PrimaryOutputType, PrimaryOutputFile, false);
 }
 
-StringRef CommandOutput::getPrimaryOutputFilename() const
-{
+StringRef CommandOutput::getPrimaryOutputFilename() const {
    // FIXME: ideally this shouldn't exist, or should at least assert size() == 1,
    // and callers should handle cases with multiple primaries explicitly.
-   assert(m_inputs.size() >= 1);
-   return getOutputForInputAndType(m_inputs[0].primary, m_primaryOutputType);
+   assert(Inputs.size() >= 1);
+   return getOutputForInputAndType(Inputs[0].Primary, PrimaryOutputType);
 }
 
-SmallVector<StringRef, 16> CommandOutput::getPrimaryOutputFilenames() const
-{
-   SmallVector<StringRef, 16> vector;
-   size_t nonEmpty = 0;
-   for (auto const &input : m_inputs) {
-      auto out = getOutputForInputAndType(input.primary, m_primaryOutputType);
-      vector.push_back(out);
-      if (!out.empty()) {
-         ++nonEmpty;
-      }
-      assert(!out.empty() || m_primaryOutputType == filetypes::TY_Nothing);
+SmallVector<StringRef, 16> CommandOutput::getPrimaryOutputFilenames() const {
+   SmallVector<StringRef, 16> V;
+   size_t NonEmpty = 0;
+   for (auto const &I : Inputs) {
+      auto Out = getOutputForInputAndType(I.Primary, PrimaryOutputType);
+      V.push_back(Out);
+      if (!Out.empty())
+         ++NonEmpty;
+      assert(!Out.empty() || PrimaryOutputType == filetypes::TY_Nothing);
    }
-   assert(nonEmpty == 0 || nonEmpty == m_inputs.size());
-   return vector;
+   assert(NonEmpty == 0 || NonEmpty == Inputs.size());
+   return V;
 }
 
-void CommandOutput::setAdditionalOutputForType( filetypes::FileTypeId type,
-                                                StringRef outputFilename)
-{
+void CommandOutput::setAdditionalOutputForType(filetypes::FileTypeId Type,
+                                               StringRef OutputFilename) {
    PrettyStackTraceDriverCommandOutputAddition CrashInfo(
-            "additional", this, m_inputs[0].primary, type, outputFilename);
+      "additional", this, Inputs[0].Primary, Type, OutputFilename);
    CommandOutputInvariantChecker Check(*this);
-   assert(m_inputs.size() >= 1);
-   assert(!outputFilename.empty());
-   assert(type != filetypes::TY_Nothing);
+   assert(Inputs.size() >= 1);
+   assert(!OutputFilename.empty());
+   assert(Type != filetypes::TY_Nothing);
 
    // If we're given an "additional" output with the same type as the primary,
    // and we've not yet had such an additional type added, we treat it as a
    // request to overwrite the primary choice (which happens early and is
    // sometimes just inferred) with a refined value (eg. -emit-module-path).
-   bool overwrite = type == m_primaryOutputType;
-   if (overwrite) {
-      assert(m_additionalOutputTypes.count(type) == 0);
+   bool Overwrite = Type == PrimaryOutputType;
+   if (Overwrite) {
+      assert(AdditionalOutputTypes.count(Type) == 0);
    } else {
-      m_additionalOutputTypes.insert(type);
+      AdditionalOutputTypes.insert(Type);
    }
-   ensureEntry(m_inputs[0].primary, type, outputFilename, overwrite);
+   ensureEntry(Inputs[0].Primary, Type, OutputFilename, Overwrite);
 }
 
-StringRef CommandOutput::getAdditionalOutputForType( filetypes::FileTypeId type) const
-{
-   if (m_additionalOutputTypes.count(type) == 0) {
+StringRef CommandOutput::getAdditionalOutputForType(filetypes::FileTypeId Type) const {
+   if (AdditionalOutputTypes.count(Type) == 0)
       return StringRef();
-   }
-   assert(m_inputs.size() >= 1);
+   assert(Inputs.size() >= 1);
    // FIXME: ideally this shouldn't associate the additional output with the
    // first primary, but with a specific primary (and/or possibly the primary "",
    // for build-wide outputs) specified by the caller.
-   assert(m_inputs.size() >= 1);
-   return getOutputForInputAndType(m_inputs[0].primary, type);
+   assert(Inputs.size() >= 1);
+   return getOutputForInputAndType(Inputs[0].Primary, Type);
 }
 
 SmallVector<StringRef, 16>
-CommandOutput::getAdditionalOutputsForType( filetypes::FileTypeId type) const
-{
-   SmallVector<StringRef, 16> vector;
-   if (m_additionalOutputTypes.count(type) != 0) {
-      for (auto const &I : m_inputs) {
-         auto out = getOutputForInputAndType(I.primary, type);
-         // FIXME: In theory this should always be non-empty -- and vector.size() would
+CommandOutput::getAdditionalOutputsForType(filetypes::FileTypeId Type) const {
+   SmallVector<StringRef, 16> V;
+   if (AdditionalOutputTypes.count(Type) != 0) {
+      for (auto const &I : Inputs) {
+         auto Out = getOutputForInputAndType(I.Primary, Type);
+         // FIXME: In theory this should always be non-empty -- and V.size() would
          // always be either 0 or N like with primary outputs -- but in practice
          // WMO currently associates additional outputs with the _first primary_ in
          // a multi-primary job, which means that the 2nd..Nth primaries will have
-         // an empty result from getOutputForInputAndType, and vector.size() will be 1.
-         if (!out.empty()) {
-            vector.push_back(out);
-         }
+         // an empty result from getOutputForInputAndType, and V.size() will be 1.
+         if (!Out.empty())
+            V.push_back(Out);
       }
    }
-   assert(vector.empty() || vector.size() == 1 || vector.size() == m_inputs.size());
-   return vector;
+   assert(V.empty() || V.size() == 1 || V.size() == Inputs.size());
+   return V;
 }
 
-StringRef CommandOutput::getAnyOutputForType( filetypes::FileTypeId type) const
-{
-   if (m_primaryOutputType == type) {
+StringRef CommandOutput::getAnyOutputForType(filetypes::FileTypeId Type) const {
+   if (PrimaryOutputType == Type)
       return getPrimaryOutputFilename();
-   }
-   return getAdditionalOutputForType(type);
+   return getAdditionalOutputForType(Type);
 }
 
-const OutputFileMap &CommandOutput::getDerivedOutputMap() const
-{
-   return m_derivedOutputMap;
+const OutputFileMap &CommandOutput::getDerivedOutputMap() const {
+   return DerivedOutputMap;
 }
 
-StringRef CommandOutput::getBaseInput(size_t index) const
-{
-   assert(index < m_inputs.size());
-   return m_inputs[index].base;
+StringRef CommandOutput::getBaseInput(size_t Index) const {
+   assert(Index < Inputs.size());
+   return Inputs[Index].Base;
 }
 
-static void escapeAndPrintString(llvm::raw_ostream &ostream, StringRef str)
-{
-   if (str.empty()) {
+static void escapeAndPrintString(llvm::raw_ostream &os, StringRef Str) {
+   if (Str.empty()) {
       // Special-case the empty string.
-      ostream << "\"\"";
+      os << "\"\"";
       return;
    }
 
-   bool needsEscape = str.find_first_of(" \"\\$") != StringRef::npos;
+   bool NeedsEscape = Str.find_first_of(" \"\\$") != StringRef::npos;
 
-   if (!needsEscape) {
+   if (!NeedsEscape) {
       // This string doesn't have anything we need to escape, so print it directly
-      ostream << str;
+      os << Str;
       return;
    }
 
    // Quote and escape. This isn't really complete, but is good enough, and
    // matches how Clang's Command handles escaping arguments.
-   ostream << '"';
-   for (const char c : str) {
+   os << '"';
+   for (const char c : Str) {
       switch (c) {
-      case '"':
-      case '\\':
-      case '$':
-         // These characters need to be escaped.
-         ostream << '\\';
-         // Fall-through to the default case, since we still need to print the
-         // character.
-         LLVM_FALLTHROUGH;
-      default:
-         ostream << c;
+         case '"':
+         case '\\':
+         case '$':
+            // These characters need to be escaped.
+            os << '\\';
+            // Fall-through to the default case, since we still need to print the
+            // character.
+            LLVM_FALLTHROUGH;
+         default:
+            os << c;
       }
    }
-   ostream << '"';
+   os << '"';
 }
 
 void
-CommandOutput::print(raw_ostream &out) const
-{
+CommandOutput::print(raw_ostream &out) const {
    out
-         << "{\n"
-         << "    m_primaryOutputType = " << filetypes::get_type_name(m_primaryOutputType)
-         << ";\n"
-         << "    m_inputs = [\n";
-   interleave(m_inputs,
-              [&](CommandInputPair const &inputPair) {
-      out << "        CommandInputPair {\n"
-          << "            Base = ";
-      escapeAndPrintString(out, inputPair.base);
-      out << ", \n"
-          << "            primary = ";
-      escapeAndPrintString(out, inputPair.primary);
-      out << "\n        }";
-   },
-   [&] { out << ",\n"; });
+      << "{\n"
+      << "    PrimaryOutputType = " << filetypes::get_type_name(PrimaryOutputType)
+      << ";\n"
+      << "    Inputs = [\n";
+   interleave(Inputs,
+              [&](CommandInputPair const &P) {
+                 out << "        CommandInputPair {\n"
+                     << "            Base = ";
+                 escapeAndPrintString(out, P.Base);
+                 out << ", \n"
+                     << "            Primary = ";
+                 escapeAndPrintString(out, P.Primary);
+                 out << "\n        }";
+              },
+              [&] { out << ",\n"; });
    out << "];\n"
        << "    DerivedOutputFileMap = {\n";
-   m_derivedOutputMap.dump(out, true);
+   DerivedOutputMap.dump(out, true);
    out << "\n    };\n}";
 }
 
 void
-CommandOutput::dump() const
-{
+CommandOutput::dump() const {
    print(llvm::errs());
    llvm::errs() << '\n';
 }
 
 void CommandOutput::writeOutputFileMap(llvm::raw_ostream &out) const {
    SmallVector<StringRef, 4> inputs;
-   for (const CommandInputPair &input : m_inputs) {
-      assert(input.base == input.primary && !input.base.empty() &&
+   for (const CommandInputPair IP : Inputs) {
+      assert(IP.Base == IP.Primary && !IP.Base.empty() &&
              "output file maps won't work if these differ");
-      inputs.push_back(input.primary);
+      inputs.push_back(IP.Primary);
    }
    getDerivedOutputMap().write(out, inputs);
 }
 
 Job::~Job() = default;
 
-void Job::printArguments(raw_ostream &ostream,
-                         const llvm::opt::ArgStringList &args)
-{
-   interleave(args,
-              [&](const char *Arg) { escapeAndPrintString(ostream, Arg); },
-   [&] { ostream << ' '; });
+void Job::printArguments(raw_ostream &os,
+                         const llvm::opt::ArgStringList &Args) {
+   interleave(Args,
+              [&](const char *Arg) { escapeAndPrintString(os, Arg); },
+              [&] { os << ' '; });
 }
 
-void Job::dump() const
-{
+void Job::dump() const {
    printCommandLineAndEnvironment(llvm::errs());
 }
 
-ArrayRef<const char *> Job::getArgumentsForTaskExecution() const
-{
+ArrayRef<const char *> Job::getArgumentsForTaskExecution() const {
    if (hasResponseFile()) {
       writeArgsToResponseFile();
       return getResponseFileArg();
@@ -395,115 +348,117 @@ ArrayRef<const char *> Job::getArgumentsForTaskExecution() const
    }
 }
 
-void Job::printCommandLineAndEnvironment(raw_ostream &stream,
-                                         StringRef terminator) const
-{
-   printCommandLine(stream, /*terminator=*/"");
-   if (!m_extraEnvironment.empty()) {
-      stream << "  #";
-      for (auto &pair : m_extraEnvironment) {
-         stream << " " << pair.first << "=" << pair.second;
+void Job::printCommandLineAndEnvironment(raw_ostream &Stream,
+                                         StringRef Terminator) const {
+   printCommandLine(Stream, /*Terminator=*/"");
+   if (!ExtraEnvironment.empty()) {
+      Stream << "  #";
+      for (auto &pair : ExtraEnvironment) {
+         Stream << " " << pair.first << "=" << pair.second;
       }
    }
-   stream << "\n";
+   Stream << "\n";
 }
 
-void Job::printCommandLine(raw_ostream &ostream, StringRef terminator) const
-{
-   escapeAndPrintString(ostream, m_executable);
-   ostream << ' ';
+void Job::printCommandLine(raw_ostream &os, StringRef Terminator) const {
+   escapeAndPrintString(os, Executable);
+   os << ' ';
    if (hasResponseFile()) {
-      printArguments(ostream, {m_responseFile->argString});
-      ostream << " # ";
+      printArguments(os, {ResponseFile->argString});
+      os << " # ";
    }
-   printArguments(ostream, m_arguments);
-   ostream << terminator;
+   printArguments(os, Arguments);
+
+   os << Terminator;
 }
 
-void Job::printSummary(raw_ostream &ostream) const
-{
+void Job::printSummary(raw_ostream &os) const {
    // Deciding how to describe our inputs is a bit subtle; if we are a Job built
    // from a JobAction that itself has InputActions sources, then we collect
    // those up. Otherwise it's more correct to talk about our inputs as the
    // outputs of our input-jobs.
-   SmallVector<StringRef, 4> inputs;
-   SmallVector<StringRef, 4> outputs = getOutput().getPrimaryOutputFilenames();
+   SmallVector<StringRef, 4> Inputs;
+   SmallVector<StringRef, 4> Outputs = getOutput().getPrimaryOutputFilenames();
 
-   for (const Action *action : getSource().getInputs()) {
-      if (const auto *inputAction = dyn_cast<InputAction>(action)) {
-         inputs.push_back(inputAction->getInputArg().getValue());
-      }
-   }
-   for (const Job *job : getInputs()) {
-      for (StringRef f : job->getOutput().getPrimaryOutputFilenames()) {
-         inputs.push_back(f);
-      }
-   }
+   for (const Action *A : getSource().getInputs())
+      if (const auto *IA = dyn_cast<InputAction>(A))
+         Inputs.push_back(IA->getInputArg().getValue());
+
+   for (const Job *J : getInputs())
+      for (StringRef f : J->getOutput().getPrimaryOutputFilenames())
+         Inputs.push_back(f);
 
    size_t limit = 3;
-   size_t actualIn = inputs.size();
-   size_t actualOut = outputs.size();
-   if (actualIn > limit) {
-      inputs.erase(inputs.begin() + limit, inputs.end());
+   size_t actual_in = Inputs.size();
+   size_t actual_out = Outputs.size();
+   if (actual_in > limit) {
+      Inputs.erase(Inputs.begin() + limit, Inputs.end());
    }
-   if (actualOut > limit) {
-      outputs.erase(outputs.begin() + limit, outputs.end());
+   if (actual_out > limit) {
+      Outputs.erase(Outputs.begin() + limit, Outputs.end());
    }
 
-   ostream << "{" << getSource().getClassName() << ": ";
-   interleave(outputs,
+   os << "{" << getSource().getClassName() << ": ";
+   interleave(Outputs,
               [&](const std::string &Arg) {
-      ostream << llvm::sys::path::filename(Arg);
-   },
-   [&] { ostream << ' '; });
-   if (actualOut > limit) {
-      ostream << " ... " << (actualOut-limit) << " more";
+                 os << llvm::sys::path::filename(Arg);
+              },
+              [&] { os << ' '; });
+   if (actual_out > limit) {
+      os << " ... " << (actual_out-limit) << " more";
    }
-   ostream << " <= ";
-   interleave(inputs,
+   os << " <= ";
+   interleave(Inputs,
               [&](const std::string &Arg) {
-      ostream << llvm::sys::path::filename(Arg);
-   },
-   [&] { ostream << ' '; });
-   if (actualIn > limit) {
-      ostream << " ... " << (actualIn-limit) << " more";
+                 os << llvm::sys::path::filename(Arg);
+              },
+              [&] { os << ' '; });
+   if (actual_in > limit) {
+      os << " ... " << (actual_in-limit) << " more";
    }
-   ostream << "}";
+   os << "}";
 }
 
-bool Job::writeArgsToResponseFile() const
-{
+
+bool Job::writeArgsToResponseFile() const {
    assert(hasResponseFile());
-   std::error_code errorCode;
-   llvm::raw_fd_ostream ostream(m_responseFile->path, errorCode, llvm::sys::fs::F_None);
-   if (errorCode) {
+   std::error_code EC;
+   llvm::raw_fd_ostream OS(ResponseFile->path, EC, llvm::sys::fs::F_None);
+   if (EC) {
       return true;
    }
-   for (const char *arg : m_arguments) {
-      escapeAndPrintString(ostream, arg);
-      ostream << " ";
+   for (const char *arg : Arguments) {
+      escapeAndPrintString(OS, arg);
+      OS << " ";
    }
-   ostream.flush();
+   OS.flush();
    return false;
 }
 
-BatchJob::BatchJob(const JobAction &source,
-                   SmallVectorImpl<const Job *> &&inputs,
-                   std::unique_ptr<CommandOutput> output,
-                   const char *executable, llvm::opt::ArgStringList arguments,
-                   EnvironmentVector extraEnvironment,
-                   std::vector<FilelistInfo> infos,
-                   ArrayRef<const Job *> combined, int64_t &nextQuasiPID,
-                   Optional<ResponseFileInfo> responseFile)
-   : Job(source, std::move(inputs), std::move(output), executable, arguments,
-         extraEnvironment, infos, responseFile),
-     m_combinedJobs(combined.begin(), combined.end()),
-     m_quasiPIDBase(nextQuasiPID)
-{
-
-   assert(m_quasiPIDBase < 0);
-   nextQuasiPID -= m_combinedJobs.size();
-   assert(nextQuasiPID < 0);
+StringRef Job::getFirstSwiftPrimaryInput() const {
+   const JobAction &source = getSource();
+   if (!isa<CompileJobAction>(source))
+      return StringRef();
+   const auto *firstInput = source.getInputs().front();
+   if (auto *inputInput = dyn_cast<InputAction>(firstInput))
+      return inputInput->getInputArg().getValue();
+   return StringRef();
 }
 
-} // polar::driver
+BatchJob::BatchJob(const JobAction &Source,
+                   SmallVectorImpl<const Job *> &&Inputs,
+                   std::unique_ptr<CommandOutput> Output,
+                   const char *Executable, llvm::opt::ArgStringList Arguments,
+                   EnvironmentVector ExtraEnvironment,
+                   std::vector<FilelistInfo> Infos,
+                   ArrayRef<const Job *> Combined, int64_t &NextQuasiPID,
+                   Optional<ResponseFileInfo> ResponseFile)
+   : Job(Source, std::move(Inputs), std::move(Output), Executable, Arguments,
+         ExtraEnvironment, Infos, ResponseFile),
+     CombinedJobs(Combined.begin(), Combined.end()),
+     QuasiPIDBase(NextQuasiPID) {
+
+   assert(QuasiPIDBase < 0);
+   NextQuasiPID -= CombinedJobs.size();
+   assert(NextQuasiPID < 0);
+}

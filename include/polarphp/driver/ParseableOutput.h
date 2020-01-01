@@ -9,48 +9,45 @@
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
 //===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
-//
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/11/27.
+///
+/// \file
+/// Helpers for emitting the driver's parseable output.
+///
+//===----------------------------------------------------------------------===//
 
-#ifndef POLARPHP_PARSEABLE_OUTPUT_H
-#define POLARPHP_PARSEABLE_OUTPUT_H
+#ifndef POLARPHP_DRIVER_PARSEABLEOUTPUT_H
+#define POLARPHP_DRIVER_PARSEABLEOUTPUT_H
 
 #include "polarphp/basic/LLVM.h"
 #include "polarphp/basic/TaskQueue.h"
 
-namespace polar::driver {
+namespace polar {
+namespace driver {
 
 class Job;
 
-namespace parseableoutput {
+namespace parseable_output {
 
 /// Emits a "began" message to the given stream.
-void emit_began_message(raw_ostream &ostream, const Job &job, int64_t pid,
-                        sys::TaskProcessInformation procInfo);
+void emitBeganMessage(raw_ostream &os, const Job &Cmd, int64_t Pid,
+                      sys::TaskProcessInformation ProcInfo);
 
 /// Emits a "finished" message to the given stream.
-void emit_finished_message(raw_ostream &ostream, const Job &job, int64_t pid,
-                           int exitStatus, StringRef output,
-                           sys::TaskProcessInformation procInfo);
+void emitFinishedMessage(raw_ostream &os, const Job &Cmd, int64_t Pid,
+                         int ExitStatus, StringRef Output,
+                         sys::TaskProcessInformation ProcInfo);
 
 /// Emits a "signalled" message to the given stream.
-void emit_signalled_message(raw_ostream &ostream, const Job &job, int64_t pid,
-                            StringRef errorMsg, StringRef output,
-                            Optional<int> signal,
-                            sys::TaskProcessInformation procInfo);
+void emitSignalledMessage(raw_ostream &os, const Job &Cmd, int64_t Pid,
+                          StringRef ErrorMsg, StringRef Output,
+                          Optional<int> Signal,
+                          sys::TaskProcessInformation ProcInfo);
 
 /// Emits a "skipped" message to the given stream.
-void emit_skipped_message(raw_ostream &ostream, const Job &job);
+void emitSkippedMessage(raw_ostream &os, const Job &Cmd);
 
-} // parseableoutput
-} // polar::driver
+} // end namespace parseable_output
+} // end namespace driver
+} // end namespace polar
 
-#endif // POLARPHP_PARSEABLE_OUTPUT_H
+#endif // POLARPHP_DRIVER_PARSEABLEOUTPUT_H

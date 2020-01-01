@@ -1,4 +1,4 @@
-//===--- Driver.h - Swift compiler driver -----------------------*- compilation++ -*-===//
+//===--- Driver.h - Swift compiler driver -----------------------*- C++ -*-===//
 //
 // This source file is part of the Swift.org open source project
 //
@@ -9,16 +9,10 @@
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
 //===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
+// This file contains declarations of parts of the compiler driver.
 //
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/11/26.
+//===----------------------------------------------------------------------===//
 
 #ifndef POLARPHP_DRIVER_DRIVER_H
 #define POLARPHP_DRIVER_DRIVER_H
@@ -30,6 +24,7 @@
 #include "polarphp/basic/OutputFileMap.h"
 #include "polarphp/basic/Sanitizers.h"
 #include "polarphp/driver/Utils.h"
+
 #include "llvm/ADT/DenseMap.h"
 #include "llvm/ADT/StringMap.h"
 #include "llvm/ADT/StringRef.h"
@@ -38,35 +33,22 @@
 #include <memory>
 #include <string>
 
-namespace llvm::opt {
+namespace llvm {
+namespace opt {
 class Arg;
 class ArgList;
 class OptTable;
 class InputArgList;
 class DerivedArgList;
-} // llvm::opt
+}
+}
 
-namespace polar::ast {
-class DiagnosticEngine;
-} // polar::ast
-
-namespace polar::sys {
+namespace polar {
+namespace sys {
 class TaskQueue;
-} // polar::sys
-
-namespace polar::driver {
-
-using polar::ast::DiagnosticEngine;
-using llvm::opt::InputArgList;
-using llvm::opt::DerivedArgList;
-using polar::sys::TaskQueue;
-using polar::OptionSet;
-using polar::SanitizerKind;
-using polar::TypeToPathMap;
-using polar::OutputFileMap;
-using polar::ast::IRGenDebugInfoLevel;
-using polar::ast::IRGenDebugInfoFormat;
-
+}
+class DiagnosticEngine;
+namespace driver {
 class Action;
 class CommandOutput;
 class Compilation;
@@ -76,17 +58,15 @@ class ToolChain;
 
 /// A class encapsulating information about the outputs the driver
 /// is expected to generate.
-class OutputInfo
-{
+class OutputInfo {
 public:
-   enum class Mode
-   {
+   enum class Mode {
       /// A standard compilation, using multiple frontend invocations and
       /// -primary-file.
-      StandardCompile,
+         StandardCompile,
 
       /// A compilation using a single frontend invocation without -primary-file.
-      SingleCompile,
+         SingleCompile,
 
       /// A single process that batches together multiple StandardCompile Jobs.
       ///
@@ -95,69 +75,72 @@ public:
       /// Jobs built by ToolChain::constructBatchJob.
       ///
       /// In particular, the driver treats a batch-mode-enabled Compilation as
-      /// having OutputInfo::compilerMode == StandardCompile, with the
+      /// having OutputInfo::CompilerMode == StandardCompile, with the
       /// Compilation::BatchModeEnabled flag set to true, _not_ as a
-      /// BatchModeCompile Compilation. The top-level OutputInfo::compilerMode for
+      /// BatchModeCompile Compilation. The top-level OutputInfo::CompilerMode for
       /// a Compilation should never be BatchModeCompile.
-      BatchModeCompile,
+         BatchModeCompile,
 
       /// Invoke the REPL
-      REPL,
+         REPL,
 
       /// Compile and execute the inputs immediately
-      Immediate,
+         Immediate,
+   };
+
+   enum class MSVCRuntime {
+      MultiThreaded,
+      MultiThreadedDebug,
+      MultiThreadedDLL,
+      MultiThreadedDebugDLL,
    };
 
    /// The mode in which the driver should invoke the frontend.
-   Mode compilerMode = Mode::StandardCompile;
+   Mode CompilerMode = Mode::StandardCompile;
+
+   Optional<MSVCRuntime> RuntimeVariant = llvm::None;
 
    /// The output type which should be used for compile actions.
-   filetypes::FileTypeId compilerOutputType = filetypes::FileTypeId::TY_INVALID;
+   filetypes::FileTypeId CompilerOutputType = filetypes::FileTypeId::TY_INVALID;
 
    /// Describes if and how the output of compile actions should be
    /// linked together.
-   LinkKind linkAction = LinkKind::None;
+   LinkKind LinkAction = LinkKind::None;
 
    /// Returns true if the linker will be invoked at all.
-   bool shouldLink() const
-   {
-      return linkAction != LinkKind::None;
-   }
+   bool shouldLink() const { return LinkAction != LinkKind::None; }
 
    /// Whether or not the output should contain debug info.
    // FIXME: Eventually this should be replaced by dSYM generation.
-   IRGenDebugInfoLevel debugInfoLevel = IRGenDebugInfoLevel::None;
+   IRGenDebugInfoLevel DebugInfoLevel = IRGenDebugInfoLevel::None;
 
    /// What kind of debug info to generate.
-   IRGenDebugInfoFormat debugInfoFormat = IRGenDebugInfoFormat::None;
+   IRGenDebugInfoFormat DebugInfoFormat = IRGenDebugInfoFormat::None;
 
    /// Whether or not the driver should generate a module.
-   bool shouldGenerateModule = false;
+   bool ShouldGenerateModule = false;
 
    /// Whether or not the driver should treat a generated module as a top-level
    /// output.
-   bool shouldTreatModuleAsTopLevelOutput = false;
+   bool ShouldTreatModuleAsTopLevelOutput = false;
 
    /// Whether the compiler picked the current module name, rather than the user.
-   bool moduleNameIsFallback = false;
+   bool ModuleNameIsFallback = false;
 
    /// The number of threads for multi-threaded compilation.
    unsigned numThreads = 0;
 
    /// Returns true if multi-threading is enabled.
-   bool isMultiThreading() const
-   {
-      return numThreads > 0;
-   }
+   bool isMultiThreading() const { return numThreads > 0; }
 
    /// The name of the module which we are building.
-   std::string moduleName;
+   std::string ModuleName;
 
    /// The path to the SDK against which to build.
    /// (If empty, this implies no SDK.)
-   std::string sdkPath;
+   std::string SDKPath;
 
-   OptionSet<SanitizerKind> selectedSanitizers;
+   OptionSet<SanitizerKind> SelectedSanitizers;
 
    /// Might this sort of compile have explicit primary inputs?
    /// When running a single compile for the whole module (in other words
@@ -165,70 +148,79 @@ public:
    /// nothing in a (preferably non-existent) -primary-filelist. Left to its own
    /// devices, the driver would forget to omit the primary input files, so
    /// return a flag here.
-   bool mightHaveExplicitPrimaryInputs(const CommandOutput &output) const;
+   bool mightHaveExplicitPrimaryInputs(const CommandOutput &Output) const;
 };
 
-class Driver
-{
+class Driver {
 public:
    /// DriverKind determines how later arguments are parsed, as well as the
    /// allowable OutputInfo::Mode values.
-   enum class DriverKind
-   {
-      Interactive,     // polarphp
-      Batch,           // polarphpc
-      AutolinkExtract, // polarphp-autolink-extract
-      PolarphpFormat      // polarphp-format
+   enum class DriverKind {
+      Interactive,     // swift
+      Batch,           // swiftc
+      AutolinkExtract, // swift-autolink-extract
+      SwiftIndent      // swift-indent
    };
 
    class InputInfoMap;
 
+private:
+   std::unique_ptr<llvm::opt::OptTable> Opts;
+
+   DiagnosticEngine &Diags;
+
+   /// The name the driver was invoked as.
+   std::string Name;
+
+   /// The original path to the executable.
+   std::string DriverExecutable;
+
+   // Extra args to pass to the driver executable
+   SmallVector<std::string, 2> DriverExecutableArgs;
+
+   DriverKind driverKind = DriverKind::Interactive;
+
+   /// Default target triple.
+   std::string DefaultTargetTriple;
+
+   /// Indicates whether the driver should print bindings.
+   bool DriverPrintBindings;
+
+   /// Indicates whether the driver should suppress the "no input files" error.
+   bool SuppressNoInputFilesError = false;
+
+   /// Indicates whether the driver should check that the input files exist.
+   bool CheckInputFilesExist = true;
+
 public:
-   Driver(StringRef driverExecutable, StringRef name,
-          ArrayRef<const char *> args, DiagnosticEngine &diags);
+   Driver(StringRef DriverExecutable, StringRef Name,
+          ArrayRef<const char *> Args, DiagnosticEngine &Diags);
    ~Driver();
 
-   const llvm::opt::OptTable &getOpts() const
-   {
-      return *m_opts;
+   const llvm::opt::OptTable &getOpts() const { return *Opts; }
+
+   const DiagnosticEngine &getDiags() const { return Diags; }
+
+   const std::string &getPHPProgramPath() const {
+      return DriverExecutable;
    }
 
-   const DiagnosticEngine &getDiags() const
-   {
-      return m_diags;
+   ArrayRef<std::string> getSwiftProgramArgs() const {
+      return DriverExecutableArgs;
    }
 
-   const std::string &getPolarphpProgramPath() const
-   {
-      return m_driverExecutable;
-   }
-
-   ArrayRef<std::string> getPolarphpProgramArgs() const
-   {
-      return m_driverExecutableArgs;
-   }
-
-   DriverKind getDriverKind() const
-   {
-      return m_driverKind;
-   }
+   DriverKind getDriverKind() const { return driverKind; }
 
    ArrayRef<const char *> getArgsWithoutProgramNameAndDriverMode(
-         ArrayRef<const char *> args) const;
+      ArrayRef<const char *> Args) const;
 
-   bool getCheckInputFilesExist() const
-   {
-      return m_checkInputFilesExist;
-   }
+   bool getCheckInputFilesExist() const { return CheckInputFilesExist; }
 
-   void setCheckInputFilesExist(bool value)
-   {
-      m_checkInputFilesExist = value;
-   }
+   void setCheckInputFilesExist(bool Value) { CheckInputFilesExist = Value; }
 
    /// Creates an appropriate ToolChain for a given driver, given the target
-   /// specified in \p args (or the default target). Sets the value of \c
-   /// m_defaultTargetTriple from \p args as a side effect.
+   /// specified in \p Args (or the default target). Sets the value of \c
+   /// DefaultTargetTriple from \p Args as a side effect.
    ///
    /// \return A ToolChain, or nullptr if an unsupported target was specified
    /// (in which case a diagnostic error is also signalled).
@@ -236,14 +228,14 @@ public:
    /// This uses a std::unique_ptr instead of returning a toolchain by value
    /// because ToolChain has virtual methods.
    std::unique_ptr<ToolChain>
-   buildToolChain(const llvm::opt::InputArgList &argList);
+   buildToolChain(const llvm::opt::InputArgList &ArgList);
 
    /// Compute the task queue for this compilation and command line argument
    /// vector.
    ///
    /// \return A TaskQueue, or nullptr if an invalid number of parallel jobs is
    /// specified.  This condition is signalled by a diagnostic.
-   std::unique_ptr<sys::TaskQueue> buildTaskQueue(const Compilation &compilation);
+   std::unique_ptr<sys::TaskQueue> buildTaskQueue(const Compilation &C);
 
    /// Construct a compilation object for a given ToolChain and command line
    /// argument vector.
@@ -253,74 +245,75 @@ public:
    /// condition; the diagnostics should be queried to determine if an error
    /// occurred.
    std::unique_ptr<Compilation>
-   buildCompilation(const ToolChain &toolchain,
-                    std::unique_ptr<llvm::opt::InputArgList> argList);
+   buildCompilation(const ToolChain &TC,
+                    std::unique_ptr<llvm::opt::InputArgList> ArgList);
 
    /// Parse the given list of strings into an InputArgList.
    std::unique_ptr<llvm::opt::InputArgList>
-   parseArgStrings(ArrayRef<const char *> args);
+   parseArgStrings(ArrayRef<const char *> Args);
 
    /// Resolve path arguments if \p workingDirectory is non-empty, and translate
    /// inputs from -- arguments into a DerivedArgList.
    llvm::opt::DerivedArgList *
-   translateInputAndPathArgs(const llvm::opt::InputArgList &argList,
+   translateInputAndPathArgs(const llvm::opt::InputArgList &ArgList,
                              StringRef workingDirectory) const;
 
    /// Construct the list of inputs and their types from the given arguments.
    ///
-   /// \param toolchain The current tool chain.
-   /// \param args The input arguments.
-   /// \param[out] inputs The list in which to store the resulting compilation
+   /// \param TC The current tool chain.
+   /// \param Args The input arguments.
+   /// \param[out] Inputs The list in which to store the resulting compilation
    /// inputs.
-   void buildInputs(const ToolChain &toolchain, const llvm::opt::DerivedArgList &args,
-                    InputFileList &inputs) const;
+   void buildInputs(const ToolChain &TC, const llvm::opt::DerivedArgList &Args,
+                    InputFileList &Inputs) const;
 
    /// Construct the OutputInfo for the driver from the given arguments.
    ///
-   /// \param toolchain The current tool chain.
-   /// \param args The input arguments.
-   /// \param batchMode Whether the driver has been explicitly or implicitly
+   /// \param TC The current tool chain.
+   /// \param Args The input arguments.
+   /// \param BatchMode Whether the driver has been explicitly or implicitly
    /// instructed to use batch mode.
-   /// \param inputs The inputs to the driver.
-   /// \param[out] outputInfo The OutputInfo in which to store the resulting output
+   /// \param Inputs The inputs to the driver.
+   /// \param[out] OI The OutputInfo in which to store the resulting output
    /// information.
-   void buildOutputInfo(const ToolChain &toolchain,
-                        const llvm::opt::DerivedArgList &args,
-                        const bool batchMode, const InputFileList &inputs,
-                        OutputInfo &outputInfo) const;
+   void buildOutputInfo(const ToolChain &TC,
+                        const llvm::opt::DerivedArgList &Args,
+                        const bool BatchMode, const InputFileList &Inputs,
+                        OutputInfo &OI) const;
 
    /// Construct the list of Actions to perform for the given arguments,
    /// which are only done for a single architecture.
    ///
-   /// \param[out] topLevelActions The main Actions to build Jobs for.
-   /// \param toolchain the default host tool chain.
-   /// \param outputInfo The OutputInfo for which Actions should be generated.
-   /// \param outOfDateMap If present, information used to decide which files
+   /// \param[out] TopLevelActions The main Actions to build Jobs for.
+   /// \param TC the default host tool chain.
+   /// \param OI The OutputInfo for which Actions should be generated.
+   /// \param OutOfDateMap If present, information used to decide which files
    /// need to be rebuilt.
-   /// \param compilation The Compilation to which Actions should be added.
-   void buildActions(SmallVectorImpl<const Action *> &topLevelActions,
-                     const ToolChain &toolchain, const OutputInfo &outputInfo,
-                     const InputInfoMap *outOfDateMap,
-                     Compilation &compilation) const;
+   /// \param C The Compilation to which Actions should be added.
+   void buildActions(SmallVectorImpl<const Action *> &TopLevelActions,
+                     const ToolChain &TC, const OutputInfo &OI,
+                     const InputInfoMap *OutOfDateMap,
+                     Compilation &C) const;
 
    /// Construct the OutputFileMap for the driver from the given arguments.
    Optional<OutputFileMap>
-   buildOutputFileMap(const llvm::opt::DerivedArgList &args,
-                      StringRef workingDirectory) const;
+   buildOutputFileMap(const llvm::opt::DerivedArgList &Args,
+                      StringRef workingDirectory,
+                      bool addEntriesForSourceRangeDependencies) const;
 
-   /// Add top-level Jobs to Compilation \p compilation for the given \p Actions and
+   /// Add top-level Jobs to Compilation \p C for the given \p Actions and
    /// OutputInfo.
    ///
-   /// \param topLevelActions The main Actions to build Jobs for.
-   /// \param outputInfo The OutputInfo for which Jobs should be generated.
+   /// \param TopLevelActions The main Actions to build Jobs for.
+   /// \param OI The OutputInfo for which Jobs should be generated.
    /// \param OFM The OutputFileMap for which Jobs should be generated.
    /// \param workingDirectory If non-empty, used to resolve any generated paths.
-   /// \param toolchain The ToolChain to build Jobs with.
-   /// \param compilation The Compilation containing the Actions for which Jobs should be
+   /// \param TC The ToolChain to build Jobs with.
+   /// \param C The Compilation containing the Actions for which Jobs should be
    /// created.
-   void buildJobs(ArrayRef<const Action *> topLevelActions, const OutputInfo &outputInfo,
+   void buildJobs(ArrayRef<const Action *> TopLevelActions, const OutputInfo &OI,
                   const OutputFileMap *OFM, StringRef workingDirectory,
-                  const ToolChain &toolchain, Compilation &compilation) const;
+                  const ToolChain &TC, Compilation &C) const;
 
    /// A map for caching Jobs for a given Action/ToolChain pair
    using JobCacheMap =
@@ -329,29 +322,95 @@ public:
    /// Create a Job for the given Action \p A, including creating any necessary
    /// input Jobs.
    ///
-   /// \param compilation The Compilation which this Job will eventually be part of
-   /// \param jobAction The Action for which a Job should be created
+   /// \param C The Compilation which this Job will eventually be part of
+   /// \param JA The Action for which a Job should be created
    /// \param OFM The OutputFileMap for which a Job should be created
    /// \param AtTopLevel indicates whether or not this is a top-level Job
    /// \param JobCache maps existing Action/ToolChain pairs to Jobs
    ///
    /// \returns a Job for the given Action/ToolChain pair
-   Job *buildJobsForAction(Compilation &compilation, const JobAction *jobAction,
+   Job *buildJobsForAction(Compilation &C, const JobAction *JA,
                            const OutputFileMap *OFM,
                            StringRef workingDirectory,
                            bool AtTopLevel, JobCacheMap &JobCache) const;
 
+private:
+   void computeMainOutput(Compilation &C, const JobAction *JA,
+                          const OutputFileMap *OFM, bool AtTopLevel,
+                          SmallVectorImpl<const Action *> &InputActions,
+                          SmallVectorImpl<const Job *> &InputJobs,
+                          const TypeToPathMap *OutputMap,
+                          StringRef workingDirectory,
+                          StringRef BaseInput,
+                          StringRef PrimaryInput,
+                          llvm::SmallString<128> &Buf,
+                          CommandOutput *Output) const;
+
+   void choosePHPModuleOutputPath(Compilation &C,
+                                    const TypeToPathMap *OutputMap,
+                                    StringRef workingDirectory,
+                                    CommandOutput *Output) const;
+
+   void choosePHPModuleDocOutputPath(Compilation &C,
+                                       const TypeToPathMap *OutputMap,
+                                       StringRef workingDirectory,
+                                       CommandOutput *Output) const;
+
+   void choosePHPSourceInfoOutputPath(Compilation &C,
+                                        const TypeToPathMap *OutputMap,
+                                        StringRef workingDirectory,
+                                        CommandOutput *Output) const;
+
+   void chooseModuleInterfacePath(Compilation &C, const JobAction *JA,
+                                  StringRef workingDirectory,
+                                  llvm::SmallString<128> &buffer,
+                                  CommandOutput *output) const;
+
+   void chooseRemappingOutputPath(Compilation &C, const TypeToPathMap *OutputMap,
+                                  CommandOutput *Output) const;
+
+   void chooseSerializedDiagnosticsPath(Compilation &C, const JobAction *JA,
+                                        const TypeToPathMap *OutputMap,
+                                        StringRef workingDirectory,
+                                        CommandOutput *Output) const;
+
+   void chooseDependenciesOutputPaths(Compilation &C,
+                                      const TypeToPathMap *OutputMap,
+                                      StringRef workingDirectory,
+                                      llvm::SmallString<128> &Buf,
+                                      CommandOutput *Output) const;
+
+   void chooseOptimizationRecordPath(Compilation &C,
+                                     StringRef workingDirectory,
+                                     llvm::SmallString<128> &Buf,
+                                     CommandOutput *Output) const;
+
+//   void chooseObjectiveCHeaderOutputPath(Compilation &C,
+//                                         const TypeToPathMap *OutputMap,
+//                                         StringRef workingDirectory,
+//                                         CommandOutput *Output) const;
+
+   void chooseLoadedModuleTracePath(Compilation &C,
+                                    StringRef workingDirectory,
+                                    llvm::SmallString<128> &Buf,
+                                    CommandOutput *Output) const;
+
+   void chooseTBDPath(Compilation &C, const TypeToPathMap *OutputMap,
+                      StringRef workingDirectory, llvm::SmallString<128> &Buf,
+                      CommandOutput *Output) const;
+
+public:
    /// Handle any arguments which should be treated before building actions or
    /// binding tools.
    ///
    /// \return Whether any compilation should be built for this invocation
-   bool handleImmediateArgs(const llvm::opt::ArgList &args, const ToolChain &toolchain);
+   bool handleImmediateArgs(const llvm::opt::ArgList &Args, const ToolChain &TC);
 
    /// Print the list of Actions in a Compilation.
-   void printActions(const Compilation &compilation) const;
+   void printActions(const Compilation &C) const;
 
    /// Print the driver version.
-   void printVersion(const ToolChain &toolchain, raw_ostream &OS) const;
+   void printVersion(const ToolChain &TC, raw_ostream &OS) const;
 
    /// Print the help text.
    ///
@@ -359,106 +418,24 @@ public:
    void printHelp(bool ShowHidden) const;
 
 private:
-   void computeMainOutput(Compilation &compilation, const JobAction *jobAction,
-                          const OutputFileMap *OFM, bool AtTopLevel,
-                          SmallVectorImpl<const Action *> &InputActions,
-                          SmallVectorImpl<const Job *> &InputJobs,
-                          const TypeToPathMap *outputMap,
-                          StringRef workingDirectory,
-                          StringRef BaseInput,
-                          StringRef PrimaryInput,
-                          llvm::SmallString<128> &buf,
-                          CommandOutput *output) const;
-
-   void choosePolarphpModuleOutputPath(Compilation &compilation,
-                                    const TypeToPathMap *outputMap,
-                                    StringRef workingDirectory,
-                                    CommandOutput *output) const;
-
-   void choosePolarphpModuleDocOutputPath(Compilation &compilation,
-                                       const TypeToPathMap *outputMap,
-                                       StringRef workingDirectory,
-                                       CommandOutput *output) const;
-
-   void chooseParseableInterfacePath(Compilation &compilation, const JobAction *jobAction,
-                                     StringRef workingDirectory,
-                                     llvm::SmallString<128> &buffer,
-                                     CommandOutput *output) const;
-
-   void chooseRemappingOutputPath(Compilation &compilation, const TypeToPathMap *outputMap,
-                                  CommandOutput *output) const;
-
-   void chooseSerializedDiagnosticsPath(Compilation &compilation, const JobAction *jobAction,
-                                        const TypeToPathMap *outputMap,
-                                        StringRef workingDirectory,
-                                        CommandOutput *output) const;
-
-   void chooseDependenciesOutputPaths(Compilation &compilation,
-                                      const TypeToPathMap *outputMap,
-                                      StringRef workingDirectory,
-                                      llvm::SmallString<128> &buf,
-                                      CommandOutput *output) const;
-
-   void chooseOptimizationRecordPath(Compilation &compilation,
-                                     StringRef workingDirectory,
-                                     llvm::SmallString<128> &buf,
-                                     CommandOutput *output) const;
-
-   void chooseLoadedModuleTracePath(Compilation &compilation,
-                                    StringRef workingDirectory,
-                                    llvm::SmallString<128> &buf,
-                                    CommandOutput *output) const;
-
-   void chooseTBDPath(Compilation &compilation, const TypeToPathMap *outputMap,
-                      StringRef workingDirectory, llvm::SmallString<128> &buf,
-                      CommandOutput *output) const;
-
-private:
    /// Parse the driver kind.
    ///
-   /// \param args The arguments passed to the driver (excluding the path to the
+   /// \param Args The arguments passed to the driver (excluding the path to the
    /// driver)
-   void parseDriverKind(ArrayRef<const char *> args);
+   void parseDriverKind(ArrayRef<const char *> Args);
 
    /// Examine potentially conficting arguments and warn the user if
    /// there is an actual conflict.
-   /// \param args The input arguments.
-   /// \param inputs The inputs to the driver.
-   /// \param batchModeOut An out-parameter flag that indicates whether to
+   /// \param Args The input arguments.
+   /// \param Inputs The inputs to the driver.
+   /// \param BatchModeOut An out-parameter flag that indicates whether to
    /// batch the jobs of the resulting \c Mode::StandardCompile compilation.
-   OutputInfo::Mode computeCompilerMode(const llvm::opt::DerivedArgList &args,
-                                        const InputFileList &inputs,
-                                        bool &batchModeOut) const;
-
-private:
-   std::unique_ptr<llvm::opt::OptTable> m_opts;
-
-   DiagnosticEngine &m_diags;
-
-   /// The name the driver was invoked as.
-   std::string m_name;
-
-   /// The original path to the executable.
-   std::string m_driverExecutable;
-
-   // Extra args to pass to the driver executable
-   SmallVector<std::string, 2> m_driverExecutableArgs;
-
-   DriverKind m_driverKind = DriverKind::Interactive;
-
-   /// Default target triple.
-   std::string m_defaultTargetTriple;
-
-   /// Indicates whether the driver should print bindings.
-   bool m_driverPrintBindings;
-
-   /// Indicates whether the driver should suppress the "no input files" error.
-   bool m_suppressNoInputFilesError = false;
-
-   /// Indicates whether the driver should check that the input files exist.
-   bool m_checkInputFilesExist = true;
+   OutputInfo::Mode computeCompilerMode(const llvm::opt::DerivedArgList &Args,
+                                        const InputFileList &Inputs,
+                                        bool &BatchModeOut) const;
 };
 
-} // polar::driver
+} // end namespace driver
+} // end namespace polar
 
-#endif // POLARPHP_DRIVER_DRIVER_H
+#endif

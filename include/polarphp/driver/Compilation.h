@@ -9,27 +9,23 @@
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
 //===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
+// TODO: Document me
 //
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/11/26.
+//===----------------------------------------------------------------------===//
 
-#ifndef POLARPHP_DRIVER_COMPILER_H
-#define POLARPHP_DRIVER_COMPILER_H
+#ifndef POLARPHP_DRIVER_COMPILATION_H
+#define POLARPHP_DRIVER_COMPILATION_H
 
 #include "polarphp/basic/ArrayRefView.h"
 #include "polarphp/basic/LLVM.h"
+#include "polarphp/basic/NullablePtr.h"
 #include "polarphp/basic/OutputFileMap.h"
 #include "polarphp/basic/Statistic.h"
 #include "polarphp/driver/Driver.h"
 #include "polarphp/driver/Job.h"
 #include "polarphp/driver/Utils.h"
+
 #include "llvm/ADT/DenseSet.h"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/Support/Chrono.h"
@@ -37,28 +33,20 @@
 #include <memory>
 #include <vector>
 
-namespace llvm::opt {
+namespace llvm {
+namespace opt {
 class InputArgList;
 class DerivedArgList;
-} // llvm::opt
+}
+}
 
-namespace polar::ast {
+namespace polar {
 class DiagnosticEngine;
-} // polar::ast
-
-namespace polar::sys {
+namespace sys {
 class TaskQueue;
-} // polar::sys
+}
 
-namespace polar::driver {
-
-using polar::ast::DiagnosticEngine;
-using llvm::opt::InputArgList;
-using llvm::opt::DerivedArgList;
-using polar::sys::TaskQueue;
-using polar::ArrayRefView;
-using polar::UnifiedStatsReporter;
-
+namespace driver {
 class Driver;
 class ToolChain;
 class OutputInfo;
@@ -66,242 +54,408 @@ class PerformJobsState;
 
 /// An enum providing different levels of output which should be produced
 /// by a Compilation.
-enum class OutputLevel
-{
+enum class OutputLevel {
    /// Indicates that normal output should be produced.
-   Normal,
+      Normal,
 
    /// Indicates that only jobs should be printed and not run. (-###)
-   PrintJobs,
+      PrintJobs,
 
    /// Indicates that verbose output should be produced. (-v)
-   Verbose,
+      Verbose,
 
    /// Indicates that parseable output should be produced.
-   Parseable,
+      Parseable,
 };
 
 /// Indicates whether a temporary file should always be preserved if a part of
 /// the compilation crashes.
-enum class PreserveOnSignal : bool
-{
+enum class PreserveOnSignal : bool {
    No,
    Yes
 };
 
-class Compilation
-{
+using CommandSet = llvm::SmallPtrSet<const Job *, 16>;
+
+class Compilation {
+public:
+   class IncrementalSchemeComparator {
+      const bool EnableIncrementalBuildWhenConstructed;
+      const bool &EnableIncrementalBuild;
+      const bool EnableSourceRangeDependencies;
+
+      /// If not empty, the path to use to log the comparision.
+      const StringRef CompareIncrementalSchemesPath;
+
+      const unsigned PHPInputCount;
+
+   public:
+      std::string WhyIncrementalWasDisabled = "";
+
+   private:
+      DiagnosticEngine &Diags;
+
+      CommandSet JobsWithoutRanges;
+      CommandSet JobsWithRanges;
+
+      unsigned CompileStagesWithoutRanges = 0;
+      unsigned CompileStagesWithRanges = 0;
+
+   public:
+      IncrementalSchemeComparator(const bool &EnableIncrementalBuild,
+                                  bool EnableSourceRangeDependencies,
+                                  const StringRef CompareIncrementalSchemesPath,
+                                  unsigned PHPInputCount,
+                                  DiagnosticEngine &Diags)
+         : EnableIncrementalBuildWhenConstructed(EnableIncrementalBuild),
+           EnableIncrementalBuild(EnableIncrementalBuild),
+           EnableSourceRangeDependencies(EnableSourceRangeDependencies),
+           CompareIncrementalSchemesPath(CompareIncrementalSchemesPath),
+           PHPInputCount(PHPInputCount), Diags(Diags) {}
+
+      /// Record scheduled jobs in support of the
+      /// -compare-incremental-schemes[-path] options
+      void update(const CommandSet &withoutRangeJobs,
+                  const CommandSet &withRangeJobs);
+
+      /// Write the information for the -compare-incremental-schemes[-path]
+      /// options
+      void outputComparison() const;
+
+   private:
+      void outputComparison(llvm::raw_ostream &) const;
+   };
+
+public:
+   /// The filelist threshold value to pass to ensure file lists are never used
+   static const size_t NEVER_USE_FILELIST = SIZE_MAX;
+
+private:
+   /// The DiagnosticEngine to which this Compilation should emit diagnostics.
+   DiagnosticEngine &Diags;
+
+   /// The ToolChain this Compilation was built with, that it may reuse to build
+   /// subsequent BatchJobs.
+   const ToolChain &TheToolChain;
+
+   /// The OutputInfo, which the Compilation stores a copy of upon
+   /// construction, and which it may use to build subsequent batch
+   /// jobs itself.
+   OutputInfo TheOutputInfo;
+
+   /// The OutputLevel at which this Compilation should generate output.
+   OutputLevel Level;
+
+   /// The OutputFileMap describing the Compilation's outputs, populated both by
+   /// the user-provided output file map (if it exists) and inference rules that
+   /// derive otherwise-unspecified output filenames from context.
+   OutputFileMap DerivedOutputFileMap;
+
+   /// The Actions which were used to build the Jobs.
+   ///
+   /// This is mostly only here for lifetime management.
+   SmallVector<std::unique_ptr<const Action>, 32> Actions;
+
+   /// The Jobs which will be performed by this compilation.
+   SmallVector<std::unique_ptr<const Job>, 32> Jobs;
+
+   /// The original (untranslated) input argument list.
+   ///
+   /// This is only here for lifetime management. Any inspection of
+   /// command-line arguments should use #getArgs().
+   std::unique_ptr<llvm::opt::InputArgList> RawInputArgs;
+
+   /// The translated input arg list.
+   std::unique_ptr<llvm::opt::DerivedArgList> TranslatedArgs;
+
+   /// A list of input files and their associated types.
+   InputFileList InputFilesWithTypes;
+
+   /// When non-null, a temporary file containing all input .swift files.
+   /// Used for large compilations to avoid overflowing argv.
+   const char *AllSourceFilesPath = nullptr;
+
+   /// Temporary files that should be cleaned up after the compilation finishes.
+   ///
+   /// These apply whether the compilation succeeds or fails. If the
+   llvm::StringMap<PreserveOnSignal> TempFilePaths;
+
+   /// Write information about this compilation to this file.
+   ///
+   /// This is used for incremental builds.
+   std::string CompilationRecordPath;
+
+   /// A hash representing all the arguments that could trigger a full rebuild.
+   std::string ArgsHash;
+
+   /// When the build was started.
+   ///
+   /// This should be as close as possible to when the driver was invoked, since
+   /// it's used as a lower bound.
+   llvm::sys::TimePoint<> BuildStartTime;
+
+   /// The time of the last build.
+   ///
+   /// If unknown, this will be some time in the past.
+   llvm::sys::TimePoint<> LastBuildTime = llvm::sys::TimePoint<>::min();
+
+   /// Indicates whether this Compilation should continue execution of subtasks
+   /// even if they returned an error status.
+   bool ContinueBuildingAfterErrors = false;
+
+   /// Indicates whether tasks should only be executed if their output is out
+   /// of date.
+   bool EnableIncrementalBuild;
+
+   /// When true, emit duplicated compilation record file whose filename is
+   /// suffixed with '~moduleonly'.
+   ///
+   /// This compilation record is used by '-emit-module'-only incremental builds
+   /// so that module-only builds do not affect compilation record file for
+   /// normal builds, while module-only incremental builds are able to use
+   /// artifacts of normal builds if they are already up to date.
+   bool OutputCompilationRecordForModuleOnlyBuild = false;
+
+   /// Indicates whether groups of parallel frontend jobs should be merged
+   /// together and run in composite "batch jobs" when possible, to reduce
+   /// redundant work.
+   const bool EnableBatchMode;
+
+   /// Provides a randomization seed to batch-mode partitioning, for debugging.
+   const unsigned BatchSeed;
+
+   /// Overrides parallelism level and \c BatchSizeLimit, sets exact
+   /// count of batches, if in batch-mode.
+   const Optional<unsigned> BatchCount;
+
+   /// Overrides maximum batch size, if in batch-mode and not overridden
+   /// by \c BatchCount.
+   const Optional<unsigned> BatchSizeLimit;
+
+   /// True if temporary files should not be deleted.
+   const bool SaveTemps;
+
+   /// When true, dumps information on how long each compilation task took to
+   /// execute.
+   const bool ShowDriverTimeCompilation;
+
+   /// When non-null, record various high-level counters to this.
+   std::unique_ptr<UnifiedStatsReporter> Stats;
+
+   /// When true, dumps information about why files are being scheduled to be
+   /// rebuilt.
+   bool ShowIncrementalBuildDecisions = false;
+
+   /// When true, traces the lifecycle of each driver job. Provides finer
+   /// detail than ShowIncrementalBuildDecisions.
+   bool ShowJobLifecycle = false;
+
+   /// When true, some frontend job has requested permission to pass
+   /// -emit-loaded-module-trace, so no other job needs to do it.
+   bool PassedEmitLoadedModuleTraceToFrontendJob = false;
+
+   /// The limit for the number of files to pass on the command line. Beyond this
+   /// limit filelists will be used.
+   size_t FilelistThreshold;
+
+   /// Scaffolding to permit experimentation with finer-grained dependencies and
+   /// faster rebuilds.
+   const bool EnableFineGrainedDependencies;
+
+   /// Helpful for debugging, but slows down the driver. So, only turn on when
+   /// needed.
+   const bool VerifyFineGrainedDependencyGraphAfterEveryImport;
+   /// Helpful for debugging, but slows down the driver. So, only turn on when
+   /// needed.
+   const bool EmitFineGrainedDependencyDotFileAfterEveryImport;
+
+   /// Experiment with inter-file dependencies
+   const bool FineGrainedDependenciesIncludeIntrafileOnes;
+
+   /// Experiment with source-range-based dependencies
+   const bool EnableSourceRangeDependencies;
+
+public:
+   /// Will contain a comparator if an argument demands it.
+   Optional<IncrementalSchemeComparator> IncrementalComparator;
+
 private:
    template <typename T>
-   static T *unwrap(const std::unique_ptr<T> &p)
-   {
+   static T *unwrap(const std::unique_ptr<T> &p) {
       return p.get();
    }
 
    template <typename T>
    using UnwrappedArrayView =
    ArrayRefView<std::unique_ptr<T>, T *, Compilation::unwrap<T>>;
+
 public:
    // clang-format off
-   Compilation(DiagnosticEngine &m_diags, const ToolChain &TC,
+   Compilation(DiagnosticEngine &Diags, const ToolChain &TC,
                OutputInfo const &OI,
-               OutputLevel m_level,
+               OutputLevel Level,
                std::unique_ptr<llvm::opt::InputArgList> InputArgs,
-               std::unique_ptr<llvm::opt::DerivedArgList> m_translatedArgs,
+               std::unique_ptr<llvm::opt::DerivedArgList> TranslatedArgs,
                InputFileList InputsWithTypes,
-               std::string m_compilationRecordPath,
-               bool m_outputCompilationRecordForModuleOnlyBuild,
-               StringRef m_argsHash, llvm::sys::TimePoint<> StartTime,
-               llvm::sys::TimePoint<> m_lastBuildTime,
-               size_t m_filelistThreshold,
-               bool m_enableIncrementalBuild = false,
-               bool m_enableBatchMode = false,
-               unsigned m_batchSeed = 0,
-               Optional<unsigned> m_batchCount = None,
-               Optional<unsigned> m_batchSizeLimit = None,
-               bool m_saveTemps = false,
-               bool m_showDriverTimeCompilation = false,
-               std::unique_ptr<UnifiedStatsReporter> m_stats = nullptr,
-               bool m_enableExperimentalDependencies = false,
-               bool m_verifyExperimentalDependencyGraphAfterEveryImport = false,
-               bool m_emitExperimentalDependencyDotFileAfterEveryImport = false,
-               bool m_experimentalDependenciesIncludeIntrafileOnes = false);
+               std::string CompilationRecordPath,
+               bool OutputCompilationRecordForModuleOnlyBuild,
+               StringRef ArgsHash, llvm::sys::TimePoint<> StartTime,
+               llvm::sys::TimePoint<> LastBuildTime,
+               size_t FilelistThreshold,
+               bool EnableIncrementalBuild = false,
+               bool EnableBatchMode = false,
+               unsigned BatchSeed = 0,
+               Optional<unsigned> BatchCount = None,
+               Optional<unsigned> BatchSizeLimit = None,
+               bool SaveTemps = false,
+               bool ShowDriverTimeCompilation = false,
+               std::unique_ptr<UnifiedStatsReporter> Stats = nullptr,
+               bool EnableFineGrainedDependencies = false,
+               bool VerifyFineGrainedDependencyGraphAfterEveryImport = false,
+               bool EmitFineGrainedDependencyDotFileAfterEveryImport = false,
+               bool FineGrainedDependenciesIncludeIntrafileOnes = false,
+               bool EnableSourceRangeDependencies = false,
+               bool CompareIncrementalSchemes = false,
+               StringRef CompareIncrementalSchemesPath = "");
    // clang-format on
    ~Compilation();
 
    ToolChain const &getToolChain() const {
-      return m_theToolChain;
+      return TheToolChain;
    }
 
    OutputInfo const &getOutputInfo() const {
-      return m_theOutputInfo;
+      return TheOutputInfo;
    }
 
    DiagnosticEngine &getDiags() const {
-      return m_diags;
+      return Diags;
    }
 
-   UnwrappedArrayView<const Action> getActions() const
-   {
-      return llvm::makeArrayRef(m_actions);
+   UnwrappedArrayView<const Action> getActions() const {
+      return llvm::makeArrayRef(Actions);
    }
 
    template <typename SpecificAction, typename... Args>
-   SpecificAction *createAction(Args &&...args)
-   {
+   SpecificAction *createAction(Args &&...args) {
       auto newAction = new SpecificAction(std::forward<Args>(args)...);
-      m_actions.emplace_back(newAction);
+      Actions.emplace_back(newAction);
       return newAction;
    }
 
-   UnwrappedArrayView<const Job> getJobs() const
-   {
-      return llvm::makeArrayRef(m_jobs);
+   UnwrappedArrayView<const Job> getJobs() const {
+      return llvm::makeArrayRef(Jobs);
    }
+   Job *addJob(std::unique_ptr<Job> J);
 
-   Job *addJob(std::unique_ptr<Job> job);
+   /// To send job list to places that don't truck in fancy array views.
+   std::vector<const Job *> getJobsSimply() const {
+      return std::vector<const Job *>(getJobs().begin(), getJobs().end());
+   }
 
    void addTemporaryFile(StringRef file,
-                         PreserveOnSignal preserve = PreserveOnSignal::No)
-   {
-      m_tempFilePaths[file] = preserve;
+                         PreserveOnSignal preserve = PreserveOnSignal::No) {
+      TempFilePaths[file] = preserve;
    }
 
-   bool isTemporaryFile(StringRef file)
-   {
-      return m_tempFilePaths.count(file);
+   bool isTemporaryFile(StringRef file) {
+      return TempFilePaths.count(file);
    }
 
-   const llvm::opt::DerivedArgList &getArgs() const
-   {
-      return *m_translatedArgs;
+   const llvm::opt::DerivedArgList &getArgs() const { return *TranslatedArgs; }
+   ArrayRef<InputPair> getInputFiles() const { return InputFilesWithTypes; }
+
+   OutputFileMap &getDerivedOutputFileMap() { return DerivedOutputFileMap; }
+   const OutputFileMap &getDerivedOutputFileMap() const {
+      return DerivedOutputFileMap;
    }
 
-   ArrayRef<InputPair> getInputFiles() const
-   {
-      return m_inputFilesWithTypes;
+   bool getIncrementalBuildEnabled() const {
+      return EnableIncrementalBuild;
+   }
+   void disableIncrementalBuild(Twine why);
+
+   bool getEnableFineGrainedDependencies() const {
+      return EnableFineGrainedDependencies;
    }
 
-   OutputFileMap &getDerivedOutputFileMap()
-   {
-      return m_derivedOutputFileMap;
+   bool getVerifyFineGrainedDependencyGraphAfterEveryImport() const {
+      return VerifyFineGrainedDependencyGraphAfterEveryImport;
    }
 
-   const OutputFileMap &getDerivedOutputFileMap() const
-   {
-      return m_derivedOutputFileMap;
+   bool getEmitFineGrainedDependencyDotFileAfterEveryImport() const {
+      return EmitFineGrainedDependencyDotFileAfterEveryImport;
    }
 
-   bool getIncrementalBuildEnabled() const
-   {
-      return m_enableIncrementalBuild;
+   bool getFineGrainedDependenciesIncludeIntrafileOnes() const {
+      return FineGrainedDependenciesIncludeIntrafileOnes;
    }
 
-   void disableIncrementalBuild()
-   {
-      m_enableIncrementalBuild = false;
+   bool getEnableSourceRangeDependencies() const {
+      return EnableSourceRangeDependencies;
    }
 
-   bool getEnableExperimentalDependencies() const
-   {
-      return m_enableExperimentalDependencies;
+   bool getBatchModeEnabled() const {
+      return EnableBatchMode;
    }
 
-   bool getVerifyExperimentalDependencyGraphAfterEveryImport() const
-   {
-      return m_verifyExperimentalDependencyGraphAfterEveryImport;
+   bool getContinueBuildingAfterErrors() const {
+      return ContinueBuildingAfterErrors;
+   }
+   void setContinueBuildingAfterErrors(bool Value = true) {
+      ContinueBuildingAfterErrors = Value;
    }
 
-   bool getEmitExperimentalDependencyDotFileAfterEveryImport() const
-   {
-      return m_emitExperimentalDependencyDotFileAfterEveryImport;
+   bool getShowIncrementalBuildDecisions() const {
+      return ShowIncrementalBuildDecisions;
+   }
+   void setShowIncrementalBuildDecisions(bool value = true) {
+      ShowIncrementalBuildDecisions = value;
    }
 
-   bool getExperimentalDependenciesIncludeIntrafileOnes() const
-   {
-      return m_experimentalDependenciesIncludeIntrafileOnes;
+   bool getShowJobLifecycle() const {
+      return ShowJobLifecycle;
+   }
+   void setShowJobLifecycle(bool value = true) {
+      ShowJobLifecycle = value;
    }
 
-   bool getBatchModeEnabled() const
-   {
-      return m_enableBatchMode;
+   bool getShowDriverTimeCompilation() const {
+      return ShowDriverTimeCompilation;
    }
 
-   bool getContinueBuildingAfterErrors() const
-   {
-      return m_continueBuildingAfterErrors;
+   size_t getFilelistThreshold() const {
+      return FilelistThreshold;
    }
 
-   void setContinueBuildingAfterErrors(bool Value = true)
-   {
-      m_continueBuildingAfterErrors = Value;
-   }
-
-   bool getShowIncrementalBuildDecisions() const
-   {
-      return m_showIncrementalBuildDecisions;
-   }
-
-   void setShowIncrementalBuildDecisions(bool value = true)
-   {
-      m_showIncrementalBuildDecisions = value;
-   }
-
-   bool getShowJobLifecycle() const
-   {
-      return m_showJobLifecycle;
-   }
-
-   void setShowJobLifecycle(bool value = true)
-   {
-      m_showJobLifecycle = value;
-   }
-
-   bool getShowDriverTimeCompilation() const
-   {
-      return m_showDriverTimeCompilation;
-   }
-
-   size_t getFilelistThreshold() const
-   {
-      return m_filelistThreshold;
-   }
-
-   UnifiedStatsReporter *getStatsReporter() const
-   {
-      return m_stats.get();
+   UnifiedStatsReporter *getStatsReporter() const {
+      return Stats.get();
    }
 
    /// True if extra work has to be done when tracing through the dependency
    /// graph, either in order to print dependencies or to collect statistics.
-   bool getTraceDependencies() const
-   {
+   bool getTraceDependencies() const {
       return getShowIncrementalBuildDecisions() || getStatsReporter();
    }
 
-   OutputLevel getOutputLevel() const
-   {
-      return m_level;
+   OutputLevel getOutputLevel() const {
+      return Level;
    }
 
-   unsigned getBatchSeed() const
-   {
-      return m_batchSeed;
+   unsigned getBatchSeed() const {
+      return BatchSeed;
    }
 
-   llvm::sys::TimePoint<> getLastBuildTime() const
-   {
-      return m_lastBuildTime;
+   llvm::sys::TimePoint<> getLastBuildTime() const {
+      return LastBuildTime;
    }
 
-   Optional<unsigned> getBatchCount() const
-   {
-      return m_batchCount;
+   Optional<unsigned> getBatchCount() const {
+      return BatchCount;
    }
 
-   Optional<unsigned> getBatchSizeLimit() const
-   {
-      return m_batchSizeLimit;
+   Optional<unsigned> getBatchSizeLimit() const {
+      return BatchSizeLimit;
    }
 
    /// Requests the path to a file containing all input source files. This can
@@ -313,12 +467,12 @@ public:
    /// \sa types::isPartOfSwiftCompilation
    const char *getAllSourcesPath() const;
 
-   /// Asks the Compilation to perform the m_jobs which it knows about.
+   /// Asks the Compilation to perform the Jobs which it knows about.
    ///
    /// \param TQ The TaskQueue used to schedule jobs for execution.
    ///
-   /// \returns result code for the Compilation's m_jobs; 0 indicates success and
-   /// -2 indicates that one of the Compilation's m_jobs crashed during execution
+   /// \returns result code for the Compilation's Jobs; 0 indicates success and
+   /// -2 indicates that one of the Compilation's Jobs crashed during execution
    int performJobs(std::unique_ptr<sys::TaskQueue> &&TQ);
 
    /// Returns whether the callee is permitted to pass -emit-loaded-module-trace
@@ -326,17 +480,19 @@ public:
    ///
    /// This only returns true once, because only one job should pass that
    /// argument.
-   bool requestPermissionForFrontendToEmitLoadedModuleTrace()
-   {
-      if (m_passedEmitLoadedModuleTraceToFrontendJob) {
+   bool requestPermissionForFrontendToEmitLoadedModuleTrace() {
+      if (PassedEmitLoadedModuleTraceToFrontendJob)
          // Someone else has already done it!
          return false;
-      } else {
+      else {
          // We're the first and only (to execute this path).
-         m_passedEmitLoadedModuleTraceToFrontendJob = true;
+         PassedEmitLoadedModuleTraceToFrontendJob = true;
          return true;
       }
    }
+
+   /// How many .php input files?
+   unsigned countPHPInputs() const;
 
 private:
    /// Perform all jobs.
@@ -358,154 +514,9 @@ private:
    /// successfully executed. In the event of an error, this function will return
    /// a negative value indicating a failure to execute.
    int performSingleCommand(const Job *Cmd);
-
-public:
-   /// The filelist threshold value to pass to ensure file lists are never used
-   static const size_t NEVER_USE_FILELIST = SIZE_MAX;
-
-private:
-   /// The DiagnosticEngine to which this Compilation should emit diagnostics.
-   DiagnosticEngine &m_diags;
-
-   /// The ToolChain this Compilation was built with, that it may reuse to build
-   /// subsequent BatchJobs.
-   const ToolChain &m_theToolChain;
-
-   /// The OutputInfo, which the Compilation stores a copy of upon
-   /// construction, and which it may use to build subsequent batch
-   /// jobs itself.
-   OutputInfo m_theOutputInfo;
-
-   /// The OutputLevel at which this Compilation should generate output.
-   OutputLevel m_level;
-
-   /// The OutputFileMap describing the Compilation's outputs, populated both by
-   /// the user-provided output file map (if it exists) and inference rules that
-   /// derive otherwise-unspecified output filenames from context.
-   OutputFileMap m_derivedOutputFileMap;
-
-   /// The m_actions which were used to build the m_jobs.
-   ///
-   /// This is mostly only here for lifetime management.
-   SmallVector<std::unique_ptr<const Action>, 32> m_actions;
-
-   /// The m_jobs which will be performed by this compilation.
-   SmallVector<std::unique_ptr<const Job>, 32> m_jobs;
-
-   /// The original (untranslated) input argument list.
-   ///
-   /// This is only here for lifetime management. Any inspection of
-   /// command-line arguments should use #getArgs().
-   std::unique_ptr<llvm::opt::InputArgList> m_rawInputArgs;
-
-   /// The translated input arg list.
-   std::unique_ptr<llvm::opt::DerivedArgList> m_translatedArgs;
-
-   /// A list of input files and their associated types.
-   InputFileList m_inputFilesWithTypes;
-
-   /// When non-null, a temporary file containing all input .swift files.
-   /// Used for large compilations to avoid overflowing argv.
-   const char *m_allSourceFilesPath = nullptr;
-
-   /// Temporary files that should be cleaned up after the compilation finishes.
-   ///
-   /// These apply whether the compilation succeeds or fails. If the
-   llvm::StringMap<PreserveOnSignal> m_tempFilePaths;
-
-   /// Write information about this compilation to this file.
-   ///
-   /// This is used for incremental builds.
-   std::string m_compilationRecordPath;
-
-   /// A hash representing all the arguments that could trigger a full rebuild.
-   std::string m_argsHash;
-
-   /// When the build was started.
-   ///
-   /// This should be as close as possible to when the driver was invoked, since
-   /// it's used as a lower bound.
-   llvm::sys::TimePoint<> m_buildStartTime;
-
-   /// The time of the last build.
-   ///
-   /// If unknown, this will be some time in the past.
-   llvm::sys::TimePoint<> m_lastBuildTime = llvm::sys::TimePoint<>::min();
-
-   /// Indicates whether this Compilation should continue execution of subtasks
-   /// even if they returned an error status.
-   bool m_continueBuildingAfterErrors = false;
-
-   /// Indicates whether tasks should only be executed if their output is out
-   /// of date.
-   bool m_enableIncrementalBuild;
-
-   /// When true, emit duplicated compilation record file whose filename is
-   /// suffixed with '~moduleonly'.
-   ///
-   /// This compilation record is used by '-emit-module'-only incremental builds
-   /// so that module-only builds do not affect compilation record file for
-   /// normal builds, while module-only incremental builds are able to use
-   /// artifacts of normal builds if they are already up to date.
-   bool m_outputCompilationRecordForModuleOnlyBuild = false;
-
-   /// Indicates whether groups of parallel frontend jobs should be merged
-   /// together and run in composite "batch jobs" when possible, to reduce
-   /// redundant work.
-   const bool m_enableBatchMode;
-
-   /// Provides a randomization seed to batch-mode partitioning, for debugging.
-   const unsigned m_batchSeed;
-
-   /// Overrides parallelism level and \c m_batchSizeLimit, sets exact
-   /// count of batches, if in batch-mode.
-   const Optional<unsigned> m_batchCount;
-
-   /// Overrides maximum batch size, if in batch-mode and not overridden
-   /// by \c m_batchCount.
-   const Optional<unsigned> m_batchSizeLimit;
-
-   /// True if temporary files should not be deleted.
-   const bool m_saveTemps;
-
-   /// When true, dumps information on how long each compilation task took to
-   /// execute.
-   const bool m_showDriverTimeCompilation;
-
-   /// When non-null, record various high-level counters to this.
-   std::unique_ptr<UnifiedStatsReporter> m_stats;
-
-   /// When true, dumps information about why files are being scheduled to be
-   /// rebuilt.
-   bool m_showIncrementalBuildDecisions = false;
-
-   /// When true, traces the lifecycle of each driver job. Provides finer
-   /// detail than m_showIncrementalBuildDecisions.
-   bool m_showJobLifecycle = false;
-
-   /// When true, some frontend job has requested permission to pass
-   /// -emit-loaded-module-trace, so no other job needs to do it.
-   bool m_passedEmitLoadedModuleTraceToFrontendJob = false;
-
-   /// The limit for the number of files to pass on the command line. Beyond this
-   /// limit filelists will be used.
-   size_t m_filelistThreshold;
-
-   /// Scaffolding to permit experimentation with finer-grained dependencies and
-   /// faster rebuilds.
-   const bool m_enableExperimentalDependencies;
-
-   /// Helpful for debugging, but slows down the driver. So, only turn on when
-   /// needed.
-   const bool m_verifyExperimentalDependencyGraphAfterEveryImport;
-   /// Helpful for debugging, but slows down the driver. So, only turn on when
-   /// needed.
-   const bool m_emitExperimentalDependencyDotFileAfterEveryImport;
-
-   /// Experiment with inter-file dependencies
-   const bool m_experimentalDependenciesIncludeIntrafileOnes;
 };
 
-} // polar::driver
+} // end namespace driver
+} // end namespace polar
 
-#endif // POLARPHP_DRIVER_COMPILER_H
+#endif // POLARPHP_DRIVER_COMPILATION_H

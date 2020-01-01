@@ -9,16 +9,6 @@
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
 //===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
-//
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/12/03.
 
 #include "polarphp/driver/internal/ToolChains.h"
 
@@ -32,6 +22,7 @@
 #include "polarphp/driver/Driver.h"
 #include "polarphp/driver/Job.h"
 #include "polarphp/option/Options.h"
+
 #include "clang/Basic/Version.h"
 #include "clang/Driver/Util.h"
 #include "llvm/ADT/StringSwitch.h"
@@ -43,190 +34,199 @@
 #include "llvm/Support/Process.h"
 #include "llvm/Support/Program.h"
 
-namespace polar::driver::toolchains {
-
-using namespace llvm::opt;
 using namespace polar;
+using namespace polar::driver;
+using namespace llvm::opt;
 
-std::string toolchains::Windows::sanitizerRuntimeLibName(StringRef sanitizer,
-                                                         bool shared) const
-{
-   return (Twine("clang_rt.") + sanitizer + "-" +
+std::string toolchains::Windows::sanitizerRuntimeLibName(StringRef Sanitizer,
+                                                         bool shared) const {
+   return (Twine("clang_rt.") + Sanitizer + "-" +
            this->getTriple().getArchName() + ".lib")
-         .str();
+      .str();
 }
 
 ToolChain::InvocationInfo
 toolchains::Windows::constructInvocation(const DynamicLinkJobAction &job,
-                                         const JobContext &context) const
-{
-   assert(context.output.getPrimaryOutputType() == filetypes::TY_Image &&
+                                         const JobContext &context) const {
+   assert(context.Output.getPrimaryOutputType() == filetypes::TY_Image &&
           "Invalid linker output type.");
 
-   ArgStringList arguments;
+   ArgStringList Arguments;
+
+   std::string Target = getTriple().str();
+   if (!Target.empty()) {
+      Arguments.push_back("-target");
+      Arguments.push_back(context.Args.MakeArgString(Target));
+   }
 
    switch (job.getKind()) {
-   case LinkKind::None:
-      llvm_unreachable("invalid link kind");
-   case LinkKind::Executable:
-      // Default case, nothing extra needed.
-      break;
-   case LinkKind::DynamicLibrary:
-      arguments.push_back("-shared");
-      break;
-   case LinkKind::StaticLibrary:
-      llvm_unreachable("invalid link kind");
+      case LinkKind::None:
+         llvm_unreachable("invalid link kind");
+      case LinkKind::Executable:
+         // Default case, nothing extra needed.
+         break;
+      case LinkKind::DynamicLibrary:
+         Arguments.push_back("-shared");
+         break;
+      case LinkKind::StaticLibrary:
+         llvm_unreachable("invalid link kind");
    }
 
    // Select the linker to use.
-   std::string linker;
-   if (const Arg *arg = context.args.getLastArg(options::OPT_use_ld)) {
-      linker = arg->getValue();
+   std::string Linker;
+   if (const Arg *A = context.Args.getLastArg(options::OPT_use_ld)) {
+      Linker = A->getValue();
    }
-   if (!linker.empty())
-      arguments.push_back(context.args.MakeArgString("-fuse-ld=" + linker));
+   if (!Linker.empty())
+      Arguments.push_back(context.Args.MakeArgString("-fuse-ld=" + Linker));
 
-   if (context.outputInfo.debugInfoFormat == IRGenDebugInfoFormat::CodeView)
-      arguments.push_back("-Wl,/DEBUG");
+   if (context.OI.DebugInfoFormat == IRGenDebugInfoFormat::CodeView) {
+      Arguments.push_back("-Xlinker");
+      Arguments.push_back("/DEBUG");
+   }
 
    // Configure the toolchain.
-   // By default, use the system clang++ to link.
-   const char *clang = nullptr;
-   if (const Arg *arg = context.args.getLastArg(options::OPT_tools_directory)) {
-      StringRef toolchainPath(arg->getValue());
+   //
+   // By default use the system `clang` to perform the link.  We use `clang` for
+   // the driver here because we do not wish to select a particular C++ runtime.
+   // Furthermore, until C++ interop is enabled, we cannot have a dependency on
+   // C++ code from pure Swift code.  If linked libraries are C++ based, they
+   // should properly link C++.  In the case of static linking, the user can
+   // explicitly specify the C++ runtime to link against.  This is particularly
+   // important for platforms like android where as it is a Linux platform, the
+   // default C++ runtime is `libstdc++` which is unsupported on the target but
+   // as the builds are usually cross-compiled from Linux, libstdc++ is going to
+   // be present.  This results in linking the wrong version of libstdc++
+   // generating invalid binaries.  It is also possible to use different C++
+   // runtimes than the default C++ runtime for the platform (e.g. libc++ on
+   // Windows rather than msvcprt).  When C++ interop is enabled, we will need to
+   // surface this via a driver flag.  For now, opt for the simpler approach of
+   // just using `clang` and avoid a dependency on the C++ runtime.
+   const char *Clang = "clang";
+   if (const Arg *A = context.Args.getLastArg(options::OPT_tools_directory)) {
+      StringRef toolchainPath(A->getValue());
 
       // If there is a clang in the toolchain folder, use that instead.
-      if (auto toolchainClang =
-          llvm::sys::findProgramByName("clang++", {toolchainPath})) {
-         clang = context.args.MakeArgString(toolchainClang.get());
-      }
+      if (auto tool = llvm::sys::findProgramByName("clang", {toolchainPath}))
+         Clang = context.Args.MakeArgString(tool.get());
    }
-   if (clang == nullptr) {
-      if (auto pathClang = llvm::sys::findProgramByName("clang++", None)) {
-         clang = context.args.MakeArgString(pathClang.get());
-      }
-   }
-   assert(clang &&
-          "clang++ was not found in the toolchain directory or system path.");
 
-   std::string target = getTriple().str();
-   if (!target.empty()) {
-      arguments.push_back("-target");
-      arguments.push_back(context.args.MakeArgString(target));
-   }
+   // Rely on `-libc` to correctly identify the MSVC Runtime Library.  We use
+   // `-nostartfiles` as that limits the difference to just the
+   // `-defaultlib:libcmt` which is passed unconditionally with the `clang++`
+   // driver rather than the `clang-cl` driver.
+   Arguments.push_back("-nostartfiles");
 
    bool wantsStaticStdlib =
-         context.args.hasFlag(options::OPT_static_stdlib,
-                              options::OPT_no_static_stdlib, false);
+      context.Args.hasFlag(options::OPT_static_stdlib,
+                           options::OPT_no_static_stdlib, false);
 
-   SmallVector<std::string, 4> runtimeLibPaths;
-   getRuntimeLibraryPaths(runtimeLibPaths, context.args, context.outputInfo.sdkPath,
-                          /*Shared=*/!wantsStaticStdlib);
+   SmallVector<std::string, 4> RuntimeLibPaths;
+   getRuntimeLibraryPaths(RuntimeLibPaths, context.Args, context.OI.SDKPath,
+      /*Shared=*/!wantsStaticStdlib);
 
-   for (auto path : runtimeLibPaths) {
-      arguments.push_back("-L");
+   for (auto path : RuntimeLibPaths) {
+      Arguments.push_back("-L");
       // Since Windows has separate libraries per architecture, link against the
       // architecture specific version of the static library.
-      arguments.push_back(context.args.MakeArgString(path + "/" +
+      Arguments.push_back(context.Args.MakeArgString(path + "/" +
                                                      getTriple().getArchName()));
    }
 
-   SmallString<128> sharedResourceDirPath;
-   getResourceDirPath(sharedResourceDirPath, context.args, /*Shared=*/true);
+   SmallString<128> SharedResourceDirPath;
+   getResourceDirPath(SharedResourceDirPath, context.Args, /*Shared=*/true);
 
-   SmallString<128> polarphpRunTimePath = sharedResourceDirPath;
-   llvm::sys::path::append(polarphpRunTimePath,
-                           get_major_architecture_name(getTriple()));
-   llvm::sys::path::append(polarphpRunTimePath, "swiftrt.obj");
-   arguments.push_back(context.args.MakeArgString(polarphpRunTimePath));
+   SmallString<128> phprtPath = SharedResourceDirPath;
+   llvm::sys::path::append(phprtPath,
+                           polar::get_major_architecture_name(getTriple()));
+   llvm::sys::path::append(phprtPath, "swiftrt.obj");
+   Arguments.push_back(context.Args.MakeArgString(phprtPath));
 
-   addPrimaryInputsOfType(arguments, context.inputs, context.args,
+   addPrimaryInputsOfType(Arguments, context.Inputs, context.Args,
                           filetypes::TY_Object);
-   addInputsOfType(arguments, context.inputActions, filetypes::TY_Object);
+   addInputsOfType(Arguments, context.InputActions, filetypes::TY_Object);
 
    for (const Arg *arg :
-        context.args.filtered(options::OPT_F, options::OPT_Fsystem)) {
-      if (arg->getOption().matches(options::OPT_Fsystem)) {
-         arguments.push_back("-iframework");
-      } else {
-         arguments.push_back(context.args.MakeArgString(arg->getSpelling()));
-      }
-      arguments.push_back(arg->getValue());
+      context.Args.filtered(options::OPT_F, options::OPT_Fsystem)) {
+      if (arg->getOption().matches(options::OPT_Fsystem))
+         Arguments.push_back("-iframework");
+      else
+         Arguments.push_back(context.Args.MakeArgString(arg->getSpelling()));
+      Arguments.push_back(arg->getValue());
    }
 
-   if (!context.outputInfo.sdkPath.empty()) {
-      arguments.push_back("-I");
-      arguments.push_back(context.args.MakeArgString(context.outputInfo.sdkPath));
+   if (!context.OI.SDKPath.empty()) {
+      Arguments.push_back("-I");
+      Arguments.push_back(context.Args.MakeArgString(context.OI.SDKPath));
    }
 
    if (job.getKind() == LinkKind::Executable) {
-      if (context.outputInfo.selectedSanitizers & SanitizerKind::Address) {
-         addLinkRuntimeLib(context.args, arguments,
+      if (context.OI.SelectedSanitizers & SanitizerKind::Address)
+         addLinkRuntimeLib(context.Args, Arguments,
                            sanitizerRuntimeLibName("asan"));
-      }
-      if (context.outputInfo.selectedSanitizers & SanitizerKind::Undefined) {
-         addLinkRuntimeLib(context.args, arguments,
+
+      if (context.OI.SelectedSanitizers & SanitizerKind::Undefined)
+         addLinkRuntimeLib(context.Args, Arguments,
                            sanitizerRuntimeLibName("ubsan"));
-      }
    }
 
-   if (context.args.hasArg(options::OPT_profile_generate)) {
-      SmallString<128> libProfile(sharedResourceDirPath);
-      llvm::sys::path::remove_filename(libProfile); // remove platform name
-      llvm::sys::path::append(libProfile, "clang", "lib");
+   if (context.Args.hasArg(options::OPT_profile_generate)) {
+      SmallString<128> LibProfile(SharedResourceDirPath);
+      llvm::sys::path::remove_filename(LibProfile); // remove platform name
+      llvm::sys::path::append(LibProfile, "clang", "lib");
 
-      llvm::sys::path::append(libProfile, getTriple().getOSName(),
+      llvm::sys::path::append(LibProfile, getTriple().getOSName(),
                               Twine("clang_rt.profile-") +
                               getTriple().getArchName() + ".lib");
-      arguments.push_back(context.args.MakeArgString(libProfile));
-      arguments.push_back(context.args.MakeArgString(
-                             Twine("-u", llvm::getInstrProfRuntimeHookVarName())));
+      Arguments.push_back(context.Args.MakeArgString(LibProfile));
+      Arguments.push_back(context.Args.MakeArgString(
+         Twine("-u", llvm::getInstrProfRuntimeHookVarName())));
    }
 
-   context.args.AddAllArgs(arguments, options::OPT_Xlinker);
-   context.args.AddAllArgs(arguments, options::OPT_linker_option_Group);
-   context.args.AddAllArgValues(arguments, options::OPT_Xclang_linker);
+   context.Args.AddAllArgs(Arguments, options::OPT_Xlinker);
+   context.Args.AddAllArgs(Arguments, options::OPT_linker_option_Group);
+   context.Args.AddAllArgValues(Arguments, options::OPT_Xclang_linker);
 
    // Run clang++ in verbose mode if "-v" is set
-   if (context.args.hasArg(options::OPT_v)) {
-      arguments.push_back("-v");
+   if (context.Args.hasArg(options::OPT_v)) {
+      Arguments.push_back("-v");
    }
 
    // This should be the last option, for convenience in checking output.
-   arguments.push_back("-o");
-   arguments.push_back(
-            context.args.MakeArgString(context.output.getPrimaryOutputFilename()));
+   Arguments.push_back("-o");
+   Arguments.push_back(
+      context.Args.MakeArgString(context.Output.getPrimaryOutputFilename()));
 
-   InvocationInfo invocationInfo{clang, arguments};
-   invocationInfo.allowsResponseFiles = true;
-   return invocationInfo;
+   InvocationInfo II{Clang, Arguments};
+   II.allowsResponseFiles = true;
+
+   return II;
 }
 
 ToolChain::InvocationInfo
 toolchains::Windows::constructInvocation(const StaticLinkJobAction &job,
-                                         const JobContext &context) const
-{
-   assert(context.output.getPrimaryOutputType() == filetypes::TY_Image &&
+                                         const JobContext &context) const {
+   assert(context.Output.getPrimaryOutputType() == filetypes::TY_Image &&
           "Invalid linker output type.");
 
-   ArgStringList arguments;
+   ArgStringList Arguments;
 
-   // Configure the toolchain.
-   const char *link = "link";
-   arguments.push_back("-lib");
+   const char *Linker = "link";
+   if (const Arg *A = context.Args.getLastArg(options::OPT_use_ld))
+      Linker = context.Args.MakeArgString(A->getValue());
 
-   addPrimaryInputsOfType(arguments, context.inputs, context.args,
+   Arguments.push_back("/lib");
+   Arguments.push_back("-nologo");
+
+   addPrimaryInputsOfType(Arguments, context.Inputs, context.Args,
                           filetypes::TY_Object);
-   addInputsOfType(arguments, context.inputActions, filetypes::TY_Object);
+   addInputsOfType(Arguments, context.InputActions, filetypes::TY_Object);
 
-   arguments.push_back(
-            context.args.MakeArgString(Twine("/OUT:") +
-                                       context.output.getPrimaryOutputFilename()));
+   StringRef OutputFile = context.Output.getPrimaryOutputFilename();
+   Arguments.push_back(context.Args.MakeArgString(Twine("/OUT:") + OutputFile));
 
-   InvocationInfo invocationInfo{link, arguments};
-   invocationInfo.allowsResponseFiles = true;
+   InvocationInfo II{Linker, Arguments};
+   II.allowsResponseFiles = true;
 
-   return invocationInfo;
+   return II;
 }
-
-} //  polar::driver::toolchains

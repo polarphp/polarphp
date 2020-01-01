@@ -125,8 +125,10 @@ public:
 
    // TODO: remove once -Wdocumentation stops warning for \param, \returns on
    // std::function (<rdar://problem/15665132>).
+#ifdef POLAR_CC_CLANG
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
+#endif
    /// A callback which will be executed when each task begins execution
    ///
    /// \param Pid the ProcessId of the task which just began execution.
@@ -176,7 +178,9 @@ public:
    using TaskSignalledCallback = std::function<TaskFinishedResponse(
       ProcessId Pid, StringRef ErrorMsg, StringRef Output, StringRef Errors,
       void *Context, Optional<int> Signal, TaskProcessInformation ProcInfo)>;
+#ifdef POLAR_CC_CLANG
 #pragma clang diagnostic pop
+#endif
 
    /// Indicates whether TaskQueue supports buffering output on the
    /// current system.

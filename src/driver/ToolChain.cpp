@@ -9,16 +9,6 @@
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
 //===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
-//
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/12/03.
 //
 /// \file This file defines the base implementation of the ToolChain class.
 /// The platform-specific subclasses are implemented in ToolChains.cpp.
@@ -38,118 +28,114 @@
 #include "llvm/Support/Path.h"
 #include "llvm/Support/Program.h"
 
-namespace polar::driver {
-
+using namespace polar;
+using namespace polar::driver;
 using namespace llvm::opt;
 
-ToolChain::JobContext::JobContext(Compilation &compilation, ArrayRef<const Job *> inputs,
-                                  ArrayRef<const Action *> inputActions,
-                                  const CommandOutput &output,
-                                  const OutputInfo &outputInfo)
-   : m_compilation(compilation),
-     inputs(inputs),
-     inputActions(inputActions),
-     output(output),
-     outputInfo(outputInfo),
-     args(compilation.getArgs())
-{}
+ToolChain::JobContext::JobContext(Compilation &C, ArrayRef<const Job *> Inputs,
+                                  ArrayRef<const Action *> InputActions,
+                                  const CommandOutput &Output,
+                                  const OutputInfo &OI)
+   : C(C), Inputs(Inputs), InputActions(InputActions), Output(Output), OI(OI),
+     Args(C.getArgs()) {}
 
-ArrayRef<InputPair> ToolChain::JobContext::getTopLevelInputFiles() const
-{
-   return m_compilation.getInputFiles();
+ArrayRef<InputPair> ToolChain::JobContext::getTopLevelInputFiles() const {
+   return C.getInputFiles();
 }
-
-const char *ToolChain::JobContext::getAllSourcesPath() const
-{
-   return m_compilation.getAllSourcesPath();
+const char *ToolChain::JobContext::getAllSourcesPath() const {
+   return C.getAllSourcesPath();
 }
 
 const char *
 ToolChain::JobContext::getTemporaryFilePath(const llvm::Twine &name,
-                                            StringRef suffix) const
-{
+                                            StringRef suffix) const {
    SmallString<128> buffer;
-   std::error_code errorCode = llvm::sys::fs::createTemporaryFile(name, suffix, buffer);
-   if (errorCode) {
+   std::error_code EC = llvm::sys::fs::createTemporaryFile(name, suffix, buffer);
+   if (EC) {
+      // Use the constructor that prints both the error code and the description.
       // FIXME: This should not take down the entire process.
-      llvm::report_fatal_error("unable to create temporary file for filelist");
+      auto error = llvm::make_error<llvm::StringError>(
+         EC,
+         "- unable to create temporary file for " + name + "." + suffix);
+      llvm::report_fatal_error(std::move(error));
    }
-   m_compilation.addTemporaryFile(buffer.str(), PreserveOnSignal::Yes);
+
+   C.addTemporaryFile(buffer.str(), PreserveOnSignal::Yes);
    // We can't just reference the data in the TemporaryFiles vector because
    // that could theoretically get copied to a new address.
-   return m_compilation.getArgs().MakeArgString(buffer.str());
+   return C.getArgs().MakeArgString(buffer.str());
 }
 
 Optional<Job::ResponseFileInfo>
-ToolChain::getResponseFileInfo(const Compilation &compilation, const char *executablePath,
+ToolChain::getResponseFileInfo(const Compilation &C, const char *executablePath,
                                const ToolChain::InvocationInfo &invocationInfo,
-                               const ToolChain::JobContext &context) const
-{
+                               const ToolChain::JobContext &context) const {
    const bool forceResponseFiles =
-         compilation.getArgs().hasArg(options::OPT_driver_force_response_files);
+      C.getArgs().hasArg(options::OPT_driver_force_response_files);
    assert((invocationInfo.allowsResponseFiles || !forceResponseFiles) &&
           "Cannot force response file if platform does not allow it");
 
    if (forceResponseFiles || (invocationInfo.allowsResponseFiles &&
                               !llvm::sys::commandLineFitsWithinSystemLimits(
-                                 executablePath, invocationInfo.arguments))) {
+                                 executablePath, invocationInfo.Arguments))) {
       const char *responseFilePath =
-            context.getTemporaryFilePath("arguments", "resp");
+         context.getTemporaryFilePath("arguments", "resp");
       const char *responseFileArg =
-            compilation.getArgs().MakeArgString(Twine("@") + responseFilePath);
+         C.getArgs().MakeArgString(Twine("@") + responseFilePath);
       return {{responseFilePath, responseFileArg}};
    }
    return None;
 }
 
 std::unique_ptr<Job> ToolChain::constructJob(
-      const JobAction &jobAction, Compilation &compilation, SmallVectorImpl<const Job *> &&inputs,
-      ArrayRef<const Action *> inputActions,
-      std::unique_ptr<CommandOutput> output, const OutputInfo &outputInfo) const
-{
-   JobContext context{compilation, inputs, inputActions, *output, outputInfo};
+   const JobAction &JA, Compilation &C, SmallVectorImpl<const Job *> &&inputs,
+   ArrayRef<const Action *> inputActions,
+   std::unique_ptr<CommandOutput> output, const OutputInfo &OI) const {
+   JobContext context{C, inputs, inputActions, *output, OI};
+
    auto invocationInfo = [&]() -> InvocationInfo {
-         switch (jobAction.getKind()) {
-      #define CASE(K)                                                                \
-         case Action::Kind::K:                                                        \
-            return constructInvocation(cast<K##Action>(jobAction), context);
-            CASE(CompileJob)
-            CASE(InterpretJob)
-            CASE(BackendJob)
-            CASE(MergeModuleJob)
-            CASE(ModuleWrapJob)
-            CASE(DynamicLinkJob)
-            CASE(StaticLinkJob)
-            CASE(GenerateDSYMJob)
-            CASE(VerifyDebugInfoJob)
-            CASE(GeneratePCHJob)
-            CASE(AutolinkExtractJob)
-            CASE(REPLJob)
-         #undef CASE
+      switch (JA.getKind()) {
+#define CASE(K)                                                                \
+  case Action::Kind::K:                                                        \
+    return constructInvocation(cast<K##Action>(JA), context);
+         CASE(CompileJob)
+         CASE(InterpretJob)
+         CASE(BackendJob)
+         CASE(MergeModuleJob)
+         CASE(ModuleWrapJob)
+         CASE(DynamicLinkJob)
+         CASE(StaticLinkJob)
+         CASE(GenerateDSYMJob)
+         CASE(VerifyDebugInfoJob)
+         CASE(GeneratePCHJob)
+         CASE(AutolinkExtractJob)
+         CASE(REPLJob)
+#undef CASE
          case Action::Kind::Input:
-          llvm_unreachable("not a JobAction");
-         }
-         // Work around MSVC warning: not all control paths return a value
-         llvm_unreachable("All switch cases are covered");
+            llvm_unreachable("not a JobAction");
+      }
+
+      // Work around MSVC warning: not all control paths return a value
+      llvm_unreachable("All switch cases are covered");
    }();
 
    // Special-case the Swift frontend.
    const char *executablePath = nullptr;
-   if (StringRef(POLARPHP_EXECUTABLE_NAME) == invocationInfo.executableName) {
-      executablePath = getDriver().getPolarphpProgramPath().c_str();
+   if (StringRef(POLARPHP_EXECUTABLE_NAME) == invocationInfo.ExecutableName) {
+      executablePath = getDriver().getPHPProgramPath().c_str();
    } else {
       std::string relativePath =
-            findProgramRelativeToSwift(invocationInfo.executableName);
+         findProgramRelativeToPHP(invocationInfo.ExecutableName);
       if (!relativePath.empty()) {
-         executablePath = compilation.getArgs().MakeArgString(relativePath);
+         executablePath = C.getArgs().MakeArgString(relativePath);
       } else {
          auto systemPath =
-               llvm::sys::findProgramByName(invocationInfo.executableName);
+            llvm::sys::findProgramByName(invocationInfo.ExecutableName);
          if (systemPath) {
-            executablePath = compilation.getArgs().MakeArgString(systemPath.get());
+            executablePath = C.getArgs().MakeArgString(systemPath.get());
          } else {
             // For debugging purposes.
-            executablePath = invocationInfo.executableName;
+            executablePath = invocationInfo.ExecutableName;
          }
       }
    }
@@ -157,55 +143,51 @@ std::unique_ptr<Job> ToolChain::constructJob(
    // Determine if the argument list is so long that it needs to be written into
    // a response file.
    auto responseFileInfo =
-         getResponseFileInfo(compilation, executablePath, invocationInfo, context);
+      getResponseFileInfo(C, executablePath, invocationInfo, context);
 
    return std::make_unique<Job>(
-            jobAction, std::move(inputs), std::move(output), executablePath,
-            std::move(invocationInfo.arguments),
-            std::move(invocationInfo.extraEnvironment),
-            std::move(invocationInfo.filelistInfos), responseFileInfo);
+      JA, std::move(inputs), std::move(output), executablePath,
+      std::move(invocationInfo.Arguments),
+      std::move(invocationInfo.ExtraEnvironment),
+      std::move(invocationInfo.FilelistInfos), responseFileInfo);
 }
 
 std::string
-ToolChain::findProgramRelativeToSwift(StringRef executableName) const
-{
+ToolChain::findProgramRelativeToPHP(StringRef executableName) const {
    auto insertionResult =
-         m_programLookupCache.insert(std::make_pair(executableName, ""));
+      ProgramLookupCache.insert(std::make_pair(executableName, ""));
    if (insertionResult.second) {
-      std::string path = findProgramRelativeToPolarphpImpl(executableName);
+      std::string path = findProgramRelativeToPHPImpl(executableName);
       insertionResult.first->setValue(std::move(path));
    }
    return insertionResult.first->getValue();
 }
 
 std::string
-ToolChain::findProgramRelativeToPolarphpImpl(StringRef executableName) const
-{
-   StringRef polarphpPath = getDriver().getPolarphpProgramPath();
-   StringRef polarphpBinDir = llvm::sys::path::parent_path(polarphpPath);
-   auto result = llvm::sys::findProgramByName(executableName, {polarphpBinDir});
-   if (result) {
+ToolChain::findProgramRelativeToPHPImpl(StringRef executableName) const {
+   StringRef swiftPath = getDriver().getPHPProgramPath();
+   StringRef swiftBinDir = llvm::sys::path::parent_path(swiftPath);
+
+   auto result = llvm::sys::findProgramByName(executableName, {swiftBinDir});
+   if (result)
       return result.get();
-   }
    return {};
 }
 
-filetypes::FileTypeId ToolChain::lookupTypeForExtension(StringRef ext) const
-{
-   return filetypes::lookup_type_for_extension(ext);
+filetypes::FileTypeId ToolChain::lookupTypeForExtension(StringRef Ext) const {
+   return filetypes::lookup_type_for_extension(Ext);
 }
 
-/// Return a _single_ TY_Swift InputAction, if one exists;
+/// Return a _single_ TY_PHP InputAction, if one exists;
 /// if 0 or >1 such inputs exist, return nullptr.
-static const InputAction *find_single_polarphp_input(const CompileJobAction *cja)
-{
-   auto inputs = cja->getInputs();
-   const InputAction *inputAction = nullptr;
-   for (auto const *input : inputs) {
-      if (auto const *S = dyn_cast<InputAction>(input)) {
-         if (S->getType() == filetypes::TY_Polar) {
-            if (inputAction == nullptr) {
-               inputAction = S;
+static const InputAction *findSinglePHPInput(const CompileJobAction *CJA) {
+   auto Inputs = CJA->getInputs();
+   const InputAction *IA = nullptr;
+   for (auto const *I : Inputs) {
+      if (auto const *S = dyn_cast<InputAction>(I)) {
+         if (S->getType() == filetypes::TY_PHP) {
+            if (IA == nullptr) {
+               IA = S;
             } else {
                // Already found one, two is too many.
                return nullptr;
@@ -213,121 +195,107 @@ static const InputAction *find_single_polarphp_input(const CompileJobAction *cja
          }
       }
    }
-   return inputAction;
+   return IA;
 }
 
-static bool jobs_have_same_executable_names(const Job *lhs, const Job *rhs)
-{
+static bool jobsHaveSameExecutableNames(const Job *A, const Job *B) {
    // Jobs that get here (that are derived from CompileJobActions) should always
    // have the same executable name -- it should always be SWIFT_EXECUTABLE_NAME
    // -- but we check here just to be sure / fail gracefully in non-assert
    // builds.
-   assert(strcmp(lhs->getExecutable(), rhs->getExecutable()) == 0);
-   if (strcmp(lhs->getExecutable(), rhs->getExecutable()) != 0) {
+   assert(strcmp(A->getExecutable(), B->getExecutable()) == 0);
+   if (strcmp(A->getExecutable(), B->getExecutable()) != 0) {
       return false;
    }
    return true;
 }
 
-static bool jobs_have_same_output_types(const Job *lhs, const Job *rhs)
-{
-   if (lhs->getOutput().getPrimaryOutputType() !=
-       rhs->getOutput().getPrimaryOutputType()) {
+static bool jobsHaveSameOutputTypes(const Job *A, const Job *B) {
+   if (A->getOutput().getPrimaryOutputType() !=
+       B->getOutput().getPrimaryOutputType())
       return false;
-   }
-   return lhs->getOutput().hasSameAdditionalOutputTypes(rhs->getOutput());
+   return A->getOutput().hasSameAdditionalOutputTypes(B->getOutput());
 }
 
-static bool jobs_have_same_environment(const Job *lhs, const Job *rhs)
-{
-   auto lhsEnv = lhs->getExtraEnvironment();
-   auto rhsEnv = rhs->getExtraEnvironment();
-   if (lhsEnv.size() != rhsEnv.size()) {
+static bool jobsHaveSameEnvironment(const Job *A, const Job *B) {
+   auto AEnv = A->getExtraEnvironment();
+   auto BEnv = B->getExtraEnvironment();
+   if (AEnv.size() != BEnv.size())
       return false;
-   }
-   for (size_t i = 0; i < lhsEnv.size(); ++i) {
-      if (strcmp(lhsEnv[i].first, rhsEnv[i].first) != 0) {
+   for (size_t i = 0; i < AEnv.size(); ++i) {
+      if (strcmp(AEnv[i].first, BEnv[i].first) != 0)
          return false;
-      }
-      if (strcmp(lhsEnv[i].second, rhsEnv[i].second) != 0) {
+      if (strcmp(AEnv[i].second, BEnv[i].second) != 0)
          return false;
-      }
    }
    return true;
 }
 
-bool ToolChain::jobIsBatchable(const Compilation &compilation, const Job *job) const
-{
+bool ToolChain::jobIsBatchable(const Compilation &C, const Job *A) const {
    // FIXME: There might be a tighter criterion to use here?
-   if (compilation.getOutputInfo().compilerMode != OutputInfo::Mode::StandardCompile) {
+   if (C.getOutputInfo().CompilerMode != OutputInfo::Mode::StandardCompile)
       return false;
-   }
-   auto const *cjActA = dyn_cast<const CompileJobAction>(&job->getSource());
-   if (!cjActA) {
+   auto const *CJActA = dyn_cast<const CompileJobAction>(&A->getSource());
+   if (!CJActA)
       return false;
-   }
-   return find_single_polarphp_input(cjActA) != nullptr;
+   return findSinglePHPInput(CJActA) != nullptr;
 }
 
-bool ToolChain::jobsAreBatchCombinable(const Compilation &compilation, const Job *lhs,
-                                       const Job *rhs) const
-{
-   assert(jobIsBatchable(compilation, lhs));
-   assert(jobIsBatchable(compilation, rhs));
-   return (jobs_have_same_executable_names(lhs, rhs) && jobs_have_same_output_types(lhs, rhs) &&
-           jobs_have_same_environment(lhs, rhs));
+bool ToolChain::jobsAreBatchCombinable(const Compilation &C, const Job *A,
+                                       const Job *B) const {
+   assert(jobIsBatchable(C, A));
+   assert(jobIsBatchable(C, B));
+   return (jobsHaveSameExecutableNames(A, B) && jobsHaveSameOutputTypes(A, B) &&
+           jobsHaveSameEnvironment(A, B));
 }
 
 /// Form a synthetic \c CommandOutput for a \c BatchJob by merging together the
 /// \c CommandOutputs of all the jobs passed.
 static std::unique_ptr<CommandOutput>
-make_batch_command_output(ArrayRef<const Job *> jobs, Compilation &compilation,
-                       filetypes::FileTypeId outputType)
-{
+makeBatchCommandOutput(ArrayRef<const Job *> jobs, Compilation &C,
+                       filetypes::FileTypeId outputType) {
    auto output =
-         std::make_unique<CommandOutput>(outputType, compilation.getDerivedOutputFileMap());
-   for (auto const *job : jobs) {
-      output->addOutputs(job->getOutput());
+      std::make_unique<CommandOutput>(outputType, C.getDerivedOutputFileMap());
+   for (auto const *J : jobs) {
+      output->addOutputs(J->getOutput());
    }
    return output;
 }
 
-/// Set-union the \c inputs and \c inputActions from each \c Job in \p jobs into
+/// Set-union the \c Inputs and \c InputActions from each \c Job in \p jobs into
 /// the provided \p inputJobs and \p inputActions vectors, further adding all \c
-/// Actions in the \p jobs -- inputActions or otherwise -- to \p batchCJA. Do
+/// Actions in the \p jobs -- InputActions or otherwise -- to \p batchCJA. Do
 /// set-union rather than concatenation here to avoid mentioning the same input
 /// multiple times.
 static bool
-merge_batch_inputs(ArrayRef<const Job *> jobs,
-                   llvm::SmallSetVector<const Job *, 16> &inputJobs,
-                   llvm::SmallSetVector<const Action *, 16> &inputActions,
-                   CompileJobAction *batchCJA)
-{
+mergeBatchInputs(ArrayRef<const Job *> jobs,
+                 llvm::SmallSetVector<const Job *, 16> &inputJobs,
+                 llvm::SmallSetVector<const Action *, 16> &inputActions,
+                 CompileJobAction *batchCJA) {
 
    llvm::SmallSetVector<const Action *, 16> allActions;
 
-   for (auto const *job : jobs) {
-      for (auto const *input : job->getInputs()) {
-         inputJobs.insert(input);
+   for (auto const *J : jobs) {
+      for (auto const *I : J->getInputs()) {
+         inputJobs.insert(I);
       }
-      auto const *cja = dyn_cast<CompileJobAction>(&job->getSource());
-      if (!cja) {
+      auto const *CJA = dyn_cast<CompileJobAction>(&J->getSource());
+      if (!CJA)
          return true;
-      }
-      for (auto const *input : cja->getInputs()) {
-         // Capture _all_ input actions -- whether or not they are inputActions --
+      for (auto const *I : CJA->getInputs()) {
+         // Capture _all_ input actions -- whether or not they are InputActions --
          // in allActions, to set as the inputs for batchCJA below.
-         allActions.insert(input);
-         // Only collect input actions that _are inputActions_ in the inputActions
+         allActions.insert(I);
+         // Only collect input actions that _are InputActions_ in the inputActions
          // array, to load into the JobContext in our caller.
-         if (auto const *inputAction = dyn_cast<InputAction>(input)) {
-            inputActions.insert(inputAction);
+         if (auto const *IA = dyn_cast<InputAction>(I)) {
+            inputActions.insert(IA);
          }
       }
    }
 
-   for (auto const *input : allActions) {
-      batchCJA->addInput(input);
+   for (auto const *I : allActions) {
+      batchCJA->addInput(I);
    }
    return false;
 }
@@ -339,23 +307,22 @@ merge_batch_inputs(ArrayRef<const Job *> jobs,
 /// we build names its inputs in an order that's a subsequence of the sequence
 /// of inputs the driver was initially invoked with.
 static void
-sort_jobs_to_match_compilation_inputs(ArrayRef<const Job *> unsortedJobs,
-                                      SmallVectorImpl<const Job *> &sortedJobs,
-                                      Compilation &compilation)
-{
+sortJobsToMatchCompilationInputs(ArrayRef<const Job *> unsortedJobs,
+                                 SmallVectorImpl<const Job *> &sortedJobs,
+                                 Compilation &C) {
    llvm::DenseMap<StringRef, const Job *> jobsByInput;
-   for (const Job *job : unsortedJobs) {
-      const CompileJobAction *cja = cast<CompileJobAction>(&job->getSource());
-      const InputAction *inputAction = find_single_polarphp_input(cja);
+   for (const Job *J : unsortedJobs) {
+      const CompileJobAction *CJA = cast<CompileJobAction>(&J->getSource());
+      const InputAction *IA = findSinglePHPInput(CJA);
       auto R =
-            jobsByInput.insert(std::make_pair(inputAction->getInputArg().getValue(), job));
+         jobsByInput.insert(std::make_pair(IA->getInputArg().getValue(), J));
       assert(R.second);
       (void)R;
    }
-   for (const InputPair &P : compilation.getInputFiles()) {
-      auto input = jobsByInput.find(P.second->getValue());
-      if (input != jobsByInput.end()) {
-         sortedJobs.push_back(input->second);
+   for (const InputPair &P : C.getInputFiles()) {
+      auto I = jobsByInput.find(P.second->getValue());
+      if (I != jobsByInput.end()) {
+         sortedJobs.push_back(I->second);
       }
    }
 }
@@ -365,32 +332,31 @@ sort_jobs_to_match_compilation_inputs(ArrayRef<const Job *> unsortedJobs,
 /// on \p BatchJob, to build the \c InvocationInfo.
 std::unique_ptr<Job>
 ToolChain::constructBatchJob(ArrayRef<const Job *> unsortedJobs,
-                             Job::PID &nextQuasiPID,
-                             Compilation &compilation) const {
+                             Job::PID &NextQuasiPID,
+                             Compilation &C) const {
    if (unsortedJobs.empty())
       return nullptr;
 
    llvm::SmallVector<const Job *, 16> sortedJobs;
-   sort_jobs_to_match_compilation_inputs(unsortedJobs, sortedJobs, compilation);
+   sortJobsToMatchCompilationInputs(unsortedJobs, sortedJobs, C);
 
    // Synthetic OutputInfo is a slightly-modified version of the initial
-   // compilation's outputInfo.
-   auto outputInfo = compilation.getOutputInfo();
-   outputInfo.compilerMode = OutputInfo::Mode::BatchModeCompile;
+   // compilation's OI.
+   auto OI = C.getOutputInfo();
+   OI.CompilerMode = OutputInfo::Mode::BatchModeCompile;
 
    auto const *executablePath = sortedJobs[0]->getExecutable();
    auto outputType = sortedJobs[0]->getOutput().getPrimaryOutputType();
-   auto output = make_batch_command_output(sortedJobs, compilation, outputType);
+   auto output = makeBatchCommandOutput(sortedJobs, C, outputType);
 
    llvm::SmallSetVector<const Job *, 16> inputJobs;
    llvm::SmallSetVector<const Action *, 16> inputActions;
-   auto *batchCJA = compilation.createAction<CompileJobAction>(outputType);
-   if (merge_batch_inputs(sortedJobs, inputJobs, inputActions, batchCJA)) {
+   auto *batchCJA = C.createAction<CompileJobAction>(outputType);
+   if (mergeBatchInputs(sortedJobs, inputJobs, inputActions, batchCJA))
       return nullptr;
-   }
 
-   JobContext context{compilation, inputJobs.getArrayRef(), inputActions.getArrayRef(),
-            *output, outputInfo};
+   JobContext context{C, inputJobs.getArrayRef(), inputActions.getArrayRef(),
+                      *output, OI};
    auto invocationInfo = constructInvocation(*batchCJA, context);
    // Batch mode can produce quite long command lines; in almost every case these
    // will trigger use of supplementary output file maps. However, if the driver
@@ -407,14 +373,12 @@ ToolChain::constructBatchJob(ArrayRef<const Job *> unsortedJobs,
    // failed to set it in `constructInvocation`.
    assert(invocationInfo.allowsResponseFiles);
    auto responseFileInfo =
-         getResponseFileInfo(compilation, executablePath, invocationInfo, context);
+      getResponseFileInfo(C, executablePath, invocationInfo, context);
 
    return std::make_unique<BatchJob>(
-            *batchCJA, inputJobs.takeVector(), std::move(output), executablePath,
-            std::move(invocationInfo.arguments),
-            std::move(invocationInfo.extraEnvironment),
-            std::move(invocationInfo.filelistInfos), sortedJobs, nextQuasiPID,
-            responseFileInfo);
+      *batchCJA, inputJobs.takeVector(), std::move(output), executablePath,
+      std::move(invocationInfo.Arguments),
+      std::move(invocationInfo.ExtraEnvironment),
+      std::move(invocationInfo.FilelistInfos), sortedJobs, NextQuasiPID,
+      responseFileInfo);
 }
-
-} // polar
