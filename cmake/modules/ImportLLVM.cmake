@@ -29,7 +29,7 @@ ExternalProject_Add(llvm-project
    BUILD_COMMAND make -j
    )
 
-find_package(LLVM
+find_package(LLVM CONFIG
    PATHS ${POLAR_CMAKE_MODULES_DIR}/llvm
    NO_DEFAULT_PATH)
 if (LLVM_FOUND)

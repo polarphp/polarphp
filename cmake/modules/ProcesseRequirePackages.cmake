@@ -61,3 +61,15 @@ endif()
 find_package(ICU COMPONENTS data i18n io tu uc REQUIRED)
 message("found icu version: ${ICU_VERSION}")
 include_directories(${ICU_INCLUDE_DIRS})
+
+find_package(PythonInterp REQUIRED)
+
+#
+# Find optional dependencies.
+#
+
+if(LLVM_ENABLE_LIBXML2)
+  find_package(LibXml2 REQUIRED)
+else()
+  find_package(LibXml2)
+endif()

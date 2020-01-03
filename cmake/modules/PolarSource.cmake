@@ -1,50 +1,41 @@
-# This source file is part of the polarphp.org open source project
-#
-# Copyright (c) 2017 - 2019 polarphp software foundation
-# Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-# Licensed under Apache License v2.0 with Runtime Library Exception
-#
-# See https://polarphp.org/LICENSE.txt for license information
-# See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-
 include(PolarUtils)
 
-# Process the sources within the given variable, pulling out any typephp
-# sources to be compiled with 'polarphp' directly. This updates
+# Process the sources within the given variable, pulling out any Swift
+# sources to be compiled with 'swift' directly. This updates
 # ${sourcesvar} in place with the resulting list and ${externalvar} with the
 # list of externally-build sources.
 #
 # Usage:
-#   typephp_handle_sources(sourcesvar externalvar)
-function(typephp_handle_sources
+#   polar_handle_sources(sourcesvar externalvar)
+function(polar_handle_sources
    dependency_target_out_var_name
    dependency_module_target_out_var_name
    dependency_pib_target_out_var_name
    dependency_pibopt_target_out_var_name
    dependency_pibgen_target_out_var_name
    sourcesvar externalvar name)
-   cmake_parse_arguments(SWIFTSOURCES
+   cmake_parse_arguments(POLARSOURCES
       "IS_MAIN;IS_STDLIB;IS_STDLIB_CORE;IS_SDK_OVERLAY;EMBED_BITCODE"
       "SDK;ARCHITECTURE;INSTALL_IN_COMPONENT"
       "DEPENDS;COMPILE_FLAGS;MODULE_NAME"
       ${ARGN})
-   polar_translate_flag(${POLARPHP_SOURCES_IS_MAIN} "IS_MAIN" IS_MAIN_arg)
-   polar_translate_flag(${POLARPHP_SOURCES_IS_STDLIB} "IS_STDLIB" IS_STDLIB_arg)
-   polar_translate_flag(${POLARPHP_SOURCES_IS_STDLIB_CORE} "IS_STDLIB_CORE"
+   polar_translate_flag(${POLARSOURCES_IS_MAIN} "IS_MAIN" IS_MAIN_arg)
+   polar_translate_flag(${POLARSOURCES_IS_STDLIB} "IS_STDLIB" IS_STDLIB_arg)
+   polar_translate_flag(${POLARSOURCES_IS_STDLIB_CORE} "IS_STDLIB_CORE"
       IS_STDLIB_CORE_arg)
-   polar_translate_flag(${POLARPHP_SOURCES_IS_SDK_OVERLAY} "IS_SDK_OVERLAY"
+   polar_translate_flag(${POLARSOURCES_IS_SDK_OVERLAY} "IS_SDK_OVERLAY"
       IS_SDK_OVERLAY_arg)
-   polar_translate_flag(${POLARPHP_SOURCES_EMBED_BITCODE} "EMBED_BITCODE"
+   polar_translate_flag(${POLARSOURCES_EMBED_BITCODE} "EMBED_BITCODE"
       EMBED_BITCODE_arg)
 
-   if(POLARPHP_SOURCES_IS_MAIN)
-      set(POLARPHP_SOURCES_INSTALL_IN_COMPONENT never_install)
+   if(POLARSOURCES_IS_MAIN)
+      set(POLARSOURCES_INSTALL_IN_COMPONENT never_install)
    endif()
 
    # Check arguments.
-   precondition(POLARPHP_SOURCES_SDK "Should specify an SDK")
-   precondition(POLARPHP_SOURCES_ARCHITECTURE "Should specify an architecture")
-   precondition(POLARPHP_SOURCES_INSTALL_IN_COMPONENT "INSTALL_IN_COMPONENT is required")
+   polar_precondition(POLARSOURCES_SDK "Should specify an SDK")
+   polar_precondition(POLARSOURCES_ARCHITECTURE "Should specify an architecture")
+   polar_precondition(POLARSOURCES_INSTALL_IN_COMPONENT "INSTALL_IN_COMPONENT is required")
 
    # Clear the result variable.
    set("${dependency_target_out_var_name}" "" PARENT_SCOPE)
@@ -54,74 +45,73 @@ function(typephp_handle_sources
    set("${dependency_pibgen_target_out_var_name}" "" PARENT_SCOPE)
 
    set(result)
-   set(typephp_sources)
+   set(polar_sources)
    foreach(src ${${sourcesvar}})
       get_filename_component(extension ${src} EXT)
       if(extension STREQUAL ".php")
-         list(APPEND typephp_sources ${src})
+         list(APPEND polar_sources ${src})
       else()
          list(APPEND result ${src})
       endif()
    endforeach()
 
-   set(polarphp_compile_flags ${POLARPHP_SOURCES_COMPILE_FLAGS})
-   if (NOT POLARPHP_SOURCES_IS_MAIN)
-      list(APPEND polarphp_compile_flags "-module-link-name" "${name}")
+   set(polar_compile_flags ${POLARSOURCES_COMPILE_FLAGS})
+   if (NOT POLARSOURCES_IS_MAIN)
+      list(APPEND polar_compile_flags "-module-link-name" "${name}")
    endif()
 
-   if(typephp_sources)
-      set(objsubdir "/${POLARPHP_SOURCES_SDK}/${POLARPHP_SOURCES_ARCHITECTURE}")
+   if(polar_sources)
+      set(objsubdir "/${POLARSOURCES_SDK}/${POLARSOURCES_ARCHITECTURE}")
 
       file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}${objsubdir}")
 
-      set(typephp_obj
-         "${CMAKE_CURRENT_BINARY_DIR}${objsubdir}/${POLARPHP_SOURCES_MODULE_NAME}${CMAKE_C_OUTPUT_EXTENSION}")
+      set(polar_obj
+         "${CMAKE_CURRENT_BINARY_DIR}${objsubdir}/${POLARSOURCES_MODULE_NAME}${CMAKE_C_OUTPUT_EXTENSION}")
 
       # FIXME: We shouldn't /have/ to build things in a single process.
       # <rdar://problem/15972329>
-      list(APPEND polarphp_compile_flags "-force-single-frontend-invocation")
+      list(APPEND polar_compile_flags "-force-single-frontend-invocation")
 
-      _polar_compile_typephp_files(
+      _compile_typephp_files(
          dependency_target
          module_dependency_target
          pib_dependency_target
          pibopt_dependency_target
          pibgen_dependency_target
-         OUTPUT ${typephp_obj}
-         SOURCES ${typephp_sources}
-         DEPENDS ${POLARPHP_SOURCES_DEPENDS}
-         FLAGS ${polarphp_compile_flags}
-         SDK ${POLARPHP_SOURCES_SDK}
-         ARCHITECTURE ${POLARPHP_SOURCES_ARCHITECTURE}
-         MODULE_NAME ${POLARPHP_SOURCES_MODULE_NAME}
+         OUTPUT ${polar_obj}
+         SOURCES ${polar_sources}
+         DEPENDS ${POLARSOURCES_DEPENDS}
+         FLAGS ${polar_compile_flags}
+         SDK ${POLARSOURCES_SDK}
+         ARCHITECTURE ${POLARSOURCES_ARCHITECTURE}
+         MODULE_NAME ${POLARSOURCES_MODULE_NAME}
          ${IS_MAIN_arg}
          ${IS_STDLIB_arg}
          ${IS_STDLIB_CORE_arg}
          ${IS_SDK_OVERLAY_arg}
          ${EMBED_BITCODE_arg}
          ${STATIC_arg}
-         INSTALL_IN_COMPONENT "${POLARPHP_SOURCES_INSTALL_IN_COMPONENT}")
-
+         INSTALL_IN_COMPONENT "${POLARSOURCES_INSTALL_IN_COMPONENT}")
       set("${dependency_target_out_var_name}" "${dependency_target}" PARENT_SCOPE)
       set("${dependency_module_target_out_var_name}" "${module_dependency_target}" PARENT_SCOPE)
       set("${dependency_pib_target_out_var_name}" "${pib_dependency_target}" PARENT_SCOPE)
       set("${dependency_pibopt_target_out_var_name}" "${pibopt_dependency_target}" PARENT_SCOPE)
       set("${dependency_pibgen_target_out_var_name}" "${pibgen_dependency_target}" PARENT_SCOPE)
 
-      list(APPEND result ${typephp_obj})
+      list(APPEND result ${polar_obj})
    endif()
 
    llvm_process_sources(result ${result})
    set(${sourcesvar} "${result}" PARENT_SCOPE)
-   set(${externalvar} ${typephp_sources} PARENT_SCOPE)
+   set(${externalvar} ${polar_sources} PARENT_SCOPE)
 endfunction()
 
-# Add TypePHP source files to the (Xcode) project.
+# Add Typephp source files to the (Xcode) project.
 #
 # Usage:
-#   polar_add_typephp_source_group(sources)
-function(polar_add_typephp_source_group sources)
-   source_group("TypePHP Sources" FILES ${sources})
+#   add_typephp_source_group(sources)
+function(add_typephp_source_group sources)
+   source_group("Typephp Sources" FILES ${sources})
    # Mark the source files as HEADER_FILE_ONLY, so that Xcode doesn't try
    # to build them itself.
    set_source_files_properties(${sources}
@@ -129,18 +119,17 @@ function(polar_add_typephp_source_group sources)
       HEADER_FILE_ONLY true)
 endfunction()
 
-
 # Compile a typephp file into an object file (as a library).
 #
 # Usage:
-#   _polar_compile_typephp_files(
+#   _compile_typephp_files(
 #     dependency_target_out_var_name
 #     dependency_module_target_out_var_name
 #     dependency_pib_target_out_var_name    # -Onone pib target
 #     dependency_pibopt_target_out_var_name # -O pib target
 #     dependency_pibgen_target_out_var_name # -pibgen target
 #     OUTPUT objfile                    # Name of the resulting object file
-#     SOURCES typephp_src [typephp_src...]  # TypePHP source files to compile
+#     SOURCES typephp_src [typephp_src...]  # typephp source files to compile
 #     FLAGS -module-name foo            # Flags to add to the compilation
 #     [SDK sdk]                         # SDK to build for
 #     [ARCHITECTURE architecture]       # Architecture to build for
@@ -150,52 +139,51 @@ endfunction()
 #     [IS_STDLIB]
 #     [IS_STDLIB_CORE]                  # This is the core standard library
 #     [OPT_FLAGS]                       # Optimization flags (overrides POLAR_OPTIMIZE)
-#     [MODULE_DIR]                      # Put .phpmodule, .typedoc., and .o
+#     [MODULE_DIR]                      # Put .phpmodule, .phpdoc., and .o
 #                                       # into this directory.
 #     [MODULE_NAME]                     # The module name.
 #     [INSTALL_IN_COMPONENT]            # Install produced files.
 #     [EMBED_BITCODE]                   # Embed LLVM bitcode into the .o files
 #     )
-
-function(_polar_compile_typephp_files
+function(_compile_typephp_files
    dependency_target_out_var_name dependency_module_target_out_var_name
    dependency_pib_target_out_var_name dependency_pibopt_target_out_var_name
    dependency_pibgen_target_out_var_name)
-   cmake_parse_arguments(POLARPHP_FILE
+   cmake_parse_arguments(POLARFILE
       "IS_MAIN;IS_STDLIB;IS_STDLIB_CORE;IS_SDK_OVERLAY;EMBED_BITCODE"
       "OUTPUT;MODULE_NAME;INSTALL_IN_COMPONENT"
       "SOURCES;FLAGS;DEPENDS;SDK;ARCHITECTURE;OPT_FLAGS;MODULE_DIR"
       ${ARGN})
 
    # Check arguments.
-   list(LENGTH POLARPHP_FILE_OUTPUT num_outputs)
-   list(GET POLARPHP_FILE_OUTPUT 0 first_output)
+   list(LENGTH POLARFILE_OUTPUT num_outputs)
+   list(GET POLARFILE_OUTPUT 0 first_output)
 
    precondition(num_outputs MESSAGE "OUTPUT must not be empty")
 
-   foreach(output ${POLARPHP_FILE_OUTPUT})
+   foreach(output ${POLARFILE_OUTPUT})
       if (NOT IS_ABSOLUTE "${output}")
          message(FATAL_ERROR "OUTPUT should be an absolute path")
       endif()
    endforeach()
 
-   if(POLARPHP_FILE_IS_MAIN AND POLARPHP_FILE_IS_STDLIB)
+   if(POLARFILE_IS_MAIN AND POLARFILE_IS_STDLIB)
       message(FATAL_ERROR "Cannot set both IS_MAIN and IS_STDLIB")
    endif()
 
-   precondition(POLARPHP_FILE_SDK MESSAGE "Should specify an SDK")
-   precondition(POLARPHP_FILE_ARCHITECTURE MESSAGE "Should specify an architecture")
-   precondition(POLARPHP_FILE_INSTALL_IN_COMPONENT MESSAGE "INSTALL_IN_COMPONENT is required")
+   precondition(POLARFILE_SDK MESSAGE "Should specify an SDK")
+   precondition(POLARFILE_ARCHITECTURE MESSAGE "Should specify an architecture")
+   precondition(POLARFILE_INSTALL_IN_COMPONENT MESSAGE "INSTALL_IN_COMPONENT is required")
 
-   if ("${POLARPHP_FILE_MODULE_NAME}" STREQUAL "")
-      get_filename_component(POLARPHP_FILE_MODULE_NAME "${first_output}" NAME_WE)
+   if ("${POLARFILE_MODULE_NAME}" STREQUAL "")
+      get_filename_component(POLARFILE_MODULE_NAME "${first_output}" NAME_WE)
       message(SEND_ERROR
          "No module name specified; did you mean to use MODULE_NAME "
-         "${POLARPHP_FILE_MODULE_NAME}?")
+         "${POLARFILE_MODULE_NAME}?")
    endif()
 
    set(source_files)
-   foreach(file ${POLARPHP_FILE_SOURCES})
+   foreach(file ${POLARFILE_SOURCES})
       # Determine where this file is.
       get_filename_component(file_path ${file} PATH)
       if(IS_ABSOLUTE "${file_path}")
@@ -205,96 +193,100 @@ function(_polar_compile_typephp_files
       endif()
    endforeach()
 
-   # Compute flags for the polarphp compiler.
-   set(polarphp_flags)
-   set(polarphp_module_flags)
+   # Compute flags for the Swift compiler.
+   set(polar_flags)
+   set(polar_module_flags)
 
-   _polar_add_variant_typephp_compile_flags(
-      "${POLARPHP_FILE_SDK}"
-      "${POLARPHP_FILE_ARCHITECTURE}"
-      "${SWIFT_STDLIB_BUILD_TYPE}"
-      "${SWIFT_STDLIB_ASSERTIONS}"
-      polarphp_flags)
+   _add_variant_polar_compile_flags(
+      "${POLARFILE_SDK}"
+      "${POLARFILE_ARCHITECTURE}"
+      "${POLAR_STDLIB_BUILD_TYPE}"
+      "${POLAR_STDLIB_ASSERTIONS}"
+      polar_flags)
 
    # Determine the subdirectory where the binary should be placed.
    compute_library_subdir(library_subdir
-      "${POLARPHP_FILE_SDK}" "${POLARPHP_FILE_ARCHITECTURE}")
+      "${POLARFILE_SDK}" "${POLARFILE_ARCHITECTURE}")
 
-   # Allow import of other TypePHP modules we just built.
-   list(APPEND polarphp_flags
-      "-I" "${POLARPHP_LIB_DIR}/${library_subdir}")
+   # Allow import of other Swift modules we just built.
+   list(APPEND polar_flags
+      "-I" "${POLARLIB_DIR}/${library_subdir}")
    # FIXME: should we use '-resource-dir' here?  Seems like it has no advantage
    # over '-I' in this case.
 
    # If we have a custom module cache path, use it.
-   if (SWIFT_MODULE_CACHE_PATH)
-      list(APPEND polarphp_flags "-module-cache-path" "${SWIFT_MODULE_CACHE_PATH}")
+   if (POLAR_MODULE_CACHE_PATH)
+      list(APPEND polar_flags "-module-cache-path" "${POLAR_MODULE_CACHE_PATH}")
    endif()
 
    # Don't include libarclite in any build products by default.
-   list(APPEND polarphp_flags "-no-link-objc-runtime")
+   list(APPEND polar_flags "-no-link-objc-runtime")
 
-   if(POLARPHP_PIL_VERIFY_ALL)
-      list(APPEND polarphp_flags "-Xfrontend" "-sil-verify-all")
+   if(POLAR_PIL_VERIFY_ALL)
+      list(APPEND polar_flags "-Xfrontend" "-pil-verify-all")
    endif()
 
    # The standard library and overlays are always built resiliently.
-   if(POLARPHP_FILE_IS_STDLIB)
-      list(APPEND polarphp_flags "-enable-library-evolution")
-      list(APPEND polarphp_flags "-Xfrontend" "-enable-ownership-stripping-after-serialization")
+   if(POLARFILE_IS_STDLIB)
+      list(APPEND polar_flags "-enable-library-evolution")
+      list(APPEND polar_flags "-Xfrontend" "-enable-ownership-stripping-after-serialization")
    endif()
 
-   if(POLARPHP_STDLIB_USE_NONATOMIC_RC)
-      list(APPEND polarphp_flags "-Xfrontend" "-assume-single-threaded")
+   if(POLAR_STDLIB_USE_NONATOMIC_RC)
+      list(APPEND polar_flags "-Xfrontend" "-assume-single-threaded")
    endif()
 
-   if(NOT POLARPHP_ENABLE_STDLIBCORE_EXCLUSIVITY_CHECKING AND POLARPHP_FILE_IS_STDLIB)
-      list(APPEND polarphp_flags "-Xfrontend" "-enforce-exclusivity=unchecked")
+   if(NOT POLAR_ENABLE_STDLIBCORE_EXCLUSIVITY_CHECKING AND POLARFILE_IS_STDLIB)
+      list(APPEND polar_flags "-Xfrontend" "-enforce-exclusivity=unchecked")
    endif()
 
-   if(POLARPHP_EMIT_SORTED_PIL_OUTPUT)
-      list(APPEND polarphp_flags "-Xfrontend" "-emit-sorted-sil")
+   if(POLAR_EMIT_SORTED_PIL_OUTPUT)
+      list(APPEND polar_flags "-Xfrontend" "-emit-sorted-pil")
    endif()
 
    # FIXME: Cleaner way to do this?
-   if(POLARPHP_FILE_IS_STDLIB_CORE)
-      list(APPEND polarphp_flags
-         "-nostdimport" "-parse-stdlib" "-module-name" "Swift")
-      list(APPEND polarphp_flags "-Xfrontend" "-group-info-path"
+   if(POLARFILE_IS_STDLIB_CORE)
+      list(APPEND polar_flags
+         "-nostdimport" "-parse-stdlib" "-module-name" "Polar")
+      list(APPEND polar_flags "-Xfrontend" "-group-info-path"
          "-Xfrontend" "${GROUP_INFO_JSON_FILE}")
    else()
-      list(APPEND polarphp_flags "-module-name" "${POLARPHP_FILE_MODULE_NAME}")
+      list(APPEND polar_flags "-module-name" "${POLARFILE_MODULE_NAME}")
    endif()
 
    # Force swift 5 mode for Standard Library and overlays.
-   if (POLARPHP_FILE_IS_STDLIB)
-      list(APPEND polarphp_flags "-polarphp-version" "5")
+   if (POLARFILE_IS_STDLIB)
+      list(APPEND polar_flags "-polarphp-version" "5")
    endif()
-   if (POLARPHP_FILE_IS_SDK_OVERLAY)
-      list(APPEND polarphp_flags "-polarphp-version" "5")
+   if (POLARFILE_IS_SDK_OVERLAY)
+      list(APPEND polar_flags "-polarphp-version" "5")
    endif()
 
-   if(POLARPHP_FILE_IS_SDK_OVERLAY)
-      list(APPEND polarphp_flags "-autolink-force-load")
+   if(POLARFILE_IS_SDK_OVERLAY)
+      list(APPEND polar_flags "-autolink-force-load")
    endif()
 
    # Don't need to link runtime compatibility libraries for older runtimes
    # into the new runtime.
-   if (POLARPHP_FILE_IS_STDLIB OR POLARPHP_FILE_IS_SDK_OVERLAY)
-      list(APPEND polarphp_flags "-runtime-compatibility-version" "none")
-      list(APPEND polarphp_flags "-disable-autolinking-runtime-compatibility-dynamic-replacements")
+   if (POLARFILE_IS_STDLIB OR POLARFILE_IS_SDK_OVERLAY)
+      list(APPEND polar_flags "-runtime-compatibility-version" "none")
+      list(APPEND polar_flags "-disable-autolinking-runtime-compatibility-dynamic-replacements")
    endif()
 
-   list(APPEND polarphp_flags ${SWIFT_EXPERIMENTAL_EXTRA_FLAGS})
-
-   if(POLARPHP_FILE_OPT_FLAGS)
-      list(APPEND polarphp_flags ${POLARPHP_FILE_OPT_FLAGS})
+   if (POLARFILE_IS_STDLIB_CORE OR POLARFILE_IS_SDK_OVERLAY)
+      list(APPEND polar_flags "-warn-polarphp3-objc-inference-complete")
    endif()
 
-   list(APPEND polarphp_flags ${POLARPHP_FILE_FLAGS})
+   list(APPEND polar_flags ${POLAR_EXPERIMENTAL_EXTRA_FLAGS})
+
+   if(POLARFILE_OPT_FLAGS)
+      list(APPEND polar_flags ${POLARFILE_OPT_FLAGS})
+   endif()
+
+   list(APPEND polar_flags ${POLARFILE_FLAGS})
 
    set(dirs_to_create)
-   foreach(output ${POLARPHP_FILE_OUTPUT})
+   foreach(output ${POLARFILE_OUTPUT})
       get_filename_component(objdir "${output}" PATH)
       list(APPEND dirs_to_create "${objdir}")
    endforeach()
@@ -303,28 +295,28 @@ function(_polar_compile_typephp_files
    set(module_doc_file)
    set(interface_file)
 
-   if(NOT POLARPHP_FILE_IS_MAIN)
+   if(NOT POLARFILE_IS_MAIN)
       # Determine the directory where the module file should be placed.
-      if(POLARPHP_FILE_MODULE_DIR)
-         set(module_dir "${POLARPHP_FILE_MODULE_DIR}")
-      elseif(POLARPHP_FILE_IS_STDLIB)
-         set(module_dir "${POLARPHP_LIB_DIR}/${library_subdir}")
+      if(POLARFILE_MODULE_DIR)
+         set(module_dir "${POLARFILE_MODULE_DIR}")
+      elseif(POLARFILE_IS_STDLIB)
+         set(module_dir "${POLARLIB_DIR}/${library_subdir}")
       else()
          message(FATAL_ERROR "Don't know where to put the module files")
       endif()
 
-      list(APPEND polarphp_flags "-parse-as-library")
+      list(APPEND polar_flags "-parse-as-library")
 
-      set(module_base "${module_dir}/${POLARPHP_FILE_MODULE_NAME}")
-      if(POLARPHP_FILE_SDK IN_LIST SWIFT_APPLE_PLATFORMS)
-         set(specific_module_dir "${module_base}.phpmodule")
+      set(module_base "${module_dir}/${POLARFILE_MODULE_NAME}")
+      if(POLARFILE_SDK IN_LIST POLAR_APPLE_PLATFORMS)
+         set(specific_module_dir "${module_base}.swiftmodule")
          set(specific_module_project_dir "${specific_module_dir}/Project")
-         set(source_info_file "${specific_module_project_dir}/${POLARPHP_FILE_ARCHITECTURE}.phpsourceinfo")
-         set(module_base "${module_base}.phpmodule/${POLARPHP_FILE_ARCHITECTURE}")
+         set(source_info_file "${specific_module_project_dir}/${POLARFILE_ARCHITECTURE}.swiftsourceinfo")
+         set(module_base "${module_base}.phpmodule/${POLARFILE_ARCHITECTURE}")
       else()
          set(specific_module_dir)
          set(specific_module_project_dir)
-         set(source_info_file "${module_base}.phpsourceinfo")
+         set(source_info_file "${module_base}.swiftsourceinfo")
       endif()
       set(module_file "${module_base}.phpmodule")
       set(module_doc_file "${module_base}.phpdoc")
@@ -335,24 +327,24 @@ function(_polar_compile_typephp_files
       set(pibopt_file "${module_base}.O.pib")
       set(pibgen_file "${module_base}.pibgen")
 
-      if(SWIFT_ENABLE_MODULE_INTERFACES)
+      if(POLAR_ENABLE_MODULE_INTERFACES)
          set(interface_file "${module_base}.phpinterface")
-         list(APPEND polarphp_module_flags
+         list(APPEND polar_module_flags
             "-emit-module-interface-path" "${interface_file}")
       endif()
 
-      if (NOT POLARPHP_FILE_IS_STDLIB_CORE)
-         list(APPEND polarphp_module_flags
+      if (NOT POLARFILE_IS_STDLIB_CORE)
+         list(APPEND polar_module_flags
             "-Xfrontend" "-experimental-skip-non-inlinable-function-bodies")
       endif()
 
       # If we have extra regexp flags, check if we match any of the regexps. If so
-      # add the relevant flags to our polarphp_flags.
-      if (POLARPHP_EXPERIMENTAL_EXTRA_REGEXP_FLAGS OR POLARPHP_EXPERIMENTAL_EXTRA_NEGATIVE_REGEXP_FLAGS)
-         set(extra_polarphp_flags_for_module)
-         _add_extra_polarphp_flags_for_module("${POLARPHP_FILE_MODULE_NAME}" extra_polarphp_flags_for_module)
-         if (extra_polarphp_flags_for_module)
-            list(APPEND polarphp_flags ${extra_polarphp_flags_for_module})
+      # add the relevant flags to our polar_flags.
+      if (POLAR_EXPERIMENTAL_EXTRA_REGEXP_FLAGS OR POLAR_EXPERIMENTAL_EXTRA_NEGATIVE_REGEXP_FLAGS)
+         set(extra_polar_flags_for_module)
+         _add_extra_polar_flags_for_module("${POLARFILE_MODULE_NAME}" extra_polar_flags_for_module)
+         if (extra_polar_flags_for_module)
+            list(APPEND polar_flags ${extra_polar_flags_for_module})
          endif()
       endif()
    endif()
@@ -362,24 +354,24 @@ function(_polar_compile_typephp_files
       list(APPEND module_outputs "${interface_file}")
    endif()
 
-   if(POLARPHP_FILE_SDK IN_LIST POLARPHP_APPLE_PLATFORMS)
-      swift_install_in_component(DIRECTORY "${specific_module_dir}"
-         DESTINATION "lib${LLVM_LIBDIR_SUFFIX}/swift/${library_subdir}"
-         COMPONENT "${POLARPHP_FILE_INSTALL_IN_COMPONENT}"
+   if(POLARFILE_SDK IN_LIST POLAR_APPLE_PLATFORMS)
+      polar_install_in_component(DIRECTORY "${specific_module_dir}"
+         DESTINATION "lib${LLVM_LIBDIR_SUFFIX}/polarphp/${library_subdir}"
+         COMPONENT "${POLARFILE_INSTALL_IN_COMPONENT}"
          OPTIONAL
          PATTERN "Project" EXCLUDE)
    else()
-      swift_install_in_component(FILES ${module_outputs}
-         DESTINATION "lib${LLVM_LIBDIR_SUFFIX}/swift/${library_subdir}"
-         COMPONENT "${POLARPHP_FILE_INSTALL_IN_COMPONENT}")
+      polar_install_in_component(FILES ${module_outputs}
+         DESTINATION "lib${LLVM_LIBDIR_SUFFIX}/polarphp/${library_subdir}"
+         COMPONENT "${POLARFILE_INSTALL_IN_COMPONENT}")
    endif()
 
-   set(line_directive_tool "${POLARPHP_SOURCE_DIR}/utils/line-directive")
-   set(polarphp_compiler_tool "${POLARPHP_NATIVE_POLARPHP_TOOLS_PATH}/polarphp")
-   set(polarphp_compiler_tool_dep)
-   if(POLARPHP_INCLUDE_TOOLS)
+   set(line_directive_tool "${POLAR_SOURCE_DIR}/utils/line-directive")
+   set(polar_compiler_tool "${POLAR_NATIVE_POLAR_TOOLS_PATH}/polarphpc")
+   set(polar_compiler_tool_dep)
+   if(POLAR_INCLUDE_TOOLS)
       # Depend on the binary itself, in addition to the symlink.
-      set(polarphp_compiler_tool_dep "polarphp")
+      set(polar_compiler_tool_dep "polarphp")
    endif()
 
    # If there are more than one output files, we assume that they are specified
@@ -390,27 +382,27 @@ function(_polar_compile_typephp_files
    endif()
 
    set(embed_bitcode_option)
-   if (POLARPHP_FILE_EMBED_BITCODE)
+   if (POLARFILE_EMBED_BITCODE)
       set(embed_bitcode_option "-embed-bitcode")
    endif()
 
    set(main_command "-c")
-   if (POLARPHP_CHECK_INCREMENTAL_COMPILATION)
-      set(polarphp_compiler_tool "${SWIFT_SOURCE_DIR}/utils/check-incremental" "${polarphp_compiler_tool}")
+   if (POLAR_CHECK_INCREMENTAL_COMPILATION)
+      set(swift_compiler_tool "${POLAR_SOURCE_DIR}/utils/check-incremental" "${polar_compiler_tool}")
    endif()
 
-   if (POLARPHP_REPORT_STATISTICS)
+   if (POLAR_REPORT_STATISTICS)
       list(GET dirs_to_create 0 first_obj_dir)
-      list(APPEND polarphp_flags "-stats-output-dir" ${first_obj_dir})
+      list(APPEND polar_flags "-stats-output-dir" ${first_obj_dir})
    endif()
 
-   set(standard_outputs ${POLARPHP_FILE_OUTPUT})
+   set(standard_outputs ${POLARFILE_OUTPUT})
    set(pib_outputs "${pib_file}")
    set(pibopt_outputs "${pibopt_file}")
    set(pibgen_outputs "${pibgen_file}")
 
    if(XCODE)
-      # HACK: work around an issue with CMake Xcode generator and the polarphp
+      # HACK: work around an issue with CMake Xcode generator and the Swift
       # driver.
       #
       # The Swift driver does not update the mtime of the output files if the
@@ -460,10 +452,10 @@ function(_polar_compile_typephp_files
    #
    # See stdlib/CMakeLists.txt and TypeConverter::TypeConverter() in
    # lib/IRGen/GenType.cpp.
-   if(POLARPHP_FILE_IS_STDLIB_CORE)
-      set(POLARPHP_FILE_PLATFORM "${SWIFT_SDK_${POLARPHP_FILE_SDK}_LIB_SUBDIR}")
+   if(POLARFILE_IS_STDLIB_CORE)
+      set(POLARFILE_PLATFORM "${POLAR_SDK_${POLARFILE_SDK}_LIB_SUBDIR}")
       set(copy_legacy_layouts_dep
-         "copy-legacy-layouts-${POLARPHP_FILE_PLATFORM}-${POLARPHP_FILE_ARCHITECTURE}")
+         "copy-legacy-layouts-${POLARFILE_PLATFORM}-${POLARFILE_ARCHITECTURE}")
    else()
       set(copy_legacy_layouts_dep)
    endif()
@@ -472,14 +464,14 @@ function(_polar_compile_typephp_files
       dependency_target
       COMMAND
       "${PYTHON_EXECUTABLE}" "${line_directive_tool}" "@${file_path}" --
-      "${polarphp_compiler_tool}" "${main_command}" ${polarphp_flags}
+      "${polar_compiler_tool}" "${main_command}" ${polar_flags}
       ${output_option} ${embed_bitcode_option} "@${file_path}"
       ${command_touch_standard_outputs}
       OUTPUT ${standard_outputs}
       DEPENDS
-      ${polarphp_compiler_tool_dep}
-      ${file_path} ${source_files} ${POLARPHP_FILE_DEPENDS}
-      ${polarphp_ide_test_dependency}
+      ${polar_compiler_tool_dep}
+      ${file_path} ${source_files} ${POLARFILE_DEPENDS}
+      ${polar_ide_test_dependency}
       ${create_dirs_dependency_target}
       ${copy_legacy_layouts_dep}
       COMMENT "Compiling ${first_output}")
@@ -500,7 +492,7 @@ function(_polar_compile_typephp_files
    #
    # We only build these when we are not producing a main file. We could do this
    # with pib/pibgen, but it is useful for looking at the stdlib.
-   if (NOT POLARPHP_FILE_IS_MAIN)
+   if (NOT POLARFILE_IS_MAIN)
       add_custom_command_target(
          module_dependency_target
          COMMAND
@@ -511,15 +503,15 @@ function(_polar_compile_typephp_files
          ${specific_module_project_dir}
          COMMAND
          "${PYTHON_EXECUTABLE}" "${line_directive_tool}" "@${file_path}" --
-         "${polarphp_compiler_tool}" "-emit-module" "-o" "${module_file}"
+         "${polar_compiler_tool}" "-emit-module" "-o" "${module_file}"
          "-emit-module-source-info-path" "${source_info_file}"
-         ${polarphp_flags} ${polarphp_module_flags} "@${file_path}"
+         ${polar_flags} ${polar_module_flags} "@${file_path}"
          ${command_touch_module_outputs}
          OUTPUT ${module_outputs}
          DEPENDS
-         ${polarphp_compiler_tool_dep}
-         ${source_files} ${POLARPHP_FILE_DEPENDS}
-         ${polarphp_ide_test_dependency}
+         ${polar_compiler_tool_dep}
+         ${source_files} ${POLARFILE_DEPENDS}
+         ${polar_ide_test_dependency}
          ${create_dirs_dependency_target}
          COMMENT "Generating ${module_file}")
       set("${dependency_module_target_out_var_name}" "${module_dependency_target}" PARENT_SCOPE)
@@ -529,13 +521,13 @@ function(_polar_compile_typephp_files
          pib_dependency_target
          COMMAND
          "${PYTHON_EXECUTABLE}" "${line_directive_tool}" "@${file_path}" --
-         "${polarphp_compiler_tool}" "-emit-pib" "-o" "${pib_file}" ${polarphp_flags} -Onone
+         "${polar_compiler_tool}" "-emit-pib" "-o" "${pib_file}" ${polar_flags} -Onone
          "@${file_path}"
          ${command_touch_pib_outputs}
          OUTPUT ${pib_outputs}
          DEPENDS
-         ${polarphp_compiler_tool_dep}
-         ${source_files} ${POLARPHP_FILE_DEPENDS}
+         ${polar_compiler_tool_dep}
+         ${source_files} ${POLARFILE_DEPENDS}
          ${create_dirs_dependency_target}
          COMMENT "Generating ${pib_file}"
          EXCLUDE_FROM_ALL)
@@ -545,13 +537,13 @@ function(_polar_compile_typephp_files
          pibopt_dependency_target
          COMMAND
          "${PYTHON_EXECUTABLE}" "${line_directive_tool}" "@${file_path}" --
-         "${polarphp_compiler_tool}" "-emit-pib" "-o" "${pibopt_file}" ${polarphp_flags} -O
+         "${polar_compiler_tool}" "-emit-pib" "-o" "${pibopt_file}" ${polar_flags} -O
          "@${file_path}"
          ${command_touch_pibopt_outputs}
          OUTPUT ${pibopt_outputs}
          DEPENDS
-         ${polarphp_compiler_tool_dep}
-         ${source_files} ${POLARPHP_FILE_DEPENDS}
+         ${polar_compiler_tool_dep}
+         ${source_files} ${POLARFILE_DEPENDS}
          ${create_dirs_dependency_target}
          COMMENT "Generating ${pibopt_file}"
          EXCLUDE_FROM_ALL)
@@ -562,26 +554,25 @@ function(_polar_compile_typephp_files
          pibgen_dependency_target
          COMMAND
          "${PYTHON_EXECUTABLE}" "${line_directive_tool}" "@${file_path}" --
-         "${polarphp_compiler_tool}" "-emit-pibgen" "-o" "${pibgen_file}" ${polarphp_flags}
+         "${polar_compiler_tool}" "-emit-pibgen" "-o" "${pibgen_file}" ${polar_flags}
          "@${file_path}"
          ${command_touch_pibgen_outputs}
          OUTPUT ${pibgen_outputs}
          DEPENDS
-         ${polarphp_compiler_tool_dep}
-         ${source_files} ${POLARPHP_FILE_DEPENDS}
+         ${polar_compiler_tool_dep}
+         ${source_files} ${POLARFILE_DEPENDS}
          ${create_dirs_dependency_target}
          COMMENT "Generating ${pibgen_file}"
          EXCLUDE_FROM_ALL)
       set("${dependency_pibgen_target_out_var_name}" "${pibgen_dependency_target}" PARENT_SCOPE)
    endif()
+
+
    # Make sure the build system knows the file is a generated object file.
-   set_source_files_properties(${POLARPHP_FILE_OUTPUT}
+   set_source_files_properties(${POLARFILE_OUTPUT}
       PROPERTIES
       GENERATED true
       EXTERNAL_OBJECT true
       LANGUAGE C
       OBJECT_DEPENDS "${source_files}")
 endfunction()
-
-
-

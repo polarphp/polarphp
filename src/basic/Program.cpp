@@ -34,7 +34,6 @@
 
 namespace polar {
 
-
 int execute_in_place(const char *program, const char **args,
                      const char **env) {
 #if LLVM_ON_UNIX

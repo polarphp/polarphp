@@ -23,3 +23,9 @@ polar_add_library(PolarIndex
    PolarUtils
    PolarAST
    PolarIDE)
+
+polar_add_host_library(PolarIndex1 STATIC
+   ${POLARPHP_INDEX_SOURCES})
+
+target_link_libraries(PolarIndex1 PRIVATE PolarAST PolarIDE)
+

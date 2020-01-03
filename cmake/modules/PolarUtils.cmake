@@ -39,7 +39,6 @@ function(polar_precondition var)
    endif()
 endfunction()
 
-
 # Assert is 'NOT ${LHS} ${OP} ${RHS}' is true.
 function(polar_precondition_binary_op OP LHS RHS)
    cmake_parse_arguments(
@@ -391,3 +390,83 @@ macro(polar_detect_compiler_root_dir _targetDir)
    get_filename_component(_tempDir ${_tempDir} DIRECTORY)
    set(${_targetDir} ${_tempDir})
 endmacro()
+
+# There is no clear way of keeping track of compiler command-line
+# options chosen via `add_definitions'
+
+# Beware that there is no implementation of remove_llvm_definitions.
+
+macro(polar_add_definitions)
+   # We don't want no semicolons on POLAR_DEFINITIONS:
+   foreach(arg ${ARGN})
+      if(DEFINED POLAR_COMPILE_DEFINITIONS)
+         set(POLAR_COMPILE_DEFINITIONS "${POLAR_COMPILE_DEFINITIONS} ${arg}")
+      else()
+         set(POLAR_COMPILE_DEFINITIONS ${arg})
+      endif()
+   endforeach(arg)
+   add_definitions(${ARGN})
+endmacro(polar_add_definitions)
+
+# utils function for check
+
+macro(polar_check_headers)
+   foreach(_filename ${ARGV})
+      polar_generate_header_guard(${_filename} _guardName)
+      check_include_file(${_filename} ${_guardName})
+      if (${${_guardName}})
+         set(POLAR_${_guardName} ON)
+      endif()
+   endforeach()
+endmacro()
+
+macro(polar_check_funcs)
+   foreach(_func ${ARGV})
+      string(TOUPPER ${_func} upcase)
+      check_function_exists(${_func} HAVE_${upcase})
+      if (${HAVE_${upcase}})
+         set(POLAR_HAVE_${upcase} ON)
+      endif()
+   endforeach()
+endmacro()
+
+macro(polar_check_prog_awk)
+   find_program(POLOAR_PROGRAM_AWK awk NAMES gawk nawk mawk
+      PATHS /usr/xpg4/bin/)
+   if (NOT POLOAR_PROGRAM_AWK)
+      message(FATAL_ERROR "Could not find awk; Install GNU awk")
+   else()
+      if(POLOAR_PROGRAM_AWK MATCHES ".*mawk")
+         message(WARNING "mawk is known to have problems on some systems. You should install GNU awk")
+      else()
+         message(STATUS "checking wether ${POLOAR_PROGRAM_AWK} is broken")
+         execute_process(COMMAND ${POLOAR_PROGRAM_AWK} "function foo() {}" ">/dev/null 2>&1"
+            RESULT_VARIABLE _awkExecRet)
+         if (_awkExecRet)
+            message(FATAL_ERROR "You should install GNU awk")
+            unset(POLOAR_PROGRAM_AWK)
+         else()
+            message("${POLOAR_PROGRAM_AWK} is works")
+         endif()
+      endif()
+   endif()
+endmacro()
+
+
+# We need to execute this script at installation time because the
+# DESTDIR environment variable may be unset at configuration time.
+# See PR8397.
+
+function(polar_install_symlink name target outdir)
+   if(UNIX)
+      set(LINK_OR_COPY create_symlink)
+      set(DESTDIR $ENV{DESTDIR})
+   else()
+      set(LINK_OR_COPY copy)
+   endif()
+   set(bindir "${DESTDIR}${CMAKE_INSTALL_PREFIX}/${outdir}/")
+   message("Creating ${name}")
+   execute_process(
+      COMMAND "${CMAKE_COMMAND}" -E ${LINK_OR_COPY} "${target}" "${name}"
+      WORKING_DIRECTORY "${bindir}")
+endfunction()
