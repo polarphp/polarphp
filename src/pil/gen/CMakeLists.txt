@@ -18,6 +18,7 @@ polar_collect_files(
 
 polar_merge_list(POLAR_PIL_PILGEN_SOURCES POLAR_HEADERS)
 
-polar_add_library(PolarPILGen STATIC
-   ${POLAR_PIL_PILGEN_SOURCES}
-   LINK_LIBS PolarPIL)
+polar_add_host_library(PolarPILGen STATIC
+   ${POLAR_PIL_PILGEN_SOURCES})
+
+target_link_libraries(PolarPILGen PRIVATE PolarPIL)

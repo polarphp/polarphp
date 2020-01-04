@@ -15,7 +15,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "polarphp/ast/PlatformKind.h"
-#include "polarphp/kernel/LangOptions.h"
+#include "polarphp/basic/LangOptions.h"
 #include "llvm/ADT/StringSwitch.h"
 #include "llvm/Support/ErrorHandling.h"
 

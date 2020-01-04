@@ -172,8 +172,8 @@ class ModuleDepGraph {
 
    std::unordered_set<std::string> cascadingJobs;
 
-   /// Keyed by swiftdeps filename, so we can get back to Jobs.
-   std::unordered_map<std::string, const driver::Job *> jobsBySwiftDeps;
+   /// Keyed by phpdeps filename, so we can get back to Jobs.
+   std::unordered_map<std::string, const driver::Job *> jobsByPHPDeps;
 
    /// For debugging, a dot file can be emitted. This file can be read into
    /// various graph-drawing programs.
@@ -239,10 +239,10 @@ class ModuleDepGraph {
 
    const driver::Job *getJob(Optional<std::string> phpDeps) const {
       assert(phpDeps.hasValue() && "Don't call me for expats.");
-      auto iter = jobsBySwiftDeps.find(phpDeps.getValue());
-      assert(iter != jobsBySwiftDeps.end() && "All jobs should be tracked.");
+      auto iter = jobsByPHPDeps.find(phpDeps.getValue());
+      assert(iter != jobsByPHPDeps.end() && "All jobs should be tracked.");
       assert(getPHPDeps(iter->second) == phpDeps.getValue() &&
-             "jobsBySwiftDeps should be inverse of getPHPDeps.");
+             "jobsByPHPDeps should be inverse of getPHPDeps.");
       return iter->second;
    }
 

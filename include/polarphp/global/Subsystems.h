@@ -20,7 +20,7 @@
 #include "polarphp/basic/LLVM.h"
 #include "polarphp/basic/OptionSet.h"
 #include "polarphp/basic/PrimarySpecificPaths.h"
-#include "polarphp/kernel/Version.h"
+#include "polarphp/basic/Version.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/Optional.h"

@@ -217,7 +217,7 @@ static void addCommonFrontendArgs(const ToolChain &TC, const OutputInfo &OI,
    inputArgs.AddLastArg(arguments, options::OPT_sanitize_recover_EQ);
    inputArgs.AddLastArg(arguments, options::OPT_sanitize_coverage_EQ);
    inputArgs.AddLastArg(arguments, options::OPT_static);
-   inputArgs.AddLastArg(arguments, options::OPT_php_version);
+   inputArgs.AddLastArg(arguments, options::OPT_polarphp_version);
    inputArgs.AddLastArg(arguments, options::OPT_enforce_exclusivity_EQ);
    inputArgs.AddLastArg(arguments, options::OPT_stats_output_dir);
    inputArgs.AddLastArg(arguments, options::OPT_trace_stats_events);

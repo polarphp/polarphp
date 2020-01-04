@@ -24,7 +24,7 @@
 #include "polarphp/ast/Type.h"
 #include "polarphp/ast/Types.h"
 #include "polarphp/ast/TypeAlignments.h"
-#include "polarphp/kernel/LangOptions.h"
+#include "polarphp/basic/LangOptions.h"
 #include "polarphp/basic/Malloc.h"
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/DenseMap.h"

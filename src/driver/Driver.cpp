@@ -26,7 +26,7 @@
 #include "polarphp/basic/Range.h"
 #include "polarphp/basic/Statistic.h"
 #include "polarphp/basic/TaskQueue.h"
-#include "polarphp/kernel/Version.h"
+#include "polarphp/basic/Version.h"
 #include "polarphp/driver/Action.h"
 #include "polarphp/driver/Compilation.h"
 #include "polarphp/driver/Job.h"

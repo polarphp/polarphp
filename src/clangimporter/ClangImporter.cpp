@@ -33,7 +33,7 @@
 #include "polarphp/basic/Platform.h"
 #include "polarphp/basic/Range.h"
 #include "polarphp/basic/StringExtras.h"
-#include "polarphp/kernel/Version.h"
+#include "polarphp/basic/Version.h"
 #include "polarphp/demangling/Demangle.h"
 
 #include "polarphp/global/Config.h"
@@ -808,8 +808,8 @@ bool ClangImporter::canReadPCH(StringRef PCHFilename) {
    // constructor and the right one for reading a PCH.
    CI.createPreprocessor(clang::TU_Complete);
    CI.createASTContext();
-   CI.createASTReader();
-   clang::ASTReader &Reader = *CI.getASTReader();
+   CI.createModuleManager();
+   auto &Reader = *CI.getModuleManager();
 
    auto failureCapabilities =
       clang::ASTReader::ARR_Missing |
@@ -1096,7 +1096,7 @@ ClangImporter::create(AstContext &ctx, const ClangImporterOptions &importerOpts,
    auto ppTracker = std::make_unique<BridgingPPTracker>(importer->Impl);
    clangPP.addPPCallbacks(std::move(ppTracker));
 
-   instance.createASTReader();
+   instance.createModuleManager();
 
    // Manually run the action, so that the TU stays open for additional parsing.
    instance.createSema(action->getTranslationUnitKind(), nullptr);
@@ -1832,7 +1832,7 @@ ModuleDecl *ClangImporter::Implementation::finishLoadingClangModule(
 // finishLoadingClangModule on each.
 void ClangImporter::Implementation::handleDeferredImports()
 {
-   clang::ASTReader &R = *Instance->getASTReader();
+   auto &R = *Instance->getModuleManager();
    llvm::SmallSet<clang::serialization::SubmoduleID, 32> seenSubmodules;
    for (clang::serialization::SubmoduleID ID : PCHImportedSubmodules) {
       if (!seenSubmodules.insert(ID).second)
@@ -3234,7 +3234,7 @@ Decl *ClangImporter::importDeclCached(const clang::NamedDecl *ClangDecl) {
 }
 
 void ClangImporter::printStatistics() const {
-   Impl.Instance->getASTReader()->PrintStats();
+   Impl.Instance->getModuleManager()->PrintStats();
 }
 
 void ClangImporter::verifyAllModules() {

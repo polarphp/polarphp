@@ -18,9 +18,12 @@ polar_collect_files(
 
 polar_merge_list(POLAR_PIL_LANG_SOURCES POLAR_HEADERS)
 
-polar_add_library(PolarPIL STATIC
-   ${POLAR_PIL_LANG_SOURCES}
-   LINK_LIBS PolarUtils PolarKernel PolarAST)
+polar_add_host_library(PolarPIL STATIC
+   ${POLAR_PIL_LANG_SOURCES})
+
+target_link_libraries(PolarPIL PRIVATE
+   PolarSema
+   PolarSerialization)
 
 set_target_properties(
    PolarPIL

@@ -18,6 +18,11 @@ polar_collect_files(
 
 polar_merge_list(POLAR_DEMANGLING_SOURCES POLAR_HEADERS)
 
-polar_add_library(PolarDemangling STATIC
-   ${POLAR_DEMANGLING_SOURCES}
-   LINK_LIBS PolarUtils PolarKernel)
+polar_add_host_library(PolarDemangling STATIC
+   ${POLAR_DEMANGLING_SOURCES})
+
+target_compile_definitions(PolarDemangling PRIVATE
+   LLVM_DISABLE_ABI_BREAKING_CHECKS_ENFORCING=1)
+
+target_link_libraries(PolarDemangling PRIVATE
+   PolarUtils PolarKernel)

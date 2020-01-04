@@ -18,7 +18,7 @@
 #include "polarphp/llparser/Lexer.h"
 #include "polarphp/ast/DiagnosticsParse.h"
 #include "polarphp/ast/Identifier.h"
-#include "polarphp/kernel/LangOptions.h"
+#include "polarphp/basic/LangOptions.h"
 #include "polarphp/basic/SourceMgr.h"
 #include "llvm/Support/Compiler.h"
 #include "llvm/Support/MathExtras.h"

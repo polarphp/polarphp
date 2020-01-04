@@ -20,7 +20,7 @@
 #include "polarphp/clangimporter/internal/ImportEnumInfo.h"
 #include "polarphp/clangimporter/internal/PolarphpLookupTable.h"
 #include "polarphp/basic/StringExtras.h"
-#include "polarphp/kernel/Version.h"
+#include "polarphp/basic/Version.h"
 #include "polarphp/ast/AstContext.h"
 #include "polarphp/ast/Decl.h"
 #include "polarphp/ast/ForeignErrorConvention.h"

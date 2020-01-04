@@ -157,7 +157,7 @@ static bool ParseFrontendArgs(
    return converter.convert(buffers);
 }
 
-static void diagnosePHPVersion(std::optional<version::Version> &vers, Arg *verArg,
+static void diagnosePHPVersion(llvm::Optional<version::Version> &vers, Arg *verArg,
                                  ArgList &Args, DiagnosticEngine &diags) {
    // General invalid version error
    diags.diagnose(SourceLoc(), diag::error_invalid_arg_value,
@@ -253,13 +253,13 @@ static bool ParseLangArgs(LangOptions &Opts, ArgList &Args,
    using namespace options;
    bool HadError = false;
 
-   if (auto A = Args.getLastArg(OPT_php_version)) {
+   if (auto A = Args.getLastArg(OPT_polarphp_version)) {
       auto vers = version::Version::parseVersionString(
          A->getValue(), SourceLoc(), &Diags);
       bool isValid = false;
-      if (vers.has_value()) {
-         if (auto effectiveVers = vers.value().getEffectiveLanguageVersion()) {
-            Opts.EffectiveLanguageVersion = effectiveVers.value();
+      if (vers.hasValue()) {
+         if (auto effectiveVers = vers.getValue().getEffectiveLanguageVersion()) {
+            Opts.EffectiveLanguageVersion = effectiveVers.getValue();
             isValid = true;
          }
       }
@@ -270,8 +270,8 @@ static bool ParseLangArgs(LangOptions &Opts, ArgList &Args,
    if (auto A = Args.getLastArg(OPT_package_description_version)) {
       auto vers = version::Version::parseVersionString(
          A->getValue(), SourceLoc(), &Diags);
-      if (vers.has_value()) {
-         Opts.PackageDescriptionVersion = vers.value();
+      if (vers.hasValue()) {
+         Opts.PackageDescriptionVersion = vers.getValue();
       } else {
          return true;
       }
@@ -624,7 +624,7 @@ static bool ParseClangImporterArgs(ClangImporterOptions &Opts,
 
    if (auto *A = Args.getLastArg(OPT_import_objc_header))
       Opts.BridgingHeader = A->getValue();
-   Opts.DisableSwiftBridgeAttr |= Args.hasArg(OPT_disable_php_bridge_attr);
+//   Opts.DisableSwiftBridgeAttr |= Args.hasArg(OPT_disable_php_bridge_attr);
 
    Opts.DisableOverlayModules |= Args.hasArg(OPT_emit_imported_modules);
 

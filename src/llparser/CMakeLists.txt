@@ -15,7 +15,8 @@ polar_collect_files(
    OUTPUT_VAR POLAR_LLPARSER_SOURCES)
 polar_merge_list(POLAR_LLPARSER_SOURCES POLAR_HEADERS)
 
-polar_add_library(PolarLLParser
+polar_add_host_library(PolarLLParser STATIC
    ${POLAR_LLPARSER_SOURCES}
-   LINK_LIBS PolarBasic PolarUtils PolarGlobal PolarKernel
-   LLVMBitstreamReader)
+   )
+
+target_link_libraries(PolarLLParser PolarAST LLVMBitstreamReader)

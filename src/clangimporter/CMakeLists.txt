@@ -16,6 +16,8 @@ polar_collect_files(
 
 polar_merge_list(POLARPHP_CLANG_IMPORTER_SOURCES POLAR_HEADERS)
 
-polar_add_library(PolarClangImporter STATIC
-   ${POLARPHP_CLANG_IMPORTER_SOURCES}
-   LINK_LIBS PolarUtils PolarKernel PolarPIL)
+polar_add_host_library(PolarClangImporter STATIC
+   ${POLARPHP_CLANG_IMPORTER_SOURCES})
+
+target_link_libraries(PolarClangImporter
+   PRIVATE PolarUtils PolarKernel PolarPIL)

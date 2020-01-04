@@ -19,7 +19,7 @@
 #define POLARPHP_KERNEL_LANGOPTIONS_H
 
 #include "polarphp/basic/CycleDiagnosticKind.h"
-#include "polarphp/kernel/Version.h"
+#include "polarphp/basic/Version.h"
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/Hashing.h"
 #include "llvm/ADT/SmallVector.h"

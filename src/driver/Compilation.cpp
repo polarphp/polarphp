@@ -13,16 +13,13 @@
 #include "polarphp/driver/Compilation.h"
 #include "polarphp/driver/internal/CompilationRecord.h"
 
-#include "polarphp/kernel/Version.h"
+#include "polarphp/basic/Version.h"
 #include "polarphp/ast/DiagnosticEngine.h"
 #include "polarphp/ast/DiagnosticsDriver.h"
-#include "polarphp/ast/FineGrainedDependencies.h"
-#include "polarphp/basic/OutputFileMap.h"
 #include "polarphp/basic/Program.h"
 #include "polarphp/basic/StlExtras.h"
 #include "polarphp/basic/Statistic.h"
 #include "polarphp/basic/TaskQueue.h"
-#include "polarphp/kernel/Version.h"
 #include "polarphp/driver/Action.h"
 #include "polarphp/driver/DependencyGraph.h"
 #include "polarphp/driver/Driver.h"
@@ -978,9 +975,9 @@ private:
    dumpSourceRangeInfo(const incremental_ranges::SourceRangeBasedInfo &info) {
       const bool dumpCompiledSourceDiffs =
          Comp.getArgs().hasArg(options::OPT_driver_dump_compiled_source_diffs);
-      const bool dumpSwiftRanges =
+      const bool dumpPHPRanges =
          Comp.getArgs().hasArg(options::OPT_driver_dump_php_ranges);
-      info.dump(dumpCompiledSourceDiffs, dumpSwiftRanges);
+      info.dump(dumpCompiledSourceDiffs, dumpPHPRanges);
    }
 
    /// Return whether job should be scheduled when using dependencies, and if

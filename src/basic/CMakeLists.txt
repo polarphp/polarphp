@@ -58,8 +58,12 @@ polar_add_host_library(PolarBasic STATIC
    ${POLARPHP_BASIC_SOURCES}
    )
 
+target_include_directories(PolarBasic PRIVATE
+  ${UUID_INCLUDE})
+
 target_link_libraries(PolarBasic
    PolarGlobal
+   ${UUID_LIBRARIES}
    nlohmann_json::nlohmann_json
    LLVMSupport
    LLVMCore)
@@ -75,3 +79,5 @@ add_dependencies(PolarBasic
    clang-project
    thirdparty_cli11
 )
+
+

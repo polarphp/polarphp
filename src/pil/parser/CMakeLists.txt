@@ -18,6 +18,7 @@ polar_collect_files(
 
 polar_merge_list(POLAR_PIL_PARSER_SOURCES POLAR_HEADERS)
 
-polar_add_library(PolarPILParser STATIC
-   ${POLAR_PIL_PARSER_SOURCES}
-   LINK_LIBS PolarPIL PolarSema)
+polar_add_host_library(PolarPILParser STATIC
+   ${POLAR_PIL_PARSER_SOURCES})
+
+target_link_libraries(PolarPILParser PRIVATE PolarPIL PolarSema)

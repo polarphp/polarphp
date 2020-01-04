@@ -16,14 +16,21 @@ polar_collect_files(
 
 polar_merge_list(POLARPHP_IMMEDIATE_SOURCES POLAR_HEADERS)
 
-polar_add_library(PolarImmediate
+polar_add_host_library(PolarImmediate STATIC
    ${POLARPHP_IMMEDIATE_SOURCES}
-   LINK_LIBS
-   LLVMExecutionEngine
-   LLVMLinker
-   LLVMTransformUtils
-   LLVMMCJIT
+   LLVM_LINK_COMPONENTS
+   executionengine
+   linker
+   mcjit
+   transformutils
+   #   ExecutionEngine
+   #   Linker
+   #   TransformUtils
+   #   MCJIT
+   )
 
+target_link_libraries(PolarImmediate
+   PRIVATE
    PolarBasic
    PolarUtils
    PolarIRGen
@@ -31,3 +38,7 @@ polar_add_library(PolarImmediate
    PolarIDE
    PolarFrontend
    PolarPILOptimizer)
+
+if(HAVE_UNICODE_LIBEDIT)
+   target_link_libraries(PolarImmediate PRIVATE edit)
+endif()

@@ -18,6 +18,15 @@ polar_collect_files(
 
 polar_merge_list(POLAR_SEMA_SOURCES POLAR_HEADERS)
 
-polar_add_library(PolarSema STATIC
+if (POLAR_FORCE_OPTIMIZED_TYPECHECKER)
+   set(EXTRA_TYPECHECKER_FLAGS "FORCE_BUILD_OPTIMIZED")
+endif()
+
+polar_add_host_library(PolarSema STATIC
    ${POLAR_SEMA_SOURCES}
-   LINK_LIBS PolarUtils PolarKernel PolarAST PolarLLParser)
+   ${EXTRA_TYPECHECKER_FLAGS})
+
+target_link_libraries(PolarSema PRIVATE
+   PolarAST
+   PolarLLParser
+   PolarSerialization)

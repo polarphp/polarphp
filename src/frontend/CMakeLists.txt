@@ -18,9 +18,14 @@ polar_collect_files(
 
 polar_merge_list(POLAR_FRONTEND_SOURCES POLAR_HEADERS)
 
-polar_add_library(PolarFrontend STATIC
-   ${POLAR_FRONTEND_SOURCES}
-   LINK_LIBS PolarUtils PolarKernel
-   PolarPIL PolarOption PolarPILParser
-   PolarPILGen PolarPILOptimizer PolarSema
+polar_add_host_library(PolarFrontend STATIC
+   ${POLAR_FRONTEND_SOURCES})
+
+target_link_libraries(PolarFrontend PRIVATE
+   PolarPIL
+   PolarOption
+   PolarPILParser
+   PolarPILGen
+   PolarPILOptimizer
+   PolarSema
    PolarSerialization)

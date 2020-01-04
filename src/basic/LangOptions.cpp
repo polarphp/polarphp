@@ -9,7 +9,7 @@
 //
 // Created by polarboy on 2019/06/13.
 
-#include "polarphp/kernel/LangOptions.h"
+#include "polarphp/basic/LangOptions.h"
 #include "polarphp/basic/Platform.h"
 #include "polarphp/basic/Range.h"
 #include "polarphp/global/Config.h"

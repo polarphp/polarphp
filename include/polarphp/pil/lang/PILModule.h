@@ -21,7 +21,7 @@
 #include "polarphp/ast/BuiltinTypes.h"
 #include "polarphp/ast/PILLayout.h"
 #include "polarphp/ast/PILOptions.h"
-#include "polarphp/kernel/LangOptions.h"
+#include "polarphp/basic/LangOptions.h"
 #include "polarphp/basic/ProfileCounter.h"
 #include "polarphp/basic/Range.h"
 #include "polarphp/pil/lang/Notifications.h"

@@ -19,8 +19,8 @@
 #include "polarphp/ast/ASTVisitor.h"
 #include "polarphp/ast/DiagnosticSuppression.h"
 #include "polarphp/basic/Defer.h"
-#include "polarphp/kernel/Version.h"
-#include "polarphp/kernel/LangOptions.h"
+#include "polarphp/basic/Version.h"
+#include "polarphp/basic/LangOptions.h"
 #include "polarphp/llparser/Lexer.h"
 //#include "polarphp/llparser/SyntaxParsingContext.h"
 //#include "polarphp/syntax/SyntaxFactory.h"
@@ -237,7 +237,7 @@ public:
 
          auto Val = version::Version::parseCompilerVersionString(
             SLE->getValue(), SLE->getLoc(), &D);
-         if (!Val.has_value())
+         if (!Val.hasValue())
             return nullptr;
          return E;
       }
@@ -257,7 +257,7 @@ public:
          auto versionString = extractExprSource(Ctx.SourceMgr, PUE->getArg());
          auto Val = version::Version::parseVersionString(
             versionString, PUE->getArg()->getStartLoc(), &D);
-         if (!Val.has_value())
+         if (!Val.hasValue())
             return nullptr;
          return E;
       }
@@ -414,16 +414,16 @@ public:
       if (KindName == "_compiler_version") {
          auto Str = cast<StringLiteralExpr>(Arg)->getValue();
          auto Val = version::Version::parseCompilerVersionString(
-            Str, SourceLoc(), nullptr).value();
+            Str, SourceLoc(), nullptr).getValue();
          auto thisVersion = version::Version::getCurrentCompilerVersion();
          return thisVersion >= Val;
-      } else if ((KindName == "swift") || (KindName == "compiler")) {
+      } else if ((KindName == "polarphp") || (KindName == "compiler")) {
          auto PUE = cast<PrefixUnaryExpr>(Arg);
          auto PrefixName = getDeclRefStr(PUE->getFn());
          auto Str = extractExprSource(Ctx.SourceMgr, PUE->getArg());
          auto Val = version::Version::parseVersionString(
-            Str, SourceLoc(), nullptr).value();
-         if (KindName == "swift") {
+            Str, SourceLoc(), nullptr).getValue();
+         if (KindName == "polarphp") {
             return isValidVersion(Ctx.LangOpts.EffectiveLanguageVersion, Val,
                                   PrefixName);
          } else if (KindName == "compiler") {
@@ -491,7 +491,7 @@ public:
 
    bool visitCallExpr(CallExpr *E) {
       auto KindName = getDeclRefStr(E->getFn());
-      return KindName == "_compiler_version" || KindName == "swift" ||
+      return KindName == "_compiler_version" || KindName == "polarphp" ||
              KindName == "compiler";
    }
 

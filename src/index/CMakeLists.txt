@@ -16,16 +16,10 @@ polar_collect_files(
 
 polar_merge_list(POLARPHP_INDEX_SOURCES POLAR_HEADERS)
 
-polar_add_library(PolarIndex
-   ${POLARPHP_INDEX_SOURCES}
-   LINK_LIBS
-   PolarBasic
-   PolarUtils
-   PolarAST
-   PolarIDE)
-
-polar_add_host_library(PolarIndex1 STATIC
+polar_add_host_library(PolarIndex STATIC
    ${POLARPHP_INDEX_SOURCES})
 
-target_link_libraries(PolarIndex1 PRIVATE PolarAST PolarIDE)
+target_link_libraries(PolarIndex PRIVATE
+   PolarAST
+   PolarIDE)
 

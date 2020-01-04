@@ -16,6 +16,7 @@ polar_collect_files(
 
 polar_merge_list(POLAR_TBGEN_SOURCES POLAR_HEADERS)
 
-polar_add_library(PolarTBDGen STATIC
-   ${POLAR_TBGEN_SOURCES}
-   LINK_LIBS PolarUtils PolarKernel PolarAST PolarPIL)
+polar_add_host_library(PolarTBDGen STATIC
+   ${POLAR_TBGEN_SOURCES})
+
+target_link_libraries(PolarTBDGen PRIVATE PolarAST PolarPIL)

@@ -10,7 +10,7 @@
 //
 //===----------------------------------------------------------------------===//
 //
-//  This file defines the options accepted by the swift driver.
+//  This file defines the options accepted by the polarphp driver.
 //
 //===----------------------------------------------------------------------===//
 
@@ -20,23 +20,23 @@ include "llvm/Option/OptParser.td"
 /////////
 // Flags
 
-// The option should be accepted by swift -frontend.
+// The option should be accepted by polarphp -frontend.
 def FrontendOption : OptionFlag;
 
-// The option should be accepted by swift-autolink-extract
+// The option should be accepted by polarphp-autolink-extract
 def AutolinkExtractOption : OptionFlag;
 
-// The option should be accepted by swift -modulewrap
+// The option should be accepted by polarphp -modulewrap
 def ModuleWrapOption : OptionFlag;
 
-// The option should be accepted by swift-indent
-def SwiftIndentOption : OptionFlag;
+// The option should be accepted by polarphp-indent
+def PolarphpIndentOption : OptionFlag;
 
 // The option should not be accepted by the driver.
 def NoDriverOption : OptionFlag;
 
 // Some options should not be available depending on whether this is the
-// interactive driver 'swift', or the batch compiler 'swiftc'.
+// interactive driver 'polarphp', or the batch compiler 'polarphpc'.
 def NoInteractiveOption : OptionFlag;
 def NoBatchOption : OptionFlag;
 
@@ -47,15 +47,15 @@ def DoesNotAffectIncrementalBuild : OptionFlag;
 // current working directory.
 def ArgumentIsPath : OptionFlag;
 
-// The option should be written into a .swiftinterface module interface file,
-// and read/parsed from there when reconstituting a .swiftmodule from it.
+// The option should be written into a .phpinterface module interface file,
+// and read/parsed from there when reconstituting a .phpmodule from it.
 def ModuleInterfaceOption : OptionFlag;
 
 /////////
 // Options
 
 // The internal option ID must be a valid C++ identifier and results in a
-// swift::driver::options::OPT_XX enum constant for XX.
+// polar::driver::options::OPT_XX enum constant for XX.
 //
 // We want to unambiguously be able to refer to options from the driver source
 // code, for this reason the option name is mangled into an ID. This mangling
@@ -73,9 +73,9 @@ def ModuleInterfaceOption : OptionFlag;
 //   C++ => CXX
 //   . => _
 
-def internal_Group : OptionGroup<"<swift internal options>">;
+def internal_Group : OptionGroup<"<polarphp internal options>">;
 def internal_debug_Group :
-  OptionGroup<"<swift debug/development internal options>">,
+  OptionGroup<"<polarphp debug/development internal options>">,
   Group<internal_Group>, HelpText<"DEBUG/DEVELOPMENT OPTIONS">;
 
 class InternalDebugOpt : Group<internal_debug_Group>,
@@ -104,7 +104,7 @@ def driver_show_incremental : Flag<["-"], "driver-show-incremental">,
 def driver_show_job_lifecycle : Flag<["-"], "driver-show-job-lifecycle">,
   InternalDebugOpt,
   HelpText<"Show every step in the lifecycle of driver jobs">;
-def driver_dump_swift_ranges : Flag<["-"], "driver-dump-swift-ranges">,
+def driver_dump_php_ranges : Flag<["-"], "driver-dump-polarphp-ranges">,
   InternalDebugOpt,
   HelpText<"Show the unparsed ranges read upon startup">;
 def driver_dump_compiled_source_diffs : Flag<["-"], "driver-dump-compiled-source-diffs">,
@@ -166,7 +166,7 @@ HelpText<"Debug DriverGraph by verifying it after every import">;
 def driver_emit_fine_grained_dependency_dot_file_after_every_import :
 Flag<["-"], "driver-emit-fine-grained-dependency-dot-file-after-every-import">,
 InternalDebugOpt,
-HelpText<"Emit dot files every time driver imports an fine-grained swiftdeps file.">;
+HelpText<"Emit dot files every time driver imports an fine-grained phpdeps file.">;
 
 def fine_grained_dependency_include_intrafile :
 Flag<["-"], "fine-grained-dependency-include-intrafile">,
@@ -174,10 +174,10 @@ InternalDebugOpt,
 HelpText<"Include within-file dependencies.">;
 
 def driver_mode : Joined<["--"], "driver-mode=">, Flags<[HelpHidden]>,
-  HelpText<"Set the driver mode to either 'swift' or 'swiftc'">;
+  HelpText<"Set the driver mode to either 'polarphp' or 'polarphpc'">;
 
 def help : Flag<["-", "--"], "help">,
-  Flags<[FrontendOption, AutolinkExtractOption, ModuleWrapOption, SwiftIndentOption]>,
+  Flags<[FrontendOption, AutolinkExtractOption, ModuleWrapOption, PolarphpIndentOption]>,
   HelpText<"Display available options">;
 def h : Flag<["-"], "h">, Alias<help>;
 def help_hidden : Flag<["-", "--"], "help-hidden">,
@@ -199,7 +199,7 @@ def _DASH_DASH : Option<["--"], "", KIND_REMAINING_ARGS>,
 
 def o : JoinedOrSeparate<["-"], "o">,
   Flags<[FrontendOption, AutolinkExtractOption, ModuleWrapOption,
-         NoInteractiveOption, SwiftIndentOption, ArgumentIsPath]>,
+         NoInteractiveOption, PolarphpIndentOption, ArgumentIsPath]>,
   HelpText<"Write output to <file>">, MetaVarName<"<file>">;
 
 def j : JoinedOrSeparate<["-"], "j">, Flags<[DoesNotAffectIncrementalBuild]>,
@@ -208,8 +208,8 @@ def j : JoinedOrSeparate<["-"], "j">, Flags<[DoesNotAffectIncrementalBuild]>,
 def sdk : Separate<["-"], "sdk">, Flags<[FrontendOption, ArgumentIsPath]>,
   HelpText<"Compile against <sdk>">, MetaVarName<"<sdk>">;
 
-def swift_version : Separate<["-"], "swift-version">, Flags<[FrontendOption, ModuleInterfaceOption]>,
-  HelpText<"Interpret input according to a specific Swift language version number">,
+def polarphp_version : Separate<["-"], "polarphp-version">, Flags<[FrontendOption, ModuleInterfaceOption]>,
+  HelpText<"Interpret input according to a specific polarphp language version number">,
   MetaVarName<"<vers>">;
 
 def package_description_version: Separate<["-"], "package-description-version">,
@@ -282,7 +282,7 @@ def trace_stats_events: Flag<["-"], "trace-stats-events">,
 def experimental_skip_non_inlinable_function_bodies:
   Flag<["-"], "experimental-skip-non-inlinable-function-bodies">,
   Flags<[FrontendOption, HelpHidden]>,
-  HelpText<"Skip type-checking and SIL generation for non-inlinable function bodies">;
+  HelpText<"Skip type-checking and PIL generation for non-inlinable function bodies">;
 def profile_stats_events: Flag<["-"], "profile-stats-events">,
   Flags<[FrontendOption, HelpHidden]>,
   HelpText<"Profile changes to stats in -stats-output-dir">;
@@ -437,9 +437,9 @@ def value_recursion_threshold : Separate<["-"], "value-recursion-threshold">,
   Flags<[FrontendOption, HelpHidden, DoesNotAffectIncrementalBuild]>,
   HelpText<"Set the maximum depth for direct recursion in value types">;
 
-def disable_swift_bridge_attr : Flag<["-"], "disable-swift-bridge-attr">,
+def disable_polarphp_bridge_attr : Flag<["-"], "disable-polarphp-bridge-attr">,
   Flags<[FrontendOption, HelpHidden]>,
-  HelpText<"Disable using the swift bridge attribute">;
+  HelpText<"Disable using the polarphp bridge attribute">;
 
 def enable_bridging_pch : Flag<["-"], "enable-bridging-pch">,
   Flags<[HelpHidden]>,
@@ -467,15 +467,15 @@ def continue_building_after_errors : Flag<["-"], "continue-building-after-errors
   Flags<[FrontendOption, DoesNotAffectIncrementalBuild]>,
   HelpText<"Continue building, even after errors are encountered">;
 
-def warn_swift3_objc_inference_complete :
-  Flag<["-"], "warn-swift3-objc-inference-complete">,
+def warn_polarphp3_objc_inference_complete :
+  Flag<["-"], "warn-polarphp3-objc-inference-complete">,
   Flags<[FrontendOption, DoesNotAffectIncrementalBuild]>,
-  HelpText<"Warn about deprecated @objc inference in Swift 3 for every declaration that will no longer be inferred as @objc in Swift 4">;
+  HelpText<"Warn about deprecated @objc inference in polarphp 3 for every declaration that will no longer be inferred as @objc in polarphp 4">;
 
-def warn_swift3_objc_inference_minimal :
-  Flag<["-"], "warn-swift3-objc-inference-minimal">,
+def warn_polarphp3_objc_inference_minimal :
+  Flag<["-"], "warn-polarphp3-objc-inference-minimal">,
   Flags<[FrontendOption, DoesNotAffectIncrementalBuild]>,
-  HelpText<"Warn about deprecated @objc inference in Swift 3 based on direct uses of the Objective-C entrypoint">;
+  HelpText<"Warn about deprecated @objc inference in polarphp 3 based on direct uses of the Objective-C entrypoint">;
 
 def warn_implicit_overrides :
   Flag<["-"], "warn-implicit-overrides">,
@@ -487,8 +487,8 @@ def typo_correction_limit : Separate<["-"], "typo-correction-limit">,
   MetaVarName<"<n>">,
   HelpText<"Limit the number of times the compiler will attempt typo correction to <n>">;
 
-def warn_swift3_objc_inference : Flag<["-"], "warn-swift3-objc-inference">,
-  Alias<warn_swift3_objc_inference_complete>,
+def warn_polarphp3_objc_inference : Flag<["-"], "warn-polarphp3-objc-inference">,
+  Alias<warn_polarphp3_objc_inference_complete>,
   Flags<[FrontendOption, DoesNotAffectIncrementalBuild, HelpHidden]>;
 
 def Rpass_EQ : Joined<["-"], "Rpass=">,
@@ -541,10 +541,10 @@ def no_link_objc_runtime : Flag<["-"], "no-link-objc-runtime">,
 
 def static_stdlib: Flag<["-"], "static-stdlib">,
   Flags<[DoesNotAffectIncrementalBuild]>,
-  HelpText<"Statically link the Swift standard library">;
+  HelpText<"Statically link the polarphp standard library">;
 def no_static_stdlib: Flag<["-"], "no-static-stdlib">,
   Flags<[HelpHidden,DoesNotAffectIncrementalBuild]>,
-  HelpText<"Don't statically link the Swift standard library">;
+  HelpText<"Don't statically link the polarphp standard library">;
 def toolchain_stdlib_rpath: Flag<["-"], "toolchain-stdlib-rpath">,
   Flags<[HelpHidden,DoesNotAffectIncrementalBuild]>,
   HelpText<"Add an rpath entry for the toolchain's standard library, rather than the OS's">;
@@ -644,40 +644,40 @@ def AssertConfig : Separate<["-"], "assert-config">,
 def code_formatting_Group : OptionGroup<"<code formatting options>">;
 
 def use_tabs : Flag<["-"], "use-tabs">, Group<code_formatting_Group>,
-  Flags<[NoInteractiveOption, NoBatchOption, SwiftIndentOption]>,
+  Flags<[NoInteractiveOption, NoBatchOption, PolarphpIndentOption]>,
   HelpText<"Use tabs for indentation.">;
 
 def indent_switch_case : Flag<["-"], "indent-switch-case">,
   Group<code_formatting_Group>,
-  Flags<[NoInteractiveOption, NoBatchOption, SwiftIndentOption]>,
+  Flags<[NoInteractiveOption, NoBatchOption, PolarphpIndentOption]>,
   HelpText<"Indent cases in switch statements.">;
 
 def in_place : Flag<["-"], "in-place">, Group<code_formatting_Group>,
-  Flags<[NoInteractiveOption, NoBatchOption, SwiftIndentOption]>,
+  Flags<[NoInteractiveOption, NoBatchOption, PolarphpIndentOption]>,
   HelpText<"Overwrite input file with formatted file.">;
 
 def tab_width : Separate<["-"], "tab-width">, Group<code_formatting_Group>,
-  Flags<[NoInteractiveOption, NoBatchOption, SwiftIndentOption]>,
+  Flags<[NoInteractiveOption, NoBatchOption, PolarphpIndentOption]>,
   HelpText<"Width of tab character.">, MetaVarName<"<n>">;
 
 def indent_width : Separate<["-"], "indent-width">, Group<code_formatting_Group>,
-  Flags<[NoInteractiveOption, NoBatchOption, SwiftIndentOption]>,
+  Flags<[NoInteractiveOption, NoBatchOption, PolarphpIndentOption]>,
   HelpText<"Number of characters to indent.">, MetaVarName<"<n>">;
 
 def line_range : Separate<["-"], "line-range">, Group<code_formatting_Group>,
-  Flags<[NoInteractiveOption, NoBatchOption, SwiftIndentOption]>,
+  Flags<[NoInteractiveOption, NoBatchOption, PolarphpIndentOption]>,
   HelpText<"<start line>:<end line>. Formats a range of lines (1-based). "
            "Can only be used with one input file.">, MetaVarName<"<n:n>">;
 
 // Migrator Options
 
 def update_code : Flag<["-"], "update-code">,
-  HelpText<"Update Swift code">,
+  HelpText<"Update polarphp code">,
   Flags<[FrontendOption, HelpHidden, NoInteractiveOption, DoesNotAffectIncrementalBuild]>;
 
 def migrate_keep_objc_visibility: Flag<["-"], "migrate-keep-objc-visibility">,
   Flags<[FrontendOption, NoInteractiveOption]>,
-  HelpText<"When migrating, add '@objc' to declarations that would've been implicitly visible in Swift 3">;
+  HelpText<"When migrating, add '@objc' to declarations that would've been implicitly visible in polarphp 3">;
 
 def disable_migrator_fixits: Flag<["-"], "disable-migrator-fixits">,
   Flags<[FrontendOption, NoInteractiveOption]>,
@@ -685,7 +685,7 @@ def disable_migrator_fixits: Flag<["-"], "disable-migrator-fixits">,
 
 def emit_remap_file_path: Separate<["-"], "emit-remap-file-path">,
   Flags<[FrontendOption, NoDriverOption, NoInteractiveOption, DoesNotAffectIncrementalBuild]>,
-  HelpText<"Emit the replacement map describing Swift Migrator changes to <path>">,
+  HelpText<"Emit the replacement map describing polarphp Migrator changes to <path>">,
   MetaVarName<"<path>">;
 
 def emit_migrated_file_path: Separate<["-"], "emit-migrated-file-path">,
@@ -723,7 +723,7 @@ def migrator_update_sdk: Flag<["-"], "migrator-update-sdk">,
   Flags<[FrontendOption, NoInteractiveOption]>,
   HelpText<"Does nothing. Temporary compatibility flag for Xcode.">;
 
-def migrator_update_swift: Flag<["-"], "migrator-update-swift">,
+def migrator_update_polarphp: Flag<["-"], "migrator-update-polarphp">,
   Flags<[FrontendOption, NoInteractiveOption]>,
   HelpText<"Does nothing. Temporary compatibility flag for Xcode.">;
 
@@ -732,12 +732,12 @@ def migrator_update_swift: Flag<["-"], "migrator-update-swift">,
 def parse_as_library : Flag<["-"], "parse-as-library">,
   Flags<[FrontendOption, NoInteractiveOption]>,
   HelpText<"Parse the input file(s) as libraries, not scripts">;
-def parse_sil : Flag<["-"], "parse-sil">,
+def parse_pil : Flag<["-"], "parse-pil">,
   Flags<[FrontendOption, NoInteractiveOption]>,
-  HelpText<"Parse the input file as SIL code, not Swift source">;
+  HelpText<"Parse the input file as PIL code, not polarphp source">;
 def parse_stdlib : Flag<["-"], "parse-stdlib">,
   Flags<[FrontendOption, HelpHidden, ModuleInterfaceOption]>,
-  HelpText<"Parse the input file(s) as the Swift standard library">;
+  HelpText<"Parse the input file(s) as the polarphp standard library">;
 
 def modes_Group : OptionGroup<"<mode options>">, HelpText<"MODES">;
 
@@ -762,17 +762,17 @@ def emit_bc : Flag<["-"], "emit-bc">,
 def emit_ir : Flag<["-"], "emit-ir">,
   HelpText<"Emit LLVM IR file(s)">, ModeOpt,
   Flags<[FrontendOption, NoInteractiveOption, DoesNotAffectIncrementalBuild]>;
-def emit_sil : Flag<["-"], "emit-sil">,
-  HelpText<"Emit canonical SIL file(s)">, ModeOpt,
+def emit_pil : Flag<["-"], "emit-pil">,
+  HelpText<"Emit canonical PIL file(s)">, ModeOpt,
   Flags<[FrontendOption, NoInteractiveOption, DoesNotAffectIncrementalBuild]>;
-def emit_silgen : Flag<["-"], "emit-silgen">,
-  HelpText<"Emit raw SIL file(s)">, ModeOpt,
+def emit_pilgen : Flag<["-"], "emit-pilgen">,
+  HelpText<"Emit raw PIL file(s)">, ModeOpt,
   Flags<[FrontendOption, NoInteractiveOption, DoesNotAffectIncrementalBuild]>;
 def emit_sib : Flag<["-"], "emit-sib">,
-  HelpText<"Emit serialized AST + canonical SIL file(s)">, ModeOpt,
+  HelpText<"Emit serialized AST + canonical PIL file(s)">, ModeOpt,
   Flags<[FrontendOption, NoInteractiveOption, DoesNotAffectIncrementalBuild]>;
 def emit_sibgen : Flag<["-"], "emit-sibgen">,
-  HelpText<"Emit serialized AST + raw SIL file(s)">, ModeOpt,
+  HelpText<"Emit serialized AST + raw PIL file(s)">, ModeOpt,
   Flags<[FrontendOption, NoInteractiveOption, DoesNotAffectIncrementalBuild]>;
 def emit_imported_modules : Flag<["-"], "emit-imported-modules">,
   HelpText<"Emit a list of the imported modules">, ModeOpt,
@@ -865,7 +865,7 @@ def num_threads : Separate<["-"], "num-threads">,
   MetaVarName<"<n>">;
 
 def Xfrontend : Separate<["-"], "Xfrontend">, Flags<[HelpHidden]>,
-  MetaVarName<"<arg>">, HelpText<"Pass <arg> to the Swift frontend">;
+  MetaVarName<"<arg>">, HelpText<"Pass <arg> to the polarphp frontend">;
 
 def Xcc : Separate<["-"], "Xcc">, Flags<[FrontendOption]>,
   MetaVarName<"<arg>">,
@@ -880,7 +880,7 @@ def Xllvm : Separate<["-"], "Xllvm">,
 
 def resource_dir : Separate<["-"], "resource-dir">,
   Flags<[FrontendOption, HelpHidden, ArgumentIsPath]>,
-  MetaVarName<"</usr/lib/swift>">,
+  MetaVarName<"</usr/lib/polarphp>">,
   HelpText<"The directory that holds the compiler resource files">;
 
 def target : Separate<["-"], "target">,
@@ -990,7 +990,7 @@ def vfsoverlay_EQ : Joined<["-"], "vfsoverlay=">,
 // Runtime compatibility version
 def runtime_compatibility_version : Separate<["-"], "runtime-compatibility-version">,
   Flags<[FrontendOption]>,
-  HelpText<"Link compatibility library for Swift runtime version, or 'none'">;
+  HelpText<"Link compatibility library for polarphp runtime version, or 'none'">;
 
 def disable_autolinking_runtime_compatibility : Flag<["-"], "disable-autolinking-runtime-compatibility">,
   Flags<[FrontendOption]>,

@@ -18,6 +18,29 @@ polar_collect_files(
 
 polar_merge_list(POLAR_PIL_OPTIMIZER_SOURCES POLAR_HEADERS)
 
-polar_add_library(PolarPILOptimizer STATIC
-   ${POLAR_PIL_OPTIMIZER_SOURCES}
-   LINK_LIBS PolarUtils PolarKernel PolarPIL)
+set(PILOPTIMIZER_SOURCES)
+
+function(_list_transform newvar)
+  set(sources ${ARGN})
+  set(dir ${CMAKE_CURRENT_SOURCE_DIR})
+  set(tmp)
+  foreach (s ${sources})
+    list(APPEND tmp "${dir}/${s}")
+  endforeach()
+  set(${newvar} "${tmp}" PARENT_SCOPE)
+endfunction()
+
+macro(pilopt_register_sources)
+  precondition(new_transformed_sources
+    NEGATE
+    MESSAGE "Expected this to be empty since we clear after each run")
+  _list_transform(new_transformed_sources ${ARGN})
+  list_union("${PILOPTIMIZER_SOURCES}" "${new_transformed_sources}" out)
+  set(PILOPTIMIZER_SOURCES "${out}" PARENT_SCOPE)
+  set(new_transformed_sources)
+endmacro()
+
+polar_add_host_library(PolarPILOptimizer STATIC
+   ${POLAR_PIL_OPTIMIZER_SOURCES})
+
+target_link_libraries(PolarPILOptimizer PRIVATE PolarPIL)

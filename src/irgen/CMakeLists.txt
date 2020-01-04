@@ -15,8 +15,18 @@ polar_collect_files(
    OUTPUT_VAR POLAR_IRGEN_SOURCES)
 polar_merge_list(POLAR_IRGEN_SOURCES POLAR_HEADERS)
 
-polar_add_library(PolarIRGen
+polar_add_host_library(PolarIRGen STATIC
    ${POLAR_IRGEN_SOURCES}
-   LINK_LIBS PolarBasic PolarUtils PolarAST PolarPILGen
-             PolarPIL PolarPILOptimizer
-             LLVMPasses)
+   )
+
+target_link_libraries(PolarIRGen
+   INTERFACE
+   clangCodeGen
+   clangAST)
+
+target_link_libraries(PolarIRGen PRIVATE
+   PolarAST
+   PolarPILGen
+   PolarPIL
+   PolarPILOptimizer
+   LLVMPasses)

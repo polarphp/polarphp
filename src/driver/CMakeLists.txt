@@ -18,11 +18,10 @@ polar_collect_files(
 
 polar_merge_list(POLAR_DRIVER_SOURCES POLAR_HEADERS)
 
-polar_add_library(PolarDriver STATIC
-   ${POLAR_DRIVER_SOURCES}
-   LINK_LIBS
-   PolarUtils
-   PolarKernel
-   PolarBasic
+polar_add_host_library(PolarDriver STATIC
+   ${POLAR_DRIVER_SOURCES})
+
+target_link_libraries(PolarDriver PRIVATE
    PolarAST
+   PolarBasic
    PolarOption)

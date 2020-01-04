@@ -16,11 +16,10 @@ polar_collect_files(
 
 polar_merge_list(POLARPHP_IDE_SOURCES POLAR_HEADERS)
 
-polar_add_library(PolarIDE
-   ${POLARPHP_IDE_SOURCES}
-   LINK_LIBS
-   PolarBasic
-   PolarUtils
+polar_add_host_library(PolarIDE STATIC
+   ${POLARPHP_IDE_SOURCES})
+
+target_link_libraries(PolarIDE PRIVATE
    PolarAST
    PolarClangImporter
    PolarFrontend

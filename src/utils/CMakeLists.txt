@@ -59,9 +59,10 @@ if (LINUX)
    set(system_libs ${system_libs} pthread uuid)
 endif()
 
-polar_add_library(PolarUtils SHARED
-   ${POLAR_UTILS_SOURCES}
-   LINK_LIBS ${system_libs})
+polar_add_host_library(PolarUtils STATIC
+   ${POLAR_UTILS_SOURCES})
+
+target_link_libraries(PolarUtils PRIVATE ${system_libs})
 
 set_target_properties(
    PolarUtils

@@ -25,7 +25,7 @@
 #include "polarphp/ast/Pattern.h"
 #include "polarphp/basic/Dwarf.h"
 #include "polarphp/basic/SourceMgr.h"
-#include "polarphp/kernel/Version.h"
+#include "polarphp/basic/Version.h"
 #include "polarphp/clangimporter/ClangImporter.h"
 #include "polarphp/clangimporter/ClangModule.h"
 #include "polarphp/demangling/ManglingMacros.h"
@@ -1602,7 +1602,7 @@ private:
          ClangDecl = ND->getClangDecl();
       }
       if (ClangDecl) {
-         clang::ASTReader &Reader = *CI.getClangInstance().getASTReader();
+         auto &Reader = *CI.getClangInstance().getModuleManager();
          auto Idx = ClangDecl->getOwningModuleID();
          auto SubModuleDesc = Reader.getSourceDescriptor(Idx);
          auto TopLevelModuleDesc = getClangModule(*TypeDecl->getModuleContext());

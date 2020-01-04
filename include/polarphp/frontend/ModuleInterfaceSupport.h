@@ -14,12 +14,12 @@
 #define POLARPHP_FRONTEND_MODULEINTERFACESUPPORT_H
 
 #include "polarphp/basic/LLVM.h"
-#include "polarphp/kernel/Version.h"
+#include "polarphp/basic/Version.h"
 #include "llvm/Support/Regex.h"
 
-#define POLAR_INTERFACE_FORMAT_VERSION_KEY "swift-interface-format-version"
-#define POLAR_COMPILER_VERSION_KEY "swift-compiler-version"
-#define POLAR_MODULE_FLAGS_KEY "swift-module-flags"
+#define POLAR_INTERFACE_FORMAT_VERSION_KEY "polarphp-interface-format-version"
+#define POLAR_COMPILER_VERSION_KEY "polarphp-compiler-version"
+#define POLAR_MODULE_FLAGS_KEY "polarphp-module-flags"
 
 namespace polar {
 
@@ -54,7 +54,7 @@ llvm::Regex getPHPInterfaceModuleFlagsRegex();
 ///
 /// \return true if an error occurred
 ///
-/// \sa swift::serialize
+/// \sa polarphp::serialize
 bool emitPHPInterface(raw_ostream &out,
                         ModuleInterfaceOptions const &Opts,
                         ModuleDecl *M);

@@ -18,7 +18,7 @@
 #include "polarphp/ast/Attr.h"
 #include "polarphp/ast/Decl.h"
 #include "polarphp/basic/Defer.h"
-#include "polarphp/kernel/Version.h"
+#include "polarphp/basic/Version.h"
 #include "polarphp/llparser/CodeCompletionCallbacks.h"
 #include "polarphp/llparser/Lexer.h"
 #include "polarphp/llparser/Parser.h"

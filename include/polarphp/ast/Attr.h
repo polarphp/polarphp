@@ -24,7 +24,7 @@
 #include "polarphp/basic/StlExtras.h"
 #include "polarphp/basic/Range.h"
 #include "polarphp/basic/OptimizationMode.h"
-#include "polarphp/kernel/Version.h"
+#include "polarphp/basic/Version.h"
 #include "polarphp/ast/Identifier.h"
 #include "polarphp/ast/AttrKind.h"
 #include "polarphp/ast/AutoDiff.h"

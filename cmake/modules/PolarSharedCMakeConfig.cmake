@@ -170,10 +170,10 @@ macro(polar_common_standalone_build_config_clang product)
 endmacro()
 
 macro(polar_common_standalone_build_config_cmark product)
-#  find_package(cmark
-#     PATHS ${POLAR_CMAKE_MODULES_DIR}/cmark
-#     NO_DEFAULT_PATH)
-#  add_definitions(-DCMARK_STATIC_DEFINE)
+  #  find_package(cmark
+  #     PATHS ${POLAR_CMAKE_MODULES_DIR}/cmark
+  #     NO_DEFAULT_PATH)
+  #  add_definitions(-DCMARK_STATIC_DEFINE)
 endmacro()
 
 # Common cmake project config for standalone builds.
@@ -245,8 +245,9 @@ endmacro()
 macro(polar_common_cxx_warnings)
   # Make unhandled switch cases be an error in assert builds
   if(DEFINED LLVM_ENABLE_ASSERTIONS)
-    check_cxx_compiler_flag("-Werror=switch" CXX_SUPPORTS_WERROR_SWITCH_FLAG)
-    append_if(CXX_SUPPORTS_WERROR_SWITCH_FLAG "-Werror=switch" CMAKE_CXX_FLAGS)
+    #    TODO
+    #    check_cxx_compiler_flag("-Werror=switch" CXX_SUPPORTS_WERROR_SWITCH_FLAG)
+    #    append_if(CXX_SUPPORTS_WERROR_SWITCH_FLAG "-Werror=switch" CMAKE_CXX_FLAGS)
 
     check_cxx_compiler_flag("/we4062" CXX_SUPPORTS_WE4062)
     append_if(CXX_SUPPORTS_WE4062 "/we4062" CMAKE_CXX_FLAGS)
@@ -284,7 +285,7 @@ endmacro()
 
 # Like 'llvm_config()', but uses libraries from the selected build
 # configuration in LLVM.  ('llvm_config()' selects the same build configuration
-# in LLVM as we have for Swift.)
+# in LLVM as we have for polarphp.)
 function(polar_common_llvm_config target)
   set(link_components ${ARGN})
 

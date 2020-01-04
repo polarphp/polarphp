@@ -116,7 +116,7 @@ bool ModuleDepGraph::markIntransitive(const Job *node) {
 }
 
 void ModuleDepGraph::addIndependentNode(const Job *job) {
-   // No need to create any nodes; that will happen when the swiftdeps file is
+   // No need to create any nodes; that will happen when the phpdeps file is
    // read. Just record the correspondence.
    jobsByPHPDeps.insert(std::make_pair(getPHPDeps(job), job));
 }
@@ -126,7 +126,7 @@ std::vector<StringRef> ModuleDepGraph::getExternalDependencies() const {
                                  externalDependencies.end());
 }
 
-// Add every (swiftdeps) use of the external dependency to uses.
+// Add every (phpdeps) use of the external dependency to uses.
 void ModuleDepGraph::markExternal(SmallVectorImpl<const Job *> &uses,
                                   StringRef externalDependency) {
    FrontendStatsTracer tracer(stats, "fine-grained-dependencies-markExternal");

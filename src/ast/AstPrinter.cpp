@@ -39,7 +39,7 @@
 #include "polarphp/basic/STLExtras.h"
 #include "polarphp/basic/StringExtras.h"
 #include "polarphp/global/Config.h"
-#include "polarphp/parser/Lexer.h"
+#include "polarphp/llparser/Lexer.h"
 #include "polarphp/global/NameStrings.h"
 #include "clang/AST/AstContext.h"
 #include "clang/AST/Decl.h"
@@ -54,6 +54,8 @@
 #include <queue>
 
 namespace polar {
+
+using polar::llparser::Lexer;
 
 void PrintOptions::setBaseType(Type T) {
    TransformContext = TypeTransformContext(T);
@@ -109,7 +111,8 @@ PrintOptions PrintOptions::printSwiftInterfaceFile(bool preferTypeRepr) {
    result.FunctionDefinitions = true;
    result.CollapseSingleGetterProperty = false;
    result.VarInitializers = true;
-   result.EnumRawValues = EnumRawValueMode::PrintObjCOnly;
+   // TODO
+//   result.EnumRawValues = EnumRawValueMode::PrintObjCOnly;
    result.OpaqueReturnTypePrinting =
       OpaqueReturnTypePrintingMode::StableReference;
    result.PreferTypeRepr = preferTypeRepr;

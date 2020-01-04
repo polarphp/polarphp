@@ -27,7 +27,7 @@
 #include "polarphp/ast/SearchPathOptions.h"
 #include "polarphp/ast/SourceFile.h"
 #include "polarphp/basic/DiagnosticOptions.h"
-#include "polarphp/kernel/LangOptions.h"
+#include "polarphp/basic/LangOptions.h"
 #include "polarphp/basic/SourceMgr.h"
 #include "polarphp/clangimporter/ClangImporter.h"
 #include "polarphp/clangimporter/ClangImporterOptions.h"

@@ -9,53 +9,29 @@
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
 //===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
-//
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/04/26.
-//===----------------------------------------------------------------------===//
 ///
 /// \file
 /// Defines version macros and version-related utility functions
-/// for polarphp.
+/// for Swift.
 ///
 //===----------------------------------------------------------------------===//
 
-#ifndef POLARPHP_KERNEL_VERSION_H
-#define POLARPHP_KERNEL_VERSION_H
+#ifndef POLAR_BASIC_VERSION_H
+#define POLAR_BASIC_VERSION_H
 
+#include "polarphp/basic/LLVM.h"
+#include "llvm/ADT/Optional.h"
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/ADT/StringRef.h"
-#include "llvm/ADT/ArrayRef.h"
 #include "llvm/Support/VersionTuple.h"
-
-#include <optional>
 #include <string>
 
-/// forward declare class with namespace
 namespace polar {
+
 class DiagnosticEngine;
 class SourceLoc;
-} // polar
-namespace llvm {
-class raw_ostream;
-} // llvm
 
-namespace polar::version {
-
-using polar::DiagnosticEngine;
-using polar::SourceLoc;
-using llvm::SmallVector;
-using llvm::StringRef;
-using llvm::ArrayRef;
-using llvm::VersionTuple;
-using llvm::raw_ostream;
+namespace version {
 
 /// Represents an internal compiler version, represented as a tuple of
 /// integers, or "version components".
@@ -74,9 +50,8 @@ using llvm::raw_ostream;
 /// Z: [0 - 999]
 /// a: [0 - 999]
 /// b: [0 - 999]
-class Version
-{
-   SmallVector<unsigned, 5> m_components;
+class Version {
+   SmallVector<unsigned, 5> Components;
 public:
    /// Create the empty compiler version - this always compares greater
    /// or equal to any other CompilerVersion, as in the case of building Swift
@@ -84,14 +59,12 @@ public:
    Version() = default;
 
    /// Create a literal version from a list of components.
-   Version(std::initializer_list<unsigned> values)
-      : m_components(values)
-   {}
+   Version(std::initializer_list<unsigned> Values) : Components(Values) {}
 
    /// Create a version from a string in source code.
    ///
    /// Must include only groups of digits separated by a dot.
-   Version(StringRef versionString, SourceLoc loc, DiagnosticEngine *diags);
+   Version(StringRef VersionString, SourceLoc Loc, DiagnosticEngine *Diags);
 
    /// Return a string to be used as an internal preprocessor define.
    ///
@@ -106,25 +79,22 @@ public:
                                       ArrayRef<uint64_t> componentWeights) const;
 
    /// Return the ith version component.
-   unsigned operator[](size_t i) const
-   {
-      return m_components[i];
+   unsigned operator[](size_t i) const {
+      return Components[i];
    }
 
    /// Return the number of version components.
-   size_t size() const
-   {
-      return m_components.size();
+   size_t size() const {
+      return Components.size();
    }
 
-   bool empty() const
-   {
-      return m_components.empty();
+   bool empty() const {
+      return Components.empty();
    }
 
    /// Convert to a (maximum-4-element) llvm::VersionTuple, truncating
    /// away any 5th component that might be in this version.
-   operator VersionTuple() const;
+   operator llvm::VersionTuple() const;
 
    /// Returns the concrete version to use when \e this version is provided as
    /// an argument to -swift-version.
@@ -132,23 +102,22 @@ public:
    /// This is not the same as the set of Swift versions that have ever existed,
    /// just those that we are attempting to maintain backward-compatibility
    /// support for. It's also common for valid versions to produce a different
-   /// result; for example "-swift-version 3" at one point instructed the
+   /// result; for example "-polarphp-version 3" at one point instructed the
    /// compiler to act as if it is version 3.1.
-   std::optional<Version> getEffectiveLanguageVersion() const;
+   Optional<Version> getEffectiveLanguageVersion() const;
 
    /// Whether this version is greater than or equal to the given major version
    /// number.
-   bool isVersionAtLeast(unsigned major, unsigned minor = 0) const
-   {
+   bool isVersionAtLeast(unsigned major, unsigned minor = 0) const {
       switch (size()) {
-      case 0:
-         return false;
-      case 1:
-         return ((m_components[0] == major && 0 == minor) ||
-               (m_components[0] > major));
-      default:
-         return ((m_components[0] == major && m_components[1] >= minor) ||
-               (m_components[0] > major));
+         case 0:
+            return false;
+         case 1:
+            return ((Components[0] == major && 0 == minor) ||
+                    (Components[0] > major));
+         default:
+            return ((Components[0] == major && Components[1] >= minor) ||
+                    (Components[0] > major));
       }
    }
 
@@ -159,16 +128,16 @@ public:
    std::string asAPINotesVersionString() const;
 
    /// Parse a version in the form used by the _compiler_version \#if condition.
-   static std::optional<Version> parseCompilerVersionString(StringRef versionString,
-                                                            SourceLoc loc,
-                                                            DiagnosticEngine *diags);
+   static Optional<Version> parseCompilerVersionString(StringRef VersionString,
+                                                       SourceLoc Loc,
+                                                       DiagnosticEngine *Diags);
 
    /// Parse a generic version string of the format [0-9]+(.[0-9]+)*
    ///
    /// Version components can be any unsigned 64-bit number.
-   static std::optional<Version> parseVersionString(StringRef versionString,
-                                                    SourceLoc loc,
-                                                    DiagnosticEngine *diags);
+   static Optional<Version> parseVersionString(StringRef VersionString,
+                                               SourceLoc Loc,
+                                               DiagnosticEngine *Diags);
 
    /// Returns a version from the currently defined SWIFT_COMPILER_VERSION.
    ///
@@ -182,26 +151,24 @@ public:
 
    // List of backward-compatibility versions that we permit passing as
    // -polarphp-version <vers>
-   static std::array<StringRef, 3> getValidEffectiveVersions()
-   {
+   static std::array<StringRef, 3> getValidEffectiveVersions() {
       return {{"4", "4.2", "5"}};
-   }
+   };
 };
 
 bool operator>=(const Version &lhs, const Version &rhs);
 bool operator<(const Version &lhs, const Version &rhs);
 bool operator==(const Version &lhs, const Version &rhs);
-inline bool operator!=(const Version &lhs, const Version &rhs)
-{
+inline bool operator!=(const Version &lhs, const Version &rhs) {
    return !(lhs == rhs);
 }
 
-raw_ostream &operator<<(raw_ostream &outStream, const Version &version);
+raw_ostream &operator<<(raw_ostream &os, const Version &version);
 
 /// Retrieves the numeric {major, minor} Swift version.
 ///
 /// Note that this is the underlying version of the language, ignoring any
-/// -swift-version flags that may have been used in a particular invocation of
+/// -polarphp-version flags that may have been used in a particular invocation of
 /// the compiler.
 std::pair<unsigned, unsigned> retrieve_polarphp_numeric_version();
 
@@ -209,12 +176,13 @@ std::pair<unsigned, unsigned> retrieve_polarphp_numeric_version();
 /// the Swift supported and effective version numbers, the repository version,
 /// and the vendor tag.
 std::string retrieve_polarphp_full_version(Version effectiveLanguageVersion =
-      Version::getCurrentLanguageVersion());
+Version::getCurrentLanguageVersion());
 
 /// Retrieves the repository revision number (or identifier) from which
 /// this polarphp was built.
 std::string retrieve_polarphp_revision();
 
-} // polar::version
+} // end namespace version
+} // end namespace polar
 
-#endif // POLARPHP_KERNEL_VERSION_H
+#endif // POLAR_BASIC_VERSION_H

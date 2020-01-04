@@ -172,7 +172,7 @@ struct PrintOptions {
    /// Choices for how to print enum raw values.
    enum class EnumRawValueMode {
       Skip,
-      PrintObjCOnly,
+//      PrintObjCOnly,
       Print
    };
 
@@ -490,7 +490,8 @@ struct PrintOptions {
          QualifyNestedDeclarations::Always;
       result.PrintDocumentationComments = true;
       result.SkipUnderscoredKeywords = true;
-      result.EnumRawValues = EnumRawValueMode::PrintObjCOnly;
+      // TODO
+//      result.EnumRawValues = EnumRawValueMode::PrintObjCOnly;
       return result;
    }
 

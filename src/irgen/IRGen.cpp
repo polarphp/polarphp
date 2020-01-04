@@ -26,7 +26,7 @@
 #include "polarphp/basic/Platform.h"
 #include "polarphp/basic/Statistic.h"
 #include "polarphp/basic/Timer.h"
-#include "polarphp/kernel/Version.h"
+#include "polarphp/basic/Version.h"
 #include "polarphp/clangimporter/ClangImporter.h"
 #include "polarphp/clangimporter/ClangModule.h"
 #include "polarphp/irgen/IRGenPublic.h"

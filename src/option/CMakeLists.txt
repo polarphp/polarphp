@@ -16,12 +16,14 @@ polar_collect_files(
 
 polar_merge_list(POLARPHP_OPTION_SOURCES POLAR_HEADERS)
 
-polar_add_library(PolarOption
-   ${POLARPHP_OPTION_SOURCES}
-   LINK_LIBS PolarBasic LLVMOption
-   DEPENDS PolarphpOptions)
+polar_add_host_library(PolarOption STATIC
+   ${POLARPHP_OPTION_SOURCES})
 
-target_link_libraries(PolarOption PRIVATE PolarAST)
+add_dependencies(PolarOption
+   PolarphpOptions)
+
+target_link_libraries(PolarOption
+   PRIVATE PolarBasic LLVMOption)
 
 set_target_properties(
    PolarOption

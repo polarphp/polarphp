@@ -10,7 +10,7 @@
 //
 //===----------------------------------------------------------------------===//
 //
-//  This file defines the options accepted by swift -frontend.
+//  This file defines the options accepted by polarphp -frontend.
 //
 //===----------------------------------------------------------------------===//
 
@@ -42,7 +42,7 @@ def emit_module_source_info : Flag<["-"], "emit-module-source-info">,
   HelpText<"Output module source info file">;
 
 def ignore_module_source_info : Flag<["-"], "ignore-module-source-info">,
-  HelpText<"Avoid getting source location from .swiftsourceinfo files">;
+  HelpText<"Avoid getting source location from .phpsourceinfo files">;
 
 def merge_modules
   : Flag<["-"], "merge-modules">, ModeOpt,
@@ -59,10 +59,10 @@ def emit_reference_dependencies_path
     HelpText<"Output Swift-style dependencies file to <path>">;
 
 
-def emit_swift_ranges : Flag<["-"], "emit-swift-ranges">,
+def emit_php_ranges : Flag<["-"], "emit-php-ranges">,
   HelpText<"Emit unparsed source ranges">;
-def emit_swift_ranges_path
-  : Separate<["-"], "emit-swift-ranges-path">, MetaVarName<"<path>">,
+def emit_php_ranges_path
+  : Separate<["-"], "emit-php-ranges-path">, MetaVarName<"<path>">,
     HelpText<"Output unparsed ranges to <path>">;
 
 def emit_compiled_source : Flag<["-"], "emit-compiled-source">,
@@ -133,8 +133,8 @@ def diagnostic_documentation_path
   : Separate<["-"], "diagnostic-documentation-path">, MetaVarName<"<path>">,
   HelpText<"Path to diagnostic documentation resources">;
 
-def enable_swiftcall : Flag<["-"], "enable-swiftcall">,
-  HelpText<"Enable the use of LLVM swiftcall support">;
+def enable_phpcall : Flag<["-"], "enable-phpcall">,
+  HelpText<"Enable the use of LLVM phpcall support">;
 
 def enable_testable_attr_requires_testable_module :
   Flag<["-"], "enable-testable-attr-requires-testable-module">,
@@ -266,15 +266,15 @@ def debug_crash_after_parse : Flag<["-"], "debug-crash-after-parse">,
   DebugCrashOpt, HelpText<"Force a crash after parsing">;
 
 def debugger_support : Flag<["-"], "debugger-support">,
-  HelpText<"Process swift code as if running in the debugger">;
+  HelpText<"Process php code as if running in the debugger">;
 
 def disable_arc_opts : Flag<["-"], "disable-arc-opts">,
-  HelpText<"Don't run SIL ARC optimization passes.">;
+  HelpText<"Don't run PIL ARC optimization passes.">;
 def disable_ossa_opts : Flag<["-"], "disable-ossa-opts">,
-  HelpText<"Don't run SIL OSSA optimization passes.">;
+  HelpText<"Don't run PIL OSSA optimization passes.">;
 
-def disable_sil_partial_apply : Flag<["-"], "disable-sil-partial-apply">,
-  HelpText<"Disable use of partial_apply in SIL generation">;
+def disable_pil_partial_apply : Flag<["-"], "disable-pil-partial-apply">,
+  HelpText<"Disable use of partial_apply in PIL generation">;
 
 def enable_ownership_stripping_after_serialization
   : Flag<["-"], "enable-ownership-stripping-after-serialization">,
@@ -299,11 +299,11 @@ def disable_diagnostic_passes : Flag<["-"], "disable-diagnostic-passes">,
 def disable_llvm_optzns : Flag<["-"], "disable-llvm-optzns">,
   HelpText<"Don't run LLVM optimization passes">;
 
-def disable_sil_perf_optzns : Flag<["-"], "disable-sil-perf-optzns">,
-  HelpText<"Don't run SIL performance optimization passes">;
+def disable_pil_perf_optzns : Flag<["-"], "disable-pil-perf-optzns">,
+  HelpText<"Don't run PIL performance optimization passes">;
 
-def disable_swift_specific_llvm_optzns : Flag<["-"], "disable-swift-specific-llvm-optzns">,
-  HelpText<"Don't run Swift specific LLVM optimization passes.">;
+def disable_php_specific_llvm_optzns : Flag<["-"], "disable-php-specific-llvm-optzns">,
+  HelpText<"Don't run polarphp specific LLVM optimization passes.">;
 
 def disable_llvm_slp_vectorizer : Flag<["-"], "disable-llvm-slp-vectorizer">,
   HelpText<"Don't run LLVM SLP vectorizer">;
@@ -341,8 +341,8 @@ def dump_clang_diagnostics : Flag<["-"], "dump-clang-diagnostics">,
 def disable_modules_validate_system_headers : Flag<["-"], "disable-modules-validate-system-headers">,
   HelpText<"Disable validating system headers in the Clang importer">;
 
-def emit_verbose_sil : Flag<["-"], "emit-verbose-sil">,
-  HelpText<"Emit locations during SIL emission">;
+def emit_verbose_pil : Flag<["-"], "emit-verbose-pil">,
+  HelpText<"Emit locations during PIL emission">;
 
 def emit_pch : Flag<["-"], "emit-pch">,
   HelpText<"Emit PCH for imported Objective-C header file">, ModeOpt;
@@ -350,14 +350,14 @@ def emit_pch : Flag<["-"], "emit-pch">,
 def pch_disable_validation : Flag<["-"], "pch-disable-validation">,
   HelpText<"Disable validating the persistent PCH">;
 
-def disable_sil_ownership_verifier : Flag<["-"], "disable-sil-ownership-verifier">,
-  HelpText<"Do not verify ownership invariants during SIL Verification ">;
+def disable_pil_ownership_verifier : Flag<["-"], "disable-pil-ownership-verifier">,
+  HelpText<"Do not verify ownership invariants during PIL Verification ">;
 
 def suppress_static_exclusivity_swap : Flag<["-"], "suppress-static-exclusivity-swap">,
   HelpText<"Suppress static violations of exclusive access with swap()">;
 
-def enable_sil_opaque_values : Flag<["-"], "enable-sil-opaque-values">,
-  HelpText<"Enable SIL Opaque Values">;
+def enable_pil_opaque_values : Flag<["-"], "enable-pil-opaque-values">,
+  HelpText<"Enable PIL Opaque Values">;
 
 def enable_large_loadable_types : Flag<["-"], "enable-large-loadable-types">,
   HelpText<"Enable Large Loadable types IRGen pass">;
@@ -366,16 +366,16 @@ def enable_experimental_static_assert :
   Flag<["-"], "enable-experimental-static-assert">,
   HelpText<"Enable experimental #assert">;
 
-def enable_subst_sil_function_types_for_function_values :
-  Flag<["-"], "enable-subst-sil-function-types-for-function-values">,
-  HelpText<"Use substituted function types for SIL type lowering of function values">;
+def enable_subst_pil_function_types_for_function_values :
+  Flag<["-"], "enable-subst-pil-function-types-for-function-values">,
+  HelpText<"Use substituted function types for PIL type lowering of function values">;
 
 def enable_deserialization_recovery :
   Flag<["-"], "enable-deserialization-recovery">,
-  HelpText<"Attempt to recover from missing xrefs (etc) in swiftmodules">;
+  HelpText<"Attempt to recover from missing xrefs (etc) in phpmodules">;
 def disable_deserialization_recovery :
   Flag<["-"], "disable-deserialization-recovery">,
-  HelpText<"Don't attempt to recover from missing xrefs (etc) in swiftmodules">;
+  HelpText<"Don't attempt to recover from missing xrefs (etc) in phpmodules">;
 
 def disable_availability_checking : Flag<["-"],
   "disable-availability-checking">,
@@ -387,15 +387,6 @@ def report_errors_to_debugger : Flag<["-"], "report-errors-to-debugger">,
 def enable_infer_import_as_member :
   Flag<["-"], "enable-infer-import-as-member">,
   HelpText<"Infer when a global could be imported as a member">;
-
-def enable_swift3_objc_inference : Flag<["-"], "enable-swift3-objc-inference">,
-  Flags<[FrontendOption, HelpHidden]>,
-HelpText<"Enable Swift 3's @objc inference rules for NSObject-derived classes and 'dynamic' members (emulates Swift 3 behavior)">;
-
-def disable_swift3_objc_inference :
-  Flag<["-"], "disable-swift3-objc-inference">,
-  Flags<[FrontendOption, HelpHidden]>,
-  HelpText<"Disable Swift 3's @objc inference rules for NSObject-derived classes and 'dynamic' members (emulates Swift 4 behavior)">;
 
 def enable_implicit_dynamic : Flag<["-"], "enable-implicit-dynamic">,
   Flags<[FrontendOption, NoInteractiveOption, HelpHidden]>,
@@ -511,36 +502,36 @@ def no_clang_module_breadcrumbs : Flag<["-"], "no-clang-module-breadcrumbs">,
 def use_jit : Flag<["-"], "use-jit">,
   HelpText<"Register Objective-C classes as if the JIT were in use">;
 
-def sil_inline_threshold : Separate<["-"], "sil-inline-threshold">,
+def pil_inline_threshold : Separate<["-"], "pil-inline-threshold">,
   MetaVarName<"<50>">,
   HelpText<"Controls the aggressiveness of performance inlining">;
 
-def sil_inline_caller_benefit_reduction_factor : Separate<["-"], "sil-inline-caller-benefit-reduction-factor">,
+def pil_inline_caller_benefit_reduction_factor : Separate<["-"], "pil-inline-caller-benefit-reduction-factor">,
   MetaVarName<"<2>">,
   HelpText<"Controls the aggressiveness of performance inlining in -Osize "
           "mode by reducing the base benefits of a caller (lower value "
           "permits more inlining!)">;
 
-def sil_unroll_threshold : Separate<["-"], "sil-unroll-threshold">,
+def pil_unroll_threshold : Separate<["-"], "pil-unroll-threshold">,
   MetaVarName<"<250>">,
   HelpText<"Controls the aggressiveness of loop unrolling">;
 
-def sil_merge_partial_modules : Flag<["-"], "sil-merge-partial-modules">,
-  HelpText<"Merge SIL from all partial swiftmodules into the final module">;
+def pil_merge_partial_modules : Flag<["-"], "pil-merge-partial-modules">,
+  HelpText<"Merge PIL from all partial phpmodules into the final module">;
 
-def sil_verify_all : Flag<["-"], "sil-verify-all">,
-  HelpText<"Verify SIL after each transform">;
+def pil_verify_all : Flag<["-"], "pil-verify-all">,
+  HelpText<"Verify PIL after each transform">;
 
-def sil_debug_serialization : Flag<["-"], "sil-debug-serialization">,
-  HelpText<"Do not eliminate functions in Mandatory Inlining/SILCombine dead "
+def pil_debug_serialization : Flag<["-"], "pil-debug-serialization">,
+  HelpText<"Do not eliminate functions in Mandatory Inlining/PILCombine dead "
            "functions. (for debugging only)">;
 
 def print_inst_counts : Flag<["-"], "print-inst-counts">,
-  HelpText<"Before IRGen, count all the various SIL instructions. Must be used "
+  HelpText<"Before IRGen, count all the various PIL instructions. Must be used "
            "in conjunction with -print-stats.">;
 
-def debug_on_sil : Flag<["-"], "gsil">,
-  HelpText<"Write the SIL into a file and generate debug-info to debug on SIL "
+def debug_on_pil : Flag<["-"], "gpil">,
+  HelpText<"Write the PIL into a file and generate debug-info to debug on PIL "
            " level.">;
 
 def print_llvm_inline_tree : Flag<["-"], "print-llvm-inline-tree">,
@@ -550,8 +541,8 @@ def disable_incremental_llvm_codegeneration :
   Flag<["-"], "disable-incremental-llvm-codegen">,
        HelpText<"Disable incremental llvm code generation.">;
 
-def emit_sorted_sil : Flag<["-"], "emit-sorted-sil">,
-  HelpText<"When printing SIL, print out all sil entities sorted by name to "
+def emit_sorted_pil : Flag<["-"], "emit-sorted-pil">,
+  HelpText<"When printing PIL, print out all pil entities sorted by name to "
            "ease diffing">;
 
 def emit_syntax : Flag<["-"], "emit-syntax">,
@@ -577,7 +568,7 @@ def external_pass_pipeline_filename : Separate<["-"], "external-pass-pipeline-fi
     MetaVarName<"<pass_pipeline_file>">;
 
 def index_system_modules : Flag<["-"], "index-system-modules">,
-  HelpText<"Emit index data for imported serialized swift system modules">;
+  HelpText<"Emit index data for imported serialized polarphp system modules">;
 
 def dump_interface_hash : Flag<["-"], "dump-interface-hash">,
    HelpText<"Parse input file(s) and dump interface token hash(es)">,
@@ -585,7 +576,7 @@ def dump_interface_hash : Flag<["-"], "dump-interface-hash">,
 
 def compile_module_from_interface :
   Flag<["-"], "compile-module-from-interface">,
-  HelpText<"Treat the (single) input as a swiftinterface and produce a module">,
+  HelpText<"Treat the (single) input as a phpinterface and produce a module">,
   ModeOpt;
 
 def build_module_from_parseable_interface :
@@ -609,7 +600,7 @@ def force_public_linkage : Flag<["-"], "force-public-linkage">,
    HelpText<"Force public linkage for private symbols. Used by LLDB.">;
 
 def dump_api_path : Separate<["-"], "dump-api-path">,
-  HelpText<"The path to output swift interface files for the compiled source files">;
+  HelpText<"The path to output php interface files for the compiled source files">;
 
 def group_info_path : Separate<["-"], "group-info-path">,
   HelpText<"The path to collect the group information of the compiled module">;

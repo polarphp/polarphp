@@ -15,9 +15,10 @@ polar_collect_files(
    OUTPUT_VAR POLAR_SERIALIZATION_SOURCES)
 polar_merge_list(POLAR_SERIALIZATION_SOURCES POLAR_HEADERS)
 
-polar_add_library(PolarSerialization STATIC
+polar_add_host_library(PolarSerialization STATIC
    ${POLAR_SERIALIZATION_SOURCES}
-   LINK_LIBS PolarBasic PolarUtils PolarGlobal PolarKernel
-   PolarClangImporter PolarSerialization
-   LLVMBitstreamReader
+   LLVM_LINK_COMPONENTS
+      BitstreamReader
    )
+
+target_link_libraries(PolarSerialization PRIVATE PolarClangImporter)
