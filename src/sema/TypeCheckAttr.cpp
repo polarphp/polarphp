@@ -1399,16 +1399,18 @@ void AttributeChecker::visitAvailableAttr(AvailableAttr *attr) {
    }
 }
 
+
+void AttributeChecker::visitCDeclAttr(CDeclAttr *attr) {
+   // Only top-level func decls are currently supported.
+   if (D->getDeclContext()->isTypeContext())
+      diagnose(attr->getLocation(), diag::cdecl_not_at_top_level);
+
+   // The name must not be empty.
+   if (attr->Name.empty())
+      diagnose(attr->getLocation(), diag::cdecl_empty_name);
+}
+
 // @todo
-//void AttributeChecker::visitCDeclAttr(CDeclAttr *attr) {
-//   // Only top-level func decls are currently supported.
-//   if (D->getDeclContext()->isTypeContext())
-//      diagnose(attr->getLocation(), diag::cdecl_not_at_top_level);
-//
-//   // The name must not be empty.
-//   if (attr->Name.empty())
-//      diagnose(attr->getLocation(), diag::cdecl_empty_name);
-//}
 
 //void AttributeChecker::visitUnsafeNoObjCTaggedPointerAttr(
 //   UnsafeNoObjCTaggedPointerAttr *attr) {
@@ -2790,9 +2792,9 @@ TypeChecker::diagnosticIfDeclCannotBePotentiallyUnavailable(const Decl *D) {
 
 static bool shouldBlockImplicitDynamic(Decl *D) {
    if (/*D->getAttrs().hasAttribute<NonObjCAttr>() ||*/
-       D->getAttrs().hasAttribute<PILGenNameAttr>() ||
-       D->getAttrs().hasAttribute<TransparentAttr>() ||
-       D->getAttrs().hasAttribute<InlinableAttr>())
+      D->getAttrs().hasAttribute<PILGenNameAttr>() ||
+      D->getAttrs().hasAttribute<TransparentAttr>() ||
+      D->getAttrs().hasAttribute<InlinableAttr>())
       return true;
    return false;
 }

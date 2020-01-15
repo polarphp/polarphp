@@ -18,7 +18,7 @@
 #define POLARPHP_CLANG_INTERNAL_IMPORT_NAME_H
 
 #include "polarphp/clangimporter/internal/ImportEnumInfo.h"
-#include "polarphp/clangimporter/internal/PolarphpLookupTable.h"
+#include "polarphp/clangimporter/internal/TypePHPLookupTable.h"
 #include "polarphp/basic/StringExtras.h"
 #include "polarphp/basic/Version.h"
 #include "polarphp/ast/AstContext.h"

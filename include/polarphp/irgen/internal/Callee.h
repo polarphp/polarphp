@@ -186,7 +186,7 @@ public:
 
    /// If this callee has a value for the Polarphp context slot, return
    /// it; otherwise return non-null.
-   llvm::Value *getPolarphpContext() const;
+   llvm::Value *getTypePHPContext() const;
 
    /// Given that this callee is a block, return the block pointer.
    llvm::Value *getBlockObject() const;

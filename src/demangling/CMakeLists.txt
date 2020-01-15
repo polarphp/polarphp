@@ -23,6 +23,3 @@ polar_add_host_library(PolarDemangling STATIC
 
 target_compile_definitions(PolarDemangling PRIVATE
    LLVM_DISABLE_ABI_BREAKING_CHECKS_ENFORCING=1)
-
-target_link_libraries(PolarDemangling PRIVATE
-   PolarUtils PolarKernel)

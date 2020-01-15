@@ -92,10 +92,10 @@ void Driver::parseDriverKind(ArrayRef<const char *> Args) {
 
    Optional<DriverKind> Kind =
       llvm::StringSwitch<Optional<DriverKind>>(DriverName)
-         .Case("swift", DriverKind::Interactive)
-         .Case("swiftc", DriverKind::Batch)
-         .Case("swift-autolink-extract", DriverKind::AutolinkExtract)
-         .Case("swift-indent", DriverKind::SwiftIndent)
+         .Case("polarphp", DriverKind::Interactive)
+         .Case("polarphpc", DriverKind::Batch)
+         .Case("polarphp-autolink-extract", DriverKind::AutolinkExtract)
+         .Case("polarphp-indent", DriverKind::PolarphpIndent)
          .Default(None);
 
    if (Kind.hasValue())
@@ -3176,7 +3176,7 @@ void Driver::printHelp(bool ShowHidden) const {
          break;
       case DriverKind::Batch:
       case DriverKind::AutolinkExtract:
-      case DriverKind::SwiftIndent:
+      case DriverKind::PolarphpIndent:
          ExcludedFlagsBitmask |= options::NoBatchOption;
          break;
    }

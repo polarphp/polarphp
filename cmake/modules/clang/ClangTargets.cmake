@@ -42,106 +42,236 @@ unset(_expectedTargets)
 
 
 # Compute the installation prefix relative to this file.
+
 set(_IMPORT_PREFIX "${POLAR_DEPS_INSTALL_DIR}")
+
 if(_IMPORT_PREFIX STREQUAL "/")
   set(_IMPORT_PREFIX "")
 endif()
 
 # Create imported target clangBasic
-add_library(clangBasic SHARED IMPORTED)
+add_library(clangBasic STATIC IMPORTED)
+
+set_target_properties(clangBasic PROPERTIES
+  INTERFACE_LINK_LIBRARIES "LLVMCore;LLVMMC;LLVMSupport"
+)
 
 # Create imported target clangLex
-add_library(clangLex SHARED IMPORTED)
+add_library(clangLex STATIC IMPORTED)
+
+set_target_properties(clangLex PROPERTIES
+  INTERFACE_LINK_LIBRARIES "clangBasic;LLVMSupport"
+)
 
 # Create imported target clangParse
-add_library(clangParse SHARED IMPORTED)
+add_library(clangParse STATIC IMPORTED)
+
+set_target_properties(clangParse PROPERTIES
+  INTERFACE_LINK_LIBRARIES "clangAST;clangBasic;clangLex;clangSema;LLVMMC;LLVMMCParser;LLVMSupport"
+)
 
 # Create imported target clangAST
-add_library(clangAST SHARED IMPORTED)
+add_library(clangAST STATIC IMPORTED)
+
+set_target_properties(clangAST PROPERTIES
+  INTERFACE_LINK_LIBRARIES "clangBasic;clangLex;LLVMBinaryFormat;LLVMCore;LLVMSupport"
+)
 
 # Create imported target clangDynamicASTMatchers
-add_library(clangDynamicASTMatchers SHARED IMPORTED)
+add_library(clangDynamicASTMatchers STATIC IMPORTED)
+
+set_target_properties(clangDynamicASTMatchers PROPERTIES
+  INTERFACE_LINK_LIBRARIES "clangAST;clangASTMatchers;clangBasic;LLVMSupport"
+)
 
 # Create imported target clangASTMatchers
-add_library(clangASTMatchers SHARED IMPORTED)
+add_library(clangASTMatchers STATIC IMPORTED)
+
+set_target_properties(clangASTMatchers PROPERTIES
+  INTERFACE_LINK_LIBRARIES "clangAST;clangBasic;LLVMSupport"
+)
 
 # Create imported target clangCrossTU
-add_library(clangCrossTU SHARED IMPORTED)
+add_library(clangCrossTU STATIC IMPORTED)
+
+set_target_properties(clangCrossTU PROPERTIES
+  INTERFACE_LINK_LIBRARIES "clangAST;clangBasic;clangFrontend;clangIndex;LLVMSupport"
+)
 
 # Create imported target clangSema
-add_library(clangSema SHARED IMPORTED)
+add_library(clangSema STATIC IMPORTED)
+
+set_target_properties(clangSema PROPERTIES
+  INTERFACE_LINK_LIBRARIES "clangAST;clangAnalysis;clangBasic;clangEdit;clangLex;LLVMSupport"
+)
 
 # Create imported target clangCodeGen
-add_library(clangCodeGen SHARED IMPORTED)
+add_library(clangCodeGen STATIC IMPORTED)
+
+set_target_properties(clangCodeGen PROPERTIES
+  INTERFACE_LINK_LIBRARIES "clangAnalysis;clangAST;clangASTMatchers;clangBasic;clangFrontend;clangLex;clangSerialization;LLVMAnalysis;LLVMBitReader;LLVMBitWriter;LLVMCore;LLVMCoroutines;LLVMCoverage;LLVMipo;LLVMIRReader;LLVMAggressiveInstCombine;LLVMInstCombine;LLVMInstrumentation;LLVMLTO;LLVMLinker;LLVMMC;LLVMObjCARCOpts;LLVMObject;LLVMPasses;LLVMProfileData;LLVMRemarks;LLVMScalarOpts;LLVMSupport;LLVMTarget;LLVMTransformUtils"
+)
 
 # Create imported target clangAnalysis
-add_library(clangAnalysis SHARED IMPORTED)
+add_library(clangAnalysis STATIC IMPORTED)
+
+set_target_properties(clangAnalysis PROPERTIES
+  INTERFACE_LINK_LIBRARIES "clangAST;clangASTMatchers;clangBasic;clangLex;LLVMSupport"
+)
 
 # Create imported target clangEdit
-add_library(clangEdit SHARED IMPORTED)
+add_library(clangEdit STATIC IMPORTED)
+
+set_target_properties(clangEdit PROPERTIES
+  INTERFACE_LINK_LIBRARIES "clangAST;clangBasic;clangLex;LLVMSupport"
+)
 
 # Create imported target clangRewrite
-add_library(clangRewrite SHARED IMPORTED)
+add_library(clangRewrite STATIC IMPORTED)
+
+set_target_properties(clangRewrite PROPERTIES
+  INTERFACE_LINK_LIBRARIES "clangBasic;clangLex;LLVMSupport"
+)
 
 # Create imported target clangARCMigrate
-add_library(clangARCMigrate SHARED IMPORTED)
+add_library(clangARCMigrate STATIC IMPORTED)
+
+set_target_properties(clangARCMigrate PROPERTIES
+  INTERFACE_LINK_LIBRARIES "clangAST;clangAnalysis;clangBasic;clangEdit;clangFrontend;clangLex;clangRewrite;clangSema;clangSerialization;LLVMSupport"
+)
 
 # Create imported target clangDriver
-add_library(clangDriver SHARED IMPORTED)
+add_library(clangDriver STATIC IMPORTED)
+
+set_target_properties(clangDriver PROPERTIES
+  INTERFACE_LINK_LIBRARIES "clangBasic;LLVMBinaryFormat;LLVMOption;LLVMProfileData;LLVMSupport"
+)
 
 # Create imported target clangSerialization
-add_library(clangSerialization SHARED IMPORTED)
+add_library(clangSerialization STATIC IMPORTED)
+
+set_target_properties(clangSerialization PROPERTIES
+  INTERFACE_LINK_LIBRARIES "clangAST;clangBasic;clangLex;clangSema;LLVMBitReader;LLVMBitstreamReader;LLVMSupport"
+)
 
 # Create imported target clangRewriteFrontend
-add_library(clangRewriteFrontend SHARED IMPORTED)
+add_library(clangRewriteFrontend STATIC IMPORTED)
+
+set_target_properties(clangRewriteFrontend PROPERTIES
+  INTERFACE_LINK_LIBRARIES "clangAST;clangBasic;clangEdit;clangFrontend;clangLex;clangRewrite;clangSerialization;LLVMSupport"
+)
 
 # Create imported target clangFrontend
-add_library(clangFrontend SHARED IMPORTED)
+add_library(clangFrontend STATIC IMPORTED)
+
+set_target_properties(clangFrontend PROPERTIES
+  INTERFACE_LINK_LIBRARIES "clangAST;clangBasic;clangDriver;clangEdit;clangLex;clangParse;clangSema;clangSerialization;LLVMBitReader;LLVMBitstreamReader;LLVMOption;LLVMProfileData;LLVMSupport"
+)
 
 # Create imported target clangFrontendTool
-add_library(clangFrontendTool SHARED IMPORTED)
+add_library(clangFrontendTool STATIC IMPORTED)
+
+set_target_properties(clangFrontendTool PROPERTIES
+  INTERFACE_LINK_LIBRARIES "clangBasic;clangCodeGen;clangDriver;clangFrontend;clangRewriteFrontend;clangARCMigrate;clangStaticAnalyzerFrontend;LLVMOption;LLVMSupport"
+)
 
 # Create imported target clangToolingCore
-add_library(clangToolingCore SHARED IMPORTED)
+add_library(clangToolingCore STATIC IMPORTED)
+
+set_target_properties(clangToolingCore PROPERTIES
+  INTERFACE_LINK_LIBRARIES "clangAST;clangBasic;clangLex;clangRewrite;LLVMSupport"
+)
 
 # Create imported target clangToolingInclusions
-add_library(clangToolingInclusions SHARED IMPORTED)
+add_library(clangToolingInclusions STATIC IMPORTED)
+
+set_target_properties(clangToolingInclusions PROPERTIES
+  INTERFACE_LINK_LIBRARIES "clangBasic;clangLex;clangRewrite;clangToolingCore;LLVMSupport"
+)
 
 # Create imported target clangToolingRefactoring
-add_library(clangToolingRefactoring SHARED IMPORTED)
+add_library(clangToolingRefactoring STATIC IMPORTED)
+
+set_target_properties(clangToolingRefactoring PROPERTIES
+  INTERFACE_LINK_LIBRARIES "clangAST;clangASTMatchers;clangBasic;clangFormat;clangIndex;clangLex;clangRewrite;clangToolingCore;LLVMSupport"
+)
 
 # Create imported target clangToolingASTDiff
-add_library(clangToolingASTDiff SHARED IMPORTED)
+add_library(clangToolingASTDiff STATIC IMPORTED)
+
+set_target_properties(clangToolingASTDiff PROPERTIES
+  INTERFACE_LINK_LIBRARIES "clangBasic;clangAST;clangLex;LLVMSupport"
+)
 
 # Create imported target clangToolingSyntax
-add_library(clangToolingSyntax SHARED IMPORTED)
+add_library(clangToolingSyntax STATIC IMPORTED)
+
+set_target_properties(clangToolingSyntax PROPERTIES
+  INTERFACE_LINK_LIBRARIES "clangAST;clangBasic;clangFrontend;clangLex;clangToolingCore;LLVMSupport"
+)
 
 # Create imported target clangDependencyScanning
-add_library(clangDependencyScanning SHARED IMPORTED)
+add_library(clangDependencyScanning STATIC IMPORTED)
+
+set_target_properties(clangDependencyScanning PROPERTIES
+  INTERFACE_LINK_LIBRARIES "clangAST;clangBasic;clangDriver;clangFrontend;clangFrontendTool;clangLex;clangParse;clangSerialization;clangTooling;LLVMCore;LLVMSupport"
+)
 
 # Create imported target clangTransformer
-add_library(clangTransformer SHARED IMPORTED)
+add_library(clangTransformer STATIC IMPORTED)
+
+set_target_properties(clangTransformer PROPERTIES
+  INTERFACE_LINK_LIBRARIES "clangAST;clangASTMatchers;clangBasic;clangLex;clangToolingCore;clangToolingRefactoring;LLVMSupport"
+)
 
 # Create imported target clangTooling
-add_library(clangTooling SHARED IMPORTED)
+add_library(clangTooling STATIC IMPORTED)
+
+set_target_properties(clangTooling PROPERTIES
+  INTERFACE_LINK_LIBRARIES "clangAST;clangASTMatchers;clangBasic;clangDriver;clangFormat;clangFrontend;clangLex;clangRewrite;clangSerialization;clangToolingCore;LLVMOption;LLVMSupport"
+)
 
 # Create imported target clangDirectoryWatcher
-add_library(clangDirectoryWatcher SHARED IMPORTED)
+add_library(clangDirectoryWatcher STATIC IMPORTED)
+
+set_target_properties(clangDirectoryWatcher PROPERTIES
+  INTERFACE_LINK_LIBRARIES "LLVMSupport"
+)
 
 # Create imported target clangIndex
-add_library(clangIndex SHARED IMPORTED)
+add_library(clangIndex STATIC IMPORTED)
+
+set_target_properties(clangIndex PROPERTIES
+  INTERFACE_LINK_LIBRARIES "clangAST;clangBasic;clangFormat;clangFrontend;clangLex;clangRewrite;clangSerialization;clangToolingCore;LLVMCore;LLVMSupport"
+)
 
 # Create imported target clangStaticAnalyzerCore
-add_library(clangStaticAnalyzerCore SHARED IMPORTED)
+add_library(clangStaticAnalyzerCore STATIC IMPORTED)
+
+set_target_properties(clangStaticAnalyzerCore PROPERTIES
+  INTERFACE_LINK_LIBRARIES "clangAST;clangASTMatchers;clangAnalysis;clangBasic;clangCrossTU;clangFrontend;clangLex;clangRewrite;LLVMSupport"
+)
 
 # Create imported target clangStaticAnalyzerCheckers
-add_library(clangStaticAnalyzerCheckers SHARED IMPORTED)
+add_library(clangStaticAnalyzerCheckers STATIC IMPORTED)
+
+set_target_properties(clangStaticAnalyzerCheckers PROPERTIES
+  INTERFACE_LINK_LIBRARIES "clangAST;clangASTMatchers;clangAnalysis;clangBasic;clangLex;clangStaticAnalyzerCore;LLVMSupport"
+)
 
 # Create imported target clangStaticAnalyzerFrontend
-add_library(clangStaticAnalyzerFrontend SHARED IMPORTED)
+add_library(clangStaticAnalyzerFrontend STATIC IMPORTED)
+
+set_target_properties(clangStaticAnalyzerFrontend PROPERTIES
+  INTERFACE_LINK_LIBRARIES "clangAST;clangAnalysis;clangBasic;clangCrossTU;clangFrontend;clangLex;clangStaticAnalyzerCheckers;clangStaticAnalyzerCore;LLVMSupport"
+)
 
 # Create imported target clangFormat
-add_library(clangFormat SHARED IMPORTED)
+add_library(clangFormat STATIC IMPORTED)
+
+set_target_properties(clangFormat PROPERTIES
+  INTERFACE_LINK_LIBRARIES "clangBasic;clangLex;clangToolingCore;clangToolingInclusions;LLVMSupport"
+)
 
 # Create imported target clang
 add_executable(clang IMPORTED)
@@ -151,10 +281,18 @@ set_property(TARGET clang PROPERTY ENABLE_EXPORTS 1)
 add_executable(clang-format IMPORTED)
 
 # Create imported target clangHandleCXX
-add_library(clangHandleCXX SHARED IMPORTED)
+add_library(clangHandleCXX STATIC IMPORTED)
+
+set_target_properties(clangHandleCXX PROPERTIES
+  INTERFACE_LINK_LIBRARIES "clangBasic;clangCodeGen;clangFrontend;clangLex;clangSerialization;clangTooling;LLVMAArch64CodeGen;LLVMAArch64AsmParser;LLVMAArch64Desc;LLVMAArch64Disassembler;LLVMAArch64Info;LLVMAArch64Utils;LLVMAMDGPUCodeGen;LLVMAMDGPUAsmParser;LLVMAMDGPUDesc;LLVMAMDGPUDisassembler;LLVMAMDGPUInfo;LLVMAMDGPUUtils;LLVMARMCodeGen;LLVMARMAsmParser;LLVMARMDesc;LLVMARMDisassembler;LLVMARMInfo;LLVMARMUtils;LLVMBPFCodeGen;LLVMBPFAsmParser;LLVMBPFDesc;LLVMBPFDisassembler;LLVMBPFInfo;LLVMHexagonCodeGen;LLVMHexagonAsmParser;LLVMHexagonDesc;LLVMHexagonDisassembler;LLVMHexagonInfo;LLVMLanaiCodeGen;LLVMLanaiAsmParser;LLVMLanaiDesc;LLVMLanaiDisassembler;LLVMLanaiInfo;LLVMMipsCodeGen;LLVMMipsAsmParser;LLVMMipsDesc;LLVMMipsDisassembler;LLVMMipsInfo;LLVMMSP430CodeGen;LLVMMSP430AsmParser;LLVMMSP430Desc;LLVMMSP430Disassembler;LLVMMSP430Info;LLVMNVPTXCodeGen;LLVMNVPTXDesc;LLVMNVPTXInfo;LLVMPowerPCCodeGen;LLVMPowerPCAsmParser;LLVMPowerPCDesc;LLVMPowerPCDisassembler;LLVMPowerPCInfo;LLVMRISCVCodeGen;LLVMRISCVAsmParser;LLVMRISCVDesc;LLVMRISCVDisassembler;LLVMRISCVInfo;LLVMRISCVUtils;LLVMSparcCodeGen;LLVMSparcAsmParser;LLVMSparcDesc;LLVMSparcDisassembler;LLVMSparcInfo;LLVMSystemZCodeGen;LLVMSystemZAsmParser;LLVMSystemZDesc;LLVMSystemZDisassembler;LLVMSystemZInfo;LLVMWebAssemblyCodeGen;LLVMWebAssemblyAsmParser;LLVMWebAssemblyDesc;LLVMWebAssemblyDisassembler;LLVMWebAssemblyInfo;LLVMX86CodeGen;LLVMX86AsmParser;LLVMX86Desc;LLVMX86Disassembler;LLVMX86Info;LLVMX86Utils;LLVMXCoreCodeGen;LLVMXCoreDesc;LLVMXCoreDisassembler;LLVMXCoreInfo;LLVMSupport"
+)
 
 # Create imported target clangHandleLLVM
-add_library(clangHandleLLVM SHARED IMPORTED)
+add_library(clangHandleLLVM STATIC IMPORTED)
+
+set_target_properties(clangHandleLLVM PROPERTIES
+  INTERFACE_LINK_LIBRARIES "LLVMAnalysis;LLVMCodeGen;LLVMCore;LLVMExecutionEngine;LLVMipo;LLVMIRReader;LLVMMC;LLVMMCJIT;LLVMObject;LLVMRuntimeDyld;LLVMSelectionDAG;LLVMSupport;LLVMTarget;LLVMTransformUtils;LLVMX86CodeGen;LLVMX86AsmParser;LLVMX86Desc;LLVMX86Disassembler;LLVMX86Info;LLVMX86Utils"
+)
 
 # Create imported target clang-import-test
 add_executable(clang-import-test IMPORTED)
@@ -186,6 +324,10 @@ add_executable(clang-extdef-mapping IMPORTED)
 # Create imported target libclang
 add_library(libclang SHARED IMPORTED)
 
+if(CMAKE_VERSION VERSION_LESS 2.8.12)
+  message(FATAL_ERROR "This file relies on consumers using CMake 2.8.12 or greater.")
+endif()
+
 # Load information for each installed configuration.
 get_filename_component(_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
 file(GLOB CONFIG_FILES "${_DIR}/ClangTargets-*.cmake")
@@ -197,22 +339,22 @@ endforeach()
 set(_IMPORT_PREFIX)
 
 # Loop over all imported files and verify that they actually exist
-foreach(target ${_IMPORT_CHECK_TARGETS} )
-  foreach(file ${_IMPORT_CHECK_FILES_FOR_${target}} )
-#     if(NOT EXISTS "${file}" )
-#       message(FATAL_ERROR "The imported target \"${target}\" references the file
-#    \"${file}\"
-# but this file does not exist.  Possible reasons include:
-# * The file was deleted, renamed, or moved to another location.
-# * An install or uninstall procedure did not complete successfully.
-# * The installation package was faulty and contained
-#    \"${CMAKE_CURRENT_LIST_FILE}\"
-# but not all the files it references.
-# ")
-#     endif()
-  endforeach()
-  unset(_IMPORT_CHECK_FILES_FOR_${target})
-endforeach()
+#foreach(target ${_IMPORT_CHECK_TARGETS} )
+#  foreach(file ${_IMPORT_CHECK_FILES_FOR_${target}} )
+#    if(NOT EXISTS "${file}" )
+#      message(FATAL_ERROR "The imported target \"${target}\" references the file
+#   \"${file}\"
+#but this file does not exist.  Possible reasons include:
+#* The file was deleted, renamed, or moved to another location.
+#* An install or uninstall procedure did not complete successfully.
+#* The installation package was faulty and contained
+#   \"${CMAKE_CURRENT_LIST_FILE}\"
+#but not all the files it references.
+#")
+#    endif()
+#  endforeach()
+#  unset(_IMPORT_CHECK_FILES_FOR_${target})
+#endforeach()
 unset(_IMPORT_CHECK_TARGETS)
 
 # This file does not depend on other imported targets which have

@@ -956,13 +956,13 @@ function(_add_variant_c_compile_link_flags)
          list(APPEND result "-B" "${tools_path}")
       endif()
    endif()
-
-   if(IS_DARWIN)
-      list(APPEND result
-         "-arch" "${CFLAGS_ARCH}"
-         "-F" "${POLAR_SDK_${CFLAGS_SDK}_PATH}/../../../Developer/Library/Frameworks"
-         "-m${POLAR_SDK_${CFLAGS_SDK}_VERSION_MIN_NAME}-version-min=${DEPLOYMENT_VERSION}")
-   endif()
+   #  TODO
+   #   if(IS_DARWIN)
+   #      list(APPEND result
+   #         "-arch" "${CFLAGS_ARCH}"
+   #         "-F" "${POLAR_SDK_${CFLAGS_SDK}_PATH}/../../../Developer/Library/Frameworks"
+   #         "-m${POLAR_SDK_${CFLAGS_SDK}_VERSION_MIN_NAME}-version-min=${DEPLOYMENT_VERSION}")
+   #   endif()
 
    if(CFLAGS_ANALYZE_CODE_COVERAGE)
       list(APPEND result "-fprofile-instr-generate"
@@ -2273,6 +2273,12 @@ function(_polar_add_library_single target name)
       target_link_libraries("${target_static}" PRIVATE
          ${POLARLIB_SINGLE_PRIVATE_LINK_LIBRARIES})
    endif()
+   add_dependencies(${target} llvm-project)
+   add_dependencies(${target} clang-project)
+   if (target_static)
+      add_dependencies(${target_static} llvm-project)
+      add_dependencies(${target_static} clang-project)
+   endif()
 
    # Do not add code here.
 endfunction()
@@ -3102,7 +3108,7 @@ endfunction()
 #
 #   [ARCHITECTURE architecture]
 #     Architecture to build for.
-function(_polar_add_typephp_executable_single name)
+function(_polar_add_executable_single name)
    # Parse the arguments we were given.
    cmake_parse_arguments(POLAREXE_SINGLE
       "EXCLUDE_FROM_ALL"
@@ -3112,13 +3118,13 @@ function(_polar_add_typephp_executable_single name)
 
    set(POLAREXE_SINGLE_SOURCES ${POLAREXE_SINGLE_UNPARSED_ARGUMENTS})
 
-   translate_flag(${POLAREXE_SINGLE_EXCLUDE_FROM_ALL}
+   polar_translate_flag(${POLAREXE_SINGLE_EXCLUDE_FROM_ALL}
       "EXCLUDE_FROM_ALL"
       POLAREXE_SINGLE_EXCLUDE_FROM_ALL_FLAG)
 
    # Check arguments.
-   precondition(POLAREXE_SINGLE_SDK MESSAGE "Should specify an SDK")
-   precondition(POLAREXE_SINGLE_ARCHITECTURE MESSAGE "Should specify an architecture")
+   polar_precondition(POLAREXE_SINGLE_SDK MESSAGE "Should specify an SDK")
+   polar_precondition(POLAREXE_SINGLE_ARCHITECTURE MESSAGE "Should specify an architecture")
 
    # Determine compiler flags.
    set(c_compile_flags)
@@ -3175,7 +3181,7 @@ function(_polar_add_typephp_executable_single name)
       ARCHITECTURE ${POLAREXE_SINGLE_ARCHITECTURE}
       COMPILE_FLAGS ${POLAREXE_SINGLE_COMPILE_FLAGS}
       IS_MAIN)
-   polar_add_source_group("${POLAREXE_SINGLE_EXTERNAL_SOURCES}")
+   add_typephp_source_group("${POLAREXE_SINGLE_EXTERNAL_SOURCES}")
 
    add_executable(${name}
       ${POLAREXE_SINGLE_EXCLUDE_FROM_ALL_FLAG}
@@ -3196,7 +3202,8 @@ function(_polar_add_typephp_executable_single name)
 
    set_property(TARGET ${name} APPEND_STRING PROPERTY
       COMPILE_FLAGS " ${c_compile_flags}")
-   polar_target_link_search_directories("${name}" "${library_search_directories}")
+   #  TODO
+   #   polar_target_link_search_directories("${name}" "${library_search_directories}")
    set_property(TARGET ${name} APPEND_STRING PROPERTY
       LINK_FLAGS " ${link_flags}")
    set_property(TARGET ${name} APPEND PROPERTY LINK_LIBRARIES ${link_libraries})
@@ -3221,7 +3228,7 @@ function(_polar_add_typephp_executable_single name)
          LINKER_LANGUAGE "CXX")
    endif()
 
-   set_target_properties(${name} PROPERTIES FOLDER "Swift executables")
+   set_target_properties(${name} PROPERTIES FOLDER "polarphp executables")
 endfunction()
 
 macro(polar_add_tool_subdirectory name)
@@ -3243,15 +3250,11 @@ function(polar_add_host_tool executable)
       "${multiple_parameter_options}"
       ${ARGN})
 
-   if(ASHT_LINK_LIBRARIES)
-      message(SEND_ERROR "${executable} is using LINK_LIBRARIES parameter which is deprecated.  Please use target_link_libraries instead")
-   endif()
-
-   precondition(ASHT_POLAR_COMPONENT
+   polar_precondition(ASHT_POLAR_COMPONENT
       MESSAGE "polarphp Component is required to add a host tool")
 
    # Create the executable rule.
-   _polar_add_typephp_executable_single(${executable}
+   _polar_add_executable_single(${executable}
       SDK ${POLAR_HOST_VARIANT_SDK}
       ARCHITECTURE ${POLAR_HOST_VARIANT_ARCH}
       ${ASHT_UNPARSED_ARGUMENTS})

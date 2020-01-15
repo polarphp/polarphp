@@ -24,6 +24,7 @@ namespace polar::markup {
 using llvm::Optional;
 using llvm::ArrayRef;
 using llvm::StringRef;
+using llvm::cast;
 
 class MarkupContext;
 class MarkupAstNode;

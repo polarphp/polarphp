@@ -111,10 +111,10 @@ ModuleDecl *ClangImporter::Implementation::loadModuleDWARF(
    if (it != DWARFModuleUnits.end())
       return it->second->getParentModule();
 
-   auto *decl = ModuleDecl::create(name, PolarphpContext);
+   auto *decl = ModuleDecl::create(name, TypePHPContext);
    decl->setIsNonSwiftModule();
    decl->setHasResolvedImports();
-   auto *wrapperUnit = new (PolarphpContext) DWARFModuleUnit(*decl, *this);
+   auto *wrapperUnit = new (TypePHPContext) DWARFModuleUnit(*decl, *this);
    DWARFModuleUnits.insert({name, wrapperUnit});
    decl->addFile(*wrapperUnit);
 
@@ -122,7 +122,7 @@ ModuleDecl *ClangImporter::Implementation::loadModuleDWARF(
    (void) namelookup::getAllImports(decl);
 
    // Register the module with the ASTContext so it is available for lookups.
-   ModuleDecl *&loaded = PolarphpContext.LoadedModules[name];
+   ModuleDecl *&loaded = TypePHPContext.LoadedModules[name];
    if (!loaded)
       loaded = decl;
 

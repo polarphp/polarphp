@@ -61,7 +61,7 @@ polar_add_host_library(PolarBasic STATIC
 target_include_directories(PolarBasic PRIVATE
   ${UUID_INCLUDE})
 
-target_link_libraries(PolarBasic
+target_link_libraries(PolarBasic INTERFACE
    PolarGlobal
    ${UUID_LIBRARIES}
    nlohmann_json::nlohmann_json

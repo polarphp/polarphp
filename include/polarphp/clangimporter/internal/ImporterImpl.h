@@ -21,7 +21,7 @@
 #include "polarphp/clangimporter/internal/ClangSourceBufferImporter.h"
 #include "polarphp/clangimporter/internal/ImportEnumInfo.h"
 #include "polarphp/clangimporter/internal/ImportName.h"
-#include "polarphp/clangimporter/internal/PolarphpLookupTable.h"
+#include "polarphp/clangimporter/internal/TypePHPLookupTable.h"
 #include "polarphp/clangimporter/ClangImporter.h"
 #include "polarphp/clangimporter/ClangModule.h"
 #include "polarphp/ast/AstContext.h"
@@ -265,7 +265,7 @@ private:
 }
 
 using LookupTableMap =
-llvm::DenseMap<StringRef, std::unique_ptr<PolarphpLookupTable>>;
+llvm::DenseMap<StringRef, std::unique_ptr<TypePHPLookupTable>>;
 
 /// The result of importing a clang type. It holds both the Swift Type
 /// as well as a bool in which 'true' indicates either:
@@ -319,7 +319,7 @@ public:
    ~Implementation();
 
    /// Polarphp AST context.
-   AstContext &PolarphpContext;
+   AstContext &TypePHPContext;
 
    const bool ImportForwardDeclarations;
    const bool InferImportAsMember;
@@ -333,13 +333,13 @@ public:
    const Version CurrentVersion;
 
    constexpr static const char * const moduleImportBufferName =
-      "<swift-imported-modules>";
+      "<typephp-imported-modules>";
    constexpr static const char * const bridgingHeaderBufferName =
       "<bridging-header-import>";
 
 private:
    /// The Swift lookup table for the bridging header.
-   std::unique_ptr<PolarphpLookupTable> BridgingHeaderLookupTable;
+   std::unique_ptr<TypePHPLookupTable> BridgingHeaderLookupTable;
 
    /// The Swift lookup tables, per module.
    ///
@@ -462,7 +462,7 @@ private:
 
    void bumpGeneration() {
       ++Generation;
-      PolarphpContext.bumpGeneration();
+      TypePHPContext.bumpGeneration();
    }
 
 public:
@@ -707,10 +707,10 @@ public:
 
    /// Print an imported name as a string suitable for the swift_name attribute,
    /// or the 'Rename' field of AvailableAttr.
-   void printPolarphpName(importer::ImportedName name,
-                          importer::ImportNameVersion version,
-                          bool fullyQualified,
-                          llvm::raw_ostream &os);
+   void printTypePHPName(importer::ImportedName name,
+                         importer::ImportNameVersion version,
+                         bool fullyQualified,
+                         llvm::raw_ostream &os);
 
    /// Import the given Clang identifier into Swift.
    ///
@@ -872,7 +872,7 @@ public:
    /// 'unavailable' in Swift.
    bool isUnavailableInSwift(const clang::Decl *decl) {
       return importer::isUnavailableInSwift(
-         decl, platformAvailability, PolarphpContext.LangOpts.EnableObjCInterop);
+         decl, platformAvailability, TypePHPContext.LangOpts.EnableObjCInterop);
    }
 
    /// Add "Unavailable" annotation to the swift declaration.
@@ -919,7 +919,7 @@ public:
    /// \param name The name of the type to find.
    ///
    /// \returns The named type, or null if the type could not be found.
-   Type getNamedPolarphpType(StringRef moduleName, StringRef name);
+   Type getNamedTypePHPType(StringRef moduleName, StringRef name);
 
    /// Retrieve the named Swift type, e.g., Int32.
    ///
@@ -928,7 +928,7 @@ public:
    /// \param name The name of the type to find.
    ///
    /// \returns The named type, or null if the type could not be found.
-   Type getNamedPolarphpType(ModuleDecl *module, StringRef name);
+   Type getNamedTypePHPType(ModuleDecl *module, StringRef name);
 
    /// Retrieve the NSObject type.
    Type getNSObjectType();
@@ -1173,7 +1173,7 @@ public:
       if (protocols.empty())
          return;
 
-      ImportedInterfaces[decl] = PolarphpContext.AllocateCopy(protocols);
+      ImportedInterfaces[decl] = TypePHPContext.AllocateCopy(protocols);
    }
 
    /// Retrieve the imported protocols for the given declaration.
@@ -1249,7 +1249,7 @@ public:
    DeclTy *createDeclWithClangNode(ClangNode ClangN, AccessLevel access,
                                    Targs &&... Args) {
       assert(ClangN);
-      void *DeclPtr = allocateMemoryForDecl<DeclTy>(PolarphpContext, sizeof(DeclTy),
+      void *DeclPtr = allocateMemoryForDecl<DeclTy>(TypePHPContext, sizeof(DeclTy),
                                                     true);
       auto D = ::new (DeclPtr) DeclTy(std::forward<Targs>(Args)...);
       D->setClangNode(ClangN);
@@ -1263,7 +1263,7 @@ public:
    ///
    /// \param clangModule The module, or null to indicate that we're talking
    /// about the directly-parsed headers.
-   PolarphpLookupTable *findLookupTable(const clang::Module *clangModule);
+   TypePHPLookupTable *findLookupTable(const clang::Module *clangModule);
 
    /// Visit each of the lookup tables in some deterministic order.
    ///
@@ -1272,11 +1272,11 @@ public:
    ///
    /// \returns \c true if the \c visitor ever returns \c true, \c
    /// false otherwise.
-   bool forEachLookupTable(llvm::function_ref<bool(PolarphpLookupTable &table)> fn);
+   bool forEachLookupTable(llvm::function_ref<bool(TypePHPLookupTable &table)> fn);
 
    /// Look for namespace-scope values with the given name in the given
-   /// Swift lookup table.
-   void lookupValue(PolarphpLookupTable &table, DeclName name,
+   /// TypePHP lookup table.
+   void lookupValue(TypePHPLookupTable &table, DeclName name,
                     VisibleDeclConsumer &consumer);
 
    /// Look for namespace-scope values with the given name using the
@@ -1291,16 +1291,16 @@ public:
                             llvm::function_ref<void(TypeDecl *)> receiver);
 
    /// Look for namespace-scope values in the given Swift lookup table.
-   void lookupVisibleDecls(PolarphpLookupTable &table,
+   void lookupVisibleDecls(TypePHPLookupTable &table,
                            VisibleDeclConsumer &consumer);
 
    /// Look for Objective-C members with the given name in the given
    /// Swift lookup table.
-   void lookupObjCMembers(PolarphpLookupTable &table, DeclName name,
+   void lookupObjCMembers(TypePHPLookupTable &table, DeclName name,
                           VisibleDeclConsumer &consumer);
 
    /// Look for all Objective-C members in the given Swift lookup table.
-   void lookupAllObjCMembers(PolarphpLookupTable &table,
+   void lookupAllObjCMembers(TypePHPLookupTable &table,
                              VisibleDeclConsumer &consumer);
 
    /// Determine the effective Clang context for the given Swift nominal type.
@@ -1386,20 +1386,20 @@ static T *castIgnoringCompatibilityAlias(Decl *D) {
    return cast_or_null<T>(D);
 }
 
-class SwiftNameLookupExtension : public clang::ModuleFileExtension {
-   std::unique_ptr<PolarphpLookupTable> &pchLookupTable;
+class TypePHPNameLookupExtension : public clang::ModuleFileExtension {
+   std::unique_ptr<TypePHPLookupTable> &pchLookupTable;
    LookupTableMap &lookupTables;
-   AstContext &polarphpCtx;
+   AstContext &typePHPCtx;
    ClangSourceBufferImporter &buffersForDiagnostics;
    const PlatformAvailability &availability;
    const bool inferImportAsMember;
 
 public:
-   SwiftNameLookupExtension(std::unique_ptr<PolarphpLookupTable> &pchLookupTable,
-                            LookupTableMap &tables, AstContext &ctx,
-                            ClangSourceBufferImporter &buffersForDiagnostics,
-                            const PlatformAvailability &avail, bool inferIAM)
-      : pchLookupTable(pchLookupTable), lookupTables(tables), polarphpCtx(ctx),
+   TypePHPNameLookupExtension(std::unique_ptr<TypePHPLookupTable> &pchLookupTable,
+                              LookupTableMap &tables, AstContext &ctx,
+                              ClangSourceBufferImporter &buffersForDiagnostics,
+                              const PlatformAvailability &avail, bool inferIAM)
+      : pchLookupTable(pchLookupTable), lookupTables(tables), typePHPCtx(ctx),
         buffersForDiagnostics(buffersForDiagnostics), availability(avail),
         inferImportAsMember(inferIAM) {}
 

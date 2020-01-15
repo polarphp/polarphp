@@ -27,6 +27,7 @@
 
 #include "polarphp/basic/PrettyStackTrace.h"
 #include "polarphp/basic/QuotedString.h"
+#include "polarphp/basic/Version.h"
 #include "llvm/Support/MemoryBuffer.h"
 #include "llvm/Support/raw_ostream.h"
 
@@ -45,6 +46,11 @@ void PrettyStackTraceFileContents::print(llvm::raw_ostream &out) const
       out << '\n';
    }
    out << "---\n";
+}
+
+void PrettyStackTracePolarphpVersion::print(llvm::raw_ostream &out) const
+{
+   out << version::retrieve_polarphp_full_version() << '\n';
 }
 
 } // polar

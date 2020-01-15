@@ -981,9 +981,9 @@ ClangImporter::create(AstContext &ctx, const ClangImporterOptions &importerOpts,
 
    // Install a Clang module file extension to build Swift name lookup tables.
    importer->Impl.Invocation->getFrontendOpts().ModuleFileExtensions.push_back(
-      std::make_shared<SwiftNameLookupExtension>(
+      std::make_shared<TypePHPNameLookupExtension>(
          importer->Impl.BridgingHeaderLookupTable,
-         importer->Impl.LookupTables, importer->Impl.PolarphpContext,
+         importer->Impl.LookupTables, importer->Impl.TypePHPContext,
          importer->Impl.getBufferImporterForDiagnostics(),
          importer->Impl.platformAvailability,
          importer->Impl.InferImportAsMember));
@@ -1107,7 +1107,7 @@ ClangImporter::create(AstContext &ctx, const ClangImporterOptions &importerOpts,
    importer->Impl.Parser->Initialize();
 
    importer->Impl.nameImporter.reset(new NameImporter(
-      importer->Impl.PolarphpContext, importer->Impl.platformAvailability,
+      importer->Impl.TypePHPContext, importer->Impl.platformAvailability,
       importer->Impl.getClangSema(), importer->Impl.InferImportAsMember));
 
    // FIXME: These decls are not being parsed correctly since (a) some of the
@@ -1301,7 +1301,7 @@ bool ClangImporter::Implementation::importHeader(
    // to correct. The fix would be explicitly importing on the command line.
    if (implicitImport && !allParsedDecls.empty() &&
        BridgingHeaderExplicitlyRequested) {
-      PolarphpContext.Diags.diagnose(
+      TypePHPContext.Diags.diagnose(
          diagLoc, diag::implicit_bridging_header_imported_from_module,
          llvm::sys::path::filename(headerName), adapter->getName());
    }
@@ -1326,7 +1326,7 @@ bool ClangImporter::Implementation::importHeader(
    // Wrap all Clang imports under a Swift import decl.
    for (auto &Import : BridgeHeaderTopLevelImports) {
       if (auto *ClangImport = Import.dyn_cast<clang::ImportDecl*>()) {
-         Import = createImportDecl(PolarphpContext, adapter, ClangImport, {});
+         Import = createImportDecl(TypePHPContext, adapter, ClangImport, {});
       }
    }
 
@@ -1336,7 +1336,7 @@ bool ClangImporter::Implementation::importHeader(
 
    // FIXME: What do we do if there was already an error?
    if (!hadError && clangDiags.hasErrorOccurred()) {
-      PolarphpContext.Diags.diagnose(diagLoc, diag::bridging_header_error,
+      TypePHPContext.Diags.diagnose(diagLoc, diag::bridging_header_error,
                                      headerName);
       return true;
    }
@@ -1385,13 +1385,13 @@ bool ClangImporter::importBridgingHeader(StringRef header, ModuleDecl *adapter,
    clang::FileManager &fileManager = Impl.Instance->getFileManager();
    auto headerFile = fileManager.getFile(header, /*OpenFile=*/true);
    if (!headerFile) {
-      Impl.PolarphpContext.Diags.diagnose(diagLoc, diag::bridging_header_missing,
+      Impl.TypePHPContext.Diags.diagnose(diagLoc, diag::bridging_header_missing,
                                           header);
       return true;
    }
 
    llvm::SmallString<128> importLine;
-   if (Impl.PolarphpContext.LangOpts.EnableObjCInterop)
+   if (Impl.TypePHPContext.LangOpts.EnableObjCInterop)
       importLine = "#import \"";
    else
       importLine = "#include \"";
@@ -1454,7 +1454,7 @@ std::string ClangImporter::getBridgingHeaderContents(StringRef headerPath,
 
    success |= !rewriteInstance.getDiagnostics().hasErrorOccurred();
    if (!success) {
-      Impl.PolarphpContext.Diags.diagnose({},
+      Impl.TypePHPContext.Diags.diagnose({},
                                           diag::could_not_rewrite_bridging_header);
       return "";
    }
@@ -1544,7 +1544,7 @@ ClangImporter::emitBridgingPCH(StringRef headerPath,
    emitInstance->ExecuteAction(*action);
 
    if (emitInstance->getDiagnostics().hasErrorOccurred()) {
-      Impl.PolarphpContext.Diags.diagnose({},
+      Impl.TypePHPContext.Diags.diagnose({},
                                           diag::bridging_header_pch_error,
                                           outputPCHPath, headerPath);
       return true;
@@ -1580,7 +1580,7 @@ bool ClangImporter::emitPrecompiledModule(StringRef moduleMapPath,
    emitInstance->ExecuteAction(*action);
 
    if (emitInstance->getDiagnostics().hasErrorOccurred()) {
-      Impl.PolarphpContext.Diags.diagnose({},
+      Impl.TypePHPContext.Diags.diagnose({},
                                           diag::emit_pcm_error,
                                           outputPath, moduleMapPath);
       return true;
@@ -1605,7 +1605,7 @@ bool ClangImporter::dumpPrecompiledModule(StringRef modulePath,
    dumpInstance->ExecuteAction(*action);
 
    if (dumpInstance->getDiagnostics().hasErrorOccurred()) {
-      Impl.PolarphpContext.Diags.diagnose({}, diag::dump_pcm_error, modulePath);
+      Impl.TypePHPContext.Diags.diagnose({}, diag::dump_pcm_error, modulePath);
       return true;
    }
    return false;
@@ -1620,7 +1620,7 @@ void ClangImporter::collectVisibleTopLevelModuleNames(
          continue;
 
       names.push_back(
-         Impl.PolarphpContext.getIdentifier(M->getTopLevelModuleName()));
+         Impl.TypePHPContext.getIdentifier(M->getTopLevelModuleName()));
    }
 }
 
@@ -1704,7 +1704,7 @@ ModuleDecl *ClangImporter::Implementation::loadModuleClang(
 //      if (!clangFEOpts.IndexStorePath.empty()) {
 //         StringRef moduleName = path[0].first->getName();
 //         // Ignore the SwiftShims module for the index data.
-//         if (moduleName == PolarphpContext.SwiftShimsModuleName.str()) {
+//         if (moduleName == TypePHPContext.SwiftShimsModuleName.str()) {
 //            preservedIndexStorePathOption = clangFEOpts.IndexStorePath;
 //            clangFEOpts.IndexStorePath.clear();
 //         }
@@ -1794,14 +1794,14 @@ ModuleDecl *ClangImporter::Implementation::finishLoadingClangModule(
       // Build the representation of the Clang module in Swift.
       // FIXME: The name of this module could end up as a key in the AstContext,
       // but that's not correct for submodules.
-      Identifier name = PolarphpContext.getIdentifier((*clangModule).Name);
-      result = ModuleDecl::create(name, PolarphpContext);
+      Identifier name = TypePHPContext.getIdentifier((*clangModule).Name);
+      result = ModuleDecl::create(name, TypePHPContext);
       result->setIsSystemModule(clangModule->IsSystem);
       result->setIsNonSwiftModule();
       result->setHasResolvedImports();
 
       wrapperUnit =
-         new (PolarphpContext) ClangModuleUnit(*result, *this, clangModule);
+         new (TypePHPContext) ClangModuleUnit(*result, *this, clangModule);
       result->addFile(*wrapperUnit);
       cacheEntry.setPointerAndInt(wrapperUnit, true);
 
@@ -1814,7 +1814,7 @@ ModuleDecl *ClangImporter::Implementation::finishLoadingClangModule(
    if (clangModule->isSubModule()) {
       finishLoadingClangModule(clangModule->getTopLevelModule(), true);
    } else {
-      ModuleDecl *&loaded = PolarphpContext.LoadedModules[result->getName()];
+      ModuleDecl *&loaded = TypePHPContext.LoadedModules[result->getName()];
       if (!loaded)
          loaded = result;
    }
@@ -1947,7 +1947,7 @@ bool PlatformAvailability::treatDeprecatedAsUnavailable(
 ClangImporter::Implementation::Implementation(
    AstContext &ctx, const ClangImporterOptions &opts,
    DWARFImporterDelegate *dwarfImporterDelegate)
-   : PolarphpContext(ctx),
+   : TypePHPContext(ctx),
      ImportForwardDeclarations(opts.ImportForwardDeclarations),
      InferImportAsMember(opts.InferImportAsMember),
      DisableSwiftBridgeAttr(opts.DisableSwiftBridgeAttr),
@@ -1955,14 +1955,14 @@ ClangImporter::Implementation::Implementation(
      DisableOverlayModules(opts.DisableOverlayModules),
      IsReadingBridgingPCH(false),
      CurrentVersion(ImportNameVersion::fromOptions(ctx.LangOpts)),
-     BridgingHeaderLookupTable(new PolarphpLookupTable(nullptr)),
+     BridgingHeaderLookupTable(new TypePHPLookupTable(nullptr)),
      BuffersForDiagnostics(ctx.SourceMgr),
      platformAvailability(ctx.LangOpts), nameImporter(),
      DWARFImporter(dwarfImporterDelegate) {}
 
 ClangImporter::Implementation::~Implementation() {
 #ifndef NDEBUG
-   PolarphpContext.SourceMgr.verifyAllBuffers();
+   TypePHPContext.SourceMgr.verifyAllBuffers();
 #endif
 }
 
@@ -1973,13 +1973,13 @@ ClangModuleUnit *ClangImporter::Implementation::getWrapperForModule(
       return cached;
 
    // FIXME: Handle hierarchical names better.
-   Identifier name = PolarphpContext.getIdentifier(underlying->Name);
-   auto wrapper = ModuleDecl::create(name, PolarphpContext);
+   Identifier name = TypePHPContext.getIdentifier(underlying->Name);
+   auto wrapper = ModuleDecl::create(name, TypePHPContext);
    wrapper->setIsSystemModule(underlying->IsSystem);
    wrapper->setIsNonSwiftModule();
    wrapper->setHasResolvedImports();
 
-   auto file = new (PolarphpContext) ClangModuleUnit(*wrapper, *this,
+   auto file = new (TypePHPContext) ClangModuleUnit(*wrapper, *this,
                                                      underlying);
    wrapper->addFile(*file);
    cacheEntry.setPointer(file);
@@ -2055,13 +2055,13 @@ ClangImporter::Implementation::importIdentifier(
    }
 
    // Get the Swift identifier.
-   return PolarphpContext.getIdentifier(name);
+   return TypePHPContext.getIdentifier(name);
 }
 // @todo
 //
 //ObjCSelector ClangImporter::Implementation::importSelector(
 //   clang::Selector selector) {
-//   auto &ctx = PolarphpContext;
+//   auto &ctx = TypePHPContext;
 //
 //   // Handle zero-argument selectors directly.
 //   if (selector.isUnarySelector()) {
@@ -2574,7 +2574,7 @@ bool ClangImporter::lookupDeclsFromHeader(StringRef Filename,
 }
 
 void ClangImporter::lookupValue(DeclName name, VisibleDeclConsumer &consumer) {
-   Impl.forEachLookupTable([&](PolarphpLookupTable &table) -> bool {
+   Impl.forEachLookupTable([&](TypePHPLookupTable &table) -> bool {
       Impl.lookupValue(table, name, consumer);
       return false;
    });
@@ -2863,7 +2863,7 @@ void ClangModuleUnit::lookupValue(DeclName name, NLKind lookupKind,
 /// FIXME: this is an elaborate hack to badly reflect Clang's
 /// submodule visibility into Swift.
 static bool isVisibleClangEntry(clang::ASTContext &ctx,
-                                PolarphpLookupTable::SingleEntry entry) {
+                                TypePHPLookupTable::SingleEntry entry) {
    if (auto clangDecl = entry.dyn_cast<clang::NamedDecl *>()) {
       // For a declaration, check whether the declaration is hidden.
       if (!clangDecl->isHidden()) return true;
@@ -2913,7 +2913,7 @@ ClangModuleUnit::lookupNestedType(Identifier name,
    // FIXME: This is very similar to what's in Implementation::lookupValue and
    // Implementation::loadAllMembers.
    SmallVector<TypeDecl *, 2> results;
-   for (auto entry : lookupTable->lookup(SerializedSwiftName(name.str()),
+   for (auto entry : lookupTable->lookup(SerializedTypePHPName(name.str()),
                                          baseTypeContext)) {
       // If the entry is not visible, skip it.
       if (!isVisibleClangEntry(clangCtx, entry)) continue;
@@ -2985,7 +2985,7 @@ void ClangImporter::loadExtensions(NominalTypeDecl *nominal,
    // Dig through each of the Swift lookup tables, creating extensions
    // where needed.
    auto &clangCtx = Impl.getClangAstContext();
-   (void)Impl.forEachLookupTable([&](PolarphpLookupTable &table) -> bool {
+   (void)Impl.forEachLookupTable([&](TypePHPLookupTable &table) -> bool {
       // FIXME: If we already looked at this for this generation,
       // skip.
 
@@ -3508,7 +3508,7 @@ void ClangImporter::getMangledName(raw_ostream &os,
 // Swift lookup tables
 // ---------------------------------------------------------------------------
 
-PolarphpLookupTable *ClangImporter::Implementation::findLookupTable(
+TypePHPLookupTable *ClangImporter::Implementation::findLookupTable(
    const clang::Module *clangModule) {
    // If the Clang module is null, use the bridging header lookup table.
    if (!clangModule)
@@ -3526,7 +3526,7 @@ PolarphpLookupTable *ClangImporter::Implementation::findLookupTable(
 }
 
 bool ClangImporter::Implementation::forEachLookupTable(
-   llvm::function_ref<bool(PolarphpLookupTable &table)> fn) {
+   llvm::function_ref<bool(TypePHPLookupTable &table)> fn) {
    // Visit the bridging header's lookup table.
    if (fn(*BridgingHeaderLookupTable)) return true;
 
@@ -3546,7 +3546,7 @@ bool ClangImporter::Implementation::forEachLookupTable(
 }
 
 void ClangImporter::Implementation::lookupValue(
-   PolarphpLookupTable &table, DeclName name,
+   TypePHPLookupTable &table, DeclName name,
    VisibleDeclConsumer &consumer) {
    auto &clangCtx = getClangAstContext();
    auto clangTU = clangCtx.getTranslationUnitDecl();
@@ -3641,7 +3641,7 @@ void ClangImporter::Implementation::lookupValue(
 }
 
 void ClangImporter::Implementation::lookupVisibleDecls(
-   PolarphpLookupTable &table,
+   TypePHPLookupTable &table,
    VisibleDeclConsumer &consumer) {
    // Retrieve and sort all of the base names in this particular table.
    auto baseNames = table.allBaseNames();
@@ -3649,12 +3649,12 @@ void ClangImporter::Implementation::lookupVisibleDecls(
 
    // Look for namespace-scope entities with each base name.
    for (auto baseName : baseNames) {
-      lookupValue(table, baseName.toDeclBaseName(PolarphpContext), consumer);
+      lookupValue(table, baseName.toDeclBaseName(TypePHPContext), consumer);
    }
 }
 
 void ClangImporter::Implementation::lookupObjCMembers(
-   PolarphpLookupTable &table,
+   TypePHPLookupTable &table,
    DeclName name,
    VisibleDeclConsumer &consumer) {
    auto &clangCtx = getClangAstContext();
@@ -3694,7 +3694,7 @@ void ClangImporter::Implementation::lookupObjCMembers(
 }
 
 void ClangImporter::Implementation::lookupAllObjCMembers(
-   PolarphpLookupTable &table,
+   TypePHPLookupTable &table,
    VisibleDeclConsumer &consumer) {
    // Retrieve and sort all of the base names in this particular table.
    auto baseNames = table.allBaseNames();
@@ -3702,7 +3702,7 @@ void ClangImporter::Implementation::lookupAllObjCMembers(
 
    // Look for Objective-C members with each base name.
    for (auto baseName : baseNames) {
-      lookupObjCMembers(table, baseName.toDeclBaseName(PolarphpContext), consumer);
+      lookupObjCMembers(table, baseName.toDeclBaseName(TypePHPContext), consumer);
    }
 }
 
@@ -3736,7 +3736,7 @@ ClangImporter::Implementation::loadNamedMembers(
    // prohibitively complex (also they're not stored in by-name lookup, for
    // reasons unclear).
    if (isa<ExtensionDecl>(D) && !checkedGlobalsAsMembers.insert(IDC).second) {
-      if (forEachLookupTable([&](PolarphpLookupTable &table) -> bool {
+      if (forEachLookupTable([&](TypePHPLookupTable &table) -> bool {
          return (!table.lookupGlobalsAsMembers(effectiveClangContext).empty());
       }))
          return None;
@@ -3768,7 +3768,7 @@ ClangImporter::Implementation::loadNamedMembers(
    assert(isa<clang::ObjCContainerDecl>(CD) || isa<clang::NamespaceDecl>(CD));
 
    TinyPtrVector<ValueDecl *> Members;
-   for (auto entry : table->lookup(SerializedSwiftName(N),
+   for (auto entry : table->lookup(SerializedTypePHPName(N),
                                    effectiveClangContext)) {
       if (!entry.is<clang::NamedDecl *>()) continue;
       auto member = entry.get<clang::NamedDecl *>();

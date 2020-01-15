@@ -58,10 +58,10 @@ function(handle_gyb_source_single dependency_out_var_name)
    set(gyb_expand_deps "")
    file(READ "${GYB_SINGLE_SOURCE}" gyb_file)
    string(REGEX MATCHALL "\\\$\{[\r\n\t ]*gyb.expand\\\([\r\n\t ]*[\'\"]([^\'\"]*)[\'\"]" gyb_expand_matches "${gyb_file}")
-      foreach(match ${gyb_expand_matches})
-         string(REGEX MATCH "[\'\"]\([^\'\"]*\)[\'\"]" gyb_dep "${match}")
-         list(APPEND gyb_expand_deps "${CMAKE_MATCH_1}")
-      endforeach()
+   foreach(match ${gyb_expand_matches})
+      string(REGEX MATCH "[\'\"]\([^\'\"]*\)[\'\"]" gyb_dep "${match}")
+      list(APPEND gyb_expand_deps "${CMAKE_MATCH_1}")
+   endforeach()
    list(REMOVE_DUPLICATES gyb_expand_deps)
 
    add_custom_command_target(
@@ -106,7 +106,15 @@ endfunction()
 #   into ${CMAKE_CURRENT_BINARY_DIR} instead of an architecture-specific
 #   destination; this is useful for generated include files.
 
-function(handle_gyb_sources dependency_out_var_name sources_var_name)
+function(handle_gyb_sources dependency_out_var_name sources_var_name arch)
+   set(extra_gyb_flags "")
+   if (arch)
+      set_if_arch_bitness(ptr_size
+         ARCH "${arch}"
+         CASE_32_BIT "4"
+         CASE_64_BIT "8")
+      set(extra_gyb_flags "-DCMAKE_SIZEOF_VOID_P=${ptr_size}")
+   endif()
    set(extra_gyb_flags "")
    set(dependency_targets)
    set(de_gybbed_sources)
@@ -116,6 +124,21 @@ function(handle_gyb_sources dependency_out_var_name sources_var_name)
       LIST_DIRECTORIES false
       ${gyb_dir}/*.php)
    foreach (src ${${sources_var_name}})
+      # On Windows (using Visual Studio), the generated project files assume that the
+      # generated GYB files will be in the source, not binary directory.
+      # We can work around this by modifying the root directory when generating VS projects.
+      if ("${CMAKE_GENERATOR_PLATFORM}" MATCHES "Visual Studio")
+         set(dir_root ${CMAKE_CURRENT_SOURCE_DIR})
+      else()
+         set(dir_root ${CMAKE_CURRENT_BINARY_DIR})
+      endif()
+
+      if (arch)
+         set(dir "${dir_root}/${ptr_size}")
+      else()
+         set(dir "${dir_root}")
+      endif()
+      # get_filename_component(src_sans_gyb ${src} NAME_WLE)
       string(REGEX REPLACE "[.]gyb$" "" src_sans_gyb "${src}")
       if(src STREQUAL src_sans_gyb)
          list(APPEND de_gybbed_sources "${src}")
@@ -124,11 +147,11 @@ function(handle_gyb_sources dependency_out_var_name sources_var_name)
          # On Windows (using Visual Studio), the generated project files assume that the
          # generated GYB files will be in the source, not binary directory.
          # We can work around this by modifying the root directory when generating VS projects.
-#         if ("${CMAKE_GENERATOR_PLATFORM}" MATCHES "Visual Studio")
-#            set(dir_root ${CMAKE_CURRENT_SOURCE_DIR})
-#         else()
-#            set(dir_root ${CMAKE_CURRENT_BINARY_DIR})
-#         endif()
+         #         if ("${CMAKE_GENERATOR_PLATFORM}" MATCHES "Visual Studio")
+         #            set(dir_root ${CMAKE_CURRENT_SOURCE_DIR})
+         #         else()
+         #            set(dir_root ${CMAKE_CURRENT_BINARY_DIR})
+         #         endif()
          set(dir_root ${CMAKE_CURRENT_SOURCE_DIR})
 
          set(output_file_name "${dir_root}/${src_sans_gyb}")
@@ -137,7 +160,8 @@ function(handle_gyb_sources dependency_out_var_name sources_var_name)
             SOURCE "${src}"
             OUTPUT "${output_file_name}"
             FLAGS ${extra_gyb_flags}
-            DEPENDS "${gyb_extra_sources}")
+            DEPENDS "${gyb_extra_sources}" llvm-project
+            COMMENT "with ptr size = ${ptr_size}")
          list(APPEND dependency_targets "${dependency_target}")
       endif()
    endforeach()
@@ -146,16 +170,16 @@ function(handle_gyb_sources dependency_out_var_name sources_var_name)
 endfunction()
 
 function(add_gyb_target target sources)
-  set(options)
-  set(single_value_args)
-  set(multi_value_args)
-  cmake_parse_arguments(GYB
-    "${options}" "${single_value_args}" "${multi_value_args}" ${ARGN})
+   set(options)
+   set(single_value_args ARCH)
+   set(multi_value_args)
+   cmake_parse_arguments(GYB
+      "${options}" "${single_value_args}" "${multi_value_args}" ${ARGN})
 
-  handle_gyb_sources(gyb_sources_depends sources)
+   handle_gyb_sources(gyb_sources_depends sources "${GYB_ARCH}")
 
-  add_custom_target(${target}
-    DEPENDS "${gyb_sources_depends}")
+   add_custom_target(${target}
+      DEPENDS "${gyb_sources_depends}")
 endfunction()
 
 

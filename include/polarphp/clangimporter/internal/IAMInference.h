@@ -18,7 +18,7 @@
 #ifndef POLARPHP_CLANG_IMPORTER_INTERNAL_IMPORT_AS_MEMBER_INFERENCE_H
 #define POLARPHP_CLANG_IMPORTER_INTERNAL_IMPORT_AS_MEMBER_INFERENCE_H
 
-#include "polarphp/clangimporter/internal/PolarphpLookupTable.h"
+#include "polarphp/clangimporter/internal/TypePHPLookupTable.h"
 #include "polarphp/ast/Identifier.h"
 
 #include "llvm/ADT/Optional.h"

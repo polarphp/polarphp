@@ -156,10 +156,10 @@ public:
    /// DriverKind determines how later arguments are parsed, as well as the
    /// allowable OutputInfo::Mode values.
    enum class DriverKind {
-      Interactive,     // swift
-      Batch,           // swiftc
-      AutolinkExtract, // swift-autolink-extract
-      SwiftIndent      // swift-indent
+      Interactive,     // polarphp
+      Batch,           // polarphpc
+      AutolinkExtract, // polarphp-autolink-extract
+      PolarphpIndent      // polarphp-indent
    };
 
    class InputInfoMap;

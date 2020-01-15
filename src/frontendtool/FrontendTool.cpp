@@ -55,13 +55,9 @@
 #include "polarphp/immediate/Immediate.h"
 #include "polarphp/index/IndexRecord.h"
 #include "polarphp/option/Options.h"
-//#include "swift/Migrator/FixitFilter.h"
-//#include "swift/Migrator/Migrator.h"
 #include "polarphp/serialization/SerializationOptions.h"
 #include "polarphp/serialization/SerializedModuleLoader.h"
 #include "polarphp/pil/optimizer/passmgr/Passes.h"
-//#include "polarphp/syntax/Serialization/SyntaxSerialization.h"
-//#include "polarphp/syntax/SyntaxNodes.h"
 
 #include "clang/AST/AstContext.h"
 
@@ -284,10 +280,10 @@ static void computePHPModuleTraceInfo(
          filetypes::lookup_type_for_extension(path::extension(depPath));
       auto isPHPModule =
          moduleFileType == filetypes::TY_PHPModuleFile;
-      auto isSwiftinterface =
+      auto isPHPinterface =
          moduleFileType == filetypes::TY_PHPModuleInterfaceFile;
 
-      if (!(isPHPModule || isSwiftinterface))
+      if (!(isPHPModule || isPHPinterface))
          continue;
 
       auto dep = pathToModuleDecl.find(depPath);
@@ -295,7 +291,7 @@ static void computePHPModuleTraceInfo(
          // Great, we recognize the path! Check if the file is still around.
 
          ModuleDecl *depMod = dep->second;
-         if(depMod->isResilient() && !isSwiftinterface) {
+         if(depMod->isResilient() && !isPHPinterface) {
             // FIXME: Ideally, we would check that the swiftmodule has a
             // swiftinterface next to it. Tracked by rdar://problem/56351399.
          }
@@ -330,7 +326,7 @@ static void computePHPModuleTraceInfo(
       // If the depTracker had an interface, that means that we must've
       // built a swiftmodule from that interface, so we should have that
       // filename available.
-      if (isSwiftinterface) {
+      if (isPHPinterface) {
          err << "Unexpected path for swiftinterface file:\n" << depPath << "\n";
          errorUnexpectedPath(err);
       }

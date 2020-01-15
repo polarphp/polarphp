@@ -61,6 +61,12 @@ public:
    void print(llvm::raw_ostream &ostream) const override;
 };
 
+/// A PrettyStackTraceEntry to print the version of the compiler.
+class PrettyStackTracePolarphpVersion : public llvm::PrettyStackTraceEntry {
+public:
+   void print(llvm::raw_ostream &OS) const override;
+};
+
 } // polar
 
 #endif // POLARPHP_BASIC_PRETTY_STACKTRACE_H

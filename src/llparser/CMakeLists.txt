@@ -13,6 +13,7 @@ polar_collect_files(
    TYPE_BOTH
    DIR .
    OUTPUT_VAR POLAR_LLPARSER_SOURCES)
+
 polar_merge_list(POLAR_LLPARSER_SOURCES POLAR_HEADERS)
 
 polar_add_host_library(PolarLLParser STATIC

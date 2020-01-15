@@ -14,8 +14,8 @@
 // modules.
 //
 //===----------------------------------------------------------------------===//
-#ifndef POLARPHP_CLANG_INTERNAL_POLARPHP_LOOKUPTABLE_H
-#define POLARPHP_CLANG_INTERNAL_POLARPHP_LOOKUPTABLE_H
+#ifndef POLARPHP_CLANG_INTERNAL_TYPEPHP_LOOKUPTABLE_H
+#define POLARPHP_CLANG_INTERNAL_TYPEPHP_LOOKUPTABLE_H
 
 #include "polarphp/basic/Debug.h"
 #include "polarphp/basic/LLVM.h"
@@ -50,21 +50,21 @@ namespace polar {
 
 /// A name from a PolarphpLookupTable that has not been deserialized into a
 /// DeclBaseName yet.
-struct SerializedSwiftName {
+struct SerializedTypePHPName {
    /// The kind of the name if it is a special name
    DeclBaseName::Kind Kind;
    /// The name of the identifier if it is not a special name
    StringRef Name;
 
-   SerializedSwiftName() : Kind(DeclBaseName::Kind::Normal), Name(StringRef()) {}
+   SerializedTypePHPName() : Kind(DeclBaseName::Kind::Normal), Name(StringRef()) {}
 
-   explicit SerializedSwiftName(DeclBaseName::Kind Kind)
+   explicit SerializedTypePHPName(DeclBaseName::Kind Kind)
       : Kind(Kind), Name(StringRef()) {}
 
-   explicit SerializedSwiftName(StringRef Name)
+   explicit SerializedTypePHPName(StringRef Name)
       : Kind(DeclBaseName::Kind::Normal), Name(Name) {}
 
-   SerializedSwiftName(DeclBaseName BaseName) {
+   SerializedTypePHPName(DeclBaseName BaseName) {
       Kind = BaseName.getKind();
       if (BaseName.getKind() == DeclBaseName::Kind::Normal) {
          Name = BaseName.getIdentifier().str();
@@ -93,11 +93,11 @@ struct SerializedSwiftName {
       llvm_unreachable("unhandled kind");
    }
 
-   bool operator<(SerializedSwiftName RHS) const {
+   bool operator<(SerializedTypePHPName RHS) const {
       return userFacingName() < RHS.userFacingName();
    }
 
-   bool operator==(SerializedSwiftName RHS) const {
+   bool operator==(SerializedTypePHPName RHS) const {
       if (Kind != RHS.Kind)
          return false;
 
@@ -114,25 +114,25 @@ struct SerializedSwiftName {
 
 namespace llvm {
 
-using polar::SerializedSwiftName;
+using polar::SerializedTypePHPName;
 
 // Inherit the DenseMapInfo from StringRef but add a few special cases for
 // special names
-template<> struct DenseMapInfo<SerializedSwiftName> {
-   static SerializedSwiftName getEmptyKey() {
-      return SerializedSwiftName(DenseMapInfo<StringRef>::getEmptyKey());
+template<> struct DenseMapInfo<SerializedTypePHPName> {
+   static SerializedTypePHPName getEmptyKey() {
+      return SerializedTypePHPName(DenseMapInfo<StringRef>::getEmptyKey());
    }
-   static SerializedSwiftName getTombstoneKey() {
-      return SerializedSwiftName(DenseMapInfo<StringRef>::getTombstoneKey());
+   static SerializedTypePHPName getTombstoneKey() {
+      return SerializedTypePHPName(DenseMapInfo<StringRef>::getTombstoneKey());
    }
-   static unsigned getHashValue(SerializedSwiftName Val) {
+   static unsigned getHashValue(SerializedTypePHPName Val) {
       if (Val.Kind == polar::DeclBaseName::Kind::Normal) {
          return DenseMapInfo<StringRef>::getHashValue(Val.Name);
       } else {
          return (unsigned)Val.Kind;
       }
    }
-   static bool isEqual(SerializedSwiftName LHS, SerializedSwiftName RHS) {
+   static bool isEqual(SerializedTypePHPName LHS, SerializedTypePHPName RHS) {
       if (LHS.Kind != RHS.Kind)
          return false;
 
@@ -267,17 +267,17 @@ public:
 static_assert(sizeof(EffectiveClangContext) <= 2 * sizeof(void *),
               "should be small");
 
-class PolarphpLookupTableReader;
-class PolarphpLookupTableWriter;
+class TypePHPLookupTableReader;
+class TypePHPLookupTableWriter;
 
 /// Lookup table major version number.
 ///
-const uint16_t SWIFT_LOOKUP_TABLE_VERSION_MAJOR = 1;
+const uint16_t POLAR_LOOKUP_TABLE_VERSION_MAJOR = 1;
 
 /// Lookup table minor version number.
 ///
 /// When the format changes IN ANY WAY, this number should be incremented.
-const uint16_t SWIFT_LOOKUP_TABLE_VERSION_MINOR = 15; // Special names
+const uint16_t POLAR_LOOKUP_TABLE_VERSION_MINOR = 15; // Special names
 
 /// A lookup table that maps Swift names to the set of Clang
 /// declarations with that particular name.
@@ -288,7 +288,7 @@ const uint16_t SWIFT_LOOKUP_TABLE_VERSION_MINOR = 15; // Special names
 /// entities. This lookup table provides efficient access to the C
 /// entities based on their Swift names, and is used by the Clang
 /// importer to satisfy the Swift compiler's queries.
-class PolarphpLookupTable {
+class TypePHPLookupTable {
 public:
    /// The kind of context in which a name occurs.
    ///
@@ -388,7 +388,7 @@ public:
 private:
    /// A table mapping from the base name of Swift entities to all of
    /// the C entities that have that name, in all contexts.
-   llvm::DenseMap<SerializedSwiftName, SmallVector<FullTableEntry, 2>>
+   llvm::DenseMap<SerializedTypePHPName, SmallVector<FullTableEntry, 2>>
    LookupTable;
 
    /// The list of Objective-C categories and extensions.
@@ -402,19 +402,19 @@ private:
    llvm::DenseMap<StoredContext, SmallVector<uint64_t, 2>> GlobalsAsMembers;
 
    /// The reader responsible for lazily loading the contents of this table.
-   PolarphpLookupTableReader *Reader;
+   TypePHPLookupTableReader *Reader;
 
    /// Entries whose effective contexts could not be resolved, and
    /// therefore will need to be added later.
    SmallVector<std::tuple<DeclName, SingleEntry, EffectiveClangContext>, 4>
       UnresolvedEntries;
 
-   friend class PolarphpLookupTableReader;
-   friend class PolarphpLookupTableWriter;
+   friend class TypePHPLookupTableReader;
+   friend class TypePHPLookupTableWriter;
 
    /// Find or create the table entry for the given base name.
-   llvm::DenseMap<SerializedSwiftName, SmallVector<FullTableEntry, 2>>::iterator
-   findOrCreate(SerializedSwiftName baseName);
+   llvm::DenseMap<SerializedTypePHPName, SmallVector<FullTableEntry, 2>>::iterator
+   findOrCreate(SerializedTypePHPName baseName);
 
    /// Add the given entry to the list of entries, if it's not already
    /// present.
@@ -423,7 +423,7 @@ private:
    bool addLocalEntry(SingleEntry newEntry, SmallVectorImpl<uint64_t> &entries);
 
 public:
-   explicit PolarphpLookupTable(PolarphpLookupTableReader *reader) : Reader(reader) { }
+   explicit TypePHPLookupTable(TypePHPLookupTableReader *reader) : Reader(reader) { }
 
    /// Maps a stored declaration entry to an actual Clang declaration.
    clang::NamedDecl *mapStoredDecl(uint64_t &entry);
@@ -471,7 +471,7 @@ private:
    /// entities should reside. This may be None to indicate that
    /// all results from all contexts should be produced.
    SmallVector<SingleEntry, 4>
-   lookup(SerializedSwiftName baseName,
+   lookup(SerializedTypePHPName baseName,
           llvm::Optional<StoredContext> searchContext);
 
    /// Retrieve the set of global declarations that are going to be
@@ -491,16 +491,16 @@ public:
    /// \param searchContext The context in which the resulting set of
    /// entities should reside. This may be None to indicate that
    /// all results from all contexts should be produced.
-   SmallVector<SingleEntry, 4> lookup(SerializedSwiftName baseName,
+   SmallVector<SingleEntry, 4> lookup(SerializedTypePHPName baseName,
                                       EffectiveClangContext searchContext);
 
    /// Retrieve the set of base names that are stored in the lookup table.
-   SmallVector<SerializedSwiftName, 4> allBaseNames();
+   SmallVector<SerializedTypePHPName, 4> allBaseNames();
 
    /// Lookup Objective-C members with the given base name, regardless
    /// of context.
    SmallVector<clang::NamedDecl *, 4>
-   lookupObjCMembers(SerializedSwiftName baseName);
+   lookupObjCMembers(SerializedTypePHPName baseName);
 
    /// Retrieve the set of Objective-C categories and extensions.
    ArrayRef<clang::ObjCCategoryDecl *> categories();
@@ -529,24 +529,24 @@ class NameImporter;
 
 /// Add the given named declaration as an entry to the given Swift name
 /// lookup table, including any of its child entries.
-void addEntryToLookupTable(PolarphpLookupTable &table, clang::NamedDecl *named,
+void addEntryToLookupTable(TypePHPLookupTable &table, clang::NamedDecl *named,
                            NameImporter &);
 
 /// Add the macros from the given Clang preprocessor to the given
 /// Swift name lookup table.
-void addMacrosToLookupTable(PolarphpLookupTable &table, NameImporter &);
+void addMacrosToLookupTable(TypePHPLookupTable &table, NameImporter &);
 
 /// Finalize a lookup table, handling any as-yet-unresolved entries
 /// and emitting diagnostics if necessary.
-void finalizeLookupTable(PolarphpLookupTable &table, NameImporter &,
+void finalizeLookupTable(TypePHPLookupTable &table, NameImporter &,
                          ClangSourceBufferImporter &buffersForDiagnostics);
 } // importer
 } // polar
 
 namespace llvm {
 
-template <> struct DenseMapInfo<polar::PolarphpLookupTable::ContextKind> {
-   typedef polar::PolarphpLookupTable::ContextKind ContextKind;
+template <> struct DenseMapInfo<polar::TypePHPLookupTable::ContextKind> {
+   typedef polar::TypePHPLookupTable::ContextKind ContextKind;
    static ContextKind getEmptyKey() {
       return static_cast<ContextKind>(0);
    }
@@ -563,4 +563,4 @@ template <> struct DenseMapInfo<polar::PolarphpLookupTable::ContextKind> {
 
 }
 
-#endif // POLARPHP_CLANG_INTERNAL_POLARPHP_LOOKUPTABLE_H
+#endif // POLARPHP_CLANG_INTERNAL_TYPEPHP_LOOKUPTABLE_H

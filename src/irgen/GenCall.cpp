@@ -1904,7 +1904,7 @@ Callee::Callee(CalleeInfo &&info, const FunctionPointer &fn,
 
 }
 
-llvm::Value *Callee::getPolarphpContext() const {
+llvm::Value *Callee::getTypePHPContext() const {
    switch (Info.OrigFnType->getRepresentation()) {
       case PILFunctionTypeRepresentation::Block:
       case PILFunctionTypeRepresentation::ObjCMethod:
@@ -1973,7 +1973,7 @@ void CallEmission::setFromCallee() {
       }
    }
 
-   llvm::Value *contextPtr = CurCallee.getPolarphpContext();
+   llvm::Value *contextPtr = CurCallee.getTypePHPContext();
 
    // Add the error result if we have one.
    if (fnType->hasErrorResult()) {

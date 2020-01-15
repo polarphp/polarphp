@@ -120,7 +120,7 @@ void ClangDiagnosticConsumer::HandleDiagnostic(
       return;
    }
 
-   const AstContext &ctx = ImporterImpl.PolarphpContext;
+   const AstContext &ctx = ImporterImpl.TypePHPContext;
    ClangSourceBufferImporter &bufferImporter =
       ImporterImpl.getBufferImporterForDiagnostics();
 

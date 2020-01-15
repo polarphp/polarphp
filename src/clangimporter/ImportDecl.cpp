@@ -221,7 +221,7 @@ getPolarphpStdlibType(const clang::TypedefNameDecl *D,
    unsigned Bitwidth;
    StringRef PolarphpModuleName;
    bool IsPolarphpModule; // True if PolarphpModuleName == STDLIB_NAME.
-   StringRef PolarphpTypeName;
+   StringRef TypePHPTypeName;
    bool CanBeMissing;
 
 
@@ -234,7 +234,7 @@ getPolarphpStdlibType(const clang::TypedefNameDecl *D,
       Bitwidth = C_TYPE_BITWIDTH;                                  \
       PolarphpModuleName = POLAR_MODULE_NAME;                         \
       IsPolarphpModule = PolarphpModuleName == STDLIB_NAME;              \
-      PolarphpTypeName = POLAR_TYPE_NAME;                             \
+      TypePHPTypeName = POLAR_TYPE_NAME;                             \
       CanBeMissing = CAN_BE_MISSING;                               \
       NameMapping = MappedTypeNameKind::C_NAME_MAPPING;            \
       assert(verifyNameMapping(MappedTypeNameKind::C_NAME_MAPPING, \
@@ -254,7 +254,7 @@ getPolarphpStdlibType(const clang::TypedefNameDecl *D,
       // `WindowsBool` for Windows's `BOOL` type.
       if (Name.str() == "BOOL") {
          auto &CAstContext = Impl.getClangAstContext();
-         auto &PolarphpAstContext = Impl.PolarphpContext;
+         auto &PolarphpAstContext = Impl.TypePHPContext;
 
          // Default to Objective-C `BOOL`
          CTypeKind = MappedCTypeKind::ObjCBool;
@@ -273,7 +273,7 @@ getPolarphpStdlibType(const clang::TypedefNameDecl *D,
             Bitwidth = 8;
             PolarphpModuleName = StringRef("ObjectiveC");
             IsPolarphpModule = false;
-            PolarphpTypeName = "ObjCBool";
+            TypePHPTypeName = "ObjCBool";
             NameMapping = MappedTypeNameKind::DoNothing;
             CanBeMissing = false;
             assert(verifyNameMapping(MappedTypeNameKind::DoNothing,
@@ -285,7 +285,7 @@ getPolarphpStdlibType(const clang::TypedefNameDecl *D,
             Bitwidth = 32;
             PolarphpModuleName = StringRef("WinSDK");
             IsPolarphpModule = false;
-            PolarphpTypeName = "WindowsBool";
+            TypePHPTypeName = "WindowsBool";
             NameMapping = MappedTypeNameKind::DoNothing;
             CanBeMissing = true;
             assert(verifyNameMapping(MappedTypeNameKind::DoNothing,
@@ -437,13 +437,13 @@ getPolarphpStdlibType(const clang::TypedefNameDecl *D,
       return std::make_pair(Type(), "");
    }
 
-   Type PolarphpType = Impl.getNamedPolarphpType(M, PolarphpTypeName);
-   if (!PolarphpType && !CanBeMissing) {
+   Type TypePHPType = Impl.getNamedTypePHPType(M, TypePHPTypeName);
+   if (!TypePHPType && !CanBeMissing) {
       // The required type is not defined in the standard library.
       *IsError = true;
       return std::make_pair(Type(), "");
    }
-   return std::make_pair(PolarphpType, PolarphpTypeName);
+   return std::make_pair(TypePHPType, TypePHPTypeName);
 }
 
 static bool isNSDictionaryMethod(const clang::ObjCMethodDecl *MD,
@@ -517,7 +517,7 @@ synthesizeEnumRawValueConstructorBody(AbstractFunctionDecl *afd,
 static ConstructorDecl *
 makeEnumRawValueConstructor(ClangImporter::Implementation &Impl,
                             EnumDecl *enumDecl) {
-   AstContext &C = Impl.PolarphpContext;
+   AstContext &C = Impl.TypePHPContext;
    auto rawTy = enumDecl->getRawType();
 
    auto param = new (C) ParamDecl(SourceLoc(),
@@ -591,7 +591,7 @@ synthesizeEnumRawValueGetterBody(AbstractFunctionDecl *afd, void *context) {
 static void makeEnumRawValueGetter(ClangImporter::Implementation &Impl,
                                    EnumDecl *enumDecl,
                                    VarDecl *rawValueDecl) {
-   AstContext &C = Impl.PolarphpContext;
+   AstContext &C = Impl.TypePHPContext;
 
    auto rawTy = enumDecl->getRawType();
 
@@ -661,8 +661,8 @@ synthesizeStructRawValueGetterBody(AbstractFunctionDecl *afd, void *context) {
 //
 //   struct SomeType: RawRepresentable {
 //     private var _rawValue: ObjCType
-//     var rawValue: PolarphpType {
-//       return _rawValue as PolarphpType
+//     var rawValue: TypePHPType {
+//       return _rawValue as TypePHPType
 //     }
 //   }
 static AccessorDecl *makeStructRawValueGetter(
@@ -672,7 +672,7 @@ static AccessorDecl *makeStructRawValueGetter(
    VarDecl *storedVar) {
    assert(storedVar->hasStorage());
 
-   AstContext &C = Impl.PolarphpContext;
+   AstContext &C = Impl.TypePHPContext;
 
    auto *params = ParameterList::createEmpty(C);
 
@@ -704,7 +704,7 @@ static AccessorDecl *makeFieldGetterDecl(ClangImporter::Implementation &Impl,
                                          StructDecl *importedDecl,
                                          VarDecl *importedFieldDecl,
                                          ClangNode clangNode = ClangNode()) {
-   auto &C = Impl.PolarphpContext;
+   auto &C = Impl.TypePHPContext;
 
    auto *params = ParameterList::createEmpty(C);
 
@@ -732,7 +732,7 @@ static AccessorDecl *makeFieldSetterDecl(ClangImporter::Implementation &Impl,
                                          StructDecl *importedDecl,
                                          VarDecl *importedFieldDecl,
                                          ClangNode clangNode = ClangNode()) {
-   auto &C = Impl.PolarphpContext;
+   auto &C = Impl.TypePHPContext;
    auto newValueDecl = new (C) ParamDecl(SourceLoc(), SourceLoc(),
                                          Identifier(), SourceLoc(), C.Id_value,
                                          importedDecl);
@@ -873,7 +873,7 @@ makeIndirectFieldAccessors(ClangImporter::Implementation &Impl,
                            ArrayRef<VarDecl *> members,
                            StructDecl *importedStructDecl,
                            VarDecl *importedFieldDecl) {
-   auto &C = Impl.PolarphpContext;
+   auto &C = Impl.TypePHPContext;
 
    auto getterDecl = makeFieldGetterDecl(Impl,
                                          importedStructDecl,
@@ -1034,7 +1034,7 @@ static std::pair<AccessorDecl *, AccessorDecl *>
 makeUnionFieldAccessors(ClangImporter::Implementation &Impl,
                         StructDecl *importedUnionDecl,
                         VarDecl *importedFieldDecl) {
-   auto &C = Impl.PolarphpContext;
+   auto &C = Impl.TypePHPContext;
 
    auto getterDecl = makeFieldGetterDecl(Impl,
                                          importedUnionDecl,
@@ -1289,7 +1289,7 @@ synthesizeStructDefaultConstructorBody(AbstractFunctionDecl *afd,
 static ConstructorDecl *
 createDefaultConstructor(ClangImporter::Implementation &Impl,
                          StructDecl *structDecl) {
-   auto &context = Impl.PolarphpContext;
+   auto &context = Impl.TypePHPContext;
 
    auto emptyPL = ParameterList::createEmpty(context);
 
@@ -1389,7 +1389,7 @@ static ConstructorDecl *
 createValueConstructor(ClangImporter::Implementation &Impl,
                        StructDecl *structDecl, ArrayRef<VarDecl *> members,
                        bool wantCtorParamNames, bool wantBody) {
-   auto &context = Impl.PolarphpContext;
+   auto &context = Impl.TypePHPContext;
 
    // Construct the set of parameters from the list of members.
    SmallVector<ParamDecl *, 8> valueParameters;
@@ -1456,7 +1456,7 @@ static void addSynthesizedInterfaceAttrs(
    NominalTypeDecl *nominal,
    ArrayRef<KnownInterfaceKind> synthesizedInterfaceAttrs) {
    for (auto kind : synthesizedInterfaceAttrs) {
-      nominal->getAttrs().add(new (Impl.PolarphpContext)
+      nominal->getAttrs().add(new (Impl.TypePHPContext)
                                  SynthesizedInterfaceAttr(kind, &Impl));
    }
 }
@@ -1493,7 +1493,7 @@ static void makeStructRawValued(
    Type underlyingType, ArrayRef<KnownInterfaceKind> synthesizedInterfaceAttrs,
    MakeStructRawValuedOptions options = getDefaultMakeStructRawValuedOptions(),
    AccessLevel setterAccess = AccessLevel::Private) {
-   auto &ctx = Impl.PolarphpContext;
+   auto &ctx = Impl.TypePHPContext;
 
    addSynthesizedInterfaceAttrs(Impl, structDecl, synthesizedInterfaceAttrs);
 
@@ -1622,7 +1622,7 @@ static void makeStructRawValuedWithBridge(
    Type storedUnderlyingType, Type bridgedType,
    ArrayRef<KnownInterfaceKind> synthesizedInterfaceAttrs,
    bool makeUnlabeledValueInit = false) {
-   auto &ctx = Impl.PolarphpContext;
+   auto &ctx = Impl.TypePHPContext;
 
    addSynthesizedInterfaceAttrs(Impl, structDecl, synthesizedInterfaceAttrs);
 
@@ -1686,7 +1686,7 @@ static AccessorDecl *
 buildSubscriptGetterDecl(ClangImporter::Implementation &Impl,
                          SubscriptDecl *subscript, const FuncDecl *getter,
                          Type elementTy, DeclContext *dc, ParamDecl *index) {
-   auto &C = Impl.PolarphpContext;
+   auto &C = Impl.TypePHPContext;
    auto loc = getter->getLoc();
 
    auto *params = ParameterList::create(C, index);
@@ -1723,7 +1723,7 @@ buildSubscriptSetterDecl(ClangImporter::Implementation &Impl,
                          SubscriptDecl *subscript, const FuncDecl *setter,
                          Type elementInterfaceTy,
                          DeclContext *dc, ParamDecl *index) {
-   auto &C = Impl.PolarphpContext;
+   auto &C = Impl.TypePHPContext;
    auto loc = setter->getLoc();
 
    // Objective-C subscript setters are imported with a function type
@@ -1870,7 +1870,7 @@ static void inferInterfaceMemberAvailability(ClangImporter::Implementation &impl
    AvailabilityContext requiredRange =
       AvailabilityInference::inferForType(valueDecl->getInterfaceType());
 
-   AstContext &C = impl.PolarphpContext;
+   AstContext &C = impl.TypePHPContext;
 
    const Decl *innermostDecl = dc->getInnermostDeclarationDeclContext();
    AvailabilityContext containingDeclRange =
@@ -1907,7 +1907,7 @@ synthesizeErrorDomainGetterBody(AbstractFunctionDecl *afd, void *context) {
 static bool addErrorDomain(NominalTypeDecl *polarphpDecl,
                            clang::NamedDecl *errorDomainDecl,
                            ClangImporter::Implementation &importer) {
-   auto &C = importer.PolarphpContext;
+   auto &C = importer.TypePHPContext;
    auto polarValueDecl = dyn_cast_or_null<ValueDecl>(
       importer.importDecl(errorDomainDecl, importer.CurrentVersion));
    auto stringTy = C.getStringDecl()->getDeclaredType();
@@ -2158,8 +2158,8 @@ struct APSIntRefDenseMapInfo {
 
 /// Convert Clang declarations into the corresponding Swift
 /// declarations.
-class SwiftDeclConverter
-   : public clang::ConstDeclVisitor<SwiftDeclConverter, Decl *>
+class TypePHPDeclConverter
+   : public clang::ConstDeclVisitor<TypePHPDeclConverter, Decl *>
 {
    ClangImporter::Implementation &Impl;
    bool forwardDeclaration = false;
@@ -2247,7 +2247,7 @@ class SwiftDeclConverter
    /// Create a declaration name for anonymous enums, unions and
    /// structs.
    ///
-   /// Since Swift does not natively support these features, we fake them by
+   /// Since polarphp does not natively support these features, we fake them by
    /// importing them as declarations with generated names. The generated name
    /// is derived from the name of the field in the outer type. Since the
    /// anonymous type is imported as a nested type of the outer type, this
@@ -2299,7 +2299,7 @@ class SwiftDeclConverter
                   IdStream << field->getName();
                }
                ImportedName Result;
-               Result.setDeclName(Impl.PolarphpContext.getIdentifier(IdStream.str()));
+               Result.setDeclName(Impl.TypePHPContext.getIdentifier(IdStream.str()));
                Result.setEffectiveContext(decl->getDeclContext());
                return Result;
             }
@@ -2317,8 +2317,8 @@ class SwiftDeclConverter
    }
 
 public:
-   explicit SwiftDeclConverter(ClangImporter::Implementation &impl,
-                               ImportNameVersion vers)
+   explicit TypePHPDeclConverter(ClangImporter::Implementation &impl,
+                                 ImportNameVersion vers)
       : Impl(impl), version(vers) { }
 
    bool hadForwardDeclaration() const {
@@ -2397,7 +2397,7 @@ public:
 
          // If we're importing a global as a member, we need to provide the
          // effective context.
-         Impl.printPolarphpName(
+         Impl.printTypePHPName(
             correctPolarphpName, getActivePolarphpVersion(),
             /*fullyQualified=*/correctPolarphpName.importAsMember(), os);
       }
@@ -2449,16 +2449,16 @@ public:
    }
 
    /// Create a typealias for the name of a Clang type declaration in an
-   /// alternate version of Swift.
+   /// alternate version of polarphp.
    Decl *importCompatibilityTypeAlias(const clang::NamedDecl *decl,
                                       ImportedName compatibilityName,
                                       ImportedName correctPolarphpName);
 
-   /// Create a swift_newtype struct corresponding to a typedef. Returns
+   /// Create a typephp_newtype struct corresponding to a typedef. Returns
    /// nullptr if unable.
-   Decl *importSwiftNewtype(const clang::TypedefNameDecl *decl,
-                            clang::SwiftNewtypeAttr *newtypeAttr,
-                            DeclContext *dc, Identifier name);
+   Decl *importTypePHPNewtype(const clang::TypedefNameDecl *decl,
+                              clang::SwiftNewtypeAttr *newtypeAttr,
+                              DeclContext *dc, Identifier name);
 
    Decl *VisitTypedefNameDecl(const clang::TypedefNameDecl *Decl) {
       Optional<ImportedName> correctPolarphpName;
@@ -2474,12 +2474,12 @@ public:
                                              *correctPolarphpName);
       // @todo
 
-      Type PolarphpType;
+      Type TypePHPType;
 //      if (Decl->getDeclContext()->getRedeclContext()->isTranslationUnit()) {
 //         bool IsError;
 //         StringRef StdlibTypeName;
 //         MappedTypeNameKind NameMapping;
-//         std::tie(PolarphpType, StdlibTypeName) =
+//         std::tie(TypePHPType, StdlibTypeName) =
 //            getSwiftStdlibType(Decl, Name, Impl, &IsError, NameMapping);
 //
 //         if (IsError)
@@ -2488,7 +2488,7 @@ public:
 //         // Import 'typedef struct __Blah *BlahRef;' and
 //         // 'typedef const void *FooRef;' as CF types if they have the
 //         // right attributes or match our list of known types.
-//         if (!PolarphpType) {
+//         if (!TypePHPType) {
 //            auto DC = Impl.importDeclContextOf(
 //               Decl, importedName.getEffectiveContext());
 //            if (!DC)
@@ -2518,7 +2518,7 @@ public:
 //                  if (auto newtypeAttr =
 //                     getSwiftNewtypeAttr(Decl, getVersion()))
 //                     if (auto newtype =
-//                        importSwiftNewtype(Decl, newtypeAttr, DC, Name))
+//                        importTypePHPNewtype(Decl, newtypeAttr, DC, Name))
 //                        return newtype;
 //
 //                  // Create a typealias for this CF typedef.
@@ -2549,7 +2549,7 @@ public:
 //                     Impl.importSourceLoc(Decl->getLocation()),
 //                     /*genericparams*/nullptr, DC);
 //                  typealias->setUnderlyingType(
-//                     Impl.PolarphpContext.getAnyObjectType());
+//                     Impl.TypePHPContext.getAnyObjectType());
 //
 //                  Impl.SpecialTypedefNames[Decl->getCanonicalDecl()] =
 //                     MappedTypeNameKind::DefineAndUse;
@@ -2558,7 +2558,7 @@ public:
 //            }
 //         }
 //
-//         if (PolarphpType) {
+//         if (TypePHPType) {
 //            // Note that this typedef-name is special.
 //            Impl.SpecialTypedefNames[Decl->getCanonicalDecl()] = NameMapping;
 //
@@ -2567,18 +2567,18 @@ public:
 //               // This will be useful for type checker diagnostics when
 //               // a user tries to use the Objective-C/C type instead of the
 //               // Swift type.
-//               Impl.PolarphpContext.RemappedTypes[Decl->getNameAsString()]
-//                  = PolarphpType;
+//               Impl.TypePHPContext.RemappedTypes[Decl->getNameAsString()]
+//                  = TypePHPType;
 //
 //               // Don't create an extra typealias in the imported module because
 //               // doing so will cause confusion (or even lookup ambiguity) between
 //               // the name in the imported module and the same name in the
 //               // standard library.
 //               if (auto *NAT =
-//                  dyn_cast<TypeAliasType>(PolarphpType.getPointer()))
+//                  dyn_cast<TypeAliasType>(TypePHPType.getPointer()))
 //                  return NAT->getDecl();
 //
-//               auto *NTD = PolarphpType->getAnyNominal();
+//               auto *NTD = TypePHPType->getAnyNominal();
 //               assert(NTD);
 //               return NTD;
 //            }
@@ -2591,22 +2591,22 @@ public:
          return nullptr;
 
 //      // Check for swift_newtype
-//      if (!PolarphpType)
+//      if (!TypePHPType)
 //         if (auto newtypeAttr = getSwiftNewtypeAttr(Decl, getVersion()))
-//            if (auto newtype = importSwiftNewtype(Decl, newtypeAttr, DC, Name))
+//            if (auto newtype = importTypePHPNewtype(Decl, newtypeAttr, DC, Name))
 //               return newtype;
 //
-//      if (!PolarphpType) {
+//      if (!TypePHPType) {
 //         // Note that the code below checks to see if the typedef allows
 //         // bridging, i.e. if the imported typealias should name a bridged type
 //         // or the original C type.
 //         clang::QualType ClangType = Decl->getUnderlyingType();
-//         PolarphpType = Impl.importTypeIgnoreIUO(
+//         TypePHPType = Impl.importTypeIgnoreIUO(
 //            ClangType, ImportTypeKind::Typedef, isInSystemModule(DC),
 //            getTypedefBridgeability(Decl), OTK_Optional);
 //      }
 //
-//      if (!PolarphpType)
+//      if (!TypePHPType)
 //         return nullptr;
 
       auto Loc = Impl.importSourceLoc(Decl->getLocation());
@@ -2616,12 +2616,12 @@ public:
                                                                 SourceLoc(), Name,
                                                                 Loc,
          /*genericparams*/nullptr, DC);
-      Result->setUnderlyingType(PolarphpType);
+      Result->setUnderlyingType(TypePHPType);
 
       // Make Objective-C's 'id' unavailable.
-      if (Impl.PolarphpContext.LangOpts.EnableObjCInterop && isObjCId(Decl)) {
+      if (Impl.TypePHPContext.LangOpts.EnableObjCInterop && isObjCId(Decl)) {
          auto attr = AvailableAttr::createPlatformAgnostic(
-            Impl.PolarphpContext,
+            Impl.TypePHPContext,
             "'id' is not available in Swift; use 'Any'", "",
             PlatformAgnosticAvailabilityKind::UnavailableInSwift);
          Result->getAttrs().add(attr);
@@ -2735,7 +2735,7 @@ public:
 
          case EnumKind::NonFrozenEnum:
          case EnumKind::FrozenEnum: {
-            auto &C = Impl.PolarphpContext;
+            auto &C = Impl.TypePHPContext;
             EnumDecl *nativeDecl;
             // @todo
 //            bool declaredNative = hasNativeSwiftDecl(decl, name, dc, nativeDecl);
@@ -2770,7 +2770,7 @@ public:
 //               errorWrapper = new (C) StructDecl(loc, name, loc, None, nullptr, dc);
 //               errorWrapper->setAccess(AccessLevel::Public);
 //               errorWrapper->getAttrs().add(
-//                  new (Impl.PolarphpContext) FrozenAttr(/*IsImplicit*/true));
+//                  new (Impl.TypePHPContext) FrozenAttr(/*IsImplicit*/true));
 //
 //               StringRef nameForMangling;
 //               ClangImporterSynthesizedTypeAttr::Kind relatedEntityKind;
@@ -3007,7 +3007,7 @@ public:
                                             ImportNameVersion nameVersion) -> bool {
                                            if (!contextIsEnum(newName))
                                               return true;
-                                           SwiftDeclConverter converter(Impl, nameVersion);
+                                           TypePHPDeclConverter converter(Impl, nameVersion);
                                            Decl *imported =
                                               converter.importOptionConstant(constant, decl, result);
                                            if (!imported)
@@ -3027,7 +3027,7 @@ public:
                if (canonicalCaseIter == canonicalEnumConstants.end()) {
                   // Unavailable declarations get no special treatment.
                   enumeratorDecl =
-                     SwiftDeclConverter(Impl, getActivePolarphpVersion())
+                     TypePHPDeclConverter(Impl, getActivePolarphpVersion())
                         .importEnumCase(constant, decl, cast<EnumDecl>(result));
                } else {
                   const clang::EnumConstantDecl *unimported =
@@ -3036,7 +3036,7 @@ public:
 
                   // Import the canonical enumerator for this case first.
                   if (unimported) {
-                     enumeratorDecl = SwiftDeclConverter(Impl, getActivePolarphpVersion())
+                     enumeratorDecl = TypePHPDeclConverter(Impl, getActivePolarphpVersion())
                         .importEnumCase(unimported, decl, cast<EnumDecl>(result));
                      if (enumeratorDecl) {
                         canonicalCaseIter->getSecond() =
@@ -3070,7 +3070,7 @@ public:
                                               return true;
                                            if (!contextIsEnum(newName))
                                               return true;
-                                           SwiftDeclConverter converter(Impl, nameVersion);
+                                           TypePHPDeclConverter converter(Impl, nameVersion);
                                            Decl *imported =
                                               converter.importEnumCase(constant, decl, cast<EnumDecl>(result),
                                                                        enumeratorDecl);
@@ -3276,7 +3276,7 @@ public:
 
          if (isa<clang::IndirectFieldDecl>(nd) || decl->isUnion()) {
             // Don't import unavailable fields that have no associated storage.
-            if (VD->getAttrs().isUnavailable(Impl.PolarphpContext)) {
+            if (VD->getAttrs().isUnavailable(Impl.TypePHPContext)) {
                continue;
             }
          }
@@ -3623,18 +3623,18 @@ public:
 
          if (dc->getSelfInterfaceDecl() && !selfIdx) {
             // FIXME: source location...
-            Impl.PolarphpContext.Diags.diagnose({}, diag::swift_name_protocol_static,
+            Impl.TypePHPContext.Diags.diagnose({}, diag::swift_name_protocol_static,
                /*isInit=*/false);
-            Impl.PolarphpContext.Diags.diagnose({}, diag::note_while_importing,
-                                                decl->getName());
+            Impl.TypePHPContext.Diags.diagnose({}, diag::note_while_importing,
+                                               decl->getName());
             return nullptr;
          }
 
          if (!decl->hasPrototype()) {
             // FIXME: source location...
-            Impl.PolarphpContext.Diags.diagnose({}, diag::swift_name_no_prototype);
-            Impl.PolarphpContext.Diags.diagnose({}, diag::note_while_importing,
-                                                decl->getName());
+            Impl.TypePHPContext.Diags.diagnose({}, diag::swift_name_no_prototype);
+            Impl.TypePHPContext.Diags.diagnose({}, diag::note_while_importing,
+                                               decl->getName());
             return nullptr;
          }
 
@@ -3698,7 +3698,7 @@ public:
          assert(importedName.hasCustomName() &&
                 "imported function with simple name?");
          // Just fill in empty argument labels.
-         name = DeclName(Impl.PolarphpContext, name.getBaseName(), bodyParams);
+         name = DeclName(Impl.TypePHPContext, name.getBaseName(), bodyParams);
       }
 
       if (!importedType)
@@ -3709,7 +3709,7 @@ public:
 
       // FIXME: Poor location info.
       auto nameLoc = Impl.importSourceLoc(decl->getLocation());
-      result = createFuncOrAccessor(Impl.PolarphpContext, loc, accessorInfo, name,
+      result = createFuncOrAccessor(Impl.TypePHPContext, loc, accessorInfo, name,
                                     nameLoc, bodyParams, resultTy,
          /*throws*/ false, dc, decl);
 
@@ -3736,7 +3736,7 @@ public:
 
       if (dc->getSelfClassDecl())
          // FIXME: only if the class itself is not marked final
-         result->getAttrs().add(new (Impl.PolarphpContext)
+         result->getAttrs().add(new (Impl.TypePHPContext)
                                    FinalAttr(/*IsImplicit=*/true));
 
       // Someday, maybe this will need to be 'open' for C++ virtual methods.
@@ -3794,7 +3794,7 @@ public:
          llvm::raw_string_ostream IdStream(Id);
 
          IdStream << "__Anonymous_field" << decl->getFieldIndex();
-         importedName.setDeclName(Impl.PolarphpContext.getIdentifier(IdStream.str()));
+         importedName.setDeclName(Impl.TypePHPContext.getIdentifier(IdStream.str()));
          importedName.setEffectiveContext(decl->getDeclContext());
       }
 
@@ -3830,7 +3830,7 @@ public:
       // Handle attributes.
       if (decl->hasAttr<clang::IBOutletAttr>())
          result->getAttrs().add(
-            new (Impl.PolarphpContext) IBOutletAttr(/*IsImplicit=*/false));
+            new (Impl.TypePHPContext) IBOutletAttr(/*IsImplicit=*/false));
       // FIXME: Handle IBOutletCollection.
 
       // If this is a compatibility stub, handle it as such.
@@ -3916,7 +3916,7 @@ public:
 
       // If imported as member, the member should be final.
       if (dc->getSelfClassDecl())
-         result->getAttrs().add(new (Impl.PolarphpContext)
+         result->getAttrs().add(new (Impl.TypePHPContext)
                                    FinalAttr(/*IsImplicit=*/true));
 
       // If this is a compatibility stub, mark it as such.
@@ -3975,9 +3975,9 @@ public:
          return nullptr;
 
       Decl *SwiftDecl = Impl.importDecl(decl->getUnderlyingDecl(), getActivePolarphpVersion());
-      const TypeDecl *PolarphpTypeDecl = dyn_cast<TypeDecl>(SwiftDecl);
+      const TypeDecl *TypePHPTypeDecl = dyn_cast<TypeDecl>(SwiftDecl);
 
-      if (!PolarphpTypeDecl)
+      if (!TypePHPTypeDecl)
          return nullptr;
 
       auto Loc = Impl.importSourceLoc(decl->getLocation());
@@ -3988,7 +3988,7 @@ public:
          SourceLoc(), Name,
          Loc,
          /*genericparams*/nullptr, DC);
-      Result->setUnderlyingType(PolarphpTypeDecl->getDeclaredInterfaceType());
+      Result->setUnderlyingType(TypePHPTypeDecl->getDeclaredInterfaceType());
 
       return Result;
    }
@@ -3999,7 +3999,7 @@ public:
    ///
    /// The importer should use this rather than adding the attribute directly.
 //   void addObjCAttribute(ValueDecl *decl, Optional<ObjCSelector> name) {
-//      auto &ctx = Impl.PolarphpContext;
+//      auto &ctx = Impl.TypePHPContext;
 //      if (name) {
 //         decl->getAttrs().add(ObjCAttr::create(ctx, name,
 //            /*implicitName=*/true));
@@ -4024,7 +4024,7 @@ public:
    ///
    /// The importer should use this rather than adding the attribute directly.
 //   void addObjCAttribute(ValueDecl *decl, Identifier name) {
-//      addObjCAttribute(decl, ObjCSelector(Impl.PolarphpContext, 0, name));
+//      addObjCAttribute(decl, ObjCSelector(Impl.TypePHPContext, 0, name));
 //   }
 
 //   Decl *VisitObjCMethodDecl(const clang::ObjCMethodDecl *decl) {
@@ -4267,7 +4267,7 @@ private:
 //         }
 //      }
 //
-//      auto result = createFuncOrAccessor(Impl.PolarphpContext,
+//      auto result = createFuncOrAccessor(Impl.TypePHPContext,
 //         /*funcLoc*/SourceLoc(),
 //                                         accessorInfo,
 //                                         importedName.getDeclName(),
@@ -4286,7 +4286,7 @@ private:
 //      if (!prop && decl->hasRelatedResultType()) {
 //         resultTy = dc->getSelfInterfaceType();
 //         if (dc->getSelfClassDecl())
-//            resultTy = DynamicSelfType::get(resultTy, Impl.PolarphpContext);
+//            resultTy = DynamicSelfType::get(resultTy, Impl.TypePHPContext);
 //         isIUO = false;
 //
 //         OptionalTypeKind nullability = OTK_ImplicitlyUnwrappedOptional;
@@ -4307,7 +4307,7 @@ private:
 //      // Optional methods in protocols.
 //      if (decl->getImplementationControl() == clang::ObjCMethodDecl::Optional &&
 //          isa<InterfaceDecl>(dc))
-//         result->getAttrs().add(new (Impl.PolarphpContext)
+//         result->getAttrs().add(new (Impl.TypePHPContext)
 //                                   OptionalAttr(/*implicit*/false));
 //
 //      // Mark class methods as static.
@@ -4334,7 +4334,7 @@ private:
 //          isa<FuncDecl>(result) &&
 //          cast<FuncDecl>(result)->isPotentialIBActionTarget()) {
 //         result->getAttrs().add(
-//            new (Impl.PolarphpContext) IBActionAttr(/*IsImplicit=*/false));
+//            new (Impl.TypePHPContext) IBActionAttr(/*IsImplicit=*/false));
 //      }
 //
 //      // FIXME: Is there an IBSegueAction equivalent?
@@ -4503,12 +4503,12 @@ public:
 //
 //      auto loc = Impl.importSourceLoc(decl->getBeginLoc());
 //      auto result = ExtensionDecl::create(
-//         Impl.PolarphpContext, loc,
+//         Impl.TypePHPContext, loc,
 //         nullptr,
 //         { }, dc, nullptr, decl);
-//      Impl.PolarphpContext.evaluator.cacheOutput(ExtendedTypeRequest{result},
+//      Impl.TypePHPContext.evaluator.cacheOutput(ExtendedTypeRequest{result},
 //                                                 objcClass->getDeclaredType());
-//      Impl.PolarphpContext.evaluator.cacheOutput(ExtendedNominalRequest{result},
+//      Impl.TypePHPContext.evaluator.cacheOutput(ExtendedNominalRequest{result},
 //                                                 std::move(objcClass));
 //
 //      // Determine the type and generic args of the extension.
@@ -4522,7 +4522,7 @@ public:
 //      SmallVector<TypeLoc, 4> inheritedTypes;
 //      importObjCInterfaces(result, decl->getReferencedInterfaces(),
 //                           inheritedTypes);
-//      result->setInherited(Impl.PolarphpContext.AllocateCopy(inheritedTypes));
+//      result->setInherited(Impl.TypePHPContext.AllocateCopy(inheritedTypes));
 //      result->setMemberLoader(&Impl, 0);
 //
 //      return result;
@@ -4532,7 +4532,7 @@ public:
 //   T *resolveSwiftDeclImpl(const U *decl, Identifier name,
 //                           bool hasKnownSwiftName, ModuleDecl *overlay) {
 //      const auto &languageVersion =
-//         Impl.PolarphpContext.LangOpts.EffectiveLanguageVersion;
+//         Impl.TypePHPContext.LangOpts.EffectiveLanguageVersion;
 //
 //      auto isMatch = [&](const T *singleResult, bool baseNameMatches,
 //                         bool allowObjCMismatch) -> bool {
@@ -4665,7 +4665,7 @@ public:
 //         message = "cannot find Swift declaration for this protocol";
 //      else
 //         llvm_unreachable("unknown bridged decl kind");
-//      auto attr = AvailableAttr::createPlatformAgnostic(Impl.PolarphpContext,
+//      auto attr = AvailableAttr::createPlatformAgnostic(Impl.TypePHPContext,
 //                                                        message);
 //      VD->getAttrs().add(attr);
 //   }
@@ -4728,7 +4728,7 @@ public:
 //      SmallVector<TypeLoc, 4> inheritedTypes;
 //      importObjCInterfaces(result, decl->getReferencedInterfaces(),
 //                           inheritedTypes);
-//      result->setInherited(Impl.PolarphpContext.AllocateCopy(inheritedTypes));
+//      result->setInherited(Impl.TypePHPContext.AllocateCopy(inheritedTypes));
 //
 //      result->setMemberLoader(&Impl, 0);
 //
@@ -4739,7 +4739,7 @@ public:
    void addInferredAttributes(Decl *decl, unsigned attributes) {
       using namespace inferredattributes;
       if (attributes & requires_stored_property_inits) {
-         auto a = new (Impl.PolarphpContext)
+         auto a = new (Impl.TypePHPContext)
             RequiresStoredPropertyInitsAttr(/*IsImplicit=*/true);
          decl->getAttrs().add(a);
       }
@@ -4779,7 +4779,7 @@ public:
 //         const ClassDecl *nsObjectDecl =
 //            nsObjectTy->getClassOrBoundGenericClass();
 //
-//         auto result = createFakeRootClass(Impl.PolarphpContext.Id_Interface,
+//         auto result = createFakeRootClass(Impl.TypePHPContext.Id_Interface,
 //                                           nsObjectDecl->getDeclContext());
 //         result->setForeignClassKind(ClassDecl::ForeignKind::RuntimeOnly);
 //         return result;
@@ -4815,12 +4815,12 @@ public:
 //            // Fake it by making an unavailable opaque @objc root class.
 //            auto result = createFakeRootClass(name);
 //            result->setImplicit();
-//            auto attr = AvailableAttr::createPlatformAgnostic(Impl.PolarphpContext,
+//            auto attr = AvailableAttr::createPlatformAgnostic(Impl.TypePHPContext,
 //                                                              "This Objective-C class has only been forward-declared; "
 //                                                              "import its owning module to use it");
 //            result->getAttrs().add(attr);
 //            result->getAttrs().add(
-//               new (Impl.PolarphpContext) ForbidSerializingReferenceAttr(true));
+//               new (Impl.TypePHPContext) ForbidSerializingReferenceAttr(true));
 //            return result;
 //         }
 //
@@ -4840,7 +4840,7 @@ public:
 //
 //      auto access = AccessLevel::Open;
 //      if (decl->hasAttr<clang::ObjCSubclassingRestrictedAttr>() &&
-//          Impl.PolarphpContext.isSwiftVersionAtLeast(5)) {
+//          Impl.TypePHPContext.isSwiftVersionAtLeast(5)) {
 //         access = AccessLevel::Public;
 //      }
 //
@@ -4915,7 +4915,7 @@ public:
 //      // Import protocols this class conforms to.
 //      importObjCInterfaces(result, decl->getReferencedInterfaces(),
 //                           inheritedTypes);
-//      result->setInherited(Impl.PolarphpContext.AllocateCopy(inheritedTypes));
+//      result->setInherited(Impl.TypePHPContext.AllocateCopy(inheritedTypes));
 //
 //      // Add inferred attributes.
 //#define INFERRED_ATTRIBUTES(ModuleName, ClassName, AttributeSet)               \
@@ -5126,11 +5126,11 @@ public:
 //      // Handle attributes.
 //      if (decl->hasAttr<clang::IBOutletAttr>())
 //         result->getAttrs().add(
-//            new (Impl.PolarphpContext) IBOutletAttr(/*IsImplicit=*/false));
+//            new (Impl.TypePHPContext) IBOutletAttr(/*IsImplicit=*/false));
 //      if (decl->getPropertyImplementation() == clang::ObjCPropertyDecl::Optional
 //          && isa<InterfaceDecl>(dc) &&
 //          !result->getAttrs().hasAttribute<OptionalAttr>())
-//         result->getAttrs().add(new (Impl.PolarphpContext)
+//         result->getAttrs().add(new (Impl.TypePHPContext)
 //                                   OptionalAttr(/*implicit*/false));
 //      // FIXME: Handle IBOutletCollection.
 //
@@ -5325,7 +5325,7 @@ static Type findCFSuperclass(ClangImporter::Implementation &impl,
 }
 
 //ClassDecl *
-//SwiftDeclConverter::importCFClassType(const clang::TypedefNameDecl *decl,
+//TypePHPDeclConverter::importCFClassType(const clang::TypedefNameDecl *decl,
 //                                      Identifier className, CFPointeeInfo info,
 //                                      EffectiveClangContext effectiveContext) {
 //   auto dc = Impl.importDeclContextOf(decl, effectiveContext);
@@ -5350,7 +5350,7 @@ static Type findCFSuperclass(ClangImporter::Implementation &impl,
 //   if (superclass) {
 //      SmallVector<TypeLoc, 4> inheritedTypes;
 //      inheritedTypes.push_back(TypeLoc::withoutLoc(superclass));
-//      theClass->setInherited(Impl.PolarphpContext.AllocateCopy(inheritedTypes));
+//      theClass->setInherited(Impl.TypePHPContext.AllocateCopy(inheritedTypes));
 //   }
 //
 //   addSynthesizedInterfaceAttrs(Impl, theClass, {KnownInterfaceKind::CFObject});
@@ -5365,7 +5365,7 @@ static Type findCFSuperclass(ClangImporter::Implementation &impl,
 //         // bridged.
 //         if (ClassDecl *objcClass = dynCastIgnoringCompatibilityAlias<ClassDecl>(
 //            Impl.importDeclByName(attr->getBridgedType()->getName()))) {
-//            theClass->getAttrs().add(new (Impl.PolarphpContext)
+//            theClass->getAttrs().add(new (Impl.TypePHPContext)
 //                                        ObjCBridgedAttr(objcClass));
 //         }
 //      }
@@ -5376,7 +5376,7 @@ static Type findCFSuperclass(ClangImporter::Implementation &impl,
 ////         // bridged.
 ////         if (ClassDecl *objcClass = dynCastIgnoringCompatibilityAlias<ClassDecl>(
 ////            Impl.importDeclByName(attr->getBridgedType()->getName()))) {
-////            theClass->getAttrs().add(new (Impl.PolarphpContext)
+////            theClass->getAttrs().add(new (Impl.TypePHPContext)
 ////                                        ObjCBridgedAttr(objcClass));
 ////         }
 ////      }
@@ -5385,7 +5385,7 @@ static Type findCFSuperclass(ClangImporter::Implementation &impl,
 //   return theClass;
 //}
 
-Decl *SwiftDeclConverter::importCompatibilityTypeAlias(
+Decl *TypePHPDeclConverter::importCompatibilityTypeAlias(
    const clang::NamedDecl *decl,
    ImportedName compatibilityName,
    ImportedName correctPolarphpName) {
@@ -5480,9 +5480,9 @@ static bool conformsToInterfaceInOriginalModule(NominalTypeDecl *nominal,
 }
 
 Decl *
-SwiftDeclConverter::importSwiftNewtype(const clang::TypedefNameDecl *decl,
-                                       clang::SwiftNewtypeAttr *newtypeAttr,
-                                       DeclContext *dc, Identifier name) {
+TypePHPDeclConverter::importTypePHPNewtype(const clang::TypedefNameDecl *decl,
+                                           clang::SwiftNewtypeAttr *newtypeAttr,
+                                           DeclContext *dc, Identifier name) {
    // The only (current) difference between swift_newtype(struct) and
    // swift_newtype(enum), until we can get real enum support, is that enums
    // have no un-labeled inits(). This is because enums are to be considered
@@ -5501,7 +5501,7 @@ SwiftDeclConverter::importSwiftNewtype(const clang::TypedefNameDecl *decl,
 //         // No other cases yet
 //   }
 
-   auto &ctx = Impl.PolarphpContext;
+   auto &ctx = Impl.TypePHPContext;
    auto Loc = Impl.importSourceLoc(decl->getLocation());
 
    auto structDecl = Impl.createDeclWithClangNode<StructDecl>(
@@ -5522,7 +5522,7 @@ SwiftDeclConverter::importSwiftNewtype(const clang::TypedefNameDecl *decl,
    // we will store the underlying type and leave it up to the use site
    // to determine whether to use this new_type, or an Unmanaged<CF...> type.
    if (auto genericType = storedUnderlyingType->getAs<BoundGenericType>()) {
-      if (genericType->getDecl() == Impl.PolarphpContext.getUnmanagedDecl()) {
+      if (genericType->getDecl() == Impl.TypePHPContext.getUnmanagedDecl()) {
          assert(genericType->getGenericArgs().size() == 1 && "other args?");
          storedUnderlyingType = genericType->getGenericArgs()[0];
       }
@@ -5636,11 +5636,11 @@ SwiftDeclConverter::importSwiftNewtype(const clang::TypedefNameDecl *decl,
    return structDecl;
 }
 
-Decl *SwiftDeclConverter::importEnumCase(const clang::EnumConstantDecl *decl,
-                                         const clang::EnumDecl *clangEnum,
-                                         EnumDecl *theEnum,
-                                         Decl *correctDecl) {
-   auto &context = Impl.PolarphpContext;
+Decl *TypePHPDeclConverter::importEnumCase(const clang::EnumConstantDecl *decl,
+                                           const clang::EnumDecl *clangEnum,
+                                           EnumDecl *theEnum,
+                                           Decl *correctDecl) {
+   auto &context = Impl.TypePHPContext;
    Optional<ImportedName> correctPolarphpName;
    auto name =
       importFullName(decl, correctPolarphpName).getDeclName().getBaseIdentifier();
@@ -5655,7 +5655,7 @@ Decl *SwiftDeclConverter::importEnumCase(const clang::EnumConstantDecl *decl,
 
       // If the correct declaration was unavailable, don't map to it.
       // FIXME: This eliminates spurious errors, but affects QoI.
-      if (correctCase->getAttrs().isUnavailable(Impl.PolarphpContext))
+      if (correctCase->getAttrs().isUnavailable(Impl.TypePHPContext))
          return nullptr;
 
       auto compatibilityCase =
@@ -5694,9 +5694,9 @@ Decl *SwiftDeclConverter::importEnumCase(const clang::EnumConstantDecl *decl,
 }
 
 Decl *
-SwiftDeclConverter::importOptionConstant(const clang::EnumConstantDecl *decl,
-                                         const clang::EnumDecl *clangEnum,
-                                         NominalTypeDecl *theStruct) {
+TypePHPDeclConverter::importOptionConstant(const clang::EnumConstantDecl *decl,
+                                           const clang::EnumDecl *clangEnum,
+                                           NominalTypeDecl *theStruct) {
    Optional<ImportedName> correctPolarphpName;
    ImportedName nameInfo = importFullName(decl, correctPolarphpName);
    Identifier name = nameInfo.getDeclName().getBaseIdentifier();
@@ -5716,11 +5716,11 @@ SwiftDeclConverter::importOptionConstant(const clang::EnumConstantDecl *decl,
    // not operate as a set-like member.  Mark them unavailable with a message
    // that says that they should be used as [].
    if (decl->getInitVal() == 0 && !nameInfo.hasCustomName() &&
-       !CD->getAttrs().isUnavailable(Impl.PolarphpContext)) {
+       !CD->getAttrs().isUnavailable(Impl.TypePHPContext)) {
       /// Create an AvailableAttr that indicates specific availability
       /// for all platforms.
       auto attr = AvailableAttr::createPlatformAgnostic(
-         Impl.PolarphpContext, "use [] to construct an empty option set");
+         Impl.TypePHPContext, "use [] to construct an empty option set");
       CD->getAttrs().add(attr);
    }
 
@@ -5731,7 +5731,7 @@ SwiftDeclConverter::importOptionConstant(const clang::EnumConstantDecl *decl,
    return CD;
 }
 
-Decl *SwiftDeclConverter::importEnumCaseAlias(
+Decl *TypePHPDeclConverter::importEnumCaseAlias(
    Identifier name, const clang::EnumConstantDecl *alias, ValueDecl *original,
    const clang::EnumDecl *clangEnum, NominalTypeDecl *importedEnum,
    DeclContext *importIntoDC) {
@@ -5745,14 +5745,14 @@ Decl *SwiftDeclConverter::importEnumCaseAlias(
    // Construct the original constant. Enum constants without payloads look
    // like simple values, but actually have type 'MyEnum.Type -> MyEnum'.
    auto constantRef =
-      new (Impl.PolarphpContext) DeclRefExpr(original, DeclNameLoc(),
+      new (Impl.TypePHPContext) DeclRefExpr(original, DeclNameLoc(),
          /*implicit*/ true);
    constantRef->setType(original->getInterfaceType());
 
    Type importedEnumTy = importedEnum->getDeclaredInterfaceType();
 
-   auto typeRef = TypeExpr::createImplicit(importedEnumTy, Impl.PolarphpContext);
-   auto instantiate = new (Impl.PolarphpContext)
+   auto typeRef = TypeExpr::createImplicit(importedEnumTy, Impl.TypePHPContext);
+   auto instantiate = new (Impl.TypePHPContext)
       DotSyntaxCallExpr(constantRef, SourceLoc(), typeRef);
    instantiate->setType(importedEnumTy);
    instantiate->setThrows(false);
@@ -5765,9 +5765,9 @@ Decl *SwiftDeclConverter::importEnumCaseAlias(
 }
 
 NominalTypeDecl *
-SwiftDeclConverter::importAsOptionSetType(DeclContext *dc, Identifier name,
-                                          const clang::EnumDecl *decl) {
-   AstContext &ctx = Impl.PolarphpContext;
+TypePHPDeclConverter::importAsOptionSetType(DeclContext *dc, Identifier name,
+                                            const clang::EnumDecl *decl) {
+   AstContext &ctx = Impl.TypePHPContext;
 
    // Compute the underlying type.
    auto underlyingType = Impl.importTypeIgnoreIUO(
@@ -5790,7 +5790,7 @@ SwiftDeclConverter::importAsOptionSetType(DeclContext *dc, Identifier name,
    return structDecl;
 }
 
-Decl *SwiftDeclConverter::importGlobalAsInitializer(
+Decl *TypePHPDeclConverter::importGlobalAsInitializer(
    const clang::FunctionDecl *decl,
    DeclName name,
    DeclContext *dc,
@@ -5802,10 +5802,10 @@ Decl *SwiftDeclConverter::importGlobalAsInitializer(
    // Check for some invalid imports
    if (dc->getSelfInterfaceDecl()) {
       // FIXME: clang source location
-      Impl.PolarphpContext.Diags.diagnose({}, diag::swift_name_protocol_static,
+      Impl.TypePHPContext.Diags.diagnose({}, diag::swift_name_protocol_static,
          /*isInit=*/true);
-      Impl.PolarphpContext.Diags.diagnose({}, diag::note_while_importing,
-                                          decl->getName());
+      Impl.TypePHPContext.Diags.diagnose({}, diag::note_while_importing,
+                                         decl->getName());
       return nullptr;
    }
 
@@ -5819,11 +5819,11 @@ Decl *SwiftDeclConverter::importGlobalAsInitializer(
       // Special case: We need to create an empty first parameter for our
       // argument label
       auto *paramDecl =
-         new (Impl.PolarphpContext) ParamDecl(
+         new (Impl.TypePHPContext) ParamDecl(
             SourceLoc(), SourceLoc(), argNames.front(),
             SourceLoc(), argNames.front(), dc);
       paramDecl->setSpecifier(ParamSpecifier::Default);
-      paramDecl->setInterfaceType(Impl.PolarphpContext.TheEmptyTupleType);
+      paramDecl->setInterfaceType(Impl.TypePHPContext.TheEmptyTupleType);
 
       parameterList = ParameterList::createWithoutLoc(paramDecl);
    } else {
@@ -5874,8 +5874,8 @@ Decl *SwiftDeclConverter::importGlobalAsInitializer(
 /// Create an implicit property given the imported name of one of
 /// the accessors.
 VarDecl *
-SwiftDeclConverter::getImplicitProperty(ImportedName importedName,
-                                        const clang::FunctionDecl *accessor) {
+TypePHPDeclConverter::getImplicitProperty(ImportedName importedName,
+                                          const clang::FunctionDecl *accessor) {
    // Check whether we already know about the property.
    auto knownProperty = Impl.FunctionsAsProperties.find(accessor);
    if (knownProperty != Impl.FunctionsAsProperties.end())
@@ -5911,7 +5911,7 @@ SwiftDeclConverter::getImplicitProperty(ImportedName importedName,
       Impl.findLookupTable(*getClangSubmoduleForDecl(accessor));
    assert(lookupTable && "No lookup table?");
    bool foundAccessor = false;
-   for (auto entry : lookupTable->lookup(SerializedSwiftName(propertyName),
+   for (auto entry : lookupTable->lookup(SerializedTypePHPName(propertyName),
                                          importedName.getEffectiveContext())) {
       auto decl = entry.dyn_cast<clang::NamedDecl *>();
       if (!decl)
@@ -6019,49 +6019,49 @@ SwiftDeclConverter::getImplicitProperty(ImportedName importedName,
    // If this property is in a class or class extension context,
    // add "final".
    if (dc->getSelfClassDecl())
-      property->getAttrs().add(new (Impl.PolarphpContext)
+      property->getAttrs().add(new (Impl.TypePHPContext)
                                   FinalAttr(/*IsImplicit=*/true));
 
    // Import the getter.
-   auto *swiftGetter = dyn_cast_or_null<AccessorDecl>(
+   auto *typePHPGetter = dyn_cast_or_null<AccessorDecl>(
       importFunctionDecl(getter, getterName, None,
                          AccessorInfo{property, AccessorKind::Get}));
-   if (!swiftGetter)
+   if (!typePHPGetter)
       return nullptr;
 
-   Impl.importAttributes(getter, swiftGetter);
-   Impl.ImportedDecls[{getter, getVersion()}] = swiftGetter;
+   Impl.importAttributes(getter, typePHPGetter);
+   Impl.ImportedDecls[{getter, getVersion()}] = typePHPGetter;
    if (swift3GetterName)
-      markAsVariant(swiftGetter, *swift3GetterName);
+      markAsVariant(typePHPGetter, *swift3GetterName);
 
    // Import the setter.
-   AccessorDecl *swiftSetter = nullptr;
+   AccessorDecl *typePHPSetter = nullptr;
    if (setter) {
-      swiftSetter = dyn_cast_or_null<AccessorDecl>(
+      typePHPSetter = dyn_cast_or_null<AccessorDecl>(
          importFunctionDecl(setter, setterName, None,
                             AccessorInfo{property, AccessorKind::Set}));
-      if (!swiftSetter)
+      if (!typePHPSetter)
          return nullptr;
 
-      Impl.importAttributes(setter, swiftSetter);
-      Impl.ImportedDecls[{setter, getVersion()}] = swiftSetter;
+      Impl.importAttributes(setter, typePHPSetter);
+      Impl.ImportedDecls[{setter, getVersion()}] = typePHPSetter;
       if (swift3SetterName)
-         markAsVariant(swiftSetter, *swift3SetterName);
+         markAsVariant(typePHPSetter, *swift3SetterName);
    }
 
-   if (swiftGetter) property->setIsGetterMutating(swiftGetter->isMutating());
-   if (swiftSetter) property->setIsSetterMutating(swiftSetter->isMutating());
+   if (typePHPGetter) property->setIsGetterMutating(typePHPGetter->isMutating());
+   if (typePHPSetter) property->setIsSetterMutating(typePHPSetter->isMutating());
 
    // Make this a computed property.
-   makeComputed(property, swiftGetter, swiftSetter);
+   makeComputed(property, typePHPGetter, typePHPSetter);
 
    // Make the property the alternate declaration for the getter.
-   Impl.addAlternateDecl(swiftGetter, property);
+   Impl.addAlternateDecl(typePHPGetter, property);
 
    return property;
 }
 //
-//ConstructorDecl *SwiftDeclConverter::importConstructor(
+//ConstructorDecl *TypePHPDeclConverter::importConstructor(
 //   const clang::ObjCMethodDecl *objcMethod, DeclContext *dc, bool implicit,
 //   Optional<CtorInitializerKind> kind, bool required) {
 //   // Only methods in the 'init' family can become constructors.
@@ -6094,7 +6094,7 @@ SwiftDeclConverter::getImplicitProperty(ImportedName importedName,
 //
 //   // If we dropped the variadic, handle it now.
 //   if (importedName.droppedVariadic()) {
-//      selector = ObjCSelector(Impl.PolarphpContext, selector.getNumArgs() - 1,
+//      selector = ObjCSelector(Impl.TypePHPContext, selector.getNumArgs() - 1,
 //                              selector.getSelectorPieces().drop_back());
 //      params = params.drop_back(1);
 //      variadic = false;
@@ -6116,7 +6116,7 @@ SwiftDeclConverter::getImplicitProperty(ImportedName importedName,
 /// Returns the latest "introduced" version on the current platform for
 /// \p D.
 llvm::VersionTuple
-SwiftDeclConverter::findLatestIntroduction(const clang::Decl *D) {
+TypePHPDeclConverter::findLatestIntroduction(const clang::Decl *D) {
    llvm::VersionTuple result;
 
    for (auto *attr : D->specific_attrs<clang::AvailabilityAttr>()) {
@@ -6140,7 +6140,7 @@ SwiftDeclConverter::findLatestIntroduction(const clang::Decl *D) {
 
 /// Returns true if importing \p objcMethod will produce a "better"
 /// initializer than \p existingCtor.
-bool SwiftDeclConverter::existingConstructorIsWorse(
+bool TypePHPDeclConverter::existingConstructorIsWorse(
    const ConstructorDecl *existingCtor,
    const clang::ObjCMethodDecl *objcMethod, CtorInitializerKind kind) {
    CtorInitializerKind existingKind = existingCtor->getInitKind();
@@ -6148,7 +6148,7 @@ bool SwiftDeclConverter::existingConstructorIsWorse(
    // If one constructor is unavailable in Swift and the other is
    // not, keep the available one.
    bool existingIsUnavailable =
-      existingCtor->getAttrs().isUnavailable(Impl.PolarphpContext);
+      existingCtor->getAttrs().isUnavailable(Impl.TypePHPContext);
    bool newIsUnavailable = Impl.isUnavailableInSwift(objcMethod);
    if (existingIsUnavailable != newIsUnavailable)
       return existingIsUnavailable;
@@ -6178,7 +6178,7 @@ bool SwiftDeclConverter::existingConstructorIsWorse(
    // other?
    llvm::VersionTuple introduced = findLatestIntroduction(objcMethod);
    AvailabilityContext existingAvailability =
-      AvailabilityInference::availableRange(existingCtor, Impl.PolarphpContext);
+      AvailabilityInference::availableRange(existingCtor, Impl.TypePHPContext);
    assert(!existingAvailability.isKnownUnreachable());
 
    if (existingAvailability.isAlwaysAvailable()) {
@@ -6212,7 +6212,7 @@ bool SwiftDeclConverter::existingConstructorIsWorse(
 ///
 /// This variant of the function is responsible for actually binding the
 /// constructor declaration appropriately.
-//ConstructorDecl *SwiftDeclConverter::importConstructor(
+//ConstructorDecl *TypePHPDeclConverter::importConstructor(
 //   const clang::ObjCMethodDecl *objcMethod, DeclContext *dc, bool implicit,
 //   CtorInitializerKind kind, bool required, ObjCSelector selector,
 //   ImportedName importedName, ArrayRef<const clang::ParmVarDecl *> args,
@@ -6261,7 +6261,7 @@ bool SwiftDeclConverter::existingConstructorIsWorse(
 //
 //   for (auto ctor : ctors) {
 //      if (ctor->isInvalid() ||
-//          ctor->getAttrs().isUnavailable(Impl.PolarphpContext) ||
+//          ctor->getAttrs().isUnavailable(Impl.TypePHPContext) ||
 //          !ctor->getClangDecl())
 //         continue;
 //
@@ -6310,7 +6310,7 @@ bool SwiftDeclConverter::existingConstructorIsWorse(
 //         errorStr += ']';
 //
 //         auto attr = AvailableAttr::createPlatformAgnostic(
-//            Impl.PolarphpContext, Impl.PolarphpContext.AllocateCopy(errorStr.str()));
+//            Impl.TypePHPContext, Impl.TypePHPContext.AllocateCopy(errorStr.str()));
 //         ctor->getAttrs().add(attr);
 //         continue;
 //      }
@@ -6382,7 +6382,7 @@ bool SwiftDeclConverter::existingConstructorIsWorse(
 //
 //   // If this initializer is required, add the appropriate attribute.
 //   if (required) {
-//      result->getAttrs().add(new (Impl.PolarphpContext)
+//      result->getAttrs().add(new (Impl.TypePHPContext)
 //                                RequiredAttr(/*IsImplicit=*/true));
 //   }
 //
@@ -6401,7 +6401,7 @@ bool SwiftDeclConverter::existingConstructorIsWorse(
 //   return result;
 //}
 //
-//void SwiftDeclConverter::recordObjCOverride(AbstractFunctionDecl *decl) {
+//void TypePHPDeclConverter::recordObjCOverride(AbstractFunctionDecl *decl) {
 //   // Make sure that we always set the overriden declarations.
 //   SWIFT_DEFER {
 //      if (!decl->overriddenDeclsComputed())
@@ -6449,7 +6449,7 @@ bool SwiftDeclConverter::existingConstructorIsWorse(
 //      // Propagate 'required' to subclass initializers.
 //      if (memberCtor->isRequired() &&
 //          !ctor->getAttrs().hasAttribute<RequiredAttr>()) {
-//         ctor->getAttrs().add(new (Impl.PolarphpContext)
+//         ctor->getAttrs().add(new (Impl.TypePHPContext)
 //                                 RequiredAttr(/*IsImplicit=*/true));
 //      }
 //   }
@@ -6476,7 +6476,7 @@ static bool areParameterTypesEqual(const ParameterList &params1,
    return true;
 }
 //
-//void SwiftDeclConverter::recordObjCOverride(SubscriptDecl *subscript) {
+//void TypePHPDeclConverter::recordObjCOverride(SubscriptDecl *subscript) {
 //   // Figure out the class in which this subscript occurs.
 //   auto classTy = subscript->getDeclContext()->getSelfClassDecl();
 //   if (!classTy)
@@ -6519,7 +6519,7 @@ static bool areParameterTypesEqual(const ParameterList &params1,
 ///// Given either the getter or setter for a subscript operation,
 ///// create the Swift subscript declaration.
 //SubscriptDecl *
-//SwiftDeclConverter::importSubscript(Decl *decl,
+//TypePHPDeclConverter::importSubscript(Decl *decl,
 //                                    const clang::ObjCMethodDecl *objcMethod) {
 //   assert(objcMethod->isInstanceMethod() && "Caller must filter");
 //
@@ -6645,7 +6645,7 @@ static bool areParameterTypesEqual(const ParameterList &params1,
 //
 //   // Local function to mark the setter unavailable.
 //   auto makeSetterUnavailable = [&] {
-//      if (setter && !setter->getAttrs().isUnavailable(Impl.PolarphpContext))
+//      if (setter && !setter->getAttrs().isUnavailable(Impl.TypePHPContext))
 //         Impl.markUnavailable(setter, "use subscripting");
 //   };
 //
@@ -6736,7 +6736,7 @@ static bool areParameterTypesEqual(const ParameterList &params1,
 //      associateWithSetter ? setter->getDeclContext() : getter->getDeclContext();
 //
 //   // Build the subscript declaration.
-//   auto &C = Impl.PolarphpContext;
+//   auto &C = Impl.TypePHPContext;
 //   auto bodyParams = ParameterList::create(C, getterIndex);
 //   DeclName name(C, DeclBaseName::createSubscript(), {Identifier()});
 //   auto subscript = Impl.createDeclWithClangNode<SubscriptDecl>(
@@ -6774,7 +6774,7 @@ static bool areParameterTypesEqual(const ParameterList &params1,
 //
 //   // Optional subscripts in protocols.
 //   if (optionalMethods && isa<InterfaceDecl>(dc))
-//      subscript->getAttrs().add(new (Impl.PolarphpContext) OptionalAttr(true));
+//      subscript->getAttrs().add(new (Impl.TypePHPContext) OptionalAttr(true));
 //
 //   // Note that we've created this subscript.
 //   Impl.Subscripts[{getter, setter}] = subscript;
@@ -6782,7 +6782,7 @@ static bool areParameterTypesEqual(const ParameterList &params1,
 //      Impl.Subscripts[{getter, nullptr}] = subscript;
 //
 //   // Make the getter/setter methods unavailable.
-//   if (!getter->getAttrs().isUnavailable(Impl.PolarphpContext))
+//   if (!getter->getAttrs().isUnavailable(Impl.TypePHPContext))
 //      Impl.markUnavailable(getter, "use subscripting");
 //   makeSetterUnavailable();
 //
@@ -6793,11 +6793,11 @@ static bool areParameterTypesEqual(const ParameterList &params1,
 //}
 //
 //AccessorDecl *
-//SwiftDeclConverter::importAccessor(clang::ObjCMethodDecl *clangAccessor,
+//TypePHPDeclConverter::importAccessor(clang::ObjCMethodDecl *clangAccessor,
 //                                   AbstractStorageDecl *storage,
 //                                   AccessorKind accessorKind,
 //                                   DeclContext *dc) {
-//   SwiftDeclConverter converter(Impl, getActivePolarphpVersion());
+//   TypePHPDeclConverter converter(Impl, getActivePolarphpVersion());
 //   auto *accessor = cast_or_null<AccessorDecl>(
 //      converter.importObjCMethodDecl(clangAccessor, dc,
 //                                     AccessorInfo{storage, accessorKind}));
@@ -6810,7 +6810,7 @@ static bool areParameterTypesEqual(const ParameterList &params1,
 //   return accessor;
 //}
 
-//void SwiftDeclConverter::addInterfaces(
+//void TypePHPDeclConverter::addInterfaces(
 //   InterfaceDecl *protocol, SmallVectorImpl<InterfaceDecl *> &protocols,
 //   llvm::SmallPtrSetImpl<InterfaceDecl *> &known) {
 //   if (!known.insert(protocol).second)
@@ -6821,7 +6821,7 @@ static bool areParameterTypesEqual(const ParameterList &params1,
 //      addInterfaces(inherited, protocols, known);
 //}
 //
-//void SwiftDeclConverter::importObjCInterfaces(
+//void TypePHPDeclConverter::importObjCInterfaces(
 //   Decl *decl, const clang::ObjCInterfaceList &clangInterfaces,
 //   SmallVectorImpl<TypeLoc> &inheritedTypes) {
 //   SmallVector<InterfaceDecl *, 4> protocols;
@@ -6843,7 +6843,7 @@ static bool areParameterTypesEqual(const ParameterList &params1,
 //   addObjCInterfaceConformances(decl, protocols);
 //}
 //
-//void SwiftDeclConverter::addObjCInterfaceConformances(
+//void TypePHPDeclConverter::addObjCInterfaceConformances(
 //   Decl *decl, ArrayRef<InterfaceDecl *> protocols) {
 //   // Nothing to do for protocols.
 //   if (isa<InterfaceDecl>(decl)) return;
@@ -6858,13 +6858,13 @@ static bool areParameterTypesEqual(const ParameterList &params1,
 //   }
 //}
 //
-//Optional<GenericParamList *> SwiftDeclConverter::importObjCGenericParams(
+//Optional<GenericParamList *> TypePHPDeclConverter::importObjCGenericParams(
 //   const clang::ObjCInterfaceDecl *decl, DeclContext *dc) {
 //   auto typeParamList = decl->getTypeParamList();
 //   if (!typeParamList) {
 //      return nullptr;
 //   }
-//   if (shouldSuppressGenericParamsImport(Impl.PolarphpContext.LangOpts, decl)) {
+//   if (shouldSuppressGenericParamsImport(Impl.TypePHPContext.LangOpts, decl)) {
 //      return nullptr;
 //   }
 //   assert(typeParamList->size() > 0);
@@ -6872,7 +6872,7 @@ static bool areParameterTypesEqual(const ParameterList &params1,
 //   for (auto *objcGenericParam : *typeParamList) {
 //      auto genericParamDecl = Impl.createDeclWithClangNode<GenericTypeParamDecl>(
 //         objcGenericParam, AccessLevel::Public, dc,
-//         Impl.PolarphpContext.getIdentifier(objcGenericParam->getName()),
+//         Impl.TypePHPContext.getIdentifier(objcGenericParam->getName()),
 //         Impl.importSourceLoc(objcGenericParam->getLocation()),
 //         /*depth*/ 0, /*index*/ genericParams.size());
 //      // NOTE: depth is always 0 for ObjC generic type arguments, since only
@@ -6907,20 +6907,20 @@ static bool areParameterTypesEqual(const ParameterList &params1,
 //      }
 //      if (inherited.empty()) {
 //         inherited.push_back(
-//            TypeLoc::withoutLoc(Impl.PolarphpContext.getAnyObjectType()));
+//            TypeLoc::withoutLoc(Impl.TypePHPContext.getAnyObjectType()));
 //      }
-//      genericParamDecl->setInherited(Impl.PolarphpContext.AllocateCopy(inherited));
+//      genericParamDecl->setInherited(Impl.TypePHPContext.AllocateCopy(inherited));
 //
 //      genericParams.push_back(genericParamDecl);
 //   }
 //   return GenericParamList::create(
-//      Impl.PolarphpContext, Impl.importSourceLoc(typeParamList->getLAngleLoc()),
+//      Impl.TypePHPContext, Impl.importSourceLoc(typeParamList->getLAngleLoc()),
 //      genericParams, Impl.importSourceLoc(typeParamList->getRAngleLoc()));
 //}
 
 // @todo
 //
-//void SwiftDeclConverter::importMirroredInterfaceMembers(
+//void TypePHPDeclConverter::importMirroredInterfaceMembers(
 //   const clang::ObjCContainerDecl *decl, DeclContext *dc,
 //   ArrayRef<InterfaceDecl *> protocols, SmallVectorImpl<Decl *> &members,
 //   AstContext &Ctx) {
@@ -6966,7 +6966,7 @@ static bool areParameterTypesEqual(const ParameterList &params1,
 //            continue;
 //
 //      const auto &languageVersion =
-//         Impl.PolarphpContext.LangOpts.EffectiveLanguageVersion;
+//         Impl.TypePHPContext.LangOpts.EffectiveLanguageVersion;
 //      for (auto member : proto->getMembers()) {
 //         // Skip compatibility stubs; there's no reason to mirror them.
 //         if (member->getAttrs().isUnavailableInSwiftVersion(languageVersion))
@@ -7127,7 +7127,7 @@ enum MirrorImportComparison {
 /// It's possible that we'll end up selecting multiple methods to import
 /// here, in the cases where there's no hierarchical relationship between
 /// two methods.  The importer already has code to handle this case.
-//void SwiftDeclConverter::importNonOverriddenMirroredMethods(DeclContext *dc,
+//void TypePHPDeclConverter::importNonOverriddenMirroredMethods(DeclContext *dc,
 //                                                            MutableArrayRef<MirroredMethodEntry> entries,
 //                                                            SmallVectorImpl<Decl *> &members) {
 //   for (size_t i = 0, e = entries.size(); i != e; ++i) {
@@ -7170,7 +7170,7 @@ enum MirrorImportComparison {
 //   }
 //}
 
-//void SwiftDeclConverter::importInheritedConstructors(
+//void TypePHPDeclConverter::importInheritedConstructors(
 //   ClassDecl *classDecl, SmallVectorImpl<Decl *> &newMembers) {
 //   if (!classDecl->hasSuperclass())
 //      return;
@@ -7180,7 +7180,7 @@ enum MirrorImportComparison {
 //   auto inheritConstructors = [&](TinyPtrVector<ValueDecl *> members,
 //                                  Optional<CtorInitializerKind> kind) {
 //      const auto &languageVersion =
-//         Impl.PolarphpContext.LangOpts.EffectiveLanguageVersion;
+//         Impl.TypePHPContext.LangOpts.EffectiveLanguageVersion;
 //
 //      for (auto member : members) {
 //         auto ctor = dyn_cast<ConstructorDecl>(member);
@@ -7364,10 +7364,10 @@ getSwiftNameFromClangName(StringRef replacement) {
    {
       // Render a swift_name string.
       llvm::raw_svector_ostream os(renamed);
-      printPolarphpName(importedName, CurrentVersion, /*fullyQualified=*/true, os);
+      printTypePHPName(importedName, CurrentVersion, /*fullyQualified=*/true, os);
    }
 
-   return PolarphpContext.AllocateCopy(StringRef(renamed));
+   return TypePHPContext.AllocateCopy(StringRef(renamed));
 }
 
 bool importer::isSpecialUIKitStructZeroProperty(const clang::NamedDecl *decl) {
@@ -7396,7 +7396,7 @@ void ClangImporter::Implementation::importAttributes(
    if (isa<SubscriptDecl>(MappedDecl))
       return;
 
-   AstContext &C = PolarphpContext;
+   AstContext &C = TypePHPContext;
 
    if (auto maybeDefinition = getDefinitionForClangTypeDecl(ClangDecl))
       if (maybeDefinition.getValue())
@@ -7633,7 +7633,7 @@ ClangImporter::Implementation::importDeclImpl(const clang::NamedDecl *ClangDecl,
    }
 
    if (!Result) {
-      SwiftDeclConverter converter(*this, version);
+      TypePHPDeclConverter converter(*this, version);
       Result = converter.Visit(ClangDecl);
       HadForwardDeclaration = converter.hadForwardDeclaration();
    }
@@ -7752,8 +7752,8 @@ ClangImporter::Implementation::importDeclImpl(const clang::NamedDecl *ClangDecl,
 void ClangImporter::Implementation::startedImportingEntity() {
    ++NumTotalImportedEntities;
    // FIXME: (transitional) increment the redundant "always-on" counter.
-   if (PolarphpContext.Stats)
-      PolarphpContext.Stats->getFrontendCounters().NumTotalClangImportedEntities++;
+   if (TypePHPContext.Stats)
+      TypePHPContext.Stats->getFrontendCounters().NumTotalClangImportedEntities++;
 }
 
 /// Look up associated type requirements in the conforming type.
@@ -7843,7 +7843,7 @@ void ClangImporter::Implementation::finishNormalConformance(
    (void)unused;
 
    auto *proto = conformance->getInterface();
-   PrettyStackTraceConformance trace(PolarphpContext, "completing import of",
+   PrettyStackTraceConformance trace(TypePHPContext, "completing import of",
                                      conformance);
 
    finishTypeWitnesses(conformance);
@@ -7870,7 +7870,7 @@ Decl *ClangImporter::Implementation::importDeclAndCacheImpl(
    if (!ClangDecl)
       return nullptr;
 
-   FrontendStatsTracer StatsTracer(PolarphpContext.Stats,
+   FrontendStatsTracer StatsTracer(TypePHPContext.Stats,
                                    "import-clang-decl", ClangDecl);
    clang::PrettyStackTraceDecl trace(ClangDecl, clang::SourceLocation(),
                                      Instance->getSourceManager(), "importing");
@@ -7927,7 +7927,7 @@ Decl *ClangImporter::Implementation::importDeclAndCacheImpl(
 //   if (known != ImportedInterfaceDecls.end())
 //      return known->second;
 //
-//   SwiftDeclConverter converter(*this, version);
+//   TypePHPDeclConverter converter(*this, version);
 //   Decl *result;
 //   // @todo
 ////   if (auto method = dyn_cast<clang::ObjCMethodDecl>(decl)) {
@@ -7950,8 +7950,8 @@ Decl *ClangImporter::Implementation::importDeclAndCacheImpl(
 //         if (proto->getAttrs().hasAttribute<AvailableAttr>()) {
 //            if (!result->getAttrs().hasAttribute<AvailableAttr>()) {
 //               AvailabilityContext protoRange =
-//                  AvailabilityInference::availableRange(proto, PolarphpContext);
-//               applyAvailableAttribute(result, protoRange, PolarphpContext);
+//                  AvailabilityInference::availableRange(proto, TypePHPContext);
+//               applyAvailableAttribute(result, protoRange, TypePHPContext);
 //            }
 //         } else {
 //            // Infer the same availability for the mirrored declaration as
@@ -8028,7 +8028,7 @@ GenericSignature ClangImporter::Implementation::buildGenericSignature(
    }
 
    return evaluateOrDefault(
-      PolarphpContext.evaluator,
+      TypePHPContext.evaluator,
       AbstractGenericSignatureRequest{
          nullptr, std::move(genericParamTypes), std::move(requirements)},
       GenericSignature());
@@ -8111,12 +8111,12 @@ ClangImporter::Implementation::importDeclContextOf(
       return knownExtension->second;
 
    // Create a new extension for this nominal type/Clang submodule pair.
-   auto ext = ExtensionDecl::create(PolarphpContext, SourceLoc(), nullptr, {},
+   auto ext = ExtensionDecl::create(TypePHPContext, SourceLoc(), nullptr, {},
                                     getClangModuleForDecl(decl), nullptr);
-   PolarphpContext.evaluator.cacheOutput(ExtendedTypeRequest{ext},
-                                         nominal->getDeclaredType());
-   PolarphpContext.evaluator.cacheOutput(ExtendedNominalRequest{ext},
-                                         std::move(nominal));
+   TypePHPContext.evaluator.cacheOutput(ExtendedTypeRequest{ext},
+                                        nominal->getDeclaredType());
+   TypePHPContext.evaluator.cacheOutput(ExtendedNominalRequest{ext},
+                                        std::move(nominal));
    ext->setMemberLoader(this, reinterpret_cast<uintptr_t>(declSubmodule));
 
    if (auto protoDecl = ext->getExtendedInterfaceDecl()) {
@@ -8153,7 +8153,7 @@ ClangImporter::Implementation::createConstant(Identifier name, DeclContext *dc,
                                               ConstantConvertKind convertKind,
                                               bool isStatic,
                                               ClangNode ClangN) {
-   auto &context = PolarphpContext;
+   auto &context = TypePHPContext;
 
    // Create the integer literal value.
    Expr *expr = nullptr;
@@ -8252,12 +8252,12 @@ ClangImporter::Implementation::createConstant(Identifier name, DeclContext *dc,
                                               ConstantConvertKind convertKind,
                                               bool isStatic,
                                               ClangNode ClangN) {
-   auto expr = new (PolarphpContext) StringLiteralExpr(value, SourceRange());
+   auto expr = new (TypePHPContext) StringLiteralExpr(value, SourceRange());
 
    auto literalType = getConstantLiteralType(*this, type, convertKind);
    auto *stringDecl = literalType->getAnyNominal();
    expr->setBuiltinInitializer(
-      PolarphpContext.getStringBuiltinInitDecl(stringDecl));
+      TypePHPContext.getStringBuiltinInitDecl(stringDecl));
    expr->setType(literalType);
 
    return createConstant(name, dc, type, expr, convertKind, isStatic, ClangN);
@@ -8349,7 +8349,7 @@ ClangImporter::Implementation::createConstant(Identifier name, DeclContext *dc,
                                               ConstantConvertKind convertKind,
                                               bool isStatic,
                                               ClangNode ClangN) {
-   auto &C = PolarphpContext;
+   auto &C = TypePHPContext;
 
    VarDecl *var = nullptr;
    if (ClangN) {
@@ -8359,7 +8359,7 @@ ClangImporter::Implementation::createConstant(Identifier name, DeclContext *dc,
          /*IsCaptureList*/false, SourceLoc(),
                                              name, dc);
    } else {
-      var = new (PolarphpContext)
+      var = new (TypePHPContext)
          VarDecl(/*IsStatic*/isStatic, VarDecl::Introducer::Var,
          /*IsCaptureList*/false, SourceLoc(), name, dc);
    }
@@ -8408,8 +8408,8 @@ ClangImporter::Implementation::createConstant(Identifier name, DeclContext *dc,
 void ClangImporter::Implementation::
 markUnavailable(ValueDecl *decl, StringRef unavailabilityMsgRef) {
 
-   unavailabilityMsgRef = PolarphpContext.AllocateCopy(unavailabilityMsgRef);
-   auto ua = AvailableAttr::createPlatformAgnostic(PolarphpContext,
+   unavailabilityMsgRef = TypePHPContext.AllocateCopy(unavailabilityMsgRef);
+   auto ua = AvailableAttr::createPlatformAgnostic(TypePHPContext,
                                                    unavailabilityMsgRef);
    decl->getAttrs().add(ua);
 }
@@ -8657,7 +8657,7 @@ void ClangImporter::Implementation::collectMembersToAdd(
          insertMembersAndAlternates(nd, members);
    }
 
-   SwiftDeclConverter converter(*this, CurrentVersion);
+   TypePHPDeclConverter converter(*this, CurrentVersion);
 
    auto protos = getImportedInterfaces(D);
    if (auto clangClass = dyn_cast<clang::ObjCInterfaceDecl>(objcContainer)) {
@@ -8679,7 +8679,7 @@ void ClangImporter::Implementation::collectMembersToAdd(
    // FIXME: This is supposed to be a short-term hack.
    // @todo
 //   converter.importMirroredInterfaceMembers(objcContainer, DC,
-//                                            protos, members, PolarphpContext);
+//                                            protos, members, TypePHPContext);
 }
 
 void ClangImporter::Implementation::loadAllConformances(
@@ -8691,7 +8691,7 @@ void ClangImporter::Implementation::loadAllConformances(
    for (auto *protocol : getImportedInterfaces(decl)) {
       // FIXME: Build a superclass conformance if the superclass
       // conforms.
-      auto conformance = PolarphpContext.getConformance(
+      auto conformance = TypePHPContext.getConformance(
          dc->getDeclaredInterfaceType(),
          protocol, SourceLoc(), dc,
          InterfaceConformanceState::Incomplete);

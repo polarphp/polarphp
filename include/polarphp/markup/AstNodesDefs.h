@@ -20,17 +20,17 @@
 ///
 /// MARKUP_AST_NODE_RANGE(Id, FirstId, LastId)
 
-MARKUP_AST_NODE(Document, MarkupASTNode)
-MARKUP_AST_NODE(BlockQuote, MarkupASTNode)
-MARKUP_AST_NODE(List, MarkupASTNode)
-MARKUP_AST_NODE(Item, MarkupASTNode)
-MARKUP_AST_NODE(CodeBlock, MarkupASTNode)
-MARKUP_AST_NODE(HTML, MarkupASTNode)
-MARKUP_AST_NODE(Paragraph, MarkupASTNode)
-MARKUP_AST_NODE(Header, MarkupASTNode)
-MARKUP_AST_NODE(HRule, MarkupASTNode)
+MARKUP_AST_NODE(Document, MarkupAstNode)
+MARKUP_AST_NODE(BlockQuote, MarkupAstNode)
+MARKUP_AST_NODE(List, MarkupAstNode)
+MARKUP_AST_NODE(Item, MarkupAstNode)
+MARKUP_AST_NODE(CodeBlock, MarkupAstNode)
+MARKUP_AST_NODE(HTML, MarkupAstNode)
+MARKUP_AST_NODE(Paragraph, MarkupAstNode)
+MARKUP_AST_NODE(Header, MarkupAstNode)
+MARKUP_AST_NODE(HRule, MarkupAstNode)
 MARKUP_AST_NODE_RANGE(Block, Document, HRule)
-ABSTRACT_MARKUP_AST_NODE(InlineContent, MarkupASTNode)
+ABSTRACT_MARKUP_AST_NODE(InlineContent, MarkupAstNode)
   MARKUP_AST_NODE(Text, InlineContent)
   MARKUP_AST_NODE(SoftBreak, InlineContent)
   MARKUP_AST_NODE(LineBreak, InlineContent)
@@ -45,7 +45,7 @@ MARKUP_AST_NODE_RANGE(Inline, Text, Image)
 /// Private Markdown Extensions - these should not be implemented in the
 /// underlying cmark parser.
 
-MARKUP_AST_NODE(PrivateExtension, MarkupASTNode)
+MARKUP_AST_NODE(PrivateExtension, MarkupAstNode)
   MARKUP_AST_NODE(ParamField, PrivateExtension)
 
   // Simple fields

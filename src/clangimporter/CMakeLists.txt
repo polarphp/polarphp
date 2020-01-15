@@ -20,4 +20,6 @@ polar_add_host_library(PolarClangImporter STATIC
    ${POLARPHP_CLANG_IMPORTER_SOURCES})
 
 target_link_libraries(PolarClangImporter
-   PRIVATE PolarUtils PolarKernel PolarPIL)
+   PRIVATE
+   PolarAST
+   PolarLLParser)

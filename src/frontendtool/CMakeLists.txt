@@ -34,4 +34,9 @@ target_link_libraries(PolarFrontendTool PRIVATE
    PolarPIL
    PolarPILGen
    PolarPILOptimizer
-   PolarTBDGen)
+   PolarTBDGen
+   )
+
+target_link_libraries(PolarFrontendTool PUBLIC
+   LLVMTarget
+   LLVMAArch64AsmParser)

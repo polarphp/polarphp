@@ -81,26 +81,26 @@ MAP_STDLIB_TYPE("intptr_t",  SignedWord,   0, "Int",  false, DefineOnly)
 MAP_STDLIB_TYPE("uintptr_t", UnsignedWord, 0, "UInt", false, DefineOnly)
 
 // SwiftStdint.h defines its own copy of stdint.h types.
-MAP_STDLIB_TYPE("__polarphp_uint8_t", UnsignedInt, 8, "UInt8", false,
+MAP_STDLIB_TYPE("typephp_uint8_t", UnsignedInt, 8, "UInt8", false,
                 DoNothing)
-MAP_STDLIB_TYPE("__polarphp_uint16_t", UnsignedInt, 16, "UInt16", false,
+MAP_STDLIB_TYPE("typephp_uint16_t", UnsignedInt, 16, "UInt16", false,
                 DoNothing)
-MAP_STDLIB_TYPE("__polarphp_uint32_t", UnsignedInt, 32, "UInt32", false,
+MAP_STDLIB_TYPE("typephp_uint32_t", UnsignedInt, 32, "UInt32", false,
                 DoNothing)
-MAP_STDLIB_TYPE("__polarphp_uint64_t", UnsignedInt, 64, "UInt64", false,
-                DoNothing)
-
-MAP_STDLIB_TYPE("__polarphp_int8_t", SignedInt, 8, "Int8", false, DoNothing)
-MAP_STDLIB_TYPE("__polarphp_int16_t", SignedInt, 16, "Int16", false,
-                DoNothing)
-MAP_STDLIB_TYPE("__polarphp_int32_t", SignedInt, 32, "Int32", false,
-                DoNothing)
-MAP_STDLIB_TYPE("__polarphp_int64_t", SignedInt, 64, "Int64", false,
+MAP_STDLIB_TYPE("typephp_uint64_t", UnsignedInt, 64, "UInt64", false,
                 DoNothing)
 
-MAP_STDLIB_TYPE("__polarphp_intptr_t", SignedWord, 0, "Int", false,
+MAP_STDLIB_TYPE("typephp_int8_t", SignedInt, 8, "Int8", false, DoNothing)
+MAP_STDLIB_TYPE("typephp_int16_t", SignedInt, 16, "Int16", false,
+                DoNothing)
+MAP_STDLIB_TYPE("typephp_int32_t", SignedInt, 32, "Int32", false,
+                DoNothing)
+MAP_STDLIB_TYPE("typephp_int64_t", SignedInt, 64, "Int64", false,
+                DoNothing)
+
+MAP_STDLIB_TYPE("typephp_intptr_t", SignedWord, 0, "Int", false,
                 DefineOnly)
-MAP_STDLIB_TYPE("__polarphp_uintptr_t", UnsignedWord, 0, "UInt", false,
+MAP_STDLIB_TYPE("typephp_uintptr_t", UnsignedWord, 0, "UInt", false,
                 DefineOnly)
 
 // stddef.h types.
@@ -109,11 +109,11 @@ MAP_STDLIB_TYPE("size_t",    UnsignedWord, 0, "Int",  false, DefineOnly)
 MAP_STDLIB_TYPE("rsize_t",   UnsignedWord, 0, "Int",  false, DefineOnly)
 
 // SwiftStddef.h defines its own copy of stddef.h types.
-MAP_STDLIB_TYPE("__polarphp_ptrdiff_t", SignedWord, 0, "Int", false,
+MAP_STDLIB_TYPE("typephp_ptrdiff_t", SignedWord, 0, "Int", false,
                 DefineOnly)
-MAP_STDLIB_TYPE("__polarphp_size_t", UnsignedWord, 0, "Int", false,
+MAP_STDLIB_TYPE("typephp_size_t", UnsignedWord, 0, "Int", false,
                 DefineOnly)
-MAP_STDLIB_TYPE("__polarphp_ssize_t", SignedWord, 0, "Int", false,
+MAP_STDLIB_TYPE("typephp_ssize_t", SignedWord, 0, "Int", false,
                 DefineOnly)
 
 // POSIX sys/types.h.
@@ -137,22 +137,22 @@ MAP_STDLIB_TYPE("SInt", SignedInt, 32, "CInt", false, DoNothing)
 // Dispatch types.
 MAP_TYPE("dispatch_block_t", Block, 0, "Dispatch", "dispatch_block_t",
 true, DoNothing)
-MAP_TYPE("__polarphp_shims_dispatch_block_t", Block, 0, "Dispatch", "_DispatchBlock",
+MAP_TYPE("typephp_shims_dispatch_block_t", Block, 0, "Dispatch", "_DispatchBlock",
 true, DoNothing)
-MAP_TYPE("__polarphp_shims_dispatch_data_t", ObjCId, 0, "Dispatch", "dispatch_data_t",
+MAP_TYPE("typephp_shims_dispatch_data_t", ObjCId, 0, "Dispatch", "dispatch_data_t",
 true, DoNothing)
 
 // Objective-C types.
 MAP_TYPE("SEL",  ObjCSel, 0, "ObjectiveC", "Selector", false, DoNothing)
 MAP_STDLIB_TYPE("Class", ObjCClass, 0, "AnyClass", false, DoNothing)
 //MAP_STDLIB_TYPE(
-//   Impl.PolarphpContext.getPolarphpName(KnownFoundationEntity::NSInteger),
+//   Impl.TypePHPContext.getPolarphpName(KnownFoundationEntity::NSInteger),
 //   SignedWord, 0, "Int", false, DefineOnly)
 
 // Treat NSUInteger specially: exposing it as a typealias for "Int" would be
 // confusing.
 //MAP_STDLIB_TYPE(
-//   Impl.PolarphpContext.getPolarphpName(KnownFoundationEntity::NSUInteger),
+//   Impl.TypePHPContext.getPolarphpName(KnownFoundationEntity::NSUInteger),
 //   UnsignedWord, 0, "Int", false, DoNothing)
 
 // CoreGraphics types.

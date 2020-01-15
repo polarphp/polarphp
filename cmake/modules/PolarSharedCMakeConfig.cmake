@@ -101,14 +101,14 @@ macro(polar_common_standalone_build_config_llvm product)
   include(PolarAddTableGen) # This imports TableGen from LLVM.
   include(HandleLLVMOptions)
 
-  # HACK: Not all targets support -z,defs as a linker flag. 
+  # HACK: Not all targets support -z,defs as a linker flag.
   #
   # Normally, LLVM would only add it as an option for known ELF targets;
-  # however, due to the custom scheme Swift uses for cross-compilation, the 
-  # CMAKE_SHARED_LINKER_FLAGS are determined based on the host system and 
+  # however, due to the custom scheme Swift uses for cross-compilation, the
+  # CMAKE_SHARED_LINKER_FLAGS are determined based on the host system and
   # then applied to all targets. This causes issues in cross-compiling to
   # Windows from a Linux host.
-  # 
+  #
   # To work around this, we unconditionally remove the flag here and then
   # selectively add it to the per-target link flags; this is currently done in
   # polar_add_host_library and polar_add_target_library within TargetUtils.cmake.
@@ -287,24 +287,23 @@ endmacro()
 # configuration in LLVM.  ('llvm_config()' selects the same build configuration
 # in LLVM as we have for polarphp.)
 function(polar_common_llvm_config target)
+  # TODO
   set(link_components ${ARGN})
-
-  if((POLAR_BUILT_STANDALONE OR SOURCEKIT_BUILT_STANDALONE) AND NOT "${CMAKE_CFG_INTDIR}" STREQUAL ".")
-    llvm_map_components_to_libnames(libnames ${link_components})
-
-    get_target_property(target_type "${target}" TYPE)
-    if("${target_type}" STREQUAL "STATIC_LIBRARY")
-      target_link_libraries("${target}" INTERFACE ${libnames})
-    elseif("${target_type}" STREQUAL "SHARED_LIBRARY" OR
-       "${target_type}" STREQUAL "MODULE_LIBRARY")
-      target_link_libraries("${target}" PRIVATE ${libnames})
-    else()
-      # HACK: Otherwise (for example, for executables), use a plain signature,
-      # because LLVM CMake does that already.
-      target_link_libraries("${target}" PRIVATE ${libnames})
-    endif()
+  #  if((POLAR_BUILT_STANDALONE OR SOURCEKIT_BUILT_STANDALONE) AND NOT "${CMAKE_CFG_INTDIR}" STREQUAL ".")
+  llvm_map_components_to_libnames(libnames ${link_components})
+  get_target_property(target_type "${target}" TYPE)
+  if("${target_type}" STREQUAL "STATIC_LIBRARY")
+    target_link_libraries("${target}" INTERFACE ${libnames})
+  elseif("${target_type}" STREQUAL "SHARED_LIBRARY" OR
+     "${target_type}" STREQUAL "MODULE_LIBRARY")
+    target_link_libraries("${target}" PRIVATE ${libnames})
   else()
-    # If polarphp was not built standalone, dispatch to 'llvm_config()'.
-    llvm_config("${target}" ${ARGN})
+    # HACK: Otherwise (for example, for executables), use a plain signature,
+    # because LLVM CMake does that already.
+    target_link_libraries("${target}" PRIVATE ${libnames})
   endif()
+  #  else()
+  #    # If polarphp was not built standalone, dispatch to 'llvm_config()'.
+  #    llvm_config("${target}" ${ARGN})
+  #  endif()
 endfunction()
