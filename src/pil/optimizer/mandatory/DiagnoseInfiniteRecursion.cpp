@@ -122,7 +122,7 @@ static bool hasInfinitelyRecursiveApply(PILFunction *targetFn) {
    // We return true if we found any recursion and did not find any
    // non-recursive, function-exiting blocks.
    bool foundRecursion = false;
-   auto *targetModule = targetFn->getModule().getPolarphpModule();
+   auto *targetModule = targetFn->getModule().getTypePHPModule();
 
    while (!workList.empty()) {
       PILBasicBlock *curBlock = workList.pop_back_val();

@@ -363,7 +363,7 @@ protected:
          return true;
 
       // Special case for vtable visibility.
-      if (decl->getDeclContext()->getParentModule() != Module->getPolarphpModule())
+      if (decl->getDeclContext()->getParentModule() != Module->getTypePHPModule())
          return true;
 
       return false;

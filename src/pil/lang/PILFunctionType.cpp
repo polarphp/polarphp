@@ -3147,7 +3147,7 @@ static bool areABICompatibleParamsOrReturns(PILType a, PILType b,
       if (inFunction) {
          auto opaqueTypesSubsituted = aa;
          auto *dc = inFunction->getDeclContext();
-         auto *currentModule = inFunction->getModule().getPolarphpModule();
+         auto *currentModule = inFunction->getModule().getTypePHPModule();
          if (!dc || !dc->isChildContextOf(currentModule))
             dc = currentModule;
          ReplaceOpaqueTypesWithUnderlyingTypes replacer(
@@ -3352,8 +3352,8 @@ PILFunctionType::withSubstitutions(SubstitutionMap subs) const {
 static DeclContext *getDeclContextForExpansion(const PILFunction &f) {
    auto *dc = f.getDeclContext();
    if (!dc)
-      dc = f.getModule().getPolarphpModule();
-   auto *currentModule = f.getModule().getPolarphpModule();
+      dc = f.getModule().getTypePHPModule();
+   auto *currentModule = f.getModule().getTypePHPModule();
    if (!dc || !dc->isChildContextOf(currentModule))
       dc = currentModule;
    return dc;

@@ -899,7 +899,7 @@ void EnumElementPatternInitialization::emitEnumMatch(
          CanType substEltTy =
             value.getType()
                .getAstType()
-               ->getTypeOfMember(SGF.SGM.M.getPolarphpModule(), eltDecl,
+               ->getTypeOfMember(SGF.SGM.M.getTypePHPModule(), eltDecl,
                                  eltDecl->getArgumentInterfaceType())
                ->getCanonicalType();
 

@@ -1,0 +1,71 @@
+//===--- DiverseStack.cpp - Out-of-line code for the heterogeneous stack --===//
+//
+// This source file is part of the Swift.org open source project
+//
+// Copyright (c) 2014 - 2017 Apple Inc. and the Swift project authors
+// Licensed under Apache License v2.0 with Runtime Library Exception
+//
+// See https://swift.org/LICENSE.txt for license information
+// See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
+//
+//===----------------------------------------------------------------------===//
+//
+//  This file implements the small amount of code for the heterogeneous
+//  stack and list classes.
+//
+//===----------------------------------------------------------------------===//
+
+#include "polarphp/basic/DiverseList.h"
+#include "polarphp/basic/DiverseStack.h"
+
+using namespace polar;
+
+void DiverseStackBase::pushNewStorageSlow(std::size_t needed) {
+   bool wasInline = isAllocatedInline();
+
+   std::size_t capacity = End - Allocated;
+   std::size_t requiredCapacity = capacity + needed;
+   do {
+      capacity = 2 * capacity + 16;
+   } while (capacity < requiredCapacity);
+
+   assert(capacity % 16 == 0 && "not allocating multiple of alignment");
+
+   char *oldAllocation = Allocated;
+   char *oldBegin = Begin;
+   std::size_t oldSize = (std::size_t) (End - oldBegin);
+
+   Allocated = new char[capacity];
+   End = Allocated + capacity;
+   Begin = End - oldSize;
+   std::memcpy(Begin, oldBegin, oldSize);
+
+   Begin -= needed;
+
+   if (!wasInline) delete[] oldAllocation;
+}
+
+char *DiverseListBase::addNewStorageSlow(std::size_t needed) {
+   bool wasInline = isAllocatedInline();
+
+   std::size_t capacity = endOfAllocation - begin;
+   std::size_t requiredCapacity = capacity + needed;
+   do {
+      capacity = 2 * capacity + 16;
+   } while (capacity < requiredCapacity);
+
+   assert(capacity % 16 == 0 && "not allocating multiple of alignment");
+
+   char *oldBegin = begin;
+   char *oldEnd = end;
+   std::size_t oldSize = (std::size_t) (oldEnd - oldBegin);
+
+   begin = new char[capacity];
+   endOfAllocation = begin + capacity;
+   end = begin + oldSize + needed;
+   std::memcpy(begin, oldBegin, oldSize);
+
+   if (!wasInline) delete[] oldBegin;
+
+   return begin + oldSize;
+}

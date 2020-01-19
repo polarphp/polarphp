@@ -541,7 +541,7 @@ static Optional<bool> shouldInlineGeneric(FullApplySite AI) {
    // Do not inline @_semantics functions when compiling the stdlib,
    // because they need to be preserved, so that the optimizer
    // can properly optimize a user code later.
-   ModuleDecl *SwiftModule = Callee->getModule().getPolarphpModule();
+   ModuleDecl *SwiftModule = Callee->getModule().getTypePHPModule();
    if (Callee->hasSemanticsAttrThatStartsWith("array.") &&
        (SwiftModule->isStdlibModule() || SwiftModule->isOnoneSupportModule()))
       return false;

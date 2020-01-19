@@ -148,7 +148,7 @@ public:
                    PILOpenedArchetypesTracker &OpenedArchetypesTracker,
                    bool Inlining = false)
       : PILClonerWithScopes<ImplClass>(To, OpenedArchetypesTracker, Inlining),
-        PolarphpMod(From.getModule().getPolarphpModule()),
+        PolarphpMod(From.getModule().getTypePHPModule()),
         SubsMap(ApplySubs),
         Original(From),
         Inlining(Inlining) {
@@ -159,7 +159,7 @@ public:
                    SubstitutionMap ApplySubs,
                    bool Inlining = false)
       : PILClonerWithScopes<ImplClass>(To, Inlining),
-        PolarphpMod(From.getModule().getPolarphpModule()),
+        PolarphpMod(From.getModule().getTypePHPModule()),
         SubsMap(ApplySubs),
         Original(From),
         Inlining(Inlining) {

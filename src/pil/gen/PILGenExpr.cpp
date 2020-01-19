@@ -2915,7 +2915,7 @@ static PILFunction *getOrCreateKeyPathSetter(PILGenModule &SGM,
 
    auto semantics = AccessSemantics::Ordinary;
    auto strategy = property->getAccessStrategy(semantics, AccessKind::Write,
-                                               SGM.M.getPolarphpModule(),
+                                               SGM.M.getTypePHPModule(),
                                                expansion);
 
    LValueOptions lvOptions;
@@ -3393,7 +3393,7 @@ PILGenModule::emitKeyPathComponentForDecl(PILLocation loc,
                                               storage->supportsMutation()
                                               ? AccessKind::ReadWrite
                                               : AccessKind::Read,
-                                              M.getPolarphpModule(),
+                                              M.getTypePHPModule(),
                                               expansion);
 
    AbstractStorageDecl *externalDecl = nullptr;
@@ -3428,8 +3428,8 @@ PILGenModule::emitKeyPathComponentForDecl(PILLocation loc,
       // supply the settability if needed. We only reference it here if the
       // setter is public.
       if (shouldUseExternalKeyPathComponent())
-         return storage->isSettable(M.getPolarphpModule())
-                && storage->isSetterAccessibleFrom(M.getPolarphpModule());
+         return storage->isSettable(M.getTypePHPModule())
+                && storage->isSetterAccessibleFrom(M.getTypePHPModule());
       return storage->isSettable(storage->getDeclContext());
    };
 
@@ -4029,7 +4029,7 @@ static bool isVerbatimNullableTypeInC(PILModule &M, Type ty) {
    // Other types like UnsafePointer can also be nullable.
    const DeclContext *DC = M.getAssociatedContext();
    if (!DC)
-      DC = M.getPolarphpModule();
+      DC = M.getTypePHPModule();
    ty = OptionalType::get(ty);
    return ty->isTriviallyRepresentableIn(ForeignLanguage::C, DC);
 }
@@ -5216,7 +5216,7 @@ ManagedValue PILGenFunction::emitLValueToPointer(PILLocation loc, LValue &&lv,
       getAstContext().getConvertInOutToPointerArgument();
 
    auto pointerType = pointerInfo.PointerType;
-   auto subMap = pointerType->getContextSubstitutionMap(SGM.M.getPolarphpModule(),
+   auto subMap = pointerType->getContextSubstitutionMap(SGM.M.getTypePHPModule(),
                                                         getPointerInterface());
    return emitApplyOfLibraryIntrinsic(loc, converter, subMap,
                                       ManagedValue::forUnmanaged(address),
@@ -5277,7 +5277,7 @@ PILGenFunction::emitArrayToPointer(PILLocation loc, ManagedValue array,
    }
 
    // Invoke the conversion intrinsic, which will produce an owner-pointer pair.
-   auto *M = SGM.M.getPolarphpModule();
+   auto *M = SGM.M.getTypePHPModule();
    auto firstSubMap =
       accessInfo.ArrayType->getContextSubstitutionMap(M, ctx.getArrayDecl());
    auto secondSubMap = accessInfo.PointerType->getContextSubstitutionMap(
@@ -5321,7 +5321,7 @@ PILGenFunction::emitStringToPointer(PILLocation loc, ManagedValue stringValue,
    FuncDecl *converter = Ctx.getConvertConstStringToUTF8PointerArgument();
 
    // Invoke the conversion intrinsic, which will produce an owner-pointer pair.
-   auto subMap = pointerType->getContextSubstitutionMap(SGM.M.getPolarphpModule(),
+   auto subMap = pointerType->getContextSubstitutionMap(SGM.M.getTypePHPModule(),
                                                         getPointerInterface());
    SmallVector<ManagedValue, 2> results;
    emitApplyOfLibraryIntrinsic(loc, converter, subMap, stringValue, SGFContext())

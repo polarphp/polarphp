@@ -141,7 +141,8 @@ public:
    /// properly during normal module loading.)
    ///
    /// \returns Status::Valid on success, one of the Status issues on error.
-   serialization::Status loadFromSerializedAST(StringRef data);
+   ///  TODO
+//   serialization::Status loadFromSerializedAST(StringRef data);
 
    /// Serialize the command line arguments for emitting them
    /// to DWARF or CodeView and inject SDKPath if necessary.

@@ -86,7 +86,7 @@ bool UsePrespecialized::replaceByPrespecialized(PILFunction &F) {
       if (Subs.hasArchetypes())
          continue;
 
-      ReabstractionInfo ReInfo(M.getPolarphpModule(), M.isWholeModule(), AI,
+      ReabstractionInfo ReInfo(M.getTypePHPModule(), M.isWholeModule(), AI,
                                ReferencedF, Subs, IsNotSerialized);
 
       if (!ReInfo.canBeSpecialized())

@@ -63,7 +63,7 @@ void PILGenFunction::emitDestroyingDestructor(DestructorDecl *dd) {
       ManagedValue dtorValue;
       PILType dtorTy;
       auto subMap
-         = superclassTy->getContextSubstitutionMap(SGM.M.getPolarphpModule(),
+         = superclassTy->getContextSubstitutionMap(SGM.M.getTypePHPModule(),
                                                    superclass);
       std::tie(dtorValue, dtorTy)
          = emitSiblingMethodRef(cleanupLoc, baseSelf, dtorConstant, subMap);
@@ -118,7 +118,7 @@ void PILGenFunction::emitDeallocatingDestructor(DestructorDecl *dd) {
    ManagedValue dtorValue;
    PILType dtorTy;
    auto subMap = classTy.getAstType()
-      ->getContextSubstitutionMap(SGM.M.getPolarphpModule(),
+      ->getContextSubstitutionMap(SGM.M.getTypePHPModule(),
                                   classDecl);
    std::tie(dtorValue, dtorTy)
       = emitSiblingMethodRef(loc, initialSelfValue, dtorConstant, subMap);
@@ -244,7 +244,7 @@ void PILGenFunction::emitObjCDestructor(PILDeclRef dtor) {
    assert(superSelf.getOwnershipKind() == ValueOwnershipKind::Owned);
 
    auto subMap
-      = superclassTy->getContextSubstitutionMap(SGM.M.getPolarphpModule(),
+      = superclassTy->getContextSubstitutionMap(SGM.M.getTypePHPModule(),
                                                 superclass);
 
    B.createApply(cleanupLoc, superclassDtorValue, subMap, superSelf);

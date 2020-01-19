@@ -64,7 +64,8 @@ public:
                                   CompInv.getTypeCheckerOptions(),
                                   CompInv.getModuleName()));
       Parser->getDiagnosticEngine().addConsumer(DiagConsumer);
-      Parser->parse();
+
+//      Parser->parse();
    }
 
    std::pair<LineRange, std::string> reformat(LineRange Range,

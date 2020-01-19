@@ -327,7 +327,7 @@ class CrossModuleSerializationSetupPass: public PILModuleTransform {
    void run() override {
 
       auto &M = *getModule();
-      if (M.getPolarphpModule()->isResilient())
+      if (M.getTypePHPModule()->isResilient())
          return;
       if (!M.isWholeModule())
          return;

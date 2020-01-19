@@ -326,7 +326,7 @@ static bool isAssignableExternally(VarDecl *Property, PILModule *Module) {
 // be analyzed by this pass.
 static bool mayHaveUnknownUses(VarDecl *Property, PILModule *Module) {
    if (Property->getDeclContext()->getParentModule() !=
-       Module->getPolarphpModule()) {
+       Module->getTypePHPModule()) {
       LLVM_DEBUG(llvm::dbgs() << "Property " << *Property
                               << " is defined in a different module\n");
       // We don't see the bodies of initializers from a different module

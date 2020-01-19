@@ -228,14 +228,14 @@ void verifyKeyPathComponent(PILModule &M,
                     "property");
          }
 
-         auto fieldTy = baseTy->getTypeOfMember(M.getPolarphpModule(), property)
+         auto fieldTy = baseTy->getTypeOfMember(M.getTypePHPModule(), property)
             ->getReferenceStorageReferent()
             ->getCanonicalType();
          require(fieldTy == componentTy,
                  "property decl should be a member of the base with the same type "
                  "as the component");
          require(property->hasStorage(), "property must be stored");
-         require(!property->isResilient(M.getPolarphpModule(), expansion),
+         require(!property->isResilient(M.getTypePHPModule(), expansion),
                  "cannot access storage of resilient property");
          auto propertyTy =
             loweredBaseTy.getFieldType(property, M, typeExpansionContext);
@@ -831,7 +831,7 @@ public:
    }
 
    PILVerifier(const PILFunction &F, bool SingleFunction = true)
-      : M(F.getModule().getPolarphpModule()), F(F),
+      : M(F.getModule().getTypePHPModule()), F(F),
         fnConv(F.getLoweredFunctionType(), F.getModule()),
         TC(F.getModule().Types), OpenedArchetypes(&F), Dominance(nullptr),
         InstNumbers(numInstsInFunction(F)),
@@ -1734,7 +1734,7 @@ public:
    void checkAllocGlobalInst(AllocGlobalInst *AGI) {
       PILGlobalVariable *RefG = AGI->getReferencedGlobal();
       if (auto *VD = RefG->getDecl()) {
-         require(!VD->isResilient(F.getModule().getPolarphpModule(),
+         require(!VD->isResilient(F.getModule().getTypePHPModule(),
                                   F.getResilienceExpansion()),
                  "cannot access storage of resilient global");
       }
@@ -1752,7 +1752,7 @@ public:
               RefG->getLoweredTypeInContext(F.getTypeExpansionContext()),
               "global_addr/value must be the type of the variable it references");
       if (auto *VD = RefG->getDecl()) {
-         require(!VD->isResilient(F.getModule().getPolarphpModule(),
+         require(!VD->isResilient(F.getModule().getTypePHPModule(),
                                   F.getResilienceExpansion()),
                  "cannot access storage of resilient global");
       }
@@ -2395,7 +2395,7 @@ public:
       require(!structDecl->hasUnreferenceableStorage(),
               "Cannot build a struct with unreferenceable storage from elements "
               "using StructInst");
-      require(!structDecl->isResilient(F.getModule().getPolarphpModule(),
+      require(!structDecl->isResilient(F.getModule().getTypePHPModule(),
                                        F.getResilienceExpansion()),
               "cannot access storage of resilient struct");
       require(SI->getType().isObject(),
@@ -2595,7 +2595,7 @@ public:
       require(cd, "Operand of dealloc_ref must be of class type");
 
       if (!DI->canAllocOnStack()) {
-         require(!cd->isResilient(F.getModule().getPolarphpModule(),
+         require(!cd->isResilient(F.getModule().getTypePHPModule(),
                                   F.getResilienceExpansion()),
                  "cannot directly deallocate resilient class");
       }
@@ -2707,7 +2707,7 @@ public:
               "result of struct_extract cannot be address");
       StructDecl *sd = operandTy.getStructOrBoundGenericStruct();
       require(sd, "must struct_extract from struct");
-      require(!sd->isResilient(F.getModule().getPolarphpModule(),
+      require(!sd->isResilient(F.getModule().getTypePHPModule(),
                                F.getResilienceExpansion()),
               "cannot access storage of resilient struct");
       require(!EI->getField()->isStatic(),
@@ -2751,7 +2751,7 @@ public:
               "must derive struct_element_addr from address");
       StructDecl *sd = operandTy.getStructOrBoundGenericStruct();
       require(sd, "struct_element_addr operand must be struct address");
-      require(!sd->isResilient(F.getModule().getPolarphpModule(),
+      require(!sd->isResilient(F.getModule().getTypePHPModule(),
                                F.getResilienceExpansion()),
               "cannot access storage of resilient struct");
       require(EI->getType().isAddress(),
@@ -2783,7 +2783,7 @@ public:
       PILType operandTy = EI->getOperand()->getType();
       ClassDecl *cd = operandTy.getClassOrBoundGenericClass();
       require(cd, "ref_element_addr operand must be a class instance");
-      require(!cd->isResilient(F.getModule().getPolarphpModule(),
+      require(!cd->isResilient(F.getModule().getTypePHPModule(),
                                F.getResilienceExpansion()),
               "cannot access storage of resilient class");
 
@@ -2806,7 +2806,7 @@ public:
       PILType operandTy = RTAI->getOperand()->getType();
       ClassDecl *cd = operandTy.getClassOrBoundGenericClass();
       require(cd, "ref_tail_addr operand must be a class instance");
-      require(!cd->isResilient(F.getModule().getPolarphpModule(),
+      require(!cd->isResilient(F.getModule().getTypePHPModule(),
                                F.getResilienceExpansion()),
               "cannot access storage of resilient class");
       require(cd, "ref_tail_addr operand must be a class instance");
@@ -2816,7 +2816,7 @@ public:
       PILType operandTy = DSI->getOperand()->getType();
       StructDecl *sd = operandTy.getStructOrBoundGenericStruct();
       require(sd, "must struct_extract from struct");
-      require(!sd->isResilient(F.getModule().getPolarphpModule(),
+      require(!sd->isResilient(F.getModule().getTypePHPModule(),
                                F.getResilienceExpansion()),
               "cannot access storage of resilient struct");
    }
@@ -4018,7 +4018,7 @@ public:
 
       // If the select is non-exhaustive, we require a default.
       bool isExhaustive =
-         eDecl->isEffectivelyExhaustive(F.getModule().getPolarphpModule(),
+         eDecl->isEffectivelyExhaustive(F.getModule().getTypePHPModule(),
                                         F.getResilienceExpansion());
       require((isExhaustive && unswitchedElts.empty()) || I->hasDefault(),
               "nonexhaustive select_enum must have a default destination");
@@ -4188,7 +4188,7 @@ public:
 
       // If the switch is non-exhaustive, we require a default.
       bool isExhaustive =
-         uDecl->isEffectivelyExhaustive(F.getModule().getPolarphpModule(),
+         uDecl->isEffectivelyExhaustive(F.getModule().getTypePHPModule(),
                                         F.getResilienceExpansion());
       require((isExhaustive && unswitchedElts.empty()) || SOI->hasDefault(),
               "nonexhaustive switch_enum must have a default destination");
@@ -4245,7 +4245,7 @@ public:
 
       // If the switch is non-exhaustive, we require a default.
       bool isExhaustive =
-         uDecl->isEffectivelyExhaustive(F.getModule().getPolarphpModule(),
+         uDecl->isEffectivelyExhaustive(F.getModule().getTypePHPModule(),
                                         F.getResilienceExpansion());
       require((isExhaustive && unswitchedElts.empty()) || SOI->hasDefault(),
               "nonexhaustive switch_enum_addr must have a default destination");

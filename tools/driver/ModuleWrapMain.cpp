@@ -148,11 +148,12 @@ int modulewrap_main(ArrayRef<const char *> Args, const char *Argv0,
    }
 
    // Superficially verify that the input is a swift module file.
-   if (!serialization::isSerializedAST(ErrOrBuf.get()->getBuffer())) {
-      Instance.getDiags().diagnose(SourceLoc(), diag::error_parse_input_file,
-                                   Filename, "signature mismatch");
-      return 1;
-   }
+   /// TODO
+//   if (!serialization::isSerializedAST(ErrOrBuf.get()->getBuffer())) {
+   Instance.getDiags().diagnose(SourceLoc(), diag::error_parse_input_file,
+                                Filename, "signature mismatch");
+   return 1;
+//   }
 
    // Wrap the bitstream in a module object file. To use the ClangImporter to
    // create the module loader, we need to properly set the runtime library path.
@@ -178,7 +179,7 @@ int modulewrap_main(ArrayRef<const char *> Args, const char *Argv0,
    PILOptions PILOpts;
    std::unique_ptr<lowering::TypeConverter> TC(new lowering::TypeConverter(*M));
    std::unique_ptr<PILModule> SM = PILModule::createEmptyModule(M, *TC, PILOpts);
-   createPolarphpModuleObjectFile(*SM, (*ErrOrBuf)->getBuffer(),
+   createTypePHPModuleObjectFile(*SM, (*ErrOrBuf)->getBuffer(),
                                   Invocation.getOutputFilename());
    return 0;
 }

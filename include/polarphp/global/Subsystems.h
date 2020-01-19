@@ -316,7 +316,7 @@ void performLLVMOptimizations(IRGenOptions &Opts, llvm::Module *Module,
                               llvm::TargetMachine *TargetMachine);
 
 /// Wrap a serialized module inside a swift AST section in an object file.
-void createPolarphpModuleObjectFile(PILModule &PILMod, StringRef Buffer,
+void createTypePHPModuleObjectFile(PILModule &PILMod, StringRef Buffer,
                                     StringRef OutputPath);
 
 /// Turn the given LLVM module into native code and return true on error.
@@ -366,8 +366,10 @@ public:
               unsigned Offset, unsigned EndOffset);
 
    ~ParserUnit();
+   /// TODO
 
-   OpaqueSyntaxNode parse();
+//   OpaqueSyntaxNode parse();
+   void parse();
 
    Parser &getParser();
    SourceFile &getSourceFile();

@@ -528,10 +528,11 @@ Optional<unsigned> CompilerInstance::getRecordedBufferID(const InputFile &input,
 
    // FIXME: The fact that this test happens twice, for some cases,
    // suggests that setupInputs could use another round of refactoring.
-   if (serialization::isSerializedAST(buffers->ModuleBuffer->getBuffer())) {
-      PartialModules.push_back(std::move(*buffers));
-      return None;
-   }
+   /// TODO
+//   if (serialization::isSerializedAST(buffers->ModuleBuffer->getBuffer())) {
+//      PartialModules.push_back(std::move(*buffers));
+//      return None;
+//   }
    assert(buffers->ModuleDocBuffer.get() == nullptr);
    assert(buffers->ModuleSourceInfoBuffer.get() == nullptr);
    // Transfer ownership of the MemoryBuffer to the SourceMgr.
@@ -557,8 +558,11 @@ Optional<ModuleBuffers> CompilerInstance::getInputBuffersIfPresent(
                            inputFileOrErr.getError().message());
       return None;
    }
-   if (!serialization::isSerializedAST((*inputFileOrErr)->getBuffer()))
-      return ModuleBuffers(std::move(*inputFileOrErr));
+   /// TODO
+//   if (!serialization::isSerializedAST((*inputFileOrErr)->getBuffer()))
+//      return ModuleBuffers(std::move(*inputFileOrErr));
+//   if (!serialization::isSerializedAST((*inputFileOrErr)->getBuffer()))
+   return ModuleBuffers(std::move(*inputFileOrErr));
 
    auto swiftdoc = openModuleDoc(input);
    auto sourceinfo = openModuleSourceInfo(input);

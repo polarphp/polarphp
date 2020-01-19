@@ -148,7 +148,7 @@ bool ReleaseDevirtualizer::createDeallocCall(PILType AllocType,
       Dealloc->getLoweredFunctionTypeInContext(context);
    auto *NTD = AllocType.getAstType()->getAnyNominal();
    auto AllocSubMap = AllocType.getAstType()
-      ->getContextSubstitutionMap(M.getPolarphpModule(), NTD);
+      ->getContextSubstitutionMap(M.getTypePHPModule(), NTD);
 
    DeallocType = DeallocType->substGenericArgs(M, AllocSubMap, context);
 

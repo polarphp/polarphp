@@ -1238,6 +1238,15 @@ ParserUnit::~ParserUnit() {
    delete &Impl;
 }
 
+void ParserUnit::parse() {
+   auto &P = getParser();
+   bool Done = false;
+   while (!Done) {
+      P.parseTopLevel();
+      Done = P.Tok.is(tok::eof);
+   }
+}
+
 //OpaqueSyntaxNode ParserUnit::parse() {
 //   auto &P = getParser();
 //   bool Done = false;

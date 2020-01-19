@@ -466,7 +466,7 @@ struct GenericArguments {
       GenericTypeRequirements requirements(IGF.IGM, decl);
 
       auto subs =
-         type->getContextSubstitutionMap(IGF.IGM.getPolarphpModule(), decl);
+         type->getContextSubstitutionMap(IGF.IGM.getTypePHPModule(), decl);
       requirements.enumerateFulfillments(
          IGF.IGM, subs,
          [&](unsigned reqtIndex, CanType type, InterfaceConformanceRef conf) {
@@ -514,7 +514,7 @@ CanType IRGenModule::substOpaqueTypesWithUnderlyingTypes(CanType type) {
    // assume are constant.
    if (type->hasOpaqueArchetype()) {
       ReplaceOpaqueTypesWithUnderlyingTypes replacer(
-         getPolarphpModule(), ResilienceExpansion::Maximal,
+         getTypePHPModule(), ResilienceExpansion::Maximal,
          getPILModule().isWholeModule());
       auto underlyingTy =
          type.subst(replacer, replacer, SubstFlags::SubstituteOpaqueArchetypes)
@@ -531,7 +531,7 @@ PILType IRGenModule::substOpaqueTypesWithUnderlyingTypes(
    // assume are constant.
    if (type.getAstType()->hasOpaqueArchetype()) {
       ReplaceOpaqueTypesWithUnderlyingTypes replacer(
-         getPolarphpModule(), ResilienceExpansion::Maximal,
+         getTypePHPModule(), ResilienceExpansion::Maximal,
          getPILModule().isWholeModule());
       auto underlyingTy =
          type.subst(getPILModule(), replacer, replacer, genericSig,
@@ -549,7 +549,7 @@ IRGenModule::substOpaqueTypesWithUnderlyingTypes(CanType type,
    // assume are constant.
    if (type->hasOpaqueArchetype()) {
       ReplaceOpaqueTypesWithUnderlyingTypes replacer(
-         getPolarphpModule(), ResilienceExpansion::Maximal,
+         getTypePHPModule(), ResilienceExpansion::Maximal,
          getPILModule().isWholeModule());
       auto substConformance = conformance.subst(
          type, replacer, replacer, SubstFlags::SubstituteOpaqueArchetypes);
@@ -2156,7 +2156,7 @@ static bool shouldAccessByMangledName(IRGenModule &IGM, CanType type) {
 static bool canIssueIncompleteMetadataRequests(IRGenModule &IGM) {
    // We can only answer blocking complete metadata requests with the <=5.1
    // runtime ABI entry points.
-   auto &context = IGM.getPolarphpModule()->getAstContext();
+   auto &context = IGM.getTypePHPModule()->getAstContext();
    auto deploymentAvailability =
       AvailabilityContext::forDeploymentTarget(context);
    return deploymentAvailability.isContainedIn(

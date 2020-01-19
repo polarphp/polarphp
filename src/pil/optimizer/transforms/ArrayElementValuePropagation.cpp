@@ -339,7 +339,7 @@ bool ArrayAllocation::replaceAppendContentOf() {
     PILType ArrayType = ArrayValue->getType();
     auto *NTD = ArrayType.getAstType()->getAnyNominal();
     SubstitutionMap ArraySubMap = ArrayType.getAstType()
-      ->getContextSubstitutionMap(M.getPolarphpModule(), NTD);
+      ->getContextSubstitutionMap(M.getTypePHPModule(), NTD);
 
     AppendContentsOf.replaceByAppendingValues(AppendFn, ReserveFn,
                                               ElementValueVector,

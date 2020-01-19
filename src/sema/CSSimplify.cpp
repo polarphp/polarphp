@@ -8593,8 +8593,8 @@ ConstraintSystem::addConstraintImpl(ConstraintKind kind, Type first,
          return simplifyOpaqueUnderlyingTypeConstraint(first, second,
                                                        subflags, locator);
 
-      case ConstraintKind::BridgingConversion:
-         return simplifyBridgingConstraint(first, second, subflags, locator);
+//      case ConstraintKind::BridgingConversion:
+//         return simplifyBridgingConstraint(first, second, subflags, locator);
 
       case ConstraintKind::ApplicableFunction:
          return simplifyApplicableFnConstraint(first, second, subflags, locator);
@@ -8922,11 +8922,11 @@ ConstraintSystem::simplifyConstraint(const Constraint &constraint) {
          return matchTypes(constraint.getFirstType(), constraint.getSecondType(),
                            matchKind, None, constraint.getLocator());
       }
-
-      case ConstraintKind::BridgingConversion:
-         return simplifyBridgingConstraint(constraint.getFirstType(),
-                                           constraint.getSecondType(),
-                                           None, constraint.getLocator());
+      /// TODO
+//      case ConstraintKind::BridgingConversion:
+//         return simplifyBridgingConstraint(constraint.getFirstType(),
+//                                           constraint.getSecondType(),
+//                                           None, constraint.getLocator());
 
       case ConstraintKind::ApplicableFunction:
          return simplifyApplicableFnConstraint(constraint.getFirstType(),

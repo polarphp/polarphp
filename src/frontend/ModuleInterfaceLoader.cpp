@@ -211,10 +211,11 @@ public:
 
 namespace path = llvm::sys::path;
 
-static bool serializedASTLooksValid(const llvm::MemoryBuffer &buf) {
-   auto VI = serialization::validateSerializedAst(buf.getBuffer());
-   return VI.status == serialization::Status::Valid;
-}
+/// TODO
+//static bool serializedASTLooksValid(const llvm::MemoryBuffer &buf) {
+//   auto VI = serialization::validateSerializedAst(buf.getBuffer());
+//   return VI.status == serialization::Status::Valid;
+//}
 
 #pragma mark - Module Loading
 
@@ -521,13 +522,14 @@ class ModuleInterfaceLoaderImpl {
       allDeps.clear();
 
       LLVM_DEBUG(llvm::dbgs() << "Validating deps of " << path << "\n");
-      auto validationInfo = serialization::validateSerializedAst(
-         buf.getBuffer(), /*ExtendedValidationInfo=*/nullptr, &allDeps);
+      /// TODO
+//      auto validationInfo = serialization::validateSerializedAst(
+//         buf.getBuffer(), /*ExtendedValidationInfo=*/nullptr, &allDeps);
 
-      if (validationInfo.status != serialization::Status::Valid) {
-         rebuildInfo.setSerializationStatus(path, validationInfo.status);
-         return false;
-      }
+//      if (validationInfo.status != serialization::Status::Valid) {
+//         rebuildInfo.setSerializationStatus(path, validationInfo.status);
+//         return false;
+//      }
 
       bool skipCheckingSystemDependencies =
          ctx.SearchPathOpts.DisableModulesValidateSystemDependencies;
@@ -563,7 +565,8 @@ class ModuleInterfaceLoaderImpl {
 
       // First, make sure the underlying module path exists and is valid.
       auto modBuf = fs.getBufferForFile(fwd.underlyingModulePath);
-      if (!modBuf || !serializedASTLooksValid(*modBuf.get()))
+      /// TODO
+      if (!modBuf /* || !serializedASTLooksValid(*modBuf.get())*/)
          return false;
 
       // Next, check the dependencies in the forwarding file.
@@ -702,8 +705,10 @@ class ModuleInterfaceLoaderImpl {
 
          // Check to see if the module is a serialized AST. If it's not, then we're
          // probably dealing with a Forwarding Module, which is a YAML file.
-         bool isForwardingModule =
-            !serialization::isSerializedAST(buf->getBuffer());
+         /// TODO
+//         bool isForwardingModule =
+//            !serialization::isSerializedAST(buf->getBuffer());
+         bool isForwardingModule = true;
 
          // If it's a forwarding module, load the YAML file from disk and check
          // if it's up-to-date.

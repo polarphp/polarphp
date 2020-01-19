@@ -682,7 +682,7 @@ PILFunction *polar::getEligibleFunction(FullApplySite AI,
    if (!PILInliner::canInlineApplySite(AI))
       return nullptr;
 
-   ModuleDecl *polarModule = Callee->getModule().getPolarphpModule();
+   ModuleDecl *polarModule = Callee->getModule().getTypePHPModule();
    bool IsInStdlib = (polarModule->isStdlibModule() ||
                       polarModule->isOnoneSupportModule());
 

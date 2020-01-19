@@ -66,7 +66,7 @@ static SubstitutionMap lookupBridgeToObjCInterfaceSubs(PILModule &mod,
                                                        CanType target) {
    auto bridgedProto =
       mod.getAstContext().getInterface(KnownInterfaceKind::ObjectiveCBridgeable);
-   auto conf = mod.getPolarphpModule()->lookupConformance(target, bridgedProto);
+   auto conf = mod.getTypePHPModule()->lookupConformance(target, bridgedProto);
    return SubstitutionMap::getInterfaceSubstitutions(conf.getRequirement(),
                                                      target, conf);
 }
@@ -456,12 +456,12 @@ static SubstitutionMap lookupBridgeToObjCInterfaceSubs(PILModule &mod,
 //   }
 //   // check if it is a bridgeable CF type
 //   if (ConvTy.getAstType() ==
-//       getNSBridgedClassOfCFClass(M.getPolarphpModule(),
+//       getNSBridgedClassOfCFClass(M.getTypePHPModule(),
 //                                  DestTy.getAstType())) {
 //      return true;
 //   }
 //   if (DestTy.getAstType() ==
-//       getNSBridgedClassOfCFClass(M.getPolarphpModule(),
+//       getNSBridgedClassOfCFClass(M.getTypePHPModule(),
 //                                  ConvTy.getAstType())) {
 //      return true;
 //   }
@@ -478,7 +478,7 @@ static SubstitutionMap lookupBridgeToObjCInterfaceSubs(PILModule &mod,
 //   auto bridgedProto =
 //      mod.getAstContext().getInterface(KnownInterfaceKind::ObjectiveCBridgeable);
 //
-//   auto conf = mod.getPolarphpModule()->lookupConformance(
+//   auto conf = mod.getTypePHPModule()->lookupConformance(
 //      sourceFormalType, bridgedProto);
 //   assert(conf && "_ObjectiveCBridgeable conformance should exist");
 //   (void)conf;
@@ -495,7 +495,7 @@ static SubstitutionMap lookupBridgeToObjCInterfaceSubs(PILModule &mod,
 //                         Identifier());
 //   ArrayRef<ValueDecl *> resultsRef(results);
 //   if (resultsRef.empty()) {
-//      mod.getPolarphpModule()->lookupMember(
+//      mod.getTypePHPModule()->lookupMember(
 //         results, sourceFormalType.getNominalOrBoundGenericNominal(),
 //         mod.getAstContext().Id_bridgeToObjectiveC, Identifier());
 //      resultsRef = results;
@@ -510,7 +510,7 @@ static SubstitutionMap lookupBridgeToObjCInterfaceSubs(PILModule &mod,
 //
 //   // Get substitutions, if source is a bound generic type.
 //   auto subMap = sourceFormalType->getContextSubstitutionMap(
-//      mod.getPolarphpModule(), resultDecl->getDeclContext());
+//      mod.getTypePHPModule(), resultDecl->getDeclContext());
 //
 //   // Implementation of _bridgeToObjectiveC could not be found.
 //   if (!bridgedFunc)
@@ -583,9 +583,9 @@ static SubstitutionMap lookupBridgeToObjCInterfaceSubs(PILModule &mod,
 //   }
 //
 //   if (convTy.getAstType() ==
-//       getNSBridgedClassOfCFClass(m.getPolarphpModule(), destLoweredTy.getAstType()) ||
+//       getNSBridgedClassOfCFClass(m.getTypePHPModule(), destLoweredTy.getAstType()) ||
 //       destLoweredTy.getAstType() ==
-//       getNSBridgedClassOfCFClass(m.getPolarphpModule(), convTy.getAstType())) {
+//       getNSBridgedClassOfCFClass(m.getTypePHPModule(), convTy.getAstType())) {
 //      // Handle NS <-> CF toll-free bridging here.
 //      return PILValue(builder.createUncheckedRefCast(loc, newAI, destLoweredTy));
 //   }
@@ -880,58 +880,59 @@ PILInstruction *CastOptimizer::simplifyCheckedCastAddrBranchInst(
    // To apply the bridged optimizations, we should
    // ensure that types are not existential,
    // and that not both types are classes.
-   BridgedI = optimizeBridgedCasts(dynamicCast);
+   /// TODO
+//   BridgedI = optimizeBridgedCasts(dynamicCast);
 
-   if (!BridgedI) {
-      // If the cast may succeed or fail, and it can't be optimized into a
-      // bridging operation, then let it be.
-      if (Feasibility == DynamicCastFeasibility::MaySucceed) {
-         return nullptr;
-      }
+//   if (!BridgedI) {
+   // If the cast may succeed or fail, and it can't be optimized into a
+   // bridging operation, then let it be.
+   if (Feasibility == DynamicCastFeasibility::MaySucceed) {
+      return nullptr;
+   }
 
-      assert(Feasibility == DynamicCastFeasibility::WillSucceed);
+   assert(Feasibility == DynamicCastFeasibility::WillSucceed);
 
-      // Replace by unconditional_addr_cast, followed by a branch.
-      // The unconditional_addr_cast can be skipped, if the result of a cast
-      // is not used afterwards.
-      if (ResultNotUsed) {
-         if (shouldTakeOnSuccess(Inst->getConsumptionKind())) {
-            auto &srcTL = Builder.getTypeLowering(Src->getType());
-            srcTL.emitDestroyAddress(Builder, Loc, Src);
-         }
-         eraseInstAction(Inst);
-         Builder.setInsertionPoint(BB);
-         auto *NewI = Builder.createBranch(Loc, SuccessBB);
-         willSucceedAction();
-         return NewI;
-      }
-
-      // Since it is an addr cast, only address types are handled here.
-      if (!Src->getType().isAddress() || !Dest->getType().isAddress()) {
-         return nullptr;
-      }
-
-      // For CopyOnSuccess casts, we could insert an explicit copy here, but this
-      // case does not happen in practice.
-      //
-      // Both TakeOnSuccess and TakeAlways can be reduced to an
-      // UnconditionalCheckedCast, since the failure path is irrelevant.
-      switch (Inst->getConsumptionKind()) {
-         case CastConsumptionKind::BorrowAlways:
-            llvm_unreachable("checked_cast_addr_br never has BorrowAlways");
-         case CastConsumptionKind::CopyOnSuccess:
-            return nullptr;
-         case CastConsumptionKind::TakeAlways:
-         case CastConsumptionKind::TakeOnSuccess:
-            break;
-      }
-
-      if (!emitSuccessfulIndirectUnconditionalCast(Builder, Loc, dynamicCast)) {
-         // No optimization was possible.
-         return nullptr;
+   // Replace by unconditional_addr_cast, followed by a branch.
+   // The unconditional_addr_cast can be skipped, if the result of a cast
+   // is not used afterwards.
+   if (ResultNotUsed) {
+      if (shouldTakeOnSuccess(Inst->getConsumptionKind())) {
+         auto &srcTL = Builder.getTypeLowering(Src->getType());
+         srcTL.emitDestroyAddress(Builder, Loc, Src);
       }
       eraseInstAction(Inst);
+      Builder.setInsertionPoint(BB);
+      auto *NewI = Builder.createBranch(Loc, SuccessBB);
+      willSucceedAction();
+      return NewI;
    }
+
+   // Since it is an addr cast, only address types are handled here.
+   if (!Src->getType().isAddress() || !Dest->getType().isAddress()) {
+      return nullptr;
+   }
+
+   // For CopyOnSuccess casts, we could insert an explicit copy here, but this
+   // case does not happen in practice.
+   //
+   // Both TakeOnSuccess and TakeAlways can be reduced to an
+   // UnconditionalCheckedCast, since the failure path is irrelevant.
+   switch (Inst->getConsumptionKind()) {
+      case CastConsumptionKind::BorrowAlways:
+         llvm_unreachable("checked_cast_addr_br never has BorrowAlways");
+      case CastConsumptionKind::CopyOnSuccess:
+         return nullptr;
+      case CastConsumptionKind::TakeAlways:
+      case CastConsumptionKind::TakeOnSuccess:
+         break;
+   }
+
+   if (!emitSuccessfulIndirectUnconditionalCast(Builder, Loc, dynamicCast)) {
+      // No optimization was possible.
+      return nullptr;
+   }
+   eraseInstAction(Inst);
+//   }
    PILInstruction *NewI = &BB->back();
    if (!isa<TermInst>(NewI)) {
       Builder.setInsertionPoint(BB);
@@ -1016,29 +1017,29 @@ CastOptimizer::simplifyCheckedCastBranchInst(CheckedCastBranchInst *Inst) {
       //
       // TODO: Bridged casts cannot be expressed by checked_cast_br yet.
       // Should we ever support it, please review this code.
-      auto BridgedI = optimizeBridgedCasts(dynamicCast);
+//      auto BridgedI = optimizeBridgedCasts(dynamicCast);
 
-      if (BridgedI) {
-         llvm_unreachable(
-            "Bridged casts cannot be expressed by checked_cast_br yet");
+//      if (BridgedI) {
+//         llvm_unreachable(
+//            "Bridged casts cannot be expressed by checked_cast_br yet");
+//      } else {
+      // Replace by unconditional_cast, followed by a branch.
+      // The unconditional_cast can be skipped, if the result of a cast
+      // is not used afterwards.
+      if (!ResultNotUsed) {
+         if (!dynamicCast.canUseScalarCheckedCastInstructions())
+            return nullptr;
+
+         CastedValue =
+            emitSuccessfulScalarUnconditionalCast(Builder, Loc, dynamicCast);
       } else {
-         // Replace by unconditional_cast, followed by a branch.
-         // The unconditional_cast can be skipped, if the result of a cast
-         // is not used afterwards.
-         if (!ResultNotUsed) {
-            if (!dynamicCast.canUseScalarCheckedCastInstructions())
-               return nullptr;
-
-            CastedValue =
-               emitSuccessfulScalarUnconditionalCast(Builder, Loc, dynamicCast);
-         } else {
-            CastedValue = PILUndef::get(TargetLoweredType, *F);
-         }
-         if (!CastedValue)
-            CastedValue =
-               Builder.createUnconditionalCheckedCast(
-                  Loc, Op, TargetLoweredType, TargetFormalType);
+         CastedValue = PILUndef::get(TargetLoweredType, *F);
       }
+      if (!CastedValue)
+         CastedValue =
+            Builder.createUnconditionalCheckedCast(
+               Loc, Op, TargetLoweredType, TargetFormalType);
+//      }
 
    } else {
       // No need to cast.
@@ -1085,38 +1086,39 @@ PILInstruction *CastOptimizer::simplifyCheckedCastValueBranchInst(
 
    bool ResultNotUsed = SuccessBB->getArgument(0)->use_empty();
    PILValue CastedValue;
+   /// TODO
    if (Op->getType() != TargetLoweredType) {
       // Apply the bridged cast optimizations.
       // TODO: Bridged casts cannot be expressed by checked_cast_value_br yet.
       // Once the support for opaque values has landed, please review this
       // code.
-      auto *BridgedI = optimizeBridgedCasts(dynamicCast);
-      if (BridgedI) {
-         llvm_unreachable(
-            "Bridged casts cannot be expressed by checked_cast_value_br yet");
-      } else {
-         // If the cast may succeed or fail and can't be turned into a bridging
-         // call, then let it be.
-         if (Feasibility == DynamicCastFeasibility::MaySucceed) {
-            return nullptr;
-         }
-
-         assert(Feasibility == DynamicCastFeasibility::WillSucceed);
-
-         // Replace by unconditional_cast, followed by a branch.
-         // The unconditional_cast can be skipped, if the result of a cast
-         // is not used afterwards.
-
-         if (!dynamicCast.canUseScalarCheckedCastInstructions())
-            return nullptr;
-
-         if (!ResultNotUsed) {
-            CastedValue =
-               emitSuccessfulScalarUnconditionalCast(Builder, Loc, dynamicCast);
-         } else {
-            CastedValue = PILUndef::get(TargetLoweredType, *F);
-         }
+//      auto *BridgedI = optimizeBridgedCasts(dynamicCast);
+//      if (BridgedI) {
+//         llvm_unreachable(
+//            "Bridged casts cannot be expressed by checked_cast_value_br yet");
+//      } else {
+      // If the cast may succeed or fail and can't be turned into a bridging
+      // call, then let it be.
+      if (Feasibility == DynamicCastFeasibility::MaySucceed) {
+         return nullptr;
       }
+
+      assert(Feasibility == DynamicCastFeasibility::WillSucceed);
+
+      // Replace by unconditional_cast, followed by a branch.
+      // The unconditional_cast can be skipped, if the result of a cast
+      // is not used afterwards.
+
+      if (!dynamicCast.canUseScalarCheckedCastInstructions())
+         return nullptr;
+
+      if (!ResultNotUsed) {
+         CastedValue =
+            emitSuccessfulScalarUnconditionalCast(Builder, Loc, dynamicCast);
+      } else {
+         CastedValue = PILUndef::get(TargetLoweredType, *F);
+      }
+//      }
       if (!CastedValue)
          CastedValue = Builder.createUnconditionalCheckedCastValue(
             Loc, Op, SourceFormalType,
@@ -1429,17 +1431,17 @@ ValueBase *CastOptimizer::optimizeUnconditionalCheckedCastInst(
    }
 
    PILBuilderWithScope Builder(Inst, builderContext);
-
+   /// TODO
    // Try to apply the bridged casts optimizations
-   auto NewI = optimizeBridgedCasts(dynamicCast);
-   if (NewI) {
-      // FIXME: I'm not sure why this is true!
-      auto newValue = cast<SingleValueInstruction>(NewI);
-      replaceInstUsesAction(Inst, newValue);
-      eraseInstAction(Inst);
-      willSucceedAction();
-      return newValue;
-   }
+//   auto NewI = optimizeBridgedCasts(dynamicCast);
+//   if (NewI) {
+//      // FIXME: I'm not sure why this is true!
+//      auto newValue = cast<SingleValueInstruction>(NewI);
+//      replaceInstUsesAction(Inst, newValue);
+//      eraseInstAction(Inst);
+//      willSucceedAction();
+//      return newValue;
+//   }
 
    // If the cast may succeed or fail and can't be optimized into a bridging
    // call, let it be.
@@ -1513,7 +1515,7 @@ static bool optimizeStaticallyKnownInterfaceConformance(
    if (TargetType->isAnyExistentialType() &&
        !SourceType->isAnyExistentialType()) {
       auto &Ctx = Mod.getAstContext();
-      auto *SM = Mod.getPolarphpModule();
+      auto *SM = Mod.getTypePHPModule();
 
       auto Proto = dyn_cast<InterfaceDecl>(TargetType->getAnyNominal());
       if (!Proto)
@@ -1658,13 +1660,13 @@ PILInstruction *CastOptimizer::optimizeUnconditionalCheckedCastAddrInst(
          willSucceedAction();
          return nullptr;
       }
-
+      /// TODO
       // Try to apply the bridged casts optimizations.
-      auto NewI = optimizeBridgedCasts(dynamicCast);
-      if (NewI) {
-         willSucceedAction();
-         return nullptr;
-      }
+//      auto NewI = optimizeBridgedCasts(dynamicCast);
+//      if (NewI) {
+//         willSucceedAction();
+//         return nullptr;
+//      }
 
       if (Feasibility == DynamicCastFeasibility::MaySucceed)
          return nullptr;

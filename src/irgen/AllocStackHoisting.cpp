@@ -62,7 +62,7 @@ static bool isHoistable(AllocStackInst *Inst, irgen::IRGenModule &Mod) {
    bool foundWeaklyImported =
       PILTy.getAstType().findIf([&Mod](CanType type) -> bool {
          if (auto nominal = type->getNominalOrBoundGenericNominal())
-            if (nominal->isWeakImported(Mod.getPolarphpModule())) {
+            if (nominal->isWeakImported(Mod.getTypePHPModule())) {
                return true;
             }
          return false;

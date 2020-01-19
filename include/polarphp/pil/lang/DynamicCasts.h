@@ -421,7 +421,7 @@ public:
 
   DynamicCastFeasibility classifyFeasibility(bool allowWholeModule) const {
     return polar::classifyDynamicCast(
-        getModule().getPolarphpModule(),
+        getModule().getTypePHPModule(),
         getSourceFormalType(), getTargetFormalType(),
         isSourceTypeExact(), allowWholeModule && getModule().isWholeModule());
   }
@@ -438,7 +438,7 @@ public:
   /// CanType() is returned.
 //  CanType getBridgedSourceType() const {
 //    PILModule &mod = getModule();
-//    Type t = mod.getAstContext().getBridgedToObjC(mod.getPolarphpModule(),
+//    Type t = mod.getAstContext().getBridgedToObjC(mod.getTypePHPModule(),
 //                                                  getSourceFormalType());
 //    if (!t)
 //      return CanType();
@@ -451,7 +451,7 @@ public:
   /// CanType() is returned.
 //  CanType getBridgedTargetType() const {
 //    PILModule &mod = getModule();
-//    Type t = mod.getAstContext().getBridgedToObjC(mod.getPolarphpModule(),
+//    Type t = mod.getAstContext().getBridgedToObjC(mod.getTypePHPModule(),
 //                                                  getTargetFormalType());
 //    if (!t)
 //      return CanType();

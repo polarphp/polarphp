@@ -1533,7 +1533,7 @@ bool SimplifyCFG::simplifyCondBrBlock(CondBranchInst *BI) {
 
       // We can't do this optimization on non-exhaustive enums.
       bool IsExhaustive =
-         E->isEffectivelyExhaustive(Fn.getModule().getPolarphpModule(),
+         E->isEffectivelyExhaustive(Fn.getModule().getTypePHPModule(),
                                     Fn.getResilienceExpansion());
 
       if (IsExhaustive

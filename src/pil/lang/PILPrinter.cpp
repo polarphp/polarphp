@@ -1707,7 +1707,7 @@ public:
    void visitWitnessMethodInst(WitnessMethodInst *WMI) {
       PrintOptions QualifiedPILTypeOptions =
          PrintOptions::printQualifiedPILType();
-      QualifiedPILTypeOptions.CurrentModule = WMI->getModule().getPolarphpModule();
+      QualifiedPILTypeOptions.CurrentModule = WMI->getModule().getTypePHPModule();
       *this << "$" << WMI->getLookupType() << ", " << WMI->getMember() << " : ";
       WMI->getMember().getDecl()->getInterfaceType().print(
          PrintState.OS, QualifiedPILTypeOptions);
@@ -2532,7 +2532,7 @@ void PILModule::dump(const char *FileName, bool Verbose,
    std::error_code EC;
    llvm::raw_fd_ostream os(FileName, EC, llvm::sys::fs::OpenFlags::F_None);
    PILPrintContext Ctx(os, Verbose);
-   print(Ctx, getPolarphpModule(), PrintASTDecls);
+   print(Ctx, getTypePHPModule(), PrintASTDecls);
 }
 
 static void printPILGlobals(PILPrintContext &Ctx,

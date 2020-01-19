@@ -857,7 +857,7 @@ private:
       unsigned OffsetInBits = 0;
       for (VarDecl *VD : D->getStoredProperties()) {
          auto memberTy =
-            BaseTy->getTypeOfMember(IGM.getPolarphpModule(), VD, nullptr);
+            BaseTy->getTypeOfMember(IGM.getTypePHPModule(), VD, nullptr);
 
          auto DbgTy = DebugTypeInfo::getFromTypeInfo(
             VD->getInterfaceType(),
@@ -1707,7 +1707,7 @@ IRGenDebugInfoImpl::IRGenDebugInfoImpl(const IRGenOptions &Opts,
       CU_Nodes->addOperand(*CU);
 
    // Create a module for the current compile unit.
-   auto *MDecl = IGM.getPolarphpModule();
+   auto *MDecl = IGM.getTypePHPModule();
    llvm::sys::path::remove_filename(SourcePath);
    MainModule = getOrCreateModule(MDecl, TheCU, Opts.ModuleName, SourcePath);
    DBuilder.createImportedModule(MainFile, MainModule, MainFile, 0);
@@ -1741,7 +1741,7 @@ void IRGenDebugInfoImpl::finalize() {
    ImportFilter |= ModuleDecl::ImportFilterKind::Private;
    ImportFilter |= ModuleDecl::ImportFilterKind::ImplementationOnly;
    SmallVector<ModuleDecl::ImportedModule, 8> ModuleWideImports;
-   IGM.getPolarphpModule()->getImportedModules(ModuleWideImports, ImportFilter);
+   IGM.getTypePHPModule()->getImportedModules(ModuleWideImports, ImportFilter);
    for (auto M : ModuleWideImports)
       if (!ImportedModules.count(M.second))
          DBuilder.createImportedModule(MainFile, getOrCreateModule(M), MainFile,

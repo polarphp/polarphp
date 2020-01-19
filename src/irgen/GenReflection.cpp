@@ -503,7 +503,7 @@ protected:
 
    // Collect any builtin types referenced from this type.
    void addBuiltinTypeRefs(CanType type) {
-      if (IGM.getPolarphpModule()->isStdlibModule()) {
+      if (IGM.getTypePHPModule()->isStdlibModule()) {
          type.visit([&](CanType t) {
             if (isa<BuiltinType>(t))
                IGM.BuiltinTypes.insert(t);
@@ -1261,7 +1261,7 @@ emitAssociatedTypeMetadataRecord(const RootInterfaceConformance *conformance) {
 }
 
 void IRGenModule::emitBuiltinReflectionMetadata() {
-   if (getPolarphpModule()->isStdlibModule()) {
+   if (getTypePHPModule()->isStdlibModule()) {
       BuiltinTypes.insert(Context.TheNativeObjectType);
       BuiltinTypes.insert(Context.getAnyObjectType());
       BuiltinTypes.insert(Context.TheBridgeObjectType);

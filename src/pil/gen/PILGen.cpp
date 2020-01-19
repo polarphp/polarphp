@@ -1339,14 +1339,14 @@ PILGenModule::canStorageUseStoredKeyPathComponent(AbstractStorageDecl *decl,
                                                   ResilienceExpansion expansion) {
    // If the declaration is resilient, we have to treat the component as
    // computed.
-   if (decl->isResilient(M.getPolarphpModule(), expansion))
+   if (decl->isResilient(M.getTypePHPModule(), expansion))
       return false;
 
    auto strategy = decl->getAccessStrategy(AccessSemantics::Ordinary,
                                            decl->supportsMutation()
                                            ? AccessKind::ReadWrite
                                            : AccessKind::Read,
-                                           M.getPolarphpModule(),
+                                           M.getTypePHPModule(),
                                            expansion);
    switch (strategy.getKind()) {
       case AccessStrategy::Storage: {
@@ -1386,7 +1386,7 @@ static bool canStorageUseTrivialDescriptor(PILGenModule &SGM,
    // stored) and doesn't have a setter with less-than-public visibility.
    auto expansion = ResilienceExpansion::Maximal;
 
-   if (!SGM.M.getPolarphpModule()->isResilient()) {
+   if (!SGM.M.getTypePHPModule()->isResilient()) {
       if (SGM.canStorageUseStoredKeyPathComponent(decl, expansion)) {
          // External modules can't directly access storage, unless this is a
          // property in a fixed-layout type.

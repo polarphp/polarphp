@@ -216,7 +216,7 @@ static ManagedValue emitTransformExistential(PILGenFunction &SGF,
    }
 
    ArrayRef<InterfaceConformanceRef> conformances =
-      collectExistentialConformances(SGF.SGM.M.getPolarphpModule(),
+      collectExistentialConformances(SGF.SGM.M.getTypePHPModule(),
                                      fromInstanceType,
                                      toInstanceType);
 
@@ -593,7 +593,7 @@ ManagedValue Transform::transform(ManagedValue v,
        SGF.getAstContext().getAnyHashableDecl()) {
       auto *protocol = SGF.getAstContext().getInterface(
          KnownInterfaceKind::Hashable);
-      auto conformance = SGF.SGM.M.getPolarphpModule()->lookupConformance(
+      auto conformance = SGF.SGM.M.getTypePHPModule()->lookupConformance(
          inputSubstType, protocol);
       auto addr = v.getType().isAddress() ? v : v.materialize(SGF, Loc);
       auto result = SGF.emitAnyHashableErasure(Loc, addr, inputSubstType,
@@ -2918,7 +2918,7 @@ buildThunkSignature(PILGenFunction &SGF,
                     SubstitutionMap &contextSubs,
                     SubstitutionMap &interfaceSubs,
                     ArchetypeType *&newArchetype) {
-   auto *mod = SGF.F.getModule().getPolarphpModule();
+   auto *mod = SGF.F.getModule().getTypePHPModule();
    auto &ctx = mod->getAstContext();
 
    // If there's no opened existential, we just inherit the generic environment

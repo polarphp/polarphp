@@ -1823,7 +1823,7 @@ CaseBlocks::CaseBlocks(
    // at compile-time. This includes future cases (for resilient enums) and
    // random values crammed into C enums.
    bool canAssumeExhaustive =
-      enumDecl->isEffectivelyExhaustive(SGF.getModule().getPolarphpModule(),
+      enumDecl->isEffectivelyExhaustive(SGF.getModule().getTypePHPModule(),
                                         SGF.F.getResilienceExpansion());
    if (canAssumeExhaustive) {
       // Check that Sema didn't let any cases slip through.
@@ -1948,7 +1948,7 @@ void PatternMatchEmission::emitEnumElementObjectDispatch(
          // Reabstract to the substituted type, if needed.
          CanType substEltTy =
             sourceType
-               ->getTypeOfMember(SGF.SGM.M.getPolarphpModule(), elt,
+               ->getTypeOfMember(SGF.SGM.M.getTypePHPModule(), elt,
                                  elt->getArgumentInterfaceType())
                ->getCanonicalType();
 
@@ -2177,7 +2177,7 @@ void PatternMatchEmission::emitEnumElementDispatch(
 
          // Reabstract to the substituted type, if needed.
          CanType substEltTy =
-            sourceType->getTypeOfMember(SGF.SGM.M.getPolarphpModule(), elt,
+            sourceType->getTypeOfMember(SGF.SGM.M.getTypePHPModule(), elt,
                                         elt->getArgumentInterfaceType())
                ->getCanonicalType();
 

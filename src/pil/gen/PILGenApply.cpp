@@ -166,7 +166,7 @@ static bool canUseStaticDispatch(PILGenFunction &SGF,
 
    // If the method is defined in the same module, we can reference it
    // directly.
-   auto thisModule = SGF.SGM.M.getPolarphpModule();
+   auto thisModule = SGF.SGM.M.getTypePHPModule();
    if (thisModule == funcDecl->getModuleContext())
       return true;
 
@@ -933,39 +933,41 @@ public:
          return {selfMeta, SGF.getLoweredType(instanceType)};
       }
 
-      CanAnyMetatypeType destMetatype;
-      if (isa<MetatypeType>(givenMetatype)) {
-         destMetatype =
-            CanMetatypeType::get(instanceType, destMetatypeRep);
-      } else {
-         destMetatype = CanExistentialMetatypeType::get(instanceType,
-                                                        destMetatypeRep);
-      }
-      // Metatypes are trivial and thus do not have a cleanup. Only if we
-      // convert them to an object do they become non-trivial.
-      assert(!selfMeta.hasCleanup());
-      PILValue convertedValue;
-      switch (metatypeRepPair(givenMetatypeRep, destMetatypeRep)) {
-         case metatypeRepPair(MetatypeRepresentation::Thick,
-                              MetatypeRepresentation::ObjC):
-            convertedValue = SGF.B.emitThickToObjCMetatype(
-               loc, selfMeta.getValue(),
-               PILType::getPrimitiveObjectType(destMetatype));
-            break;
+      llvm_unreachable("shouldn't happen");
+      /// TODO
+//      CanAnyMetatypeType destMetatype;
+//      if (isa<MetatypeType>(givenMetatype)) {
+//         destMetatype =
+//            CanMetatypeType::get(instanceType, destMetatypeRep);
+//      } else {
+//         destMetatype = CanExistentialMetatypeType::get(instanceType,
+//                                                        destMetatypeRep);
+//      }
+//      // Metatypes are trivial and thus do not have a cleanup. Only if we
+//      // convert them to an object do they become non-trivial.
+//      assert(!selfMeta.hasCleanup());
+//      PILValue convertedValue;
+//      switch (metatypeRepPair(givenMetatypeRep, destMetatypeRep)) {
+//         case metatypeRepPair(MetatypeRepresentation::Thick,
+//                              MetatypeRepresentation::ObjC):
+//            convertedValue = SGF.B.emitThickToObjCMetatype(
+//               loc, selfMeta.getValue(),
+//               PILType::getPrimitiveObjectType(destMetatype));
+//            break;
 
-         case metatypeRepPair(MetatypeRepresentation::ObjC,
-                              MetatypeRepresentation::Thick):
-            convertedValue = SGF.B.emitObjCToThickMetatype(
-               loc, selfMeta.getValue(),
-               PILType::getPrimitiveObjectType(destMetatype));
-            break;
+//         case metatypeRepPair(MetatypeRepresentation::ObjC,
+//                              MetatypeRepresentation::Thick):
+//            convertedValue = SGF.B.emitObjCToThickMetatype(
+//               loc, selfMeta.getValue(),
+//               PILType::getPrimitiveObjectType(destMetatype));
+//            break;
 
-         default:
-            llvm_unreachable("shouldn't happen");
-      }
-
-      auto result = ManagedValue::forUnmanaged(convertedValue);
-      return {result, SGF.getLoweredType(instanceType)};
+//         default:
+//            llvm_unreachable("shouldn't happen");
+//      }
+//
+//      auto result = ManagedValue::forUnmanaged(convertedValue);
+//      return {result, SGF.getLoweredType(instanceType)};
    }
 
    /// Given a metatype value for the type, allocate an Objective-C
@@ -5222,7 +5224,7 @@ PILGenFunction::emitUninitializedArrayAllocation(Type ArrayTy,
    auto allocate = Ctx.getAllocateUninitializedArray();
 
    // Invoke the intrinsic, which returns a tuple.
-   auto subMap = ArrayTy->getContextSubstitutionMap(SGM.M.getPolarphpModule(),
+   auto subMap = ArrayTy->getContextSubstitutionMap(SGM.M.getTypePHPModule(),
                                                     Ctx.getArrayDecl());
    auto result = emitApplyOfLibraryIntrinsic(Loc, allocate,
                                              subMap,
@@ -5245,7 +5247,7 @@ void PILGenFunction::emitUninitializedArrayDeallocation(PILLocation loc,
    CanType arrayTy = array->getType().getAstType();
 
    // Invoke the intrinsic.
-   auto subMap = arrayTy->getContextSubstitutionMap(SGM.M.getPolarphpModule(),
+   auto subMap = arrayTy->getContextSubstitutionMap(SGM.M.getTypePHPModule(),
                                                     Ctx.getArrayDecl());
    emitApplyOfLibraryIntrinsic(loc, deallocate, subMap,
                                ManagedValue::forUnmanaged(array),

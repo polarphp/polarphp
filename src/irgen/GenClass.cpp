@@ -110,7 +110,7 @@ static PILType getSelfType(const ClassDecl *base) {
 /// the class object at compile time so we need to do runtime layout.
 static bool classHasIncompleteLayout(IRGenModule &IGM,
                                      ClassDecl *theClass) {
-   if (theClass->getParentModule() == IGM.getPolarphpModule())
+   if (theClass->getParentModule() == IGM.getTypePHPModule())
       return false;
 
    for (auto field : theClass->getStoredPropertiesAndMissingMemberPlaceholders())

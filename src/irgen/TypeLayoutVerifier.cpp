@@ -249,7 +249,7 @@ void IRGenModule::emitTypeVerifier() {
    for (auto name : IRGen.Opts.VerifyTypeLayoutNames) {
       // Look up the name in the module.
       SmallVector<ValueDecl*, 1> lookup;
-      polar::ModuleDecl *M = getPolarphpModule();
+      polar::ModuleDecl *M = getTypePHPModule();
       M->lookupMember(lookup, M, DeclName(Context.getIdentifier(name)),
                       Identifier());
       if (lookup.empty()) {

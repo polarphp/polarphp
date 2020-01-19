@@ -408,7 +408,7 @@ bool PILModule::hasFunction(StringRef Name) {
 }
 
 void PILModule::linkAllFromCurrentModule() {
-   getPILLoader()->getAllForModule(getPolarphpModule()->getName(),
+   getPILLoader()->getAllForModule(getTypePHPModule()->getName(),
       /*PrimaryFile=*/nullptr);
 }
 
@@ -642,7 +642,7 @@ shouldSerializeEntitiesAssociatedWithDeclContext(const DeclContext *DC) const {
 /// Returns true if it is the optimized OnoneSupport module.
 bool PILModule::isOptimizedOnoneSupportModule() const {
    return getOptions().shouldOptimize() &&
-          getPolarphpModule()->isOnoneSupportModule();
+          getTypePHPModule()->isOnoneSupportModule();
 }
 
 void PILModule::setSerializePILAction(PILModule::ActionCallback Action) {

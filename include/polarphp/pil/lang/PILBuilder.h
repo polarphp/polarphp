@@ -207,7 +207,7 @@ public:
    AstContext &getAstContext() const { return getModule().getAstContext(); }
    const lowering::TypeLowering &getTypeLowering(PILType T) const {
 
-      auto expansion = TypeExpansionContext::maximal(getModule().getPolarphpModule(),
+      auto expansion = TypeExpansionContext::maximal(getModule().getTypePHPModule(),
                                                      getModule().isWholeModule());
       // If there's no current PILFunction, we're inserting into a global
       // variable initializer.

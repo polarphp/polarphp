@@ -527,7 +527,7 @@ static PILValue emitCodeForConstantArray(ArrayRef<PILValue> elements,
    // created array and the second element is a pointer to the internal storage
    // of the array.
    SubstitutionMap subMap = arrayType->getContextSubstitutionMap(
-      module.getPolarphpModule(), astContext.getArrayDecl());
+      module.getTypePHPModule(), astContext.getArrayDecl());
    FunctionRefInst *arrayAllocateRef =
       builder.createFunctionRef(loc, arrayAllocateFun);
    ApplyInst *applyInst = builder.createApply(

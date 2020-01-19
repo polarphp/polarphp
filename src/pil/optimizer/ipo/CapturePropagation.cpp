@@ -422,7 +422,7 @@ static PILFunction *getSpecializedWithDeadParams(
 
       // Perform a generic specialization of the Specialized function.
       ReabstractionInfo ReInfo(
-         FuncBuilder.getModule().getPolarphpModule(),
+         FuncBuilder.getModule().getTypePHPModule(),
          FuncBuilder.getModule().isWholeModule(), ApplySite(), Specialized,
          PAI->getSubstitutionMap(), Specialized->isSerialized(),
          /* ConvertIndirectToDirect */ false);

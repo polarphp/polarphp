@@ -387,7 +387,7 @@ bool ObjectOutliner::optimizeObjectAllocation(AllocRefInst *ARI) {
 
    PILModule *Module = &ARI->getFunction()->getModule();
    // FIXME: Expansion
-   assert(!Cl->isResilient(Module->getPolarphpModule(),
+   assert(!Cl->isResilient(Module->getTypePHPModule(),
                            ResilienceExpansion::Minimal) &&
           "constructor call of resilient class should prevent static allocation");
 
@@ -518,7 +518,7 @@ void ObjectOutliner::replaceFindStringCall(ApplyInst *FindStringCall) {
 
 
    // FIXME: Expansion
-   assert(!cacheDecl->isResilient(Module->getPolarphpModule(),
+   assert(!cacheDecl->isResilient(Module->getTypePHPModule(),
                                   ResilienceExpansion::Minimal));
 
    PILType wordTy =

@@ -266,7 +266,7 @@ bool FulfillmentMap::searchNominalTypeMetadata(IRGenModule &IGM,
 
    GenericTypeRequirements requirements(IGM, nominal);
    requirements.enumerateFulfillments(
-      IGM, type->getContextSubstitutionMap(IGM.getPolarphpModule(), nominal),
+      IGM, type->getContextSubstitutionMap(IGM.getTypePHPModule(), nominal),
       [&](unsigned reqtIndex, CanType arg, InterfaceConformanceRef conf) {
          // Skip uninteresting type arguments.
          if (!keys.hasInterestingType(arg))

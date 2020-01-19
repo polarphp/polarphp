@@ -5158,7 +5158,7 @@ void IRGenPILFunction::visitKeyPathInst(polar::KeyPathInst *I) {
          emitInitOfGenericRequirementsBuffer(*this, requirements, argsBuf,
                                              [&](GenericRequirement reqt) -> llvm::Value * {
                                                 return emitGenericRequirementFromSubstitutions(*this, sig,
-                                                                                               *IGM.getPolarphpModule(),
+                                                                                               *IGM.getTypePHPModule(),
                                                                                                reqt, subs);
                                              });
       }

@@ -19,21 +19,21 @@ class FunctionPass;
 class ImmutablePass;
 class PassRegistry;
 
-void initializePolarphpAAWrapperPassPass(PassRegistry &);
-void initializePolarphpRCIdentityPass(PassRegistry &);
-void initializePolarphpARCOptPass(PassRegistry &);
-void initializePolarphpARCContractPass(PassRegistry &);
+void initializeTypePHPAAWrapperPassPass(PassRegistry &);
+void initializeTypePHPRCIdentityPass(PassRegistry &);
+void initializeTypePHPARCOptPass(PassRegistry &);
+void initializeTypePHPARCContractPass(PassRegistry &);
 void initializeInlineTreePrinterPass(PassRegistry &);
-void initializePolarphpMergeFunctionsPass(PassRegistry &);
+void initializeTypePHPMergeFunctionsPass(PassRegistry &);
 }
 
 namespace polar {
-llvm::FunctionPass *createPolarphpARCOptPass();
-llvm::FunctionPass *createPolarphpARCContractPass();
+llvm::FunctionPass *createTypePHPARCOptPass();
+llvm::FunctionPass *createTypePHPARCContractPass();
 llvm::ModulePass *createInlineTreePrinterPass();
-llvm::ModulePass *createPolarphpMergeFunctionsPass();
-llvm::ImmutablePass *createPolarphpAAWrapperPass();
-llvm::ImmutablePass *createPolarphpRCIdentityPass();
+llvm::ModulePass *createTypePHPMergeFunctionsPass();
+llvm::ImmutablePass *createTypePHPAAWrapperPass();
+llvm::ImmutablePass *createTypePHPRCIdentityPass();
 } // end namespace polar
 
 #endif

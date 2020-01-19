@@ -1193,7 +1193,7 @@ public:
                                        SubstitutionMap ParamSubs)
       : CallerGenericSig(CallerGenericSig), CallerGenericEnv(CallerGenericEnv),
         CalleeGenericSig(CalleeGenericSig), CalleeGenericEnv(CalleeGenericEnv),
-        M(M), SM(M.getPolarphpModule()), Ctx(M.getAstContext()) {
+        M(M), SM(M.getTypePHPModule()), Ctx(M.getAstContext()) {
       SpecializedGenericSig = nullptr;
       SpecializedGenericEnv = nullptr;
       CalleeInterfaceToCallerArchetypeMap = ParamSubs;
@@ -1208,7 +1208,7 @@ public:
       : CallerGenericSig(CalleeGenericSig), CallerGenericEnv(CalleeGenericEnv),
         CalleeGenericSig(CalleeGenericSig), CalleeGenericEnv(CalleeGenericEnv),
         SpecializedGenericSig(SpecializedSig),
-        M(M), SM(M.getPolarphpModule()), Ctx(M.getAstContext()) {
+        M(M), SM(M.getTypePHPModule()), Ctx(M.getAstContext()) {
 
       // Create the new generic signature using provided requirements.
       SpecializedGenericEnv = SpecializedGenericSig->getGenericEnvironment();
@@ -2259,7 +2259,7 @@ static bool createPrespecialized(StringRef UnspecializedName,
    if (!UnspecFunc || !UnspecFunc->isDefinition())
       return false;
 
-   ReabstractionInfo ReInfo(M.getPolarphpModule(), M.isWholeModule(), ApplySite(),
+   ReabstractionInfo ReInfo(M.getTypePHPModule(), M.isWholeModule(), ApplySite(),
                             UnspecFunc, Apply.getSubstitutionMap(),
                             IsNotSerialized,
       /*ConvertIndirectToDirect=*/true, nullptr);
@@ -2361,7 +2361,7 @@ void polar::trySpecializeApplyOfGeneric(
       Serialized = IsNotSerialized;
    }
 
-   ReabstractionInfo ReInfo(FuncBuilder.getModule().getPolarphpModule(),
+   ReabstractionInfo ReInfo(FuncBuilder.getModule().getTypePHPModule(),
                             FuncBuilder.getModule().isWholeModule(), Apply, RefF,
                             Apply.getSubstitutionMap(), Serialized,
       /*ConvertIndirectToDirect=*/true, &ORE);

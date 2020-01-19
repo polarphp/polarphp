@@ -762,7 +762,7 @@ void EagerSpecializerTransform::run() {
       // TODO: Use a decision-tree to reduce the amount of dynamic checks being
       // performed.
       for (auto *SA : F.getSpecializeAttrs()) {
-         ReInfoVec.emplace_back(FuncBuilder.getModule().getPolarphpModule(),
+         ReInfoVec.emplace_back(FuncBuilder.getModule().getTypePHPModule(),
                                 FuncBuilder.getModule().isWholeModule(), &F,
                                 SA->getSpecializedSignature());
          auto *NewFunc = eagerSpecialize(FuncBuilder, &F, *SA, ReInfoVec.back());

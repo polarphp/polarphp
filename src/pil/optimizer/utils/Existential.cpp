@@ -251,7 +251,7 @@ void ConcreteExistentialInfo::initializeSubstitutionMap(
    // filtered when using it with this (phony) generic signature.
    CanGenericSignature ExistentialSig =
       M->getAstContext().getOpenedArchetypeSignature(ExistentialType,
-                                                     M->getPolarphpModule());
+                                                     M->getTypePHPModule());
    ExistentialSubs = SubstitutionMap::get(
       ExistentialSig, [&](SubstitutableType *type) { return ConcreteType; },
       [&](CanType /*depType*/, Type /*replaceType*/,
@@ -383,7 +383,7 @@ ConcreteExistentialInfo::ConcreteExistentialInfo(PILValue existential,
 
    // We have the open_existential; we still need the conformance.
    auto ConformanceRef =
-      M->getPolarphpModule()->conformsToInterface(ConcreteTypeCandidate, Interface);
+      M->getTypePHPModule()->conformsToInterface(ConcreteTypeCandidate, Interface);
    if (ConformanceRef.isInvalid())
       return;
 

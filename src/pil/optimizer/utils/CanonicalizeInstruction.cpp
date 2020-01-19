@@ -346,7 +346,7 @@ broadenSingleElementStores(StoreInst *storeInst,
 
       auto *decl = baseAddrType.getStructOrBoundGenericStruct();
       assert(
-         !decl->isResilient(f->getModule().getPolarphpModule(),
+         !decl->isResilient(f->getModule().getTypePHPModule(),
                             f->getResilienceExpansion()) &&
          "This code assumes resilient structs can not have fragile fields. If "
          "this assert is hit, this has been changed. Please update this code.");

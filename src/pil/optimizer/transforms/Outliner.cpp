@@ -477,7 +477,7 @@ static bool matchSwitch(SwitchInfo &SI, PILInstruction *Inst,
    // Check that we call the _unconditionallyBridgeFromObjectiveC witness.
    auto NativeType = Apply->getType().getAstType();
    auto *BridgeFun = FunRef->getInitiallyReferencedFunction();
-   auto *SwiftModule = BridgeFun->getModule().getPolarphpModule();
+   auto *SwiftModule = BridgeFun->getModule().getTypePHPModule();
    auto bridgeWitness = getBridgeFromObjectiveC(NativeType, SwiftModule);
    if (BridgeFun->getName() != bridgeWitness.mangle())
       return false;
@@ -765,7 +765,7 @@ BridgedArgument BridgedArgument::match(unsigned ArgIdx, PILValue Arg,
    // Make sure we are calling the actual bridge witness.
    auto NativeType = BridgedValue->getType().getAstType();
    auto *BridgeFun = FunRef->getInitiallyReferencedFunction();
-   auto *SwiftModule = BridgeFun->getModule().getPolarphpModule();
+   auto *SwiftModule = BridgeFun->getModule().getTypePHPModule();
    auto bridgeWitness = getBridgeToObjectiveC(NativeType, SwiftModule);
    if (BridgeFun->getName() != bridgeWitness.mangle())
       return BridgedArgument();

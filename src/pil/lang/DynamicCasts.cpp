@@ -1046,7 +1046,7 @@ PILValue
 polar::emitSuccessfulScalarUnconditionalCast(PILBuilder &B, PILLocation loc,
                                              PILDynamicCastInst dynamicCast) {
    return emitSuccessfulScalarUnconditionalCast(
-      B, B.getModule().getPolarphpModule(), loc, dynamicCast.getSource(),
+      B, B.getModule().getTypePHPModule(), loc, dynamicCast.getSource(),
       dynamicCast.getTargetLoweredType(), dynamicCast.getSourceFormalType(),
       dynamicCast.getTargetFormalType(), dynamicCast.getInstruction());
 }
@@ -1087,7 +1087,7 @@ polar::emitSuccessfulScalarUnconditionalCast(PILBuilder &B, ModuleDecl *M,
 bool polar::emitSuccessfulIndirectUnconditionalCast(
    PILBuilder &B, PILLocation loc, PILDynamicCastInst dynamicCast) {
    return emitSuccessfulIndirectUnconditionalCast(
-      B, B.getModule().getPolarphpModule(), loc, dynamicCast.getSource(),
+      B, B.getModule().getTypePHPModule(), loc, dynamicCast.getSource(),
       dynamicCast.getSourceFormalType(), dynamicCast.getDest(),
       dynamicCast.getTargetFormalType(), dynamicCast.getInstruction());
 }

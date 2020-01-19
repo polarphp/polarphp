@@ -634,20 +634,20 @@ static ManagedValue emitNativeToCBridgedNonoptionalValue(PILGenFunction &SGF,
 //    return emitBridge##NativeType##To##BridgedType(SGF, loc, v);            \
 //  }
 //#include "polarphp/pil/gen/BridgedTypesDef.h"
-
+   /// TODO
    // Bridge thick to Objective-C metatypes.
-   if (auto bridgedMetaTy = dyn_cast<AnyMetatypeType>(bridgedType)) {
-      if (bridgedMetaTy->hasRepresentation() &&
-          bridgedMetaTy->getRepresentation() == MetatypeRepresentation::ObjC) {
-         PILValue native = SGF.B.emitThickToObjCMetatype(loc, v.getValue(),
-                                                         loweredBridgedTy);
-         // *NOTE*: ObjCMetatypes are trivial types. They only gain ARC semantics
-         // when they are converted to an object via objc_metatype_to_object.
-         assert(!v.hasCleanup() &&
-                "Metatypes are trivial and thus should not have cleanups");
-         return ManagedValue::forUnmanaged(native);
-      }
-   }
+//   if (auto bridgedMetaTy = dyn_cast<AnyMetatypeType>(bridgedType)) {
+//      if (bridgedMetaTy->hasRepresentation() &&
+//          bridgedMetaTy->getRepresentation() == MetatypeRepresentation::ObjC) {
+//         PILValue native = SGF.B.emitThickToObjCMetatype(loc, v.getValue(),
+//                                                         loweredBridgedTy);
+//         // *NOTE*: ObjCMetatypes are trivial types. They only gain ARC semantics
+//         // when they are converted to an object via objc_metatype_to_object.
+//         assert(!v.hasCleanup() &&
+//                "Metatypes are trivial and thus should not have cleanups");
+//         return ManagedValue::forUnmanaged(native);
+//      }
+//   }
 
    // Bridge native functions to blocks.
    auto bridgedFTy = dyn_cast<AnyFunctionType>(bridgedType);
@@ -1031,19 +1031,20 @@ static ManagedValue emitCBridgedToNativeValue(PILGenFunction &SGF,
    }
 
    // Bridge Objective-C to thick metatypes.
-   if (isa<AnyMetatypeType>(nativeType)) {
-      auto bridgedMetaTy = cast<AnyMetatypeType>(bridgedType);
-      if (bridgedMetaTy->hasRepresentation() &&
-          bridgedMetaTy->getRepresentation() == MetatypeRepresentation::ObjC) {
-         PILValue native =
-            SGF.B.emitObjCToThickMetatype(loc, v.getValue(), loweredNativeTy);
-         // *NOTE*: ObjCMetatypes are trivial types. They only gain ARC semantics
-         // when they are converted to an object via objc_metatype_to_object.
-         assert(!v.hasCleanup() && "Metatypes are trivial and should not have "
-                                   "cleanups");
-         return ManagedValue::forUnmanaged(native);
-      }
-   }
+   /// TODO
+//   if (isa<AnyMetatypeType>(nativeType)) {
+//      auto bridgedMetaTy = cast<AnyMetatypeType>(bridgedType);
+//      if (bridgedMetaTy->hasRepresentation() &&
+//          bridgedMetaTy->getRepresentation() == MetatypeRepresentation::ObjC) {
+//         PILValue native =
+//            SGF.B.emitObjCToThickMetatype(loc, v.getValue(), loweredNativeTy);
+//         // *NOTE*: ObjCMetatypes are trivial types. They only gain ARC semantics
+//         // when they are converted to an object via objc_metatype_to_object.
+//         assert(!v.hasCleanup() && "Metatypes are trivial and should not have "
+//                                   "cleanups");
+//         return ManagedValue::forUnmanaged(native);
+//      }
+//   }
 
    // Bridge blocks back into native function types.
    if (auto nativeFTy = dyn_cast<AnyFunctionType>(nativeType)) {

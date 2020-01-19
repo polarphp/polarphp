@@ -323,7 +323,7 @@ const TypeInfo *TypeConverter::convertArchetypeType(ArchetypeType *archetype) {
          SpareBitVector::getConstant(size.getValueInBits(), false);
       // Get an integer type of the required size.
       auto ProperlySizedIntTy = PILType::getBuiltinIntegerType(
-         size.getValueInBits(), IGM.getPolarphpModule()->getAstContext());
+         size.getValueInBits(), IGM.getTypePHPModule()->getAstContext());
       auto storageType = IGM.getStorageType(ProperlySizedIntTy);
       return FixedSizeArchetypeTypeInfo::create(storageType, size, align,
                                                 spareBits);

@@ -2397,9 +2397,10 @@ public:
 
          // If we're importing a global as a member, we need to provide the
          // effective context.
-         Impl.printTypePHPName(
-            correctPolarphpName, getActivePolarphpVersion(),
-            /*fullyQualified=*/correctPolarphpName.importAsMember(), os);
+         //
+//         Impl.printTypePHPName(
+//            correctPolarphpName, getActivePolarphpVersion(),
+//            /*fullyQualified=*/correctPolarphpName.importAsMember(), os);
       }
 
       DeclAttribute *attr;
@@ -3768,8 +3769,8 @@ public:
             "Functions that may return more than one time (annotated with the "
             "'returns_twice' attribute) are unavailable in Swift");
       }
-
-      recordObjCOverride(result);
+      /// TODO
+//      recordObjCOverride(result);
    }
 
    Decl *VisitCXXMethodDecl(const clang::CXXMethodDecl *decl) {
@@ -4365,8 +4366,8 @@ private:
 //   }
 
 public:
-   /// Record the function or initializer overridden by the given Swift method.
-   void recordObjCOverride(AbstractFunctionDecl *decl);
+//   /// Record the function or initializer overridden by the given Swift method.
+//   void recordObjCOverride(AbstractFunctionDecl *decl);
 
    /// Given an imported method, try to import it as a constructor.
    ///
@@ -4478,10 +4479,11 @@ public:
                                            MutableArrayRef<MirroredMethodEntry> entries,
                                            SmallVectorImpl<Decl *> &newMembers);
 
+   /// TODO
    /// Import constructors from our superclasses (and their
    /// categories/extensions), effectively "inheriting" constructors.
-   void importInheritedConstructors(ClassDecl *classDecl,
-                                    SmallVectorImpl<Decl *> &newMembers);
+//   void importInheritedConstructors(ClassDecl *classDecl,
+//                                    SmallVectorImpl<Decl *> &newMembers);
 
 //   Decl *VisitObjCCategoryDecl(const clang::ObjCCategoryDecl *decl) {
 //      // If the declaration is invalid, fail.
@@ -7361,11 +7363,12 @@ getSwiftNameFromClangName(StringRef replacement) {
       return "";
 
    llvm::SmallString<64> renamed;
-   {
-      // Render a swift_name string.
-      llvm::raw_svector_ostream os(renamed);
-      printTypePHPName(importedName, CurrentVersion, /*fullyQualified=*/true, os);
-   }
+   /// TODO
+//   {
+//      // Render a swift_name string.
+//      llvm::raw_svector_ostream os(renamed);
+//      printTypePHPName(importedName, CurrentVersion, /*fullyQualified=*/true, os);
+//   }
 
    return TypePHPContext.AllocateCopy(StringRef(renamed));
 }
@@ -8665,10 +8668,10 @@ void ClangImporter::Implementation::collectMembersToAdd(
       objcContainer = clangClass = clangClass->getDefinition();
 
       // Imported inherited initializers.
-      if (clangClass->getName() != "Interface") {
-         converter.importInheritedConstructors(const_cast<ClassDecl *>(swiftClass),
-                                               members);
-      }
+//      if (clangClass->getName() != "Interface") {
+//         converter.importInheritedConstructors(const_cast<ClassDecl *>(swiftClass),
+//                                               members);
+//      }
 
    } else if (auto clangProto
       = dyn_cast<clang::ObjCInterfaceDecl>(objcContainer)) {

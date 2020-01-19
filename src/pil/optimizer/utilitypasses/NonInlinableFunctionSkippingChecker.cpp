@@ -81,7 +81,7 @@ class NonInlinableFunctionSkippingChecker : public PILModuleTransform {
          return;
 
       // Skip this verification for SwiftOnoneSupport
-      if (getModule()->getPolarphpModule()->isOnoneSupportModule())
+      if (getModule()->getTypePHPModule()->isOnoneSupportModule())
          return;
 
       for (auto &F : *getModule()) {

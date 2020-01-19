@@ -642,7 +642,7 @@ void IRGenModule::emitRuntimeRegistration() {
 
    // Register Swift protocols if we added any.
    if (!SwiftInterfaces.empty()) {
-      llvm::Constant *protocols = emitPolarphpInterfaces();
+      llvm::Constant *protocols = emitTypePHPInterfaces();
 
       llvm::Constant *beginIndices[] = {
          llvm::ConstantInt::get(Int32Ty, 0),
@@ -1077,13 +1077,13 @@ void IRGenModule::finishEmitAfterTopLevel() {
    // for the explicit imports.
    if (DebugInfo) {
       if (ModuleDecl *TheStdlib = Context.getStdlibModule()) {
-         if (TheStdlib != getPolarphpModule()) {
+         if (TheStdlib != getTypePHPModule()) {
             std::pair<polar::Identifier, polar::SourceLoc> AccessPath[] = {
                { Context.StdlibModuleName, polar::SourceLoc() }
             };
 
             auto Imp = ImportDecl::create(Context,
-                                          getPolarphpModule(),
+                                          getTypePHPModule(),
                                           SourceLoc(),
                                           ImportKind::Module, SourceLoc(),
                                           AccessPath);
@@ -1094,9 +1094,9 @@ void IRGenModule::finishEmitAfterTopLevel() {
    }
 }
 
-void IRGenerator::emitPolarphpInterfaces() {
+void IRGenerator::emitTypePHPInterfaces() {
    for (auto &m : *this) {
-      m.second->emitPolarphpInterfaces();
+      m.second->emitTypePHPInterfaces();
    }
 }
 
@@ -1207,7 +1207,7 @@ bool IRGenerator::hasLazyMetadata(TypeDecl *type) {
          if (auto nominal = dyn_cast<NominalTypeDecl>(type)) {
             return requiresForeignTypeMetadata(nominal);
          }
-      } else if (dc->getParentModule() == PIL.getPolarphpModule()) {
+      } else if (dc->getParentModule() == PIL.getTypePHPModule()) {
          // When compiling with -Onone keep all metadata for the debugger. Even if
          // it is not used by the program itself.
          if (!Opts.shouldOptimize())
@@ -1761,7 +1761,7 @@ void irgen::updateLinkageForDefinition(IRGenModule &IGM,
    // TODO: there are probably cases where we can avoid redoing the
    // entire linkage computation.
    UniversalLinkageInfo linkInfo(IGM);
-   bool weakImported = entity.isWeakImported(IGM.getPolarphpModule());
+   bool weakImported = entity.isWeakImported(IGM.getTypePHPModule());
    auto IRL =
       getIRLinkage(linkInfo, entity.getLinkage(ForDefinition),
                    ForDefinition, weakImported);
@@ -1780,7 +1780,7 @@ void irgen::updateLinkageForDefinition(IRGenModule &IGM,
 LinkInfo LinkInfo::get(IRGenModule &IGM, const LinkEntity &entity,
                        ForDefinition_t isDefinition) {
    return LinkInfo::get(UniversalLinkageInfo(IGM),
-                        IGM.getPolarphpModule(),
+                        IGM.getTypePHPModule(),
                         entity, isDefinition);
 }
 
@@ -3032,7 +3032,7 @@ IRGenModule::emitDirectRelativeReference(llvm::Constant *target,
 }
 
 /// Emit the protocol descriptors list and return it.
-llvm::Constant *IRGenModule::emitPolarphpInterfaces() {
+llvm::Constant *IRGenModule::emitTypePHPInterfaces() {
    if (SwiftInterfaces.empty())
       return nullptr;
 
@@ -4279,7 +4279,7 @@ bool IRGenModule::isResilient(NominalTypeDecl *D, ResilienceExpansion expansion)
        Types.getLoweringMode() == TypeConverter::Mode::CompletelyFragile) {
       return false;
    }
-   return D->isResilient(getPolarphpModule(), expansion);
+   return D->isResilient(getTypePHPModule(), expansion);
 }
 
 /// Do we have to use resilient access patterns when working with this
@@ -4293,13 +4293,13 @@ bool IRGenModule::hasResilientMetadata(ClassDecl *D,
        Types.getLoweringMode() == TypeConverter::Mode::CompletelyFragile) {
       return false;
    }
-   return D->hasResilientMetadata(getPolarphpModule(), expansion);
+   return D->hasResilientMetadata(getTypePHPModule(), expansion);
 }
 
 // The most general resilience expansion where the given declaration is visible.
 ResilienceExpansion
 IRGenModule::getResilienceExpansionForAccess(NominalTypeDecl *decl) {
-   if (decl->getModuleContext() == getPolarphpModule() &&
+   if (decl->getModuleContext() == getTypePHPModule() &&
        decl->getEffectiveAccess() < AccessLevel::Public)
       return ResilienceExpansion::Maximal;
    return ResilienceExpansion::Minimal;

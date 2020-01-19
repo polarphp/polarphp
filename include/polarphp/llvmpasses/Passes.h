@@ -19,11 +19,11 @@
 
 namespace polar {
 
-struct PolarphpAAResult : llvm::AAResultBase<PolarphpAAResult> {
-   friend llvm::AAResultBase<PolarphpAAResult>;
+struct TypePHPAAResult : llvm::AAResultBase<TypePHPAAResult> {
+   friend llvm::AAResultBase<TypePHPAAResult>;
 
-   explicit PolarphpAAResult() : AAResultBase() {}
-   PolarphpAAResult(PolarphpAAResult &&Arg)
+   explicit TypePHPAAResult() : AAResultBase() {}
+   TypePHPAAResult(TypePHPAAResult &&Arg)
       : AAResultBase(std::move(Arg)) {}
 
    bool invalidate(llvm::Function &,
@@ -40,28 +40,28 @@ struct PolarphpAAResult : llvm::AAResultBase<PolarphpAAResult> {
                                   llvm::AAQueryInfo &AAQI);
 };
 
-class PolarphpAAWrapperPass : public llvm::ImmutablePass {
-   std::unique_ptr<PolarphpAAResult> Result;
+class TypePHPAAWrapperPass : public llvm::ImmutablePass {
+   std::unique_ptr<TypePHPAAResult> Result;
 
 public:
    static char ID; // Class identification, replacement for typeinfo
-   PolarphpAAWrapperPass();
+   TypePHPAAWrapperPass();
 
-   PolarphpAAResult &getResult() { return *Result; }
-   const PolarphpAAResult &getResult() const { return *Result; }
+   TypePHPAAResult &getResult() { return *Result; }
+   const TypePHPAAResult &getResult() const { return *Result; }
 
    bool doInitialization(llvm::Module &M) override;
    bool doFinalization(llvm::Module &M) override;
    void getAnalysisUsage(llvm::AnalysisUsage &AU) const override;
 };
 
-class SwiftRCIdentity : public llvm::ImmutablePass {
+class TypePHPRCIdentity : public llvm::ImmutablePass {
 public:
    static char ID; // Class identification, replacement for typeinfo
-   SwiftRCIdentity() : ImmutablePass(ID) {}
+   TypePHPRCIdentity() : ImmutablePass(ID) {}
 
    /// Returns the root of the RC-equivalent value for the given V.
-   llvm::Value *getSwiftRCIdentityRoot(llvm::Value *V);
+   llvm::Value *getTypePHPRCIdentityRoot(llvm::Value *V);
 private:
    enum { MaxRecursionDepth = 16 };
    bool doInitialization(llvm::Module &M) override;
@@ -73,24 +73,24 @@ private:
    llvm::Value *stripReferenceForwarding(llvm::Value *Val);
 };
 
-class SwiftARCOpt : public llvm::FunctionPass {
+class TypePHPARCOpt : public llvm::FunctionPass {
    /// Swift RC Identity analysis.
-   SwiftRCIdentity *RC;
+   TypePHPRCIdentity *RC;
    virtual void getAnalysisUsage(llvm::AnalysisUsage &AU) const override;
    virtual bool runOnFunction(llvm::Function &F) override;
 public:
    static char ID;
-   SwiftARCOpt();
+   TypePHPARCOpt();
 };
 
-class SwiftARCContract : public llvm::FunctionPass {
+class TypePHPARCContract : public llvm::FunctionPass {
    /// Swift RC Identity analysis.
-   SwiftRCIdentity *RC;
+   TypePHPRCIdentity *RC;
    virtual void getAnalysisUsage(llvm::AnalysisUsage &AU) const override;
    virtual bool runOnFunction(llvm::Function &F) override;
 public:
    static char ID;
-   SwiftARCContract() : llvm::FunctionPass(ID) {}
+   TypePHPARCContract() : llvm::FunctionPass(ID) {}
 };
 
 class InlineTreePrinter : public llvm::ModulePass {

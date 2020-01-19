@@ -75,7 +75,7 @@ OptimizationMode IRGenFunction::getEffectiveOptimizationMode() const {
 }
 
 ModuleDecl *IRGenFunction::getSwiftModule() const {
-   return IGM.getPolarphpModule();
+   return IGM.getTypePHPModule();
 }
 
 PILModule &IRGenFunction::getPILModule() const {

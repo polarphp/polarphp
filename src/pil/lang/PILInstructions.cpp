@@ -1567,7 +1567,7 @@ getUniqueCaseForDefaultValue(Inst *inst, PILValue enumValue) {
    assert(decl && "switch_enum operand is not an enum");
 
    const PILFunction *F = inst->getFunction();
-   if (!decl->isEffectivelyExhaustive(F->getModule().getPolarphpModule(),
+   if (!decl->isEffectivelyExhaustive(F->getModule().getTypePHPModule(),
                                       F->getResilienceExpansion())) {
       return nullptr;
    }

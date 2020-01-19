@@ -122,7 +122,7 @@ bool PILModule::isTypeMetadataAccessible(CanType type) {
 
             // Hidden declarations are inaccessible from different modules.
          case FormalLinkage::HiddenUnique:
-            return (decl->getModuleContext() != getPolarphpModule());
+            return (decl->getModuleContext() != getTypePHPModule());
 
             // Private declarations are inaccessible from different files unless
             // this is WMO and we're in the same module.
@@ -131,7 +131,7 @@ bool PILModule::isTypeMetadataAccessible(CanType type) {
             // integrated REPL, where we also don't have a concept of other
             // source files within the current module.
             if (!AssociatedDeclContext)
-               return (decl->getModuleContext() != getPolarphpModule());
+               return (decl->getModuleContext() != getTypePHPModule());
 
             // The associated DC should be either a SourceFile or, in WMO mode,
             // a ModuleDecl.  In the WMO modes, IRGen will ensure that private

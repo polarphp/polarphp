@@ -162,7 +162,7 @@ bool polar::performDumpTypeInfo(IRGenOptions &Opts,
    // We want to bypass resilience.
    LoweringModeScope scope(IGM, TypeConverter::Mode::CompletelyFragile);
 
-   auto *Mod = PILMod.getPolarphpModule();
+   auto *Mod = PILMod.getTypePHPModule();
    SmallVector<Decl *, 16> AllDecls;
    Mod->getTopLevelDecls(AllDecls);
 

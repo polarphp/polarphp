@@ -179,7 +179,7 @@ private:
 
 PolymorphicConvention::PolymorphicConvention(IRGenModule &IGM,
                                              CanPILFunctionType fnType)
-   : IGM(IGM), M(*IGM.getPolarphpModule()), FnType(fnType) {
+   : IGM(IGM), M(*IGM.getTypePHPModule()), FnType(fnType) {
    initGenerics();
 
    auto rep = fnType->getRepresentation();
@@ -825,7 +825,7 @@ bool IRGenModule::isResilientConformance(
 
    // If the protocol and the conformance are both in the current module,
    // they're not resilient.
-   if (conformanceModule == getPolarphpModule() &&
+   if (conformanceModule == getTypePHPModule() &&
        conformanceModule == conformance->getInterface()->getParentModule())
       return false;
 
@@ -952,7 +952,7 @@ emitConditionalConformancesBuffer(IRGenFunction &IGF,
    // in the buffer that gets passed to the witness table accessor.
    llvm::SmallVector<llvm::Value *, 4> tables;
 
-   auto subMap = substConformance->getSubstitutions(IGF.IGM.getPolarphpModule());
+   auto subMap = substConformance->getSubstitutions(IGF.IGM.getTypePHPModule());
 
    PILWitnessTable::enumerateWitnessTableConditionalConformances(
       rootConformance, [&](unsigned, CanType type, InterfaceDecl *proto) {
@@ -1053,7 +1053,7 @@ mapConformanceIntoContext(IRGenModule &IGM, const RootInterfaceConformance &conf
    return *conf.subst([&](SubstitutableType *t) -> Type {
                          return dc->mapTypeIntoContext(t);
                       },
-                      LookUpConformanceInModule(IGM.getPolarphpModule()));
+                      LookUpConformanceInModule(IGM.getTypePHPModule()));
 }
 
 WitnessIndex InterfaceInfo::getAssociatedTypeIndex(
@@ -1088,7 +1088,7 @@ public:
    llvm::Constant *tryGetConstantTable(IRGenModule &IGM,
                                        CanType conformingType) const override {
       if (IGM.getOptions().LazyInitializeInterfaceConformances &&
-          RootConformance->getDeclContext()->getParentModule() != IGM.getPolarphpModule())
+          RootConformance->getDeclContext()->getParentModule() != IGM.getTypePHPModule())
          return nullptr;
       return IGM.getAddrOfWitnessTable(RootConformance);
    }

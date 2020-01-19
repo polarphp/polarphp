@@ -158,7 +158,7 @@ static bool ParseFrontendArgs(
 }
 
 static void diagnosePHPVersion(llvm::Optional<version::Version> &vers, Arg *verArg,
-                                 ArgList &Args, DiagnosticEngine &diags) {
+                               ArgList &Args, DiagnosticEngine &diags) {
    // General invalid version error
    diags.diagnose(SourceLoc(), diag::error_invalid_arg_value,
                   verArg->getAsString(Args), verArg->getValue());
@@ -1464,26 +1464,27 @@ bool CompilerInvocation::parseArgs(
    return false;
 }
 
-serialization::Status
-CompilerInvocation::loadFromSerializedAST(StringRef data) {
-   serialization::ExtendedValidationInfo extendedInfo;
-   serialization::ValidationInfo info =
-      serialization::validateSerializedAst(data, &extendedInfo);
-
-   if (info.status != serialization::Status::Valid)
-      return info.status;
-
-   LangOpts.EffectiveLanguageVersion = info.compatibilityVersion;
-   setTargetTriple(info.targetTriple);
-   if (!extendedInfo.getSDKPath().empty())
-      setSDKPath(extendedInfo.getSDKPath());
-
-   auto &extraClangArgs = getClangImporterOptions().ExtraArgs;
-   extraClangArgs.insert(extraClangArgs.end(),
-                         extendedInfo.getExtraClangImporterOptions().begin(),
-                         extendedInfo.getExtraClangImporterOptions().end());
-   return info.status;
-}
+/// TODO
+//serialization::Status
+//CompilerInvocation::loadFromSerializedAST(StringRef data) {
+//   serialization::ExtendedValidationInfo extendedInfo;
+//   serialization::ValidationInfo info =
+//      serialization::validateSerializedAst(data, &extendedInfo);
+//
+//   if (info.status != serialization::Status::Valid)
+//      return info.status;
+//
+//   LangOpts.EffectiveLanguageVersion = info.compatibilityVersion;
+//   setTargetTriple(info.targetTriple);
+//   if (!extendedInfo.getSDKPath().empty())
+//      setSDKPath(extendedInfo.getSDKPath());
+//
+//   auto &extraClangArgs = getClangImporterOptions().ExtraArgs;
+//   extraClangArgs.insert(extraClangArgs.end(),
+//                         extendedInfo.getExtraClangImporterOptions().begin(),
+//                         extendedInfo.getExtraClangImporterOptions().end());
+//   return info.status;
+//}
 
 llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>>
 CompilerInvocation::setUpInputForPILTool(
@@ -1501,23 +1502,24 @@ CompilerInvocation::setUpInputForPILTool(
    // name of the module to the file's name.
    getFrontendOptions().InputsAndOutputs.addInput(
       InputFile(inputFilename, bePrimary, fileBufOrErr.get().get()));
+   /// TODO
 
-   auto result = serialization::validateSerializedAst(
-      fileBufOrErr.get()->getBuffer(), &extendedInfo);
-   bool hasSerializedAST = result.status == serialization::Status::Valid;
-
-   if (hasSerializedAST) {
-      const StringRef stem = !moduleNameArg.empty()
-                             ? moduleNameArg
-                             : llvm::sys::path::stem(inputFilename);
-      setModuleName(stem);
-      setInputKind(InputFileKind::PHPLibrary);
-   } else {
-      const StringRef name = (alwaysSetModuleToMain || moduleNameArg.empty())
-                             ? "main"
-                             : moduleNameArg;
-      setModuleName(name);
-      setInputKind(InputFileKind::PIL);
-   }
+//   auto result = serialization::validateSerializedAst(
+//      fileBufOrErr.get()->getBuffer(), &extendedInfo);
+//   bool hasSerializedAST = result.status == serialization::Status::Valid;
+//
+//   if (hasSerializedAST) {
+//      const StringRef stem = !moduleNameArg.empty()
+//                             ? moduleNameArg
+//                             : llvm::sys::path::stem(inputFilename);
+//      setModuleName(stem);
+//      setInputKind(InputFileKind::PHPLibrary);
+//   } else {
+   const StringRef name = (alwaysSetModuleToMain || moduleNameArg.empty())
+                          ? "main"
+                          : moduleNameArg;
+   setModuleName(name);
+   setInputKind(InputFileKind::PIL);
+//   }
    return fileBufOrErr;
 }

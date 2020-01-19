@@ -361,7 +361,7 @@ public:
                     bool WholeModule = false);
 
   /// Get the Swift module associated with this PIL module.
-  ModuleDecl *getPolarphpModule() const { return ThePolarphpModule; }
+  ModuleDecl *getTypePHPModule() const { return ThePolarphpModule; }
   /// Get the AST context used for type uniquing etc. by this PIL module.
   AstContext &getAstContext() const;
   SourceManager &getSourceManager() const { return getAstContext().SourceMgr; }

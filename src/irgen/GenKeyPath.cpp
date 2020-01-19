@@ -834,7 +834,7 @@ emitKeyPathComponent(IRGenModule &IGM,
          // declarations that point within the same module. Just ignore those.
          auto externalDecl = component.getExternalDecl();
          if (externalDecl &&
-             externalDecl->getModuleContext() != IGM.getPolarphpModule()) {
+             externalDecl->getModuleContext() != IGM.getTypePHPModule()) {
             SmallVector<llvm::Constant *, 4> externalSubArgs;
             auto componentSig = externalDecl->getInnermostDeclContext()
                ->getGenericSignatureOfContext();

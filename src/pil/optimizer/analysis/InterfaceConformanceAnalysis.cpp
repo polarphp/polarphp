@@ -73,7 +73,7 @@ void InterfaceConformanceAnalysis::init() {
    SmallVector<Decl *, 32> Decls;
 
    // Find all top level declarations.
-   M->getPolarphpModule()->getTopLevelDecls(Decls);
+   M->getTypePHPModule()->getTopLevelDecls(Decls);
 
    /// This operation is quadratic and should only be performed
    /// in whole module compilation!

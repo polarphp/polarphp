@@ -432,7 +432,7 @@ getSubstitutionsForCallee(PILModule &module, CanPILFunctionType baseCalleeType,
       if (auto metatypeType = derivedClass->getAs<MetatypeType>())
          derivedClass = metatypeType->getInstanceType();
       baseSubMap = derivedClass->getContextSubstitutionMap(
-         module.getPolarphpModule(), baseClassDecl);
+         module.getTypePHPModule(), baseClassDecl);
    }
 
    SubstitutionMap origSubMap = applySite.getSubstitutionMap();
@@ -949,7 +949,7 @@ polar::getWitnessMethodSubstitutions(PILModule &module, ApplySite applySite,
 
    SubstitutionMap origSubs = applySite.getSubstitutionMap();
 
-   auto *mod = module.getPolarphpModule();
+   auto *mod = module.getTypePHPModule();
    bool isSelfAbstract =
       witnessFnTy->getSelfInstanceType(module)->is<GenericTypeParamType>();
    auto *classWitness = witnessFnTy->getWitnessMethodClass(module);

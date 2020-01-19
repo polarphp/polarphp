@@ -1437,7 +1437,7 @@ public:
 
                   return Type(type);
                },
-               LookUpConformanceInModule(SGF.SGM.M.getPolarphpModule()));
+               LookUpConformanceInModule(SGF.SGM.M.getTypePHPModule()));
          }
 
          PartialApplyInst *initPAI =
@@ -2571,7 +2571,7 @@ static LValue emitLValueForNonMemberVarDecl(PILGenFunction &SGF,
 
    auto access = getFormalAccessKind(accessKind);
    auto strategy = var->getAccessStrategy(semantics, access,
-                                          SGF.SGM.M.getPolarphpModule(),
+                                          SGF.SGM.M.getTypePHPModule(),
                                           SGF.F.getResilienceExpansion());
 
    lv.addNonMemberVarComponent(SGF, loc, var, subs,
@@ -2992,7 +2992,7 @@ LValue PILGenLValue::visitMemberRefExpr(MemberRefExpr *e,
    AccessStrategy strategy =
       var->getAccessStrategy(accessSemantics,
                              getFormalAccessKind(accessKind),
-                             SGF.SGM.M.getPolarphpModule(),
+                             SGF.SGM.M.getTypePHPModule(),
                              SGF.F.getResilienceExpansion());
 
    bool isOnSelfParameter = isCallToSelfOfCurrentFunction(SGF, e);
@@ -3014,7 +3014,7 @@ LValue PILGenLValue::visitMemberRefExpr(MemberRefExpr *e,
          strategy = var->getAccessStrategy(
             accessSemantics,
             getFormalAccessKind(accessKind),
-            SGF.SGM.M.getPolarphpModule(),
+            SGF.SGM.M.getTypePHPModule(),
             SGF.F.getResilienceExpansion());
       }
    }
@@ -3164,7 +3164,7 @@ LValue PILGenLValue::visitSubscriptExpr(SubscriptExpr *e,
    auto strategy =
       decl->getAccessStrategy(accessSemantics,
                               getFormalAccessKind(accessKind),
-                              SGF.SGM.M.getPolarphpModule(),
+                              SGF.SGM.M.getTypePHPModule(),
                               SGF.F.getResilienceExpansion());
 
    bool isOnSelfParameter = isCallToSelfOfCurrentFunction(SGF, e);
@@ -3185,7 +3185,7 @@ LValue PILGenLValue::visitSubscriptExpr(SubscriptExpr *e,
          strategy = decl->getAccessStrategy(
             accessSemantics,
             getFormalAccessKind(accessKind),
-            SGF.SGM.M.getPolarphpModule(),
+            SGF.SGM.M.getTypePHPModule(),
             SGF.F.getResilienceExpansion());
       }
    }
@@ -3460,12 +3460,12 @@ LValue PILGenFunction::emitPropertyLValue(PILLocation loc, ManagedValue base,
 
    auto baseType = base.getType().getAstType();
    auto subMap = baseType->getContextSubstitutionMap(
-      SGM.M.getPolarphpModule(), ivar->getDeclContext());
+      SGM.M.getTypePHPModule(), ivar->getDeclContext());
 
    AccessStrategy strategy =
       ivar->getAccessStrategy(semantics,
                               getFormalAccessKind(accessKind),
-                              SGM.M.getPolarphpModule(),
+                              SGM.M.getTypePHPModule(),
                               F.getResilienceExpansion());
 
    auto baseAccessKind =
@@ -4039,7 +4039,7 @@ RValue PILGenFunction::emitRValueForStorageLoad(
    bool isBaseGuaranteed) {
    AccessStrategy strategy =
       storage->getAccessStrategy(semantics, AccessKind::Read,
-                                 SGM.M.getPolarphpModule(),
+                                 SGM.M.getTypePHPModule(),
                                  F.getResilienceExpansion());
 
    // If we should call an accessor of some kind, do so.

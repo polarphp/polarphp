@@ -19,7 +19,7 @@
 using namespace polar;
 
 void ClassHierarchyAnalysis::init() {
-   auto module = M->getPolarphpModule();
+   auto module = M->getTypePHPModule();
 
    // For each class declaration in our V-table list:
    for (auto &VT : M->getVTableList()) {

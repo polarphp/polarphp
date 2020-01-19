@@ -490,7 +490,7 @@ PILGenFunction::emitPointerToPointer(PILLocation loc,
       origValue = emitManagedBufferWithCleanup(origBuf);
    }
    // Invoke the conversion intrinsic to convert to the destination type.
-   auto *M = SGM.M.getPolarphpModule();
+   auto *M = SGM.M.getTypePHPModule();
    auto *proto = getPointerInterface();
    auto firstSubMap = inputType->getContextSubstitutionMap(M, proto);
    auto secondSubMap = outputType->getContextSubstitutionMap(M, proto);

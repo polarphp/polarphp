@@ -319,7 +319,7 @@ void BBEnumTagDataflowState::handlePredCondSelectEnum(CondBranchInst *CondBr) {
       // We can't do this optimization on non-exhaustive enums.
       const PILFunction *Fn = CondBr->getFunction();
       bool IsExhaustive =
-         E->isEffectivelyExhaustive(Fn->getModule().getPolarphpModule(),
+         E->isEffectivelyExhaustive(Fn->getModule().getTypePHPModule(),
                                     Fn->getResilienceExpansion());
       if (!IsExhaustive)
          return;

@@ -81,7 +81,7 @@ std::string IRGenMangler::manglePartialApplyForwarder(StringRef FuncName) {
 SymbolicMangling
 IRGenMangler::withSymbolicReferences(IRGenModule &IGM,
                                      llvm::function_ref<void ()> body) {
-   Mod = IGM.getPolarphpModule();
+   Mod = IGM.getTypePHPModule();
    OptimizeInterfaceNames = false;
    UseObjCInterfaceNames = true;
 

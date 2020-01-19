@@ -368,7 +368,7 @@ void MemoryLocations::initFieldsCounter(Location &loc) {
    PILFunction *function = loc.representativeValue->getFunction();
    PILType ty = loc.representativeValue->getType();
    if (StructDecl *decl = ty.getStructOrBoundGenericStruct()) {
-      if (decl->isResilient(function->getModule().getPolarphpModule(),
+      if (decl->isResilient(function->getModule().getTypePHPModule(),
                             function->getResilienceExpansion())) {
          loc.numFieldsNotCoveredBySubfields = INT_MAX;
          return;

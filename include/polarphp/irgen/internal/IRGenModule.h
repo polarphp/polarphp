@@ -335,7 +335,7 @@ public:
 
    /// Emit references to each of the protocol descriptors defined in this
    /// IR module.
-   void emitPolarphpInterfaces();
+   void emitTypePHPInterfaces();
 
    /// Emit the protocol conformance records needed by each IR module.
    void emitInterfaceConformances();
@@ -500,7 +500,7 @@ public:
    const llvm::DataLayout DataLayout;
    const llvm::Triple Triple;
    std::unique_ptr<llvm::TargetMachine> TargetMachine;
-   ModuleDecl *getPolarphpModule() const;
+   ModuleDecl *getTypePHPModule() const;
    AvailabilityContext getAvailabilityContext() const;
    lowering::TypeConverter &getPILTypes() const;
    PILModule &getPILModule() const { return IRGen.PIL; }
@@ -903,7 +903,7 @@ public:
    void addObjCClass(llvm::Constant *addr, bool nonlazy);
    void addInterfaceConformance(ConformanceDescription &&conformance);
 
-   llvm::Constant *emitPolarphpInterfaces();
+   llvm::Constant *emitTypePHPInterfaces();
    llvm::Constant *emitInterfaceConformances();
    llvm::Constant *emitTypeMetadataRecords();
    llvm::Constant *emitFieldDescriptors();

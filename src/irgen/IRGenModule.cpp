@@ -821,8 +821,8 @@ Address IRGenModule::getAddrOfObjCISAMask() {
    return Address(ObjCISAMaskPtr, getPointerAlignment());
 }
 
-ModuleDecl *IRGenModule::getPolarphpModule() const {
-   return IRGen.PIL.getPolarphpModule();
+ModuleDecl *IRGenModule::getTypePHPModule() const {
+   return IRGen.PIL.getTypePHPModule();
 }
 
 AvailabilityContext IRGenModule::getAvailabilityContext() const {
@@ -1388,6 +1388,6 @@ const llvm::DataLayout &IRGenerator::getClangDataLayout() {
 }
 
 TypeExpansionContext IRGenModule::getMaximalTypeExpansionContext() const {
-   return TypeExpansionContext::maximal(getPolarphpModule(),
+   return TypeExpansionContext::maximal(getTypePHPModule(),
                                         getPILModule().isWholeModule());
 }

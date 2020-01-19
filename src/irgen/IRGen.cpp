@@ -107,22 +107,22 @@ public:
 };
 } // end anonymous namespace
 
-static void addPolarphpARCOptPass(const PassManagerBuilder &Builder,
+static void addTypePHPARCOptPass(const PassManagerBuilder &Builder,
                                PassManagerBase &PM) {
    if (Builder.OptLevel > 0)
-      PM.add(createPolarphpARCOptPass());
+      PM.add(createTypePHPARCOptPass());
 }
 
-static void addSwiftContractPass(const PassManagerBuilder &Builder,
+static void addTypePHPContractPass(const PassManagerBuilder &Builder,
                                  PassManagerBase &PM) {
    if (Builder.OptLevel > 0)
-      PM.add(createPolarphpARCContractPass());
+      PM.add(createTypePHPARCContractPass());
 }
 
-static void addSwiftMergeFunctionsPass(const PassManagerBuilder &Builder,
+static void addTypePHPMergeFunctionsPass(const PassManagerBuilder &Builder,
                                        PassManagerBase &PM) {
    if (Builder.OptLevel > 0)
-      PM.add(createPolarphpMergeFunctionsPass());
+      PM.add(createTypePHPMergeFunctionsPass());
 }
 
 static void addAddressSanitizerPasses(const PassManagerBuilder &Builder,
@@ -176,7 +176,7 @@ void setModuleFlags(IRGenModule &IGM) {
 
    // These module flags don't affect code generation; they just let us
    // error during LTO if the user tries to combine files across ABIs.
-   Module->addModuleFlag(llvm::Module::Error, "Polarphp Version",
+   Module->addModuleFlag(llvm::Module::Error, "TypePHP Version",
                          IRGenModule::polarphpVersion);
 }
 
@@ -206,9 +206,9 @@ void polar::performLLVMOptimizations(IRGenOptions &Opts, llvm::Module *Module,
    // and the Contract pass as late as possible.
    if (RunSwiftSpecificLLVMOptzns) {
       PMBuilder.addExtension(PassManagerBuilder::EP_ScalarOptimizerLate,
-                             addPolarphpARCOptPass);
+                             addTypePHPARCOptPass);
       PMBuilder.addExtension(PassManagerBuilder::EP_OptimizerLast,
-                             addSwiftContractPass);
+                             addTypePHPContractPass);
    }
 
    if (RunSwiftSpecificLLVMOptzns)
@@ -238,7 +238,7 @@ void polar::performLLVMOptimizations(IRGenOptions &Opts, llvm::Module *Module,
    }
    if (RunSwiftSpecificLLVMOptzns)
       PMBuilder.addExtension(PassManagerBuilder::EP_OptimizerLast,
-                             addSwiftMergeFunctionsPass);
+                             addTypePHPMergeFunctionsPass);
 
    // Configure the function passes.
    legacy::FunctionPassManager FunctionPasses(Module);
@@ -251,10 +251,10 @@ void polar::performLLVMOptimizations(IRGenOptions &Opts, llvm::Module *Module,
    // The PMBuilder only knows about LLVM AA passes.  We should explicitly add
    // the swift AA pass after the other ones.
    if (RunSwiftSpecificLLVMOptzns) {
-      FunctionPasses.add(createPolarphpAAWrapperPass());
+      FunctionPasses.add(createTypePHPAAWrapperPass());
       FunctionPasses.add(createExternalAAWrapperPass([](Pass &P, Function &,
                                                         AAResults &AAR) {
-         if (auto *WrapperPass = P.getAnalysisIfAvailable<PolarphpAAWrapperPass>())
+         if (auto *WrapperPass = P.getAnalysisIfAvailable<TypePHPAAWrapperPass>())
             AAR.addAAResult(WrapperPass->getResult());
       }));
    }
@@ -285,10 +285,10 @@ void polar::performLLVMOptimizations(IRGenOptions &Opts, llvm::Module *Module,
    // The PMBuilder only knows about LLVM AA passes.  We should explicitly add
    // the swift AA pass after the other ones.
    if (RunSwiftSpecificLLVMOptzns) {
-      ModulePasses.add(createPolarphpAAWrapperPass());
+      ModulePasses.add(createTypePHPAAWrapperPass());
       ModulePasses.add(createExternalAAWrapperPass([](Pass &P, Function &,
                                                       AAResults &AAR) {
-         if (auto *WrapperPass = P.getAnalysisIfAvailable<PolarphpAAWrapperPass>())
+         if (auto *WrapperPass = P.getAnalysisIfAvailable<TypePHPAAWrapperPass>())
             AAR.addAAResult(WrapperPass->getResult());
       }));
    }
@@ -621,7 +621,7 @@ bool polar::performLLVM(IRGenOptions &Opts, DiagnosticEngine *Diags,
     switch (*result) {
     case FileDifference::DifferentContents:
       llvm::report_fatal_error(
-          "Polarphp skipped an LLVM compile that would have changed output; pass "
+          "TypePHP skipped an LLVM compile that would have changed output; pass "
           "-Xfrontend -disable-incremental-llvm-codegen to work around this bug"
       );
       // Note for future debuggers: If you see this error, either you changed
@@ -821,7 +821,7 @@ polar::irgen::createIRGenModule(PILModule *PILMod, StringRef OutputFilename,
       new IRGenModule(*irgen, std::move(targetMachine), nullptr, LLVMContext,
                       "", OutputFilename, MainInputFilenameForDebugInfo);
 
-   initLLVMModule(*IGM, *PILMod->getPolarphpModule());
+   initLLVMModule(*IGM, *PILMod->getTypePHPModule());
 
    return std::pair<IRGenerator *, IRGenModule *>(irgen, IGM);
 }
@@ -873,7 +873,7 @@ performIRGeneration(IRGenOptions &Opts, ModuleDecl *M,
                    ModuleName, PSPs.outputFilename,
                    PSPs.mainInputFilenameForDebugInfo);
 
-   initLLVMModule(IGM, *PILMod->getPolarphpModule());
+   initLLVMModule(IGM, *PILMod->getTypePHPModule());
 
    // Run PIL level IRGen preparation passes.
    runIRGenPreparePasses(*PILMod, IGM);
@@ -908,7 +908,7 @@ performIRGeneration(IRGenOptions &Opts, ModuleDecl *M,
       } else {
          // Emit protocol conformances into a section we can recognize at runtime.
          // In JIT mode these are manually registered above.
-         IGM.emitPolarphpInterfaces();
+         IGM.emitTypePHPInterfaces();
          IGM.emitInterfaceConformances();
          IGM.emitTypeMetadataRecords();
          IGM.emitBuiltinReflectionMetadata();
@@ -1119,7 +1119,7 @@ static void performParallelIRGeneration(
                          ModuleName, *OutputIter++, nextSF->getFilename());
       IGMcreated = true;
 
-      initLLVMModule(*IGM, *PILMod->getPolarphpModule());
+      initLLVMModule(*IGM, *PILMod->getTypePHPModule());
       if (!DidRunPILCodeGenPreparePasses) {
          // Run PIL level IRGen preparation passes on the module the first time
          // around.
@@ -1151,7 +1151,7 @@ static void performParallelIRGeneration(
    // Okay, emit any definitions that we suddenly need.
    irgen.emitLazyDefinitions();
 
-   irgen.emitPolarphpInterfaces();
+   irgen.emitTypePHPInterfaces();
 
    irgen.emitDynamicReplacements();
 
@@ -1289,7 +1289,7 @@ performIRGeneration(IRGenOptions &Opts, SourceFile &SF,
 }
 
 void
-polar::createPolarphpModuleObjectFile(PILModule &PILMod, StringRef Buffer,
+polar::createTypePHPModuleObjectFile(PILModule &PILMod, StringRef Buffer,
                                    StringRef OutputPath) {
    LLVMContext VMContext;
 
@@ -1305,7 +1305,7 @@ polar::createPolarphpModuleObjectFile(PILModule &PILMod, StringRef Buffer,
 
    IRGenModule IGM(irgen, std::move(targetMachine), nullptr, VMContext,
                    OutputPath, OutputPath, "");
-   initLLVMModule(IGM, *PILMod.getPolarphpModule());
+   initLLVMModule(IGM, *PILMod.getTypePHPModule());
    auto *Ty = llvm::ArrayType::get(IGM.Int8Ty, Buffer.size());
    auto *Data =
       llvm::ConstantDataArray::getString(VMContext, Buffer, /*AddNull=*/false);

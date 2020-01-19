@@ -70,7 +70,7 @@ PILGenModule::emitVTableMethod(ClassDecl *theClass,
 
       // If the override is defined in a class from a different resilience
       // domain, don't emit the vtable entry.
-      if (derivedClass->isResilient(M.getPolarphpModule(),
+      if (derivedClass->isResilient(M.getTypePHPModule(),
                                     ResilienceExpansion::Maximal)) {
          return None;
       }

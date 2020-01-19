@@ -1211,7 +1211,7 @@ TypeConverter::TypeConverter(IRGenModule &IGM)
 
    StringRef path = IGM.IRGen.Opts.ReadLegacyTypeInfoPath;
    auto fs =
-      IGM.getPolarphpModule()->getAstContext().SourceMgr.getFileSystem();
+      IGM.getTypePHPModule()->getAstContext().SourceMgr.getFileSystem();
    if (path.empty()) {
       const auto &Triple = IGM.Context.LangOpts.Target;
 
@@ -2298,7 +2298,7 @@ PILType irgen::getSingletonAggregateFieldType(IRGenModule &IGM, PILType t,
       if (allFields.size() == 1) {
          auto fieldTy = t.getFieldType(
             allFields[0], IGM.getPILModule(),
-            TypeExpansionContext(expansion, IGM.getPolarphpModule(),
+            TypeExpansionContext(expansion, IGM.getTypePHPModule(),
                                  IGM.getPILModule().isWholeModule()));
          if (!IGM.isTypeABIAccessible(fieldTy))
             return PILType();
@@ -2321,7 +2321,7 @@ PILType irgen::getSingletonAggregateFieldType(IRGenModule &IGM, PILType t,
           && (*theCase)->hasAssociatedValues()) {
          auto enumEltTy = t.getEnumElementType(
             *theCase, IGM.getPILModule(),
-            TypeExpansionContext(expansion, IGM.getPolarphpModule(),
+            TypeExpansionContext(expansion, IGM.getTypePHPModule(),
                                  IGM.getPILModule().isWholeModule()));
          if (!IGM.isTypeABIAccessible(enumEltTy))
             return PILType();

@@ -1578,13 +1578,13 @@ void AttributeChecker::visitNSCopyingAttr(NSCopyingAttr *attr) {
       attr->setInvalid();
       return;
    }
-
-   if (VD->hasInterfaceType()) {
-      if (TypeChecker::checkConformanceToNSCopying(VD).isInvalid()) {
-         attr->setInvalid();
-         return;
-      }
-   }
+   /// TODO
+//   if (VD->hasInterfaceType()) {
+//      if (TypeChecker::checkConformanceToNSCopying(VD).isInvalid()) {
+//         attr->setInvalid();
+//         return;
+//      }
+//   }
 
    assert(VD->getOverriddenDecl() == nullptr &&
           "Can't have value with storage that is an override");

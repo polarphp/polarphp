@@ -185,7 +185,7 @@ void ExistentialSpecializerCloner::cloneArguments(
       PILType ExistentialType = ArgDesc.Arg->getType().getObjectType();
       CanType OpenedType = NewArg->getType().getAstType();
       auto Conformances = collectExistentialConformances(
-         M.getPolarphpModule(), OpenedType, ExistentialType.getAstType());
+         M.getTypePHPModule(), OpenedType, ExistentialType.getAstType());
       auto ExistentialRepr =
          ArgDesc.Arg->getType().getPreferredExistentialRepresentation();
       auto &EAD = ExistentialArgDescriptor[ArgDesc.Index];
@@ -624,7 +624,7 @@ void ExistentialTransform::createExistentialSpecializedFunction() {
       [&](SubstitutableType *type) -> Type {
          return NewFGenericEnv->mapTypeIntoContext(type);
       },
-      LookUpConformanceInModule(F->getModule().getPolarphpModule()));
+      LookUpConformanceInModule(F->getModule().getTypePHPModule()));
    ExistentialSpecializerCloner cloner(F, NewF, Subs, ArgumentDescList,
                                        ArgToGenericTypeMap,
                                        ExistentialArgDescriptor);

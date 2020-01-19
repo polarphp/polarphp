@@ -69,7 +69,7 @@ struct AstNode : public llvm::PointerUnion<Expr*, Stmt*, Decl*> {
    /// Whether the AST node is implicit.
    bool isImplicit() const;
 };
-} // namespace swift
+} // namespace polar
 
 namespace llvm {
 using polar::AstNode;
