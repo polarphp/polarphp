@@ -257,37 +257,38 @@ public:
    }
 };
 
-void getSwiftDocKeyword(const Decl* D, CommandWordsPairs &Words) {
-   auto Interested = false;
-   for (auto C : D->getRawComment().Comments) {
-      if (containsInterestedWords(C.RawText, "-", /*AllowWhitespace*/true)) {
-         Interested = true;
-         break;
-      }
-   }
-   if (!Interested)
-      return;
-   static polar::markup::MarkupContext MC;
-   auto DC = getSingleDocComment(MC, D);
-   if (!DC)
-      return;
-   SwiftDocWordExtractor Extractor(Words);
-   for (auto Part : DC->getBodyNodes()) {
-      switch (Part->getKind()) {
-         case AstNodeKind::KeywordField:
-         case AstNodeKind::RecommendedField:
-         case AstNodeKind::RecommendedoverField:
-         case AstNodeKind::MutatingvariantField:
-         case AstNodeKind::NonmutatingvariantField:
-            Extractor.walk(Part);
-            break;
-         default:
-            break;
-      }
-   }
+void getTypePHPDocKeyword(const Decl* D, CommandWordsPairs &Words) {
+   /// TODO
+//   auto Interested = false;
+//   for (auto C : D->getRawComment().Comments) {
+//      if (containsInterestedWords(C.RawText, "-", /*AllowWhitespace*/true)) {
+//         Interested = true;
+//         break;
+//      }
+//   }
+//   if (!Interested)
+//      return;
+//   static polar::markup::MarkupContext MC;
+//   auto DC = getSingleDocComment(MC, D);
+//   if (!DC)
+//      return;
+//   SwiftDocWordExtractor Extractor(Words);
+//   for (auto Part : DC->getBodyNodes()) {
+//      switch (Part->getKind()) {
+//         case AstNodeKind::KeywordField:
+//         case AstNodeKind::RecommendedField:
+//         case AstNodeKind::RecommendedoverField:
+//         case AstNodeKind::MutatingvariantField:
+//         case AstNodeKind::NonmutatingvariantField:
+//            Extractor.walk(Part);
+//            break;
+//         default:
+//            break;
+//      }
+//   }
 }
 } // end namespace markup
-} // end namespace swift
+} // end namespace polar
 
 using DeclFilter = std::function<bool(ValueDecl *, DeclVisibilityKind)>;
 static bool DefaultFilter(ValueDecl* VD, DeclVisibilityKind Kind) {
@@ -1570,7 +1571,7 @@ private:
       if (auto *CD = VD->getClangDecl()) {
          clang::comments::getClangDocKeyword(*Importer, CD, Pairs);
       } else {
-         polar::markup::getSwiftDocKeyword(VD, Pairs);
+         polar::markup::getTypePHPDocKeyword(VD, Pairs);
       }
       Builder.addDeclDocCommentWords(llvm::makeArrayRef(Pairs));
    }
@@ -5583,10 +5584,10 @@ void CodeCompletionCallbacksImpl::doneParsing() {
                ModuleFilename, TheModule->getName().str(), AccessPath,
                Request.NeedLeadingDot,
                SF.hasTestableOrPrivateImport(
-                  AccessLevel::Interface, TheModule,
+                  AccessLevel::Internal, TheModule,
                   SourceFile::ImportQueryKind::TestableOnly),
                SF.hasTestableOrPrivateImport(
-                  AccessLevel::Interface, TheModule,
+                  AccessLevel::Internal, TheModule,
                   SourceFile::ImportQueryKind::PrivateOnly),
                Ctx.LangOpts.CodeCompleteInitsInPostfixExpr};
 

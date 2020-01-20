@@ -3854,20 +3854,20 @@ void irgen::emitEnumMetadata(IRGenModule &IGM, EnumDecl *theEnum) {
                           init.finishAndCreateFuture());
 }
 
-llvm::Value *IRGenFunction::emitObjCSelectorRefLoad(StringRef selector) {
-   llvm::Constant *loadSelRef = IGM.getAddrOfObjCSelectorRef(selector);
-   llvm::Value *loadSel =
-      Builder.CreateLoad(Address(loadSelRef, IGM.getPointerAlignment()));
-
-   // When generating JIT'd code, we need to call sel_registerName() to force
-   // the runtime to unique the selector. For non-JIT'd code, the linker will
-   // do it for us.
-   if (IGM.IRGen.Opts.UseJIT) {
-      loadSel = Builder.CreateCall(IGM.getObjCSelRegisterNameFn(), loadSel);
-   }
-
-   return loadSel;
-}
+//llvm::Value *IRGenFunction::emitObjCSelectorRefLoad(StringRef selector) {
+//   llvm::Constant *loadSelRef = IGM.getAddrOfObjCSelectorRef(selector);
+//   llvm::Value *loadSel =
+//      Builder.CreateLoad(Address(loadSelRef, IGM.getPointerAlignment()));
+//
+//   // When generating JIT'd code, we need to call sel_registerName() to force
+//   // the runtime to unique the selector. For non-JIT'd code, the linker will
+//   // do it for us.
+//   if (IGM.IRGen.Opts.UseJIT) {
+//      loadSel = Builder.CreateCall(IGM.getObjCSelRegisterNameFn(), loadSel);
+//   }
+//
+//   return loadSel;
+//}
 
 //===----------------------------------------------------------------------===//
 // Foreign types

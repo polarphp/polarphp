@@ -522,10 +522,11 @@ ManagedValue Transform::transform(ManagedValue v,
 
    // - metatype to Interface conversion
    if (isInterfaceClass(outputSubstType)) {
-      if (auto metatypeTy = dyn_cast<MetatypeType>(inputSubstType)) {
-         return SGF.emitInterfaceMetatypeToObject(Loc, metatypeTy,
-                                                  SGF.getLoweredLoadableType(outputSubstType));
-      }
+      /// TODO
+//      if (auto metatypeTy = dyn_cast<MetatypeType>(inputSubstType)) {
+//         return SGF.emitInterfaceMetatypeToObject(Loc, metatypeTy,
+//                                                  SGF.getLoweredLoadableType(outputSubstType));
+//      }
    }
 
    // - metatype to AnyObject conversion

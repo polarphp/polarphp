@@ -65,7 +65,7 @@ static bool canClassOrSuperclassesHaveUnknownSubclasses(ClassDecl *CD,
 
       // Internal and public classes may have unknown subclasses if we are not in
       // whole-module-optimization mode.
-      if (CD->getEffectiveAccess() >= AccessLevel::Interface &&
+      if (CD->getEffectiveAccess() >= AccessLevel::Internal &&
           !isWholeModuleOpts)
          return true;
 
@@ -83,7 +83,7 @@ static bool canClassOrSuperclassesHaveUnknownSubclasses(ClassDecl *CD,
 /// of protocol conformances if it is possible.
 static DynamicCastFeasibility
 classifyDynamicCastToInterface(ModuleDecl *M, CanType source, CanType target,
-                              bool isWholeModuleOpts) {
+                               bool isWholeModuleOpts) {
    assert(target.isExistentialType() &&
           "target should be an existential type");
 
@@ -161,8 +161,8 @@ classifyDynamicCastToInterface(ModuleDecl *M, CanType source, CanType target,
    // module could have implemented them, but no conformances were found.
    // Therefore it is safe to make a negative decision at compile-time.
    if (isWholeModuleOpts &&
-       (SourceNominalTy->getEffectiveAccess() <= AccessLevel::Interface ||
-        TargetInterface->getEffectiveAccess() <= AccessLevel::Interface)) {
+       (SourceNominalTy->getEffectiveAccess() <= AccessLevel::Internal ||
+        TargetInterface->getEffectiveAccess() <= AccessLevel::Internal)) {
       return DynamicCastFeasibility::WillFail;
    }
 
@@ -171,7 +171,7 @@ classifyDynamicCastToInterface(ModuleDecl *M, CanType source, CanType target,
 
 static DynamicCastFeasibility
 classifyDynamicCastFromInterface(ModuleDecl *M, CanType source, CanType target,
-                                bool isWholeModuleOpts) {
+                                 bool isWholeModuleOpts) {
    assert(source.isExistentialType() &&
           "source should be an existential type");
 
@@ -289,20 +289,20 @@ classifyClassHierarchyCast(CanType source, CanType target) {
 //   return CanType();
 //}
 
-static bool isCFBridgingConversion(ModuleDecl *M,
-                                   CanType sourceFormalType,
-                                   CanType targetFormalType) {
-   if (auto bridgedTarget =
-      getNSBridgedClassOfCFClass(M, targetFormalType)) {
-      return bridgedTarget->isExactSuperclassOf(sourceFormalType);
-   }
-   if (auto bridgedSource =
-      getNSBridgedClassOfCFClass(M, sourceFormalType)) {
-      return targetFormalType->isExactSuperclassOf(bridgedSource);
-   }
-
-   return false;
-}
+//static bool isCFBridgingConversion(ModuleDecl *M,
+//                                   CanType sourceFormalType,
+//                                   CanType targetFormalType) {
+//   if (auto bridgedTarget =
+//      getNSBridgedClassOfCFClass(M, targetFormalType)) {
+//      return bridgedTarget->isExactSuperclassOf(sourceFormalType);
+//   }
+//   if (auto bridgedSource =
+//      getNSBridgedClassOfCFClass(M, sourceFormalType)) {
+//      return targetFormalType->isExactSuperclassOf(bridgedSource);
+//   }
+//
+//   return false;
+//}
 
 /// Try to classify the dynamic-cast relationship between two types.
 DynamicCastFeasibility
@@ -361,13 +361,13 @@ polar::classifyDynamicCast(ModuleDecl *M,
       if (!source.isExistentialType() &&
           target.isExistentialType())
          return classifyDynamicCastToInterface(M, source, target,
-                                              isWholeModuleOpts);
+                                               isWholeModuleOpts);
 
       // Check conversions from protocol types to non-protocol types.
       if (source.isExistentialType() &&
           !target.isExistentialType())
          return classifyDynamicCastFromInterface(M, source, target,
-                                                isWholeModuleOpts);
+                                                 isWholeModuleOpts);
 
       return DynamicCastFeasibility::MaySucceed;
    }
@@ -378,7 +378,7 @@ polar::classifyDynamicCast(ModuleDecl *M,
          if (auto hashable = getHashableExistentialType(M)) {
             // Succeeds if Hashable can be cast to the target type.
             return classifyDynamicCastFromInterface(M, hashable, target,
-                                                   isWholeModuleOpts);
+                                                    isWholeModuleOpts);
          }
       }
    }
@@ -391,7 +391,7 @@ polar::classifyDynamicCast(ModuleDecl *M,
          // the check doesn't care about that.
          if (auto hashable = getHashableExistentialType(M)) {
             return classifyDynamicCastToInterface(M, source, hashable,
-                                                 isWholeModuleOpts);
+                                                  isWholeModuleOpts);
          }
       }
    }
@@ -579,20 +579,20 @@ polar::classifyDynamicCast(ModuleDecl *M,
          auto hierarchyResult = classifyClassHierarchyCast(source, target);
          if (hierarchyResult != DynamicCastFeasibility::WillFail)
             return hierarchyResult;
-
+         /// TODO
          // As a backup, consider whether either type is a CF class type
          // with an NS bridged equivalent.
-         CanType bridgedSource = getNSBridgedClassOfCFClass(M, source);
-         CanType bridgedTarget = getNSBridgedClassOfCFClass(M, target);
+//         CanType bridgedSource = getNSBridgedClassOfCFClass(M, source);
+//         CanType bridgedTarget = getNSBridgedClassOfCFClass(M, target);
 
          // If neither type qualifies, we're done.
-         if (!bridgedSource && !bridgedTarget)
-            return DynamicCastFeasibility::WillFail;
-
-         // Otherwise, map over to the bridged types and try to answer the
-         // question there.
-         if (bridgedSource) source = bridgedSource;
-         if (bridgedTarget) target = bridgedTarget;
+//         if (!bridgedSource && !bridgedTarget)
+//            return DynamicCastFeasibility::WillFail;
+//
+//         // Otherwise, map over to the bridged types and try to answer the
+//         // question there.
+//         if (bridgedSource) source = bridgedSource;
+//         if (bridgedTarget) target = bridgedTarget;
          return classifyDynamicCast(M, source, target, false, isWholeModuleOpts);
       }
 
@@ -878,13 +878,14 @@ private:
       auto targetFormalTy = target.FormalType;
       auto targetLoweredTy =
          PILType::getPrimitiveObjectType(targetFormalTy);
-      if (isCFBridgingConversion(SwiftModule,
-                                 source.FormalType,
-                                 targetFormalTy)) {
-         value = B.createUncheckedRefCast(Loc, value, targetLoweredTy);
-      } else {
-         value = B.createUpcast(Loc, value, targetLoweredTy);
-      }
+      /// TODO
+//      if (isCFBridgingConversion(SwiftModule,
+//                                 source.FormalType,
+//                                 targetFormalTy)) {
+//         value = B.createUncheckedRefCast(Loc, value, targetLoweredTy);
+//      } else {
+      value = B.createUpcast(Loc, value, targetLoweredTy);
+//      }
       return putOwnedScalar(value, target);
    }
 

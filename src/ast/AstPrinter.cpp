@@ -619,7 +619,7 @@ class PrintAst : public AstVisitor<PrintAst> {
 //         case AccessLevel::FilePrivate:
 //            Printer << tok::kw_fileprivate;
 //            break;
-//         case AccessLevel::Interface:
+//         case AccessLevel::Internal:
 //            if (!Options.PrintInternalAccessKeyword)
 //               return;
 //            Printer << tok::kw_internal;

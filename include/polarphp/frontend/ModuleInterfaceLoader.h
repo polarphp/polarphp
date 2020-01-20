@@ -128,68 +128,69 @@ class SearchPathOptions;
 /// \c CompilerInstance to convert .swiftinterface files to .swiftmodule
 /// files on the fly, caching the resulting .swiftmodules in the module cache
 /// directory, and loading the serialized .swiftmodules from there.
-class ModuleInterfaceLoader : public SerializedModuleLoaderBase {
-   friend class unittest::ModuleInterfaceLoaderTest;
-   explicit ModuleInterfaceLoader(
-      AstContext &ctx, StringRef cacheDir, StringRef prebuiltCacheDir,
-      DependencyTracker *tracker, ModuleLoadingMode loadMode,
-      ArrayRef<std::string> PreferInterfaceForModules,
-      bool RemarkOnRebuildFromInterface, bool IgnoreSwiftSourceInfoFile)
-      : SerializedModuleLoaderBase(ctx, tracker, loadMode,
-                                   IgnoreSwiftSourceInfoFile),
-        CacheDir(cacheDir), PrebuiltCacheDir(prebuiltCacheDir),
-        RemarkOnRebuildFromInterface(RemarkOnRebuildFromInterface),
-        PreferInterfaceForModules(PreferInterfaceForModules)
-   {}
-
-   std::string CacheDir;
-   std::string PrebuiltCacheDir;
-   bool RemarkOnRebuildFromInterface;
-   ArrayRef<std::string> PreferInterfaceForModules;
-
-   std::error_code findModuleFilesInDirectory(
-      AccessPathElem ModuleID, StringRef DirPath, StringRef ModuleFilename,
-      StringRef ModuleDocFilename,
-      StringRef ModuleSourceInfoFilename,
-      SmallVectorImpl<char> *ModuleInterfacePath,
-      std::unique_ptr<llvm::MemoryBuffer> *ModuleBuffer,
-      std::unique_ptr<llvm::MemoryBuffer> *ModuleDocBuffer,
-      std::unique_ptr<llvm::MemoryBuffer> *ModuleSourceInfoBuffer) override;
-
-   bool isCached(StringRef DepPath) override;
-
-public:
-   static std::unique_ptr<ModuleInterfaceLoader>
-   create(AstContext &ctx, StringRef cacheDir, StringRef prebuiltCacheDir,
-          DependencyTracker *tracker, ModuleLoadingMode loadMode,
-          ArrayRef<std::string> PreferInterfaceForModules = {},
-          bool RemarkOnRebuildFromInterface = false,
-          bool IgnoreSwiftSourceInfoFile = false) {
-      return std::unique_ptr<ModuleInterfaceLoader>(
-         new ModuleInterfaceLoader(ctx, cacheDir, prebuiltCacheDir,
-                                   tracker, loadMode,
-                                   PreferInterfaceForModules,
-                                   RemarkOnRebuildFromInterface,
-                                   IgnoreSwiftSourceInfoFile));
-   }
-
-   /// Append visible module names to \p names. Note that names are possibly
-   /// duplicated, and not guaranteed to be ordered in any way.
-   void collectVisibleTopLevelModuleNames(
-      SmallVectorImpl<Identifier> &names) const override;
-
-   /// Unconditionally build \p InPath (a swiftinterface file) to \p OutPath (as
-   /// a swiftmodule file).
-   ///
-   /// A simplified version of the core logic in #openModuleFiles.
-   static bool buildSwiftModuleFromSwiftInterface(
-      SourceManager &SourceMgr, DiagnosticEngine &Diags,
-      const SearchPathOptions &SearchPathOpts, const LangOptions &LangOpts,
-      StringRef CacheDir, StringRef PrebuiltCacheDir,
-      StringRef ModuleName, StringRef InPath, StringRef OutPath,
-      bool SerializeDependencyHashes, bool TrackSystemDependencies,
-      bool RemarkOnRebuildFromInterface);
-};
+/// TODO
+//class ModuleInterfaceLoader : public SerializedModuleLoaderBase {
+//   friend class unittest::ModuleInterfaceLoaderTest;
+//   explicit ModuleInterfaceLoader(
+//      AstContext &ctx, StringRef cacheDir, StringRef prebuiltCacheDir,
+//      DependencyTracker *tracker, ModuleLoadingMode loadMode,
+//      ArrayRef<std::string> PreferInterfaceForModules,
+//      bool RemarkOnRebuildFromInterface, bool IgnoreSwiftSourceInfoFile)
+//      : SerializedModuleLoaderBase(ctx, tracker, loadMode,
+//                                   IgnoreSwiftSourceInfoFile),
+//        CacheDir(cacheDir), PrebuiltCacheDir(prebuiltCacheDir),
+//        RemarkOnRebuildFromInterface(RemarkOnRebuildFromInterface),
+//        PreferInterfaceForModules(PreferInterfaceForModules)
+//   {}
+//
+//   std::string CacheDir;
+//   std::string PrebuiltCacheDir;
+//   bool RemarkOnRebuildFromInterface;
+//   ArrayRef<std::string> PreferInterfaceForModules;
+//
+//   std::error_code findModuleFilesInDirectory(
+//      AccessPathElem ModuleID, StringRef DirPath, StringRef ModuleFilename,
+//      StringRef ModuleDocFilename,
+//      StringRef ModuleSourceInfoFilename,
+//      SmallVectorImpl<char> *ModuleInterfacePath,
+//      std::unique_ptr<llvm::MemoryBuffer> *ModuleBuffer,
+//      std::unique_ptr<llvm::MemoryBuffer> *ModuleDocBuffer,
+//      std::unique_ptr<llvm::MemoryBuffer> *ModuleSourceInfoBuffer) override;
+//
+//   bool isCached(StringRef DepPath) override;
+//
+//public:
+//   static std::unique_ptr<ModuleInterfaceLoader>
+//   create(AstContext &ctx, StringRef cacheDir, StringRef prebuiltCacheDir,
+//          DependencyTracker *tracker, ModuleLoadingMode loadMode,
+//          ArrayRef<std::string> PreferInterfaceForModules = {},
+//          bool RemarkOnRebuildFromInterface = false,
+//          bool IgnoreSwiftSourceInfoFile = false) {
+//      return std::unique_ptr<ModuleInterfaceLoader>(
+//         new ModuleInterfaceLoader(ctx, cacheDir, prebuiltCacheDir,
+//                                   tracker, loadMode,
+//                                   PreferInterfaceForModules,
+//                                   RemarkOnRebuildFromInterface,
+//                                   IgnoreSwiftSourceInfoFile));
+//   }
+//
+//   /// Append visible module names to \p names. Note that names are possibly
+//   /// duplicated, and not guaranteed to be ordered in any way.
+//   void collectVisibleTopLevelModuleNames(
+//      SmallVectorImpl<Identifier> &names) const override;
+//
+//   /// Unconditionally build \p InPath (a swiftinterface file) to \p OutPath (as
+//   /// a swiftmodule file).
+//   ///
+//   /// A simplified version of the core logic in #openModuleFiles.
+//   static bool buildSwiftModuleFromSwiftInterface(
+//      SourceManager &SourceMgr, DiagnosticEngine &Diags,
+//      const SearchPathOptions &SearchPathOpts, const LangOptions &LangOpts,
+//      StringRef CacheDir, StringRef PrebuiltCacheDir,
+//      StringRef ModuleName, StringRef InPath, StringRef OutPath,
+//      bool SerializeDependencyHashes, bool TrackSystemDependencies,
+//      bool RemarkOnRebuildFromInterface);
+//};
 
 /// Extract the specified-or-defaulted -module-cache-path that winds up in
 /// the clang importer, for reuse as the .swiftmodule cache path when

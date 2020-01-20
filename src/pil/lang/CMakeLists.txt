@@ -23,7 +23,8 @@ polar_add_host_library(PolarPIL STATIC
 
 target_link_libraries(PolarPIL PRIVATE
    PolarSema
-   PolarSerialization)
+#   PolarSerialization
+   )
 
 set_target_properties(
    PolarPIL

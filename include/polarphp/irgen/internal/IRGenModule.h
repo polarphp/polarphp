@@ -884,12 +884,12 @@ public:
    llvm::Constant *getAddrOfGlobalUTF16String(StringRef utf8);
    llvm::Constant *getAddrOfObjCSelectorRef(StringRef selector);
    llvm::Constant *getAddrOfObjCSelectorRef(PILDeclRef method);
-   std::string getObjCSelectorName(PILDeclRef method);
-   llvm::Constant *getAddrOfObjCMethodName(StringRef methodName);
-   llvm::Constant *getAddrOfObjCInterfaceRecord(InterfaceDecl *proto,
-                                               ForDefinition_t forDefinition);
-   llvm::Constant *getAddrOfObjCInterfaceRef(InterfaceDecl *proto,
-                                            ForDefinition_t forDefinition);
+//   std::string getObjCSelectorName(PILDeclRef method);
+//   llvm::Constant *getAddrOfObjCMethodName(StringRef methodName);
+//   llvm::Constant *getAddrOfObjCInterfaceRecord(InterfaceDecl *proto,
+//                                               ForDefinition_t forDefinition);
+//   llvm::Constant *getAddrOfObjCInterfaceRef(InterfaceDecl *proto,
+//                                            ForDefinition_t forDefinition);
    llvm::Constant *getAddrOfKeyPathPattern(KeyPathPattern *pattern,
                                            PILLocation diagLoc);
    llvm::Constant *getAddrOfOpaqueTypeDescriptor(OpaqueTypeDecl *opaqueType,

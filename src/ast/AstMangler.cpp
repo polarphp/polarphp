@@ -46,7 +46,7 @@
 
 namespace polar::mangle {
 
-using namespace polar::mangling;
+using namespace polar::mangle;
 using namespace polar::demangling;
 
 static StringRef getCodeForAccessorKind(AccessorKind kind) {

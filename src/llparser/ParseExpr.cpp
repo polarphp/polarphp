@@ -1590,11 +1590,11 @@ ParserResult<Expr> Parser::parseExprPrimary(Diag<> ID, bool isExprBasic) {
          return makeParserResult(
             new(Context) DiscardAssignmentExpr(consumeToken(), /*Implicit=*/false));
 
-      case tok::pound_selector: // expr-selector
-         return parseExprSelector();
+//      case tok::pound_selector: // expr-selector
+//         return parseExprSelector();
 
-      case tok::pound_keyPath:
-         return parseExprKeyPathObjC();
+//      case tok::pound_keyPath:
+//         return parseExprKeyPathObjC();
 
       case tok::l_brace:     // expr-closure
          return parseExprClosure();

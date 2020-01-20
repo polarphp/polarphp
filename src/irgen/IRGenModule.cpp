@@ -863,7 +863,7 @@ bool IRGenerator::canEmitWitnessTableLazily(PILWitnessTable *wt) {
       case AccessLevel::FilePrivate:
          return true;
 
-      case AccessLevel::Interface:
+      case AccessLevel::Internal:
          return PrimaryIGM->getPILModule().isWholeModule();
 
       default:
@@ -1301,7 +1301,8 @@ bool IRGenModule::finalize() {
 /// Emit lazy definitions that have to be emitted in this specific
 /// IRGenModule.
 void IRGenModule::emitLazyPrivateDefinitions() {
-   emitLazyObjCInterfaceDefinitions();
+/// TODO
+//   emitLazyObjCInterfaceDefinitions();
 }
 
 llvm::MDNode *IRGenModule::createProfileWeights(uint64_t TrueCount,

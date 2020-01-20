@@ -60,15 +60,15 @@ std::string getExecutablePath(const char *FirstArg) {
 }
 
 /// Run 'polarphp-autolink-extract'.
-extern int autolink_extract_main(ArrayRef<const char *> Args, const char *Argv0,
-                                 void *MainAddr);
+//extern int autolink_extract_main(ArrayRef<const char *> Args, const char *Argv0,
+//                                 void *MainAddr);
 
-extern int modulewrap_main(ArrayRef<const char *> Args, const char *Argv0,
-                           void *MainAddr);
+//extern int modulewrap_main(ArrayRef<const char *> Args, const char *Argv0,
+//                           void *MainAddr);
 
 /// Run 'polarphp-indent'
-extern int polarphp_indent_main(ArrayRef<const char *> Args, const char *Argv0,
-                             void *MainAddr);
+//extern int polarphp_indent_main(ArrayRef<const char *> Args, const char *Argv0,
+//                             void *MainAddr);
 
 /// Determine if the given invocation should run as a subcommand.
 ///
@@ -127,11 +127,11 @@ static int run_driver(StringRef ExecName,
                                                    argv.data()+argv.size()),
                                 argv[0], (void *)(intptr_t)getExecutablePath);
       }
-      if (FirstArg == "-modulewrap") {
-         return modulewrap_main(llvm::makeArrayRef(argv.data()+2,
-                                                   argv.data()+argv.size()),
-                                argv[0], (void *)(intptr_t)getExecutablePath);
-      }
+//      if (FirstArg == "-modulewrap") {
+//         return modulewrap_main(llvm::makeArrayRef(argv.data()+2,
+//                                                   argv.data()+argv.size()),
+//                                argv[0], (void *)(intptr_t)getExecutablePath);
+//      }
    }
 
    std::string Path = getExecutablePath(argv[0]);
@@ -143,18 +143,19 @@ static int run_driver(StringRef ExecName,
    Diags.addConsumer(PDC);
 
    Driver TheDriver(Path, ExecName, argv, Diags);
-   switch (TheDriver.getDriverKind()) {
-      case Driver::DriverKind::AutolinkExtract:
-         return autolink_extract_main(
-            TheDriver.getArgsWithoutProgramNameAndDriverMode(argv),
-            argv[0], (void *)(intptr_t)getExecutablePath);
-      case Driver::DriverKind::PolarphpIndent:
-         return polarphp_indent_main(
-            TheDriver.getArgsWithoutProgramNameAndDriverMode(argv),
-            argv[0], (void *)(intptr_t)getExecutablePath);
-      default:
-         break;
-   }
+   /// TODO
+//   switch (TheDriver.getDriverKind()) {
+//      case Driver::DriverKind::AutolinkExtract:
+//         return autolink_extract_main(
+//            TheDriver.getArgsWithoutProgramNameAndDriverMode(argv),
+//            argv[0], (void *)(intptr_t)getExecutablePath);
+//      case Driver::DriverKind::PolarphpIndent:
+//         return polarphp_indent_main(
+//            TheDriver.getArgsWithoutProgramNameAndDriverMode(argv),
+//            argv[0], (void *)(intptr_t)getExecutablePath);
+//      default:
+//         break;
+//   }
 
    std::unique_ptr<llvm::opt::InputArgList> ArgList =
       TheDriver.parseArgStrings(ArrayRef<const char*>(argv).slice(1));

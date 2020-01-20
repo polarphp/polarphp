@@ -2252,8 +2252,9 @@ static bool createPrespecialized(StringRef UnspecializedName,
       if (!UnspecFunc->isDefinition())
          M.loadFunction(UnspecFunc);
    } else {
-      UnspecFunc = M.getPILLoader()->lookupPILFunction(UnspecializedName,
-         /*declarationOnly*/ false);
+      /// TODO
+//      UnspecFunc = M.getPILLoader()->lookupPILFunction(UnspecializedName,
+//         /*declarationOnly*/ false);
    }
 
    if (!UnspecFunc || !UnspecFunc->isDefinition())

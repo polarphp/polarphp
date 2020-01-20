@@ -11,4 +11,4 @@
 
 #add_subdirectory(polar-ast-dumper)
 #add_subdirectory(polar-tokenizer)
-#add_subdirectory(driver)
+add_subdirectory(driver)

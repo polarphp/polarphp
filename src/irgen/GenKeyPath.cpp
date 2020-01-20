@@ -906,75 +906,75 @@ emitKeyPathComponent(IRGenModule &IGM,
             }
             case KeyPathPatternComponent::ComputedPropertyId::DeclRef: {
                auto declRef = id.getDeclRef();
-
+               /// TODO
                // Foreign method refs identify using a selector
                // reference, which is doubly-indirected and filled in with a unique
                // pointer by dyld.
-               if (declRef.isForeign) {
-                  assert(IGM.ObjCInterop && "foreign keypath component w/o objc interop?!");
+//               if (declRef.isForeign) {
+//                  assert(IGM.ObjCInterop && "foreign keypath component w/o objc interop?!");
+//                  idKind = KeyPathComponentHeader::Pointer;
+//                  // FIXME: In non-JIT mode, ideally we would just refer to the selector
+//                  // reference variable here with an indirectpointer resolution,
+//                  // but ld64 section coalescing on the __objc_sel section can break
+//                  // relative references (and on some platforms, mach-o just doesn't
+//                  // support the necessary relocations).
+//                  // As a workaround, generate a stub function to resolve the selector.
+//                  //
+//                  // Note that we'd need to do this anyway in JIT mode because we would
+//                  // need to unique the selector at runtime anyway.
+////                  auto selectorName = IGM.getObjCSelectorName(declRef);
+//                  llvm::Type *fnParams[] = {IGM.Int8PtrTy};
+//                  auto fnTy = llvm::FunctionType::get(IGM.Int8PtrTy, fnParams, false);
+//                  SmallString<32> fnName;
+//                  fnName.append("keypath_get_selector_");
+//                  fnName.append(selectorName);
+//                  auto fn = cast<llvm::Function>(
+//                     IGM.Module.getOrInsertFunction(fnName, fnTy).getCallee());
+//                  if (fn->empty()) {
+//                     fn->setLinkage(llvm::Function::PrivateLinkage);
+//                     IRGenFunction subIGF(IGM, fn);
+//                     if (IGM.DebugInfo)
+//                        IGM.DebugInfo->emitArtificialFunction(subIGF, fn);
+//
+//                     auto selectorValue = subIGF.emitObjCSelectorRefLoad(selectorName);
+//                     subIGF.Builder.CreateRet(selectorValue);
+//                  }
+//
+//                  idValue = fn;
+//                  idResolution = KeyPathComponentHeader::FunctionCall;
+//               } else {
+               if (auto overridden = declRef.getOverriddenVTableEntry())
+                  declRef = overridden;
+               if (auto overridden = declRef.getOverriddenWitnessTableEntry())
+                  declRef = overridden;
+
+               auto dc = declRef.getDecl()->getDeclContext();
+
+               // We can use a method descriptor if we have a class or resilient
+               // protocol.
+               if (isa<ClassDecl>(dc) ||
+                   IGM.isResilient(cast<NominalTypeDecl>(dc),
+                                   ResilienceExpansion::Minimal)) {
                   idKind = KeyPathComponentHeader::Pointer;
-                  // FIXME: In non-JIT mode, ideally we would just refer to the selector
-                  // reference variable here with an indirectpointer resolution,
-                  // but ld64 section coalescing on the __objc_sel section can break
-                  // relative references (and on some platforms, mach-o just doesn't
-                  // support the necessary relocations).
-                  // As a workaround, generate a stub function to resolve the selector.
-                  //
-                  // Note that we'd need to do this anyway in JIT mode because we would
-                  // need to unique the selector at runtime anyway.
-                  auto selectorName = IGM.getObjCSelectorName(declRef);
-                  llvm::Type *fnParams[] = {IGM.Int8PtrTy};
-                  auto fnTy = llvm::FunctionType::get(IGM.Int8PtrTy, fnParams, false);
-                  SmallString<32> fnName;
-                  fnName.append("keypath_get_selector_");
-                  fnName.append(selectorName);
-                  auto fn = cast<llvm::Function>(
-                     IGM.Module.getOrInsertFunction(fnName, fnTy).getCallee());
-                  if (fn->empty()) {
-                     fn->setLinkage(llvm::Function::PrivateLinkage);
-                     IRGenFunction subIGF(IGM, fn);
-                     if (IGM.DebugInfo)
-                        IGM.DebugInfo->emitArtificialFunction(subIGF, fn);
+                  auto idRef = IGM.getAddrOfLLVMVariableOrGOTEquivalent(
+                     LinkEntity::forMethodDescriptor(declRef));
 
-                     auto selectorValue = subIGF.emitObjCSelectorRefLoad(selectorName);
-                     subIGF.Builder.CreateRet(selectorValue);
-                  }
-
-                  idValue = fn;
-                  idResolution = KeyPathComponentHeader::FunctionCall;
-               } else {
-                  if (auto overridden = declRef.getOverriddenVTableEntry())
-                     declRef = overridden;
-                  if (auto overridden = declRef.getOverriddenWitnessTableEntry())
-                     declRef = overridden;
-
-                  auto dc = declRef.getDecl()->getDeclContext();
-
-                  // We can use a method descriptor if we have a class or resilient
-                  // protocol.
-                  if (isa<ClassDecl>(dc) ||
-                      IGM.isResilient(cast<NominalTypeDecl>(dc),
-                                      ResilienceExpansion::Minimal)) {
-                     idKind = KeyPathComponentHeader::Pointer;
-                     auto idRef = IGM.getAddrOfLLVMVariableOrGOTEquivalent(
-                        LinkEntity::forMethodDescriptor(declRef));
-
-                     idValue = idRef.getValue();
-                     idResolution = idRef.isIndirect()
-                                    ? KeyPathComponentHeader::IndirectPointer
-                                    : KeyPathComponentHeader::Resolved;
-                     break;
-                  }
-
-                  idKind = KeyPathComponentHeader::VTableOffset;
-                  auto methodProto = cast<InterfaceDecl>(dc);
-                  auto &protoInfo = IGM.getInterfaceInfo(methodProto,
-                                                         InterfaceInfoKind::Full);
-                  auto index = protoInfo.getFunctionIndex(
-                     cast<AbstractFunctionDecl>(declRef.getDecl()));
-                  idValue = llvm::ConstantInt::get(IGM.SizeTy, -index.getValue());
-                  idResolution = KeyPathComponentHeader::Resolved;
+                  idValue = idRef.getValue();
+                  idResolution = idRef.isIndirect()
+                                 ? KeyPathComponentHeader::IndirectPointer
+                                 : KeyPathComponentHeader::Resolved;
+                  break;
                }
+
+               idKind = KeyPathComponentHeader::VTableOffset;
+               auto methodProto = cast<InterfaceDecl>(dc);
+               auto &protoInfo = IGM.getInterfaceInfo(methodProto,
+                                                      InterfaceInfoKind::Full);
+               auto index = protoInfo.getFunctionIndex(
+                  cast<AbstractFunctionDecl>(declRef.getDecl()));
+               idValue = llvm::ConstantInt::get(IGM.SizeTy, -index.getValue());
+               idResolution = KeyPathComponentHeader::Resolved;
+//               }
                break;
             }
             case KeyPathPatternComponent::ComputedPropertyId::Property:

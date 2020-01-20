@@ -327,9 +327,9 @@ public:
       auto result = Builder.CreatePHI(IGM.InterfaceDescriptorPtrTy, 2);
       result->addIncoming(existing, existingBB);
       result->addIncoming(NewProto, newBB);
-
-      llvm::Value *ref = IGM.getAddrOfObjCInterfaceRef(proto, NotForDefinition);
-      ref = IGF.Builder.CreateBitCast(ref,
+//
+//      llvm::Value *ref = IGM.getAddrOfObjCInterfaceRef(proto, NotForDefinition);
+      llvm::Value *ref = IGF.Builder.CreateBitCast(ref,
                                       IGM.InterfaceDescriptorPtrTy->getPointerTo());
 
       Builder.CreateStore(result, ref, IGM.getPointerAlignment());
@@ -1223,7 +1223,7 @@ bool IRGenerator::hasLazyMetadata(TypeDecl *type) {
             case AccessLevel::Public:
                // We can't remove metadata for externally visible types.
                return false;
-            case AccessLevel::Interface:
+            case AccessLevel::Internal:
                // In non-whole-module mode, internal types are also visible externally.
                return PIL.isWholeModule();
             case AccessLevel::FilePrivate:

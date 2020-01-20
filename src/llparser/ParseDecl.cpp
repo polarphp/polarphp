@@ -1356,7 +1356,7 @@ bool Parser::parseNewDeclAttribute(DeclAttributes &Attributes, SourceLoc AtLoc,
          AccessLevel access = llvm::StringSwitch<AccessLevel>(AttrName)
             .Case("private", AccessLevel::Private)
             .Case("fileprivate", AccessLevel::FilePrivate)
-            .Case("internal", AccessLevel::Interface)
+            .Case("internal", AccessLevel::Internal)
             .Case("public", AccessLevel::Public)
             .Case("open", AccessLevel::Open);
 

@@ -2391,8 +2391,8 @@ public:
                   requiredAccess = AccessLevel::Public;
                   break;
                case AccessLevel::Public:
-               case AccessLevel::Interface:
-                  requiredAccess = AccessLevel::Interface;
+               case AccessLevel::Internal:
+                  requiredAccess = AccessLevel::Internal;
                   break;
                case AccessLevel::FilePrivate:
                case AccessLevel::Private:

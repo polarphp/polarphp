@@ -988,8 +988,8 @@ void IRGenFunction::emitStrongRelease(llvm::Value *value,
          return emitNativeStrongRelease(value, atomicity);
 //      case ReferenceCounting::ObjC:
 //         return emitObjCStrongRelease(value);
-      case ReferenceCounting::Block:
-         return emitBlockRelease(value);
+//      case ReferenceCounting::Block:
+//         return emitBlockRelease(value);
       case ReferenceCounting::Unknown:
          return emitUnknownStrongRelease(value, atomicity);
       case ReferenceCounting::Bridge:
@@ -1012,9 +1012,9 @@ void IRGenFunction::emitStrongRetain(llvm::Value *value,
 //      case ReferenceCounting::ObjC:
 //         emitObjCStrongRetain(value);
 //         return;
-      case ReferenceCounting::Block:
-         emitBlockCopyCall(value);
-         return;
+//      case ReferenceCounting::Block:
+//         emitBlockCopyCall(value);
+//         return;
       case ReferenceCounting::Unknown:
          emitUnknownStrongRetain(value, atomicity);
          return;

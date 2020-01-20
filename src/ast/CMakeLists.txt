@@ -26,11 +26,47 @@ if (POLAR_FORCE_OPTIMIZED_TYPECHECKER)
    set(EXTRA_AST_FLAGS "FORCE_BUILD_OPTIMIZED")
 endif()
 
+
+set(supportTargets
+   AArch64
+   AMDGPU
+   ARM
+   BPF
+   Hexagon
+   Lanai
+   Mips
+   MSP430
+   NVPTX
+   PowerPC
+   RISCV
+   Sparc
+   SystemZ
+   WebAssembly
+   X86
+   XCore)
+
+set(targetLLVMComponents "")
+
+foreach(_targetName ${supportTargets})
+   string(TOLOWER ${_targetName} _targetName)
+   set(targetSuffix asmparser codegen disassembler)
+   foreach(suffix ${targetSuffix})
+      list(APPEND targetLLVMComponents "${_targetName}${suffix}")
+   endforeach()
+endforeach()
+
+list(REMOVE_ITEM targetLLVMComponents
+   "xcoreasmparser"
+   "nvptxasmparser"
+   "nvptxdisassembler")
+
 polar_add_host_library(PolarAST STATIC
    ${POLAR_AST_SOURCES}
    LLVM_LINK_COMPONENTS
    ${POLAR_LLVM_LINK_COMPONENTS}
    ${EXTRA_AST_FLAGS}
+   LLVM_LINK_COMPONENTS
+   ${targetLLVMComponents}
    )
 
 target_link_libraries(PolarAST INTERFACE
@@ -50,7 +86,8 @@ target_link_libraries(PolarAST INTERFACE
    clangRewrite
    clangAST
    clangLex
-   clangBasic)
+   clangBasic
+)
 
 set(polar_ast_verifier_flag)
 if(POLAR_AST_VERIFIER)

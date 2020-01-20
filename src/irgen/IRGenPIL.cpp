@@ -2633,10 +2633,11 @@ void IRGenPILFunction::visitStringLiteralInst(polar::StringLiteralInst *i) {
    llvm::Value *addr;
 
    // Emit a load of a selector.
-   if (i->getEncoding() == polar::StringLiteralInst::Encoding::ObjCSelector)
-      addr = emitObjCSelectorRefLoad(i->getValue());
-   else
-      addr = emitAddrOfConstantString(IGM, i);
+//   if (i->getEncoding() == polar::StringLiteralInst::Encoding::ObjCSelector)
+//      addr = emitObjCSelectorRefLoad(i->getValue());
+//   else
+   /// TODO
+   addr = emitAddrOfConstantString(IGM, i);
 
    Explosion e;
    e.add(addr);
@@ -3323,69 +3324,70 @@ void IRGenPILFunction::visitSelectValueInst(SelectValueInst *inst) {
 }
 
 void IRGenPILFunction::visitDynamicMethodBranchInst(DynamicMethodBranchInst *i){
-   LoweredBB &hasMethodBB = getLoweredBB(i->getHasMethodBB());
-   LoweredBB &noMethodBB = getLoweredBB(i->getNoMethodBB());
-
-   // Emit the respondsToSelector: call.
-   StringRef selector;
-   llvm::SmallString<64> selectorBuffer;
-//   if (auto fnDecl = dyn_cast<FuncDecl>(i->getMember().getDecl()))
-//      selector = fnDecl->getObjCSelector().getString(selectorBuffer);
-//   else if (auto var = dyn_cast<AbstractStorageDecl>(i->getMember().getDecl()))
-//      selector = var->getObjCGetterSelector().getString(selectorBuffer);
-//   else
-   // @todo
-   llvm_unreachable("Unhandled dynamic method branch query");
-
-   llvm::Value *object = getLoweredExplosion(i->getOperand()).claimNext();
-   if (object->getType() != IGM.ObjCPtrTy)
-      object = Builder.CreateBitCast(object, IGM.ObjCPtrTy);
-   llvm::Value *loadSel = emitObjCSelectorRefLoad(selector);
-
-   llvm::Value *respondsToSelector
-      = emitObjCSelectorRefLoad("respondsToSelector:");
-
-   llvm::Constant *messenger = IGM.getObjCMsgSendFn();
-   llvm::Type *argTys[] = {
-      IGM.ObjCPtrTy,
-      IGM.Int8PtrTy,
-      IGM.Int8PtrTy,
-   };
-   auto respondsToSelectorTy = llvm::FunctionType::get(IGM.Int1Ty,
-                                                       argTys,
-      /*isVarArg*/ false)
-      ->getPointerTo();
-   messenger = llvm::ConstantExpr::getBitCast(messenger,
-                                              respondsToSelectorTy);
-   llvm::CallInst *call = Builder.CreateCall(messenger,
-                                             {object, respondsToSelector, loadSel});
-   call->setDoesNotThrow();
-
-   // FIXME: Assume (probably safely) that the hasMethodBB has only us as a
-   // predecessor, and cannibalize its bb argument so we can represent is as an
-   // ObjCMethod lowered value. This is hella gross but saves us having to
-   // implement ObjCMethod-to-Explosion lowering and creating a thunk we don't
-   // want.
-   assert(std::next(i->getHasMethodBB()->pred_begin())
-          == i->getHasMethodBB()->pred_end()
-          && "lowering dynamic_method_br with multiple preds for destination "
-             "not implemented");
-   // Kill the existing lowered value for the bb arg and its phi nodes.
-   PILValue methodArg = i->getHasMethodBB()->args_begin()[0];
-   Explosion formerLLArg = getLoweredExplosion(methodArg);
-   for (llvm::Value *val : formerLLArg.claimAll()) {
-      auto phi = cast<llvm::PHINode>(val);
-      assert(phi->getNumIncomingValues() == 0 && "phi already used");
-      phi->removeFromParent();
-      delete phi;
-   }
-   LoweredValues.erase(methodArg);
-
-   // Replace the lowered value with an ObjCMethod lowering.
-//   setLoweredObjCMethod(methodArg, i->getMember());
-
-   // Create the branch.
-   Builder.CreateCondBr(call, hasMethodBB.bb, noMethodBB.bb);
+   /// TODO
+//   LoweredBB &hasMethodBB = getLoweredBB(i->getHasMethodBB());
+//   LoweredBB &noMethodBB = getLoweredBB(i->getNoMethodBB());
+//
+//   // Emit the respondsToSelector: call.
+//   StringRef selector;
+//   llvm::SmallString<64> selectorBuffer;
+////   if (auto fnDecl = dyn_cast<FuncDecl>(i->getMember().getDecl()))
+////      selector = fnDecl->getObjCSelector().getString(selectorBuffer);
+////   else if (auto var = dyn_cast<AbstractStorageDecl>(i->getMember().getDecl()))
+////      selector = var->getObjCGetterSelector().getString(selectorBuffer);
+////   else
+//   // @todo
+//   llvm_unreachable("Unhandled dynamic method branch query");
+//
+//   llvm::Value *object = getLoweredExplosion(i->getOperand()).claimNext();
+//   if (object->getType() != IGM.ObjCPtrTy)
+//      object = Builder.CreateBitCast(object, IGM.ObjCPtrTy);
+////   llvm::Value *loadSel = emitObjCSelectorRefLoad(selector);
+////
+////   llvm::Value *respondsToSelector
+////      = emitObjCSelectorRefLoad("respondsToSelector:");
+//
+//   llvm::Constant *messenger = IGM.getObjCMsgSendFn();
+//   llvm::Type *argTys[] = {
+//      IGM.ObjCPtrTy,
+//      IGM.Int8PtrTy,
+//      IGM.Int8PtrTy,
+//   };
+//   auto respondsToSelectorTy = llvm::FunctionType::get(IGM.Int1Ty,
+//                                                       argTys,
+//      /*isVarArg*/ false)
+//      ->getPointerTo();
+//   messenger = llvm::ConstantExpr::getBitCast(messenger,
+//                                              respondsToSelectorTy);
+//   llvm::CallInst *call = Builder.CreateCall(messenger,
+//                                             {object, respondsToSelector, loadSel});
+//   call->setDoesNotThrow();
+//
+//   // FIXME: Assume (probably safely) that the hasMethodBB has only us as a
+//   // predecessor, and cannibalize its bb argument so we can represent is as an
+//   // ObjCMethod lowered value. This is hella gross but saves us having to
+//   // implement ObjCMethod-to-Explosion lowering and creating a thunk we don't
+//   // want.
+//   assert(std::next(i->getHasMethodBB()->pred_begin())
+//          == i->getHasMethodBB()->pred_end()
+//          && "lowering dynamic_method_br with multiple preds for destination "
+//             "not implemented");
+//   // Kill the existing lowered value for the bb arg and its phi nodes.
+//   PILValue methodArg = i->getHasMethodBB()->args_begin()[0];
+//   Explosion formerLLArg = getLoweredExplosion(methodArg);
+//   for (llvm::Value *val : formerLLArg.claimAll()) {
+//      auto phi = cast<llvm::PHINode>(val);
+//      assert(phi->getNumIncomingValues() == 0 && "phi already used");
+//      phi->removeFromParent();
+//      delete phi;
+//   }
+//   LoweredValues.erase(methodArg);
+//
+//   // Replace the lowered value with an ObjCMethod lowering.
+////   setLoweredObjCMethod(methodArg, i->getMember());
+//
+//   // Create the branch.
+//   Builder.CreateCondBr(call, hasMethodBB.bb, noMethodBB.bb);
 }
 
 void IRGenPILFunction::visitBranchInst(polar::BranchInst *i) {
@@ -3449,10 +3451,11 @@ void IRGenPILFunction::visitCopyValueInst(polar::CopyValueInst *i) {
 // PIL verifier restricts it to single-refcounted-pointer types.
 void IRGenPILFunction::visitAutoreleaseValueInst(polar::AutoreleaseValueInst *i)
 {
-   Explosion in = getLoweredExplosion(i->getOperand());
-   auto val = in.claimNext();
-
-   emitObjCAutoreleaseCall(val);
+   /// TODO
+//   Explosion in = getLoweredExplosion(i->getOperand());
+//   auto val = in.claimNext();
+//
+//   emitObjCAutoreleaseCall(val);
 }
 
 void IRGenPILFunction::visitSetDeallocatingInst(SetDeallocatingInst *i) {
@@ -3831,10 +3834,11 @@ void IRGenPILFunction::visitMarkDependenceInst(polar::MarkDependenceInst *i) {
 }
 
 void IRGenPILFunction::visitCopyBlockInst(CopyBlockInst *i) {
+   /// TODO
    Explosion lowered = getLoweredExplosion(i->getOperand());
-   llvm::Value *copied = emitBlockCopyCall(lowered.claimNext());
+//   llvm::Value *copied = emitBlockCopyCall(lowered.claimNext());
    Explosion result;
-   result.add(copied);
+//   result.add(copied);
    setLoweredExplosion(i, result);
 }
 

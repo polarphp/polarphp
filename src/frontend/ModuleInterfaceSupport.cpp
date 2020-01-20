@@ -21,7 +21,7 @@
 #include "polarphp/frontend/Frontend.h"
 #include "polarphp/frontend/ModuleInterfaceSupport.h"
 #include "polarphp/frontend/PrintingDiagnosticConsumer.h"
-#include "polarphp/pil/optimizer/passmgr/Passes.h"
+//#include "polarphp/pil/optimizer/passmgr/Passes.h"
 #include "polarphp/serialization/SerializationOptions.h"
 #include "polarphp/serialization/Validation.h"
 

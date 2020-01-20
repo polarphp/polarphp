@@ -4124,7 +4124,7 @@ void polar::fixItAccess(InFlightDiagnostic &diag, ValueDecl *VD,
    switch (desiredAccess) {
       case AccessLevel::Private:      fixItString = "private ";      break;
       case AccessLevel::FilePrivate:  fixItString = "fileprivate ";  break;
-      case AccessLevel::Interface:     fixItString = "internal ";     break;
+      case AccessLevel::Internal:     fixItString = "internal ";     break;
       case AccessLevel::Public:       fixItString = "public ";       break;
       case AccessLevel::Open:         fixItString = "open ";         break;
    }

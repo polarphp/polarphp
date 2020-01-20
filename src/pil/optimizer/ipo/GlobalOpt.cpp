@@ -787,7 +787,7 @@ static bool canBeChangedExternally(PILGlobalVariable *PILG) {
          case AccessLevel::Private:
          case AccessLevel::FilePrivate:
             return false;
-         case AccessLevel::Interface:
+         case AccessLevel::Internal:
             return !PILG->getModule().isWholeModule();
          case AccessLevel::Public:
          case AccessLevel::Open:

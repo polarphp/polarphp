@@ -176,7 +176,8 @@ public:
    /// Derive a _BridgedNSError requirement for an @objc enum type.
    ///
    /// \returns the derived member, which will also be added to the type.
-   ValueDecl *deriveBridgedNSError(ValueDecl *requirement);
+   /// TODO
+//   ValueDecl *deriveBridgedNSError(ValueDecl *requirement);
 
    /// Derive a CodingKey requirement for an enum type.
    ///

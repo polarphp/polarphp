@@ -140,7 +140,7 @@ public:
           CodeCompletionString::Chunk::ChunkKind::AccessControlKeyword,
           "fileprivate ");
       break;
-    case AccessLevel::Interface:
+    case AccessLevel::Internal:
       // 'internal' is the default, don't add it.
       break;
     case AccessLevel::Public:

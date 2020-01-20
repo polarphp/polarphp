@@ -1432,44 +1432,44 @@ bool IndexPHPAstWalker::indexComment(const Decl *D) {
    }
    if (tagLocs.empty())
       return true;
-
-   polar::markup::MarkupContext MC;
-   auto DC = getSingleDocComment(MC, D);
-   if (!DC)
-      return true;
-   for (StringRef tagName : DC->getTags()) {
-      tagName = tagName.trim();
-      if (tagName.empty())
-         continue;
-      SourceLoc loc;
-      for (const auto &tagLoc : tagLocs) {
-         if (tagLoc.Text.contains(tagName)) {
-            loc = tagLoc.Loc;
-            break;
-         }
-      }
-      if (loc.isInvalid())
-         continue;
-      IndexSymbol Info;
-      Info.decl = nullptr;
-      // @todo
-//      Info.symInfo = SymbolInfo{ SymbolKind::CommentTag, SymbolSubKind::None,
-//                                 SymbolLanguage::Swift, SymbolPropertySet() };
-      Info.roles |= (unsigned)SymbolRole::Definition;
-      Info.name = StringRef();
-      SmallString<128> storage;
-      {
-         llvm::raw_svector_ostream OS(storage);
-         OS << "t:" << tagName;
-         Info.USR = stringStorage.copyString(OS.str());
-      }
-      std::tie(Info.line, Info.column, Info.offset) = getLineColAndOffset(loc);
-      if (!IdxConsumer.startSourceEntity(Info) || !IdxConsumer.finishSourceEntity(Info.symInfo, Info.roles)) {
-         Cancelled = true;
-         break;
-      }
-   }
-   return !Cancelled;
+   /// TODO
+//   polar::markup::MarkupContext MC;
+//   auto DC = getSingleDocComment(MC, D);
+//   if (!DC)
+//      return true;
+//   for (StringRef tagName : DC->getTags()) {
+//      tagName = tagName.trim();
+//      if (tagName.empty())
+//         continue;
+//      SourceLoc loc;
+//      for (const auto &tagLoc : tagLocs) {
+//         if (tagLoc.Text.contains(tagName)) {
+//            loc = tagLoc.Loc;
+//            break;
+//         }
+//      }
+//      if (loc.isInvalid())
+//         continue;
+//      IndexSymbol Info;
+//      Info.decl = nullptr;
+//      // @todo
+////      Info.symInfo = SymbolInfo{ SymbolKind::CommentTag, SymbolSubKind::None,
+////                                 SymbolLanguage::Swift, SymbolPropertySet() };
+//      Info.roles |= (unsigned)SymbolRole::Definition;
+//      Info.name = StringRef();
+//      SmallString<128> storage;
+//      {
+//         llvm::raw_svector_ostream OS(storage);
+//         OS << "t:" << tagName;
+//         Info.USR = stringStorage.copyString(OS.str());
+//      }
+//      std::tie(Info.line, Info.column, Info.offset) = getLineColAndOffset(loc);
+//      if (!IdxConsumer.startSourceEntity(Info) || !IdxConsumer.finishSourceEntity(Info.symInfo, Info.roles)) {
+//         Cancelled = true;
+//         break;
+//      }
+//   }
+//   return !Cancelled;
 }
 
 void IndexPHPAstWalker::getRecursiveModuleImports(

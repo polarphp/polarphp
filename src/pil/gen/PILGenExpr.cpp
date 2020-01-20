@@ -4216,12 +4216,12 @@ RValue RValueEmitter::visitExistentialMetatypeToObjectExpr(
 RValue RValueEmitter::visitInterfaceMetatypeToObjectExpr(
    InterfaceMetatypeToObjectExpr *E,
    SGFContext C) {
-   SGF.emitIgnoredExpr(E->getSubExpr());
-   CanType inputTy = E->getSubExpr()->getType()->getCanonicalType();
-   PILType resultTy = SGF.getLoweredLoadableType(E->getType());
-
-   ManagedValue v = SGF.emitInterfaceMetatypeToObject(E, inputTy, resultTy);
-   return RValue(SGF, E, v);
+//   SGF.emitIgnoredExpr(E->getSubExpr());
+//   CanType inputTy = E->getSubExpr()->getType()->getCanonicalType();
+//   PILType resultTy = SGF.getLoweredLoadableType(E->getType());
+//
+//   ManagedValue v = SGF.emitInterfaceMetatypeToObject(E, inputTy, resultTy);
+//   return RValue(SGF, E, v);
 }
 
 RValue RValueEmitter::visitIfExpr(IfExpr *E, SGFContext C) {

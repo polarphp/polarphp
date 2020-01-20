@@ -70,13 +70,13 @@ AccessLevelRequest::evaluate(Evaluator &evaluator, ValueDecl *D) const {
   // Special case for generic parameters; we just give them a dummy
   // access level.
   if (auto genericParam = dyn_cast<GenericTypeParamDecl>(D)) {
-    return AccessLevel::Interface;
+    return AccessLevel::Internal;
   }
 
   // Special case for associated types: inherit access from protocol.
   if (auto assocType = dyn_cast<AssociatedTypeDecl>(D)) {
     auto prot = assocType->getInterface();
-    return std::max(prot->getFormalAccess(), AccessLevel::Interface);
+    return std::max(prot->getFormalAccess(), AccessLevel::Internal);
   }
 
   // Special case for dtors and enum elements: inherit from container
@@ -86,7 +86,7 @@ AccessLevelRequest::evaluate(Evaluator &evaluator, ValueDecl *D) const {
       return AccessLevel::Private;
     } else {
       auto container = cast<NominalTypeDecl>(D->getDeclContext());
-      return std::max(container->getFormalAccess(), AccessLevel::Interface);
+      return std::max(container->getFormalAccess(), AccessLevel::Internal);
     }
   }
 
@@ -111,10 +111,10 @@ AccessLevelRequest::evaluate(Evaluator &evaluator, ValueDecl *D) const {
     return AccessLevel::Private;
   case DeclContextKind::Module:
   case DeclContextKind::FileUnit:
-    return AccessLevel::Interface;
+    return AccessLevel::Internal;
   case DeclContextKind::GenericTypeDecl: {
     auto generic = cast<GenericTypeDecl>(DC);
-    AccessLevel access = AccessLevel::Interface;
+    AccessLevel access = AccessLevel::Internal;
     if (isa<InterfaceDecl>(generic))
       access = std::max(AccessLevel::FilePrivate, generic->getFormalAccess());
     return access;
@@ -235,7 +235,7 @@ DefaultAndMaxAccessLevelRequest::evaluate(Evaluator &evaluator,
     } else if (maxScope->isPublic()) {
       maxAccess = AccessLevel::Public;
     } else if (isa<ModuleDecl>(maxScope->getDeclContext())) {
-      maxAccess = AccessLevel::Interface;
+      maxAccess = AccessLevel::Internal;
     } else {
       // Because extensions are always at top-level, they should never
       // reference declarations not at the top level. (And any such references
@@ -255,7 +255,7 @@ DefaultAndMaxAccessLevelRequest::evaluate(Evaluator &evaluator,
   if (auto *AA = ED->getAttrs().getAttribute<AccessControlAttr>())
     defaultAccess = std::max(AA->getAccess(), AccessLevel::FilePrivate);
   else
-    defaultAccess = AccessLevel::Interface;
+    defaultAccess = AccessLevel::Internal;
 
   // Don't set the max or default access level to 'open'.  This should
   // be diagnosed as invalid anyway.

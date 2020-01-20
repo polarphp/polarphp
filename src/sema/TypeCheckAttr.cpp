@@ -2001,7 +2001,7 @@ void AttributeChecker::visitUsableFromInlineAttr(UsableFromInlineAttr *attr) {
    }
 
    // @usableFromInline can only be applied to internal declarations.
-   if (VD->getFormalAccess() != AccessLevel::Interface) {
+   if (VD->getFormalAccess() != AccessLevel::Internal) {
       diagnoseAndRemoveAttr(attr,
                             diag::usable_from_inline_attr_with_explicit_access,
                             VD->getFullName(),
@@ -2043,7 +2043,7 @@ void AttributeChecker::visitInlinableAttr(InlinableAttr *attr) {
 
    // @inlinable can only be applied to public or internal declarations.
    auto access = VD->getFormalAccess();
-   if (access < AccessLevel::Interface) {
+   if (access < AccessLevel::Internal) {
       diagnoseAndRemoveAttr(attr, diag::inlinable_decl_not_public,
                             VD->getBaseName(),
                             access);

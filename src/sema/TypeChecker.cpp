@@ -406,10 +406,8 @@ TypeCheckSourceFileRequest::evaluate(Evaluator &eval,
 void polar::performWholeModuleTypeChecking(SourceFile &SF) {
    auto &Ctx = SF.getAstContext();
    FrontendStatsTracer tracer(Ctx.Stats, "perform-whole-module-type-checking");
-   diagnoseAttrsRequiringFoundation(SF);
-   diagnoseObjCMethodConflicts(SF);
-   diagnoseObjCUnsatisfiedOptReqConflicts(SF);
-   diagnoseUnintendedObjCMethodOverrides(SF);
+//   diagnoseAttrsRequiringFoundation(SF);
+//   diagnoseUnintendedObjCMethodOverrides(SF);
 
    // In whole-module mode, import verification is deferred until all files have
    // been type checked. This avoids caching imported declarations when a valid
@@ -445,7 +443,7 @@ void polar::checkInconsistentImplementationOnlyImports(ModuleDecl *MainModule) {
                            normalImport->getModule()->getName());
          if (normalImport->getAttrs().isEmpty()) {
             // Only try to add a fix-it if there's no other annotations on the
-            // import to avoid creating things like
+            // import to avoid creating things likeConstantPropagation.cpp
             // `@_implementationOnly @_exported import Foo`. The developer can
             // resolve those manually.
             warning.fixItInsert(normalImport->getStartLoc(),

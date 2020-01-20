@@ -509,11 +509,11 @@ const {
       Diags.diagnose(SourceLoc(), diag::error_mode_cannot_emit_compiled_source);
       return true;
    }
-   if (!FrontendOptions::canActionEmitObjCHeader(Opts.RequestedAction) &&
-       Opts.InputsAndOutputs.hasObjCHeaderOutputPath()) {
-      Diags.diagnose(SourceLoc(), diag::error_mode_cannot_emit_header);
-      return true;
-   }
+//   if (!FrontendOptions::canActionEmitObjCHeader(Opts.RequestedAction) &&
+//       Opts.InputsAndOutputs.hasObjCHeaderOutputPath()) {
+//      Diags.diagnose(SourceLoc(), diag::error_mode_cannot_emit_header);
+//      return true;
+//   }
    if (!FrontendOptions::canActionEmitLoadedModuleTrace(Opts.RequestedAction) &&
        Opts.InputsAndOutputs.hasLoadedModuleTracePath()) {
       Diags.diagnose(SourceLoc(),

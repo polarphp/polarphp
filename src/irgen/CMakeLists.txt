@@ -65,4 +65,5 @@ target_link_libraries(PolarIRGen PRIVATE
    PolarPILGen
    PolarPIL
    PolarPILOptimizer
+   PolarLLVMPasses
    LLVMPasses)

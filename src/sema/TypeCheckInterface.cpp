@@ -4650,7 +4650,7 @@ static void diagnoseUnstableName(InterfaceConformance *conformance,
             kind = UnstableNameKind::Private;
             break;
 
-         case AccessLevel::Interface:
+         case AccessLevel::Internal:
          case AccessLevel::Open:
          case AccessLevel::Public:
             break;
@@ -5318,9 +5318,9 @@ ValueDecl *TypeChecker::deriveInterfaceRequirement(DeclContext *DC,
 
       case KnownInterfaceKind::Hashable:
          return derived.deriveHashable(Requirement);
-
-      case KnownInterfaceKind::BridgedNSError:
-         return derived.deriveBridgedNSError(Requirement);
+      /// TODO
+//      case KnownInterfaceKind::BridgedNSError:
+//         return derived.deriveBridgedNSError(Requirement);
 
       case KnownInterfaceKind::CodingKey:
          return derived.deriveCodingKey(Requirement);

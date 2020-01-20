@@ -31,7 +31,7 @@
 
 namespace polar::demangling {
 
-using namespace polar::mangling;
+using namespace polar::mangle;
 using polar::ReferenceOwnership;
 
 [[noreturn]]
@@ -45,7 +45,7 @@ static char getCharOfNodeText(Node *node, unsigned idx) {
       case Node::Kind::InfixOperator:
       case Node::Kind::PrefixOperator:
       case Node::Kind::PostfixOperator:
-         return mangling::translateOperatorChar(node->getText()[idx]);
+         return mangle::translateOperatorChar(node->getText()[idx]);
       default:
          return node->getText()[idx];
    }
@@ -162,9 +162,9 @@ namespace {
 
 class Remangler : public RemanglerBase {
    template<typename Mangler>
-   friend void mangling::mangleIdentifier(Mangler &M, StringRef ident);
+   friend void mangle::mangleIdentifier(Mangler &M, StringRef ident);
 
-   friend class mangling::SubstitutionMerging;
+   friend class mangle::SubstitutionMerging;
 
    const bool UsePunycode = true;
 
@@ -370,10 +370,10 @@ void Remangler::mangleIdentifierImpl(Node *node, bool isOperator) {
    SubstitutionEntry entry;
    if (trySubstitution(node, entry, /*treatAsIdentifier*/ true)) return;
    if (isOperator) {
-      mangling::mangleIdentifier(*this,
-                               mangling::translateOperator(node->getText()));
+      mangle::mangleIdentifier(*this,
+                               mangle::translateOperator(node->getText()));
    } else {
-      mangling::mangleIdentifier(*this, node->getText());
+      mangle::mangleIdentifier(*this, node->getText());
    }
    addSubstitution(entry);
 }

@@ -453,7 +453,8 @@ void DependencyGraphImpl::MarkTracerImpl::printPath(
          if (name.front() == 'P')
             name.push_back('_');
          out << " provides type '"
-             << polar::demangling::demangleTypeAsString(name.str())
+         // TODO
+//             << polar::demangling::demangleTypeAsString(name.str())
              << "'\n";
 
       } else if (entry.KindMask.contains(DependencyKind::NominalTypeMember)) {
@@ -472,11 +473,13 @@ void DependencyGraphImpl::MarkTracerImpl::printPath(
 
          if (memberPart.empty()) {
             out << " provides non-private members of type '"
-                << polar::demangling::demangleTypeAsString(typePart)
+            /// TODO
+//                << polar::demangling::demangleTypeAsString(typePart)
                 << "'\n";
          } else {
             out << " provides member '" << memberPart << "' of type '"
-                << polar::demangling::demangleTypeAsString(typePart)
+                /// TODO
+//                << polar::demangling::demangleTypeAsString(typePart)
                 << "'\n";
          }
       } else if (entry.KindMask.contains(DependencyKind::DynamicLookupName)) {

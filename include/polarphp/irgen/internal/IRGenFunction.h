@@ -275,7 +275,7 @@ public:
                                                ValueWitness index);
 
    /// Emit a load of a reference to the given Objective-C selector.
-   llvm::Value *emitObjCSelectorRefLoad(StringRef selector);
+//   llvm::Value *emitObjCSelectorRefLoad(StringRef selector);
 
    /// Return the PILDebugScope for this function.
    const PILDebugScope *getDebugScope() const { return DbgScope; }

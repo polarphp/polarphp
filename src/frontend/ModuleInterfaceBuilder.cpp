@@ -366,10 +366,11 @@ bool ModuleInterfaceBuilder::buildPHPModule(
       PILMod->setSerializePILAction([&]() {
          // We don't want to serialize module docs in the cache -- they
          // will be serialized beside the interface file.
-         serializeToBuffers(Mod, SerializationOpts, ModuleBuffer,
-            /*ModuleDocBuffer*/nullptr,
-            /*SourceInfoBuffer*/nullptr,
-                            PILMod.get());
+         /// TODO
+//         serializeToBuffers(Mod, SerializationOpts, ModuleBuffer,
+//            /*ModuleDocBuffer*/nullptr,
+//            /*SourceInfoBuffer*/nullptr,
+//                            PILMod.get());
       });
 
       LLVM_DEBUG(llvm::dbgs() << "Running PIL processing passes\n");

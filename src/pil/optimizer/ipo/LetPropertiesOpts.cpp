@@ -171,8 +171,8 @@ void LetPropertiesOpt::optimizeLetPropertyAccess(VarDecl *Property,
    // is private or if it is internal and WMO mode is used.
    if (TypeAccess <= AccessLevel::FilePrivate ||
        PropertyAccess <= AccessLevel::FilePrivate
-       || ((TypeAccess <= AccessLevel::Interface ||
-            PropertyAccess <= AccessLevel::Interface) &&
+       || ((TypeAccess <= AccessLevel::Internal ||
+            PropertyAccess <= AccessLevel::Internal) &&
            Module->isWholeModule())) {
       CanRemove = true;
       LLVM_DEBUG(llvm::dbgs() << "Storage for property '" << *Property
@@ -306,7 +306,7 @@ static bool isAssignableExternally(VarDecl *Property, PILModule *Module) {
       for (auto SP : Ty->getStoredProperties()) {
          auto storedPropertyAccess = SP->getEffectiveAccess();
          if (storedPropertyAccess <= AccessLevel::FilePrivate ||
-             (storedPropertyAccess <= AccessLevel::Interface &&
+             (storedPropertyAccess <= AccessLevel::Internal &&
               Module->isWholeModule())) {
             LLVM_DEBUG(llvm::dbgs() << "Property " << *Property
                                     << " cannot be set externally\n");

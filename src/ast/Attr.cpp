@@ -81,7 +81,7 @@ StringRef getAccessLevelSpelling(AccessLevel value) {
          return "private";
       case AccessLevel::FilePrivate:
          return "fileprivate";
-      case AccessLevel::Interface:
+      case AccessLevel::Internal:
          return "internal";
       case AccessLevel::Public:
          return "public";

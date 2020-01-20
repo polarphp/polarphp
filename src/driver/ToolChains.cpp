@@ -322,7 +322,7 @@ ToolChain::constructInvocation(const CompileJobAction &job,
    ArgStringList &Arguments = II.Arguments;
    II.allowsResponseFiles = true;
 
-   for (auto &s : getDriver().getSwiftProgramArgs())
+   for (auto &s : getDriver().getPHPProgramArgs())
       Arguments.push_back(s.c_str());
    Arguments.push_back("-frontend");
 
@@ -689,7 +689,7 @@ ToolChain::constructInvocation(const InterpretJobAction &job,
    ArgStringList &Arguments = II.Arguments;
    II.allowsResponseFiles = true;
 
-   for (auto &s : getDriver().getSwiftProgramArgs())
+   for (auto &s : getDriver().getPHPProgramArgs())
       Arguments.push_back(s.c_str());
    Arguments.push_back("-frontend");
    Arguments.push_back("-interpret");
@@ -729,7 +729,7 @@ ToolChain::constructInvocation(const BackendJobAction &job,
    assert(context.Args.hasArg(options::OPT_embed_bitcode));
    ArgStringList Arguments;
 
-   for (auto &s : getDriver().getSwiftProgramArgs())
+   for (auto &s : getDriver().getPHPProgramArgs())
       Arguments.push_back(s.c_str());
    Arguments.push_back("-frontend");
 
@@ -876,7 +876,7 @@ ToolChain::constructInvocation(const MergeModuleJobAction &job,
    ArgStringList &Arguments = II.Arguments;
    II.allowsResponseFiles = true;
 
-   for (auto &s : getDriver().getSwiftProgramArgs())
+   for (auto &s : getDriver().getPHPProgramArgs())
       Arguments.push_back(s.c_str());
    Arguments.push_back("-frontend");
 
@@ -963,7 +963,7 @@ ToolChain::constructInvocation(const ModuleWrapJobAction &job,
    ArgStringList &Arguments = II.Arguments;
    II.allowsResponseFiles = true;
 
-   for (auto &s : getDriver().getSwiftProgramArgs())
+   for (auto &s : getDriver().getPHPProgramArgs())
       Arguments.push_back(s.c_str());
    Arguments.push_back("-modulewrap");
 
@@ -1008,7 +1008,7 @@ ToolChain::constructInvocation(const REPLJobAction &job,
    }
 
    ArgStringList FrontendArgs;
-   for (auto &s : getDriver().getSwiftProgramArgs())
+   for (auto &s : getDriver().getPHPProgramArgs())
       FrontendArgs.push_back(s.c_str());
 
    addCommonFrontendArgs(*this, context.OI, context.Output, context.Args,
@@ -1093,7 +1093,7 @@ ToolChain::constructInvocation(const GeneratePCHJobAction &job,
    ArgStringList &Arguments = II.Arguments;
    II.allowsResponseFiles = true;
 
-   for (auto &s : getDriver().getSwiftProgramArgs())
+   for (auto &s : getDriver().getPHPProgramArgs())
       Arguments.push_back(s.c_str());
    Arguments.push_back("-frontend");
 

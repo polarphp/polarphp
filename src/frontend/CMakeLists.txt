@@ -22,10 +22,11 @@ polar_add_host_library(PolarFrontend STATIC
    ${POLAR_FRONTEND_SOURCES})
 
 target_link_libraries(PolarFrontend PRIVATE
-   PolarPIL
+#   PolarPIL
    PolarOption
-   PolarPILParser
-   PolarPILGen
-   PolarPILOptimizer
-   PolarSema
-   PolarSerialization)
+#   PolarPILParser
+#   PolarPILGen
+#   PolarPILOptimizer
+#   PolarSema
+#   PolarSerialization
+   )

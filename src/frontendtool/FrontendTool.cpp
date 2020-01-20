@@ -490,22 +490,22 @@ getFileOutputStream(StringRef OutputFilename, AstContext &Ctx) {
 //}
 
 /// Writes PIL out to the given file.
-static bool writePIL(PILModule &SM, ModuleDecl *M, bool EmitVerbosePIL,
-                     StringRef OutputFilename, bool SortPIL) {
-   auto OS = getFileOutputStream(OutputFilename, M->getAstContext());
-   if (!OS) return true;
-   SM.print(*OS, EmitVerbosePIL, M, SortPIL);
+//static bool writePIL(PILModule &SM, ModuleDecl *M, bool EmitVerbosePIL,
+//                     StringRef OutputFilename, bool SortPIL) {
+//   auto OS = getFileOutputStream(OutputFilename, M->getAstContext());
+//   if (!OS) return true;
+//   SM.print(*OS, EmitVerbosePIL, M, SortPIL);
+//
+//   return M->getAstContext().hadError();
+//}
 
-   return M->getAstContext().hadError();
-}
-
-static bool writePIL(PILModule &SM, const PrimarySpecificPaths &PSPs,
-                     CompilerInstance &Instance,
-                     CompilerInvocation &Invocation) {
-   const FrontendOptions &opts = Invocation.getFrontendOptions();
-   return writePIL(SM, Instance.getMainModule(), opts.EmitVerbosePIL,
-                   PSPs.outputFilename, opts.EmitSortedPIL);
-}
+//static bool writePIL(PILModule &SM, const PrimarySpecificPaths &PSPs,
+//                     CompilerInstance &Instance,
+//                     CompilerInvocation &Invocation) {
+//   const FrontendOptions &opts = Invocation.getFrontendOptions();
+//   return writePIL(SM, Instance.getMainModule(), opts.EmitVerbosePIL,
+//                   PSPs.outputFilename, opts.EmitSortedPIL);
+//}
 
 /// Prints the Objective-C "generated header" interface for \p M to \p
 /// outputPath.
@@ -733,113 +733,115 @@ createOptRecordFile(StringRef Filename, DiagnosticEngine &DE) {
    return File;
 }
 
-static bool precompileBridgingHeader(CompilerInvocation &Invocation,
-                                     CompilerInstance &Instance) {
-   auto clangImporter = static_cast<ClangImporter *>(
-      Instance.getAstContext().getClangModuleLoader());
-   auto &ImporterOpts = Invocation.getClangImporterOptions();
-   auto &PCHOutDir = ImporterOpts.PrecompiledHeaderOutputDir;
-   if (!PCHOutDir.empty()) {
-      ImporterOpts.BridgingHeader =
-         Invocation.getFrontendOptions()
-            .InputsAndOutputs.getFilenameOfFirstInput();
-      // Create or validate a persistent PCH.
-      auto SwiftPCHHash = Invocation.getPCHHash();
-      auto PCH = clangImporter->getOrCreatePCH(ImporterOpts, SwiftPCHHash);
-      return !PCH.hasValue();
-   }
-   return clangImporter->emitBridgingPCH(
-      Invocation.getFrontendOptions()
-         .InputsAndOutputs.getFilenameOfFirstInput(),
-      Invocation.getFrontendOptions()
-         .InputsAndOutputs.getSingleOutputFilename());
-}
+/// TODO
+//static bool precompileBridgingHeader(CompilerInvocation &Invocation,
+//                                     CompilerInstance &Instance) {
+//   auto clangImporter = static_cast<ClangImporter *>(
+//      Instance.getAstContext().getClangModuleLoader());
+//   auto &ImporterOpts = Invocation.getClangImporterOptions();
+//   auto &PCHOutDir = ImporterOpts.PrecompiledHeaderOutputDir;
+//   if (!PCHOutDir.empty()) {
+//      ImporterOpts.BridgingHeader =
+//         Invocation.getFrontendOptions()
+//            .InputsAndOutputs.getFilenameOfFirstInput();
+//      // Create or validate a persistent PCH.
+//      auto SwiftPCHHash = Invocation.getPCHHash();
+//      auto PCH = clangImporter->getOrCreatePCH(ImporterOpts, SwiftPCHHash);
+//      return !PCH.hasValue();
+//   }
+//   return clangImporter->emitBridgingPCH(
+//      Invocation.getFrontendOptions()
+//         .InputsAndOutputs.getFilenameOfFirstInput(),
+//      Invocation.getFrontendOptions()
+//         .InputsAndOutputs.getSingleOutputFilename());
+//}
 
-static bool precompileClangModule(CompilerInvocation &Invocation,
-                                  CompilerInstance &Instance) {
-   auto clangImporter = static_cast<ClangImporter *>(
-      Instance.getAstContext().getClangModuleLoader());
-   return clangImporter->emitPrecompiledModule(
-      Invocation.getFrontendOptions()
-         .InputsAndOutputs.getFilenameOfFirstInput(),
-      Invocation.getFrontendOptions().ModuleName,
-      Invocation.getFrontendOptions()
-         .InputsAndOutputs.getSingleOutputFilename());
-}
+//static bool precompileClangModule(CompilerInvocation &Invocation,
+//                                  CompilerInstance &Instance) {
+//   auto clangImporter = static_cast<ClangImporter *>(
+//      Instance.getAstContext().getClangModuleLoader());
+//   return clangImporter->emitPrecompiledModule(
+//      Invocation.getFrontendOptions()
+//         .InputsAndOutputs.getFilenameOfFirstInput(),
+//      Invocation.getFrontendOptions().ModuleName,
+//      Invocation.getFrontendOptions()
+//         .InputsAndOutputs.getSingleOutputFilename());
+//}
 
-static bool dumpPrecompiledClangModule(CompilerInvocation &Invocation,
-                                       CompilerInstance &Instance) {
-   auto clangImporter = static_cast<ClangImporter *>(
-      Instance.getAstContext().getClangModuleLoader());
-   return clangImporter->dumpPrecompiledModule(
-      Invocation.getFrontendOptions()
-         .InputsAndOutputs.getFilenameOfFirstInput(),
-      Invocation.getFrontendOptions()
-         .InputsAndOutputs.getSingleOutputFilename());
-}
+//static bool dumpPrecompiledClangModule(CompilerInvocation &Invocation,
+//                                       CompilerInstance &Instance) {
+//   auto clangImporter = static_cast<ClangImporter *>(
+//      Instance.getAstContext().getClangModuleLoader());
+//   return clangImporter->dumpPrecompiledModule(
+//      Invocation.getFrontendOptions()
+//         .InputsAndOutputs.getFilenameOfFirstInput(),
+//      Invocation.getFrontendOptions()
+//         .InputsAndOutputs.getSingleOutputFilename());
+//}
 
-static bool buildModuleFromInterface(CompilerInvocation &Invocation,
-                                     CompilerInstance &Instance) {
-   const FrontendOptions &FEOpts = Invocation.getFrontendOptions();
-   assert(FEOpts.InputsAndOutputs.hasSingleInput());
-   StringRef InputPath = FEOpts.InputsAndOutputs.getFilenameOfFirstInput();
-   StringRef PrebuiltCachePath = FEOpts.PrebuiltModuleCachePath;
-   return ModuleInterfaceLoader::buildSwiftModuleFromSwiftInterface(
-      Instance.getSourceMgr(), Instance.getDiags(),
-      Invocation.getSearchPathOptions(), Invocation.getLangOptions(),
-      Invocation.getClangModuleCachePath(),
-      PrebuiltCachePath, Invocation.getModuleName(), InputPath,
-      Invocation.getOutputFilename(),
-      FEOpts.SerializeModuleInterfaceDependencyHashes,
-      FEOpts.TrackSystemDeps, FEOpts.RemarkOnRebuildFromModuleInterface);
-}
-
-static bool compileLLVMIR(CompilerInvocation &Invocation,
-                          CompilerInstance &Instance,
-                          UnifiedStatsReporter *Stats) {
-   auto &LLVMContext = get_global_llvm_context();
-
-   // Load in bitcode file.
-   assert(Invocation.getFrontendOptions().InputsAndOutputs.hasSingleInput() &&
-          "We expect a single input for bitcode input!");
-   llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> FileBufOrErr =
-      polar::vfs::get_file_or_stdin(Instance.getFileSystem(),
-                                    Invocation.getFrontendOptions()
-                                       .InputsAndOutputs.getFilenameOfFirstInput());
-
-   if (!FileBufOrErr) {
-      Instance.getAstContext().Diags.diagnose(
-         SourceLoc(), diag::error_open_input_file,
-         Invocation.getFrontendOptions()
-            .InputsAndOutputs.getFilenameOfFirstInput(),
-         FileBufOrErr.getError().message());
-      return true;
-   }
-   llvm::MemoryBuffer *MainFile = FileBufOrErr.get().get();
-
-   llvm::SMDiagnostic Err;
-   std::unique_ptr<llvm::Module> Module =
-      llvm::parseIR(MainFile->getMemBufferRef(), Err, LLVMContext);
-   if (!Module) {
-      // TODO: Translate from the diagnostic info to the SourceManager location
-      // if available.
-      Instance.getAstContext().Diags.diagnose(
-         SourceLoc(), diag::error_parse_input_file,
-         Invocation.getFrontendOptions()
-            .InputsAndOutputs.getFilenameOfFirstInput(),
-         Err.getMessage());
-      return true;
-   }
-   IRGenOptions &IRGenOpts = Invocation.getIRGenOptions();
-   // TODO: remove once the frontend understands what action it should perform
-   IRGenOpts.OutputKind =
-      getOutputKind(Invocation.getFrontendOptions().RequestedAction);
-
-   return performLLVM(IRGenOpts, Instance.getAstContext(), Module.get(),
-                      Invocation.getFrontendOptions()
-                         .InputsAndOutputs.getSingleOutputFilename(),
-                      Stats);
-}
+/// TODO
+//static bool buildModuleFromInterface(CompilerInvocation &Invocation,
+//                                     CompilerInstance &Instance) {
+//   const FrontendOptions &FEOpts = Invocation.getFrontendOptions();
+//   assert(FEOpts.InputsAndOutputs.hasSingleInput());
+//   StringRef InputPath = FEOpts.InputsAndOutputs.getFilenameOfFirstInput();
+//   StringRef PrebuiltCachePath = FEOpts.PrebuiltModuleCachePath;
+//   return ModuleInterfaceLoader::buildSwiftModuleFromSwiftInterface(
+//      Instance.getSourceMgr(), Instance.getDiags(),
+//      Invocation.getSearchPathOptions(), Invocation.getLangOptions(),
+//      Invocation.getClangModuleCachePath(),
+//      PrebuiltCachePath, Invocation.getModuleName(), InputPath,
+//      Invocation.getOutputFilename(),
+//      FEOpts.SerializeModuleInterfaceDependencyHashes,
+//      FEOpts.TrackSystemDeps, FEOpts.RemarkOnRebuildFromModuleInterface);
+//}
+//
+//static bool compileLLVMIR(CompilerInvocation &Invocation,
+//                          CompilerInstance &Instance,
+//                          UnifiedStatsReporter *Stats) {
+//   auto &LLVMContext = get_global_llvm_context();
+//
+//   // Load in bitcode file.
+//   assert(Invocation.getFrontendOptions().InputsAndOutputs.hasSingleInput() &&
+//          "We expect a single input for bitcode input!");
+//   llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> FileBufOrErr =
+//      polar::vfs::get_file_or_stdin(Instance.getFileSystem(),
+//                                    Invocation.getFrontendOptions()
+//                                       .InputsAndOutputs.getFilenameOfFirstInput());
+//
+//   if (!FileBufOrErr) {
+//      Instance.getAstContext().Diags.diagnose(
+//         SourceLoc(), diag::error_open_input_file,
+//         Invocation.getFrontendOptions()
+//            .InputsAndOutputs.getFilenameOfFirstInput(),
+//         FileBufOrErr.getError().message());
+//      return true;
+//   }
+//   llvm::MemoryBuffer *MainFile = FileBufOrErr.get().get();
+//
+//   llvm::SMDiagnostic Err;
+//   std::unique_ptr<llvm::Module> Module =
+//      llvm::parseIR(MainFile->getMemBufferRef(), Err, LLVMContext);
+//   if (!Module) {
+//      // TODO: Translate from the diagnostic info to the SourceManager location
+//      // if available.
+//      Instance.getAstContext().Diags.diagnose(
+//         SourceLoc(), diag::error_parse_input_file,
+//         Invocation.getFrontendOptions()
+//            .InputsAndOutputs.getFilenameOfFirstInput(),
+//         Err.getMessage());
+//      return true;
+//   }
+//   IRGenOptions &IRGenOpts = Invocation.getIRGenOptions();
+//   // TODO: remove once the frontend understands what action it should perform
+//   IRGenOpts.OutputKind =
+//      getOutputKind(Invocation.getFrontendOptions().RequestedAction);
+//
+//   return performLLVM(IRGenOpts, Instance.getAstContext(), Module.get(),
+//                      Invocation.getFrontendOptions()
+//                         .InputsAndOutputs.getSingleOutputFilename(),
+//                      Stats);
+//}
 
 static void verifyGenericSignaturesIfNeeded(CompilerInvocation &Invocation,
                                             AstContext &Context) {
@@ -982,7 +984,7 @@ static void emitReferenceDependenciesForAllPrimaryInputsIfNeeded(
    }
 }
 static void
-emitSwiftRangesForAllPrimaryInputsIfNeeded(CompilerInvocation &Invocation,
+emitPHPRangesForAllPrimaryInputsIfNeeded(CompilerInvocation &Invocation,
                                            CompilerInstance &Instance) {
    if (Invocation.getFrontendOptions().InputsAndOutputs.hasPHPRangesPath() &&
        Instance.getPrimarySourceFiles().empty()) {
@@ -1037,98 +1039,98 @@ static bool writeTBDIfNeeded(CompilerInvocation &Invocation,
    return writeTBD(Instance.getMainModule(), TBDPath, tbdOpts);
 }
 
-static bool performCompileStepsPostPILGen(
-   CompilerInstance &Instance, CompilerInvocation &Invocation,
-   std::unique_ptr<PILModule> SM, bool astGuaranteedToCorrespondToPIL,
-   ModuleOrSourceFile MSF, const PrimarySpecificPaths &PSPs,
-   bool moduleIsPublic, int &ReturnValue, FrontendObserver *observer,
-   UnifiedStatsReporter *Stats);
-
-static bool
-performCompileStepsPostSema(CompilerInvocation &Invocation,
-                            CompilerInstance &Instance,
-                            bool moduleIsPublic, int &ReturnValue,
-                            FrontendObserver *observer,
-                            UnifiedStatsReporter *Stats) {
-   auto mod = Instance.getMainModule();
-   if (auto SM = Instance.takePILModule()) {
-      const PrimarySpecificPaths PSPs =
-         Instance.getPrimarySpecificPathsForAtMostOnePrimary();
-      return performCompileStepsPostPILGen(Instance, Invocation, std::move(SM),
-         /*ASTGuaranteedToCorrespondToPIL=*/false,
-                                           mod, PSPs, moduleIsPublic,
-                                           ReturnValue, observer, Stats);
-   }
-
-   PILOptions &PILOpts = Invocation.getPILOptions();
-   FrontendOptions &opts = Invocation.getFrontendOptions();
-   auto fileIsPIB = [](const FileUnit *File) -> bool {
-      auto SASTF = dyn_cast<SerializedAstFile>(File);
-      return SASTF && SASTF->isPIB();
-   };
-
-   if (!opts.InputsAndOutputs.hasPrimaryInputs()) {
-      // If there are no primary inputs the compiler is in WMO mode and builds one
-      // PILModule for the entire module.
-      auto SM = performPILGeneration(mod, Instance.getPILTypes(), PILOpts);
-      const PrimarySpecificPaths PSPs =
-         Instance.getPrimarySpecificPathsForWholeModuleOptimizationMode();
-      bool astGuaranteedToCorrespondToPIL =
-         llvm::none_of(mod->getFiles(), fileIsPIB);
-      return performCompileStepsPostPILGen(Instance, Invocation, std::move(SM),
-                                           astGuaranteedToCorrespondToPIL,
-                                           mod, PSPs, moduleIsPublic,
-                                           ReturnValue, observer, Stats);
-   }
-   // If there are primary source files, build a separate PILModule for
-   // each source file, and run the remaining PILOpt-Serialize-IRGen-LLVM
-   // once for each such input.
-   if (!Instance.getPrimarySourceFiles().empty()) {
-      bool result = false;
-      for (auto *PrimaryFile : Instance.getPrimarySourceFiles()) {
-         auto SM = performPILGeneration(*PrimaryFile, Instance.getPILTypes(), PILOpts);
-         const PrimarySpecificPaths PSPs =
-            Instance.getPrimarySpecificPathsForSourceFile(*PrimaryFile);
-         result |= performCompileStepsPostPILGen(Instance, Invocation, std::move(SM),
-            /*ASTGuaranteedToCorrespondToPIL*/true,
-                                                 PrimaryFile, PSPs, moduleIsPublic,
-                                                 ReturnValue, observer, Stats);
-      }
-
-      return result;
-   }
-
-   // If there are primary inputs but no primary _source files_, there might be
-   // a primary serialized input.
-   bool result = false;
-   for (FileUnit *fileUnit : mod->getFiles()) {
-      if (auto SASTF = dyn_cast<SerializedAstFile>(fileUnit))
-         if (Invocation.getFrontendOptions().InputsAndOutputs.isInputPrimary(
-            SASTF->getFilename())) {
-            auto SM = performPILGeneration(*SASTF, Instance.getPILTypes(), PILOpts);
-            const PrimarySpecificPaths &PSPs =
-               Instance.getPrimarySpecificPathsForPrimary(SASTF->getFilename());
-            result |= performCompileStepsPostPILGen(Instance, Invocation, std::move(SM),
-                                                    !fileIsPIB(SASTF),
-                                                    mod, PSPs, moduleIsPublic,
-                                                    ReturnValue, observer, Stats);
-         }
-   }
-
-   return result;
-}
+//static bool performCompileStepsPostPILGen(
+//   CompilerInstance &Instance, CompilerInvocation &Invocation,
+//   std::unique_ptr<PILModule> SM, bool astGuaranteedToCorrespondToPIL,
+//   ModuleOrSourceFile MSF, const PrimarySpecificPaths &PSPs,
+//   bool moduleIsPublic, int &ReturnValue, FrontendObserver *observer,
+//   UnifiedStatsReporter *Stats);
+//
+//static bool
+//performCompileStepsPostSema(CompilerInvocation &Invocation,
+//                            CompilerInstance &Instance,
+//                            bool moduleIsPublic, int &ReturnValue,
+//                            FrontendObserver *observer,
+//                            UnifiedStatsReporter *Stats) {
+//   auto mod = Instance.getMainModule();
+//   if (auto SM = Instance.takePILModule()) {
+//      const PrimarySpecificPaths PSPs =
+//         Instance.getPrimarySpecificPathsForAtMostOnePrimary();
+//      return performCompileStepsPostPILGen(Instance, Invocation, std::move(SM),
+//         /*ASTGuaranteedToCorrespondToPIL=*/false,
+//                                           mod, PSPs, moduleIsPublic,
+//                                           ReturnValue, observer, Stats);
+//   }
+//
+//   PILOptions &PILOpts = Invocation.getPILOptions();
+//   FrontendOptions &opts = Invocation.getFrontendOptions();
+//   auto fileIsPIB = [](const FileUnit *File) -> bool {
+//      auto SASTF = dyn_cast<SerializedAstFile>(File);
+//      return SASTF && SASTF->isPIB();
+//   };
+//
+//   if (!opts.InputsAndOutputs.hasPrimaryInputs()) {
+//      // If there are no primary inputs the compiler is in WMO mode and builds one
+//      // PILModule for the entire module.
+//      auto SM = performPILGeneration(mod, Instance.getPILTypes(), PILOpts);
+//      const PrimarySpecificPaths PSPs =
+//         Instance.getPrimarySpecificPathsForWholeModuleOptimizationMode();
+//      bool astGuaranteedToCorrespondToPIL =
+//         llvm::none_of(mod->getFiles(), fileIsPIB);
+//      return performCompileStepsPostPILGen(Instance, Invocation, std::move(SM),
+//                                           astGuaranteedToCorrespondToPIL,
+//                                           mod, PSPs, moduleIsPublic,
+//                                           ReturnValue, observer, Stats);
+//   }
+//   // If there are primary source files, build a separate PILModule for
+//   // each source file, and run the remaining PILOpt-Serialize-IRGen-LLVM
+//   // once for each such input.
+//   if (!Instance.getPrimarySourceFiles().empty()) {
+//      bool result = false;
+//      for (auto *PrimaryFile : Instance.getPrimarySourceFiles()) {
+//         auto SM = performPILGeneration(*PrimaryFile, Instance.getPILTypes(), PILOpts);
+//         const PrimarySpecificPaths PSPs =
+//            Instance.getPrimarySpecificPathsForSourceFile(*PrimaryFile);
+//         result |= performCompileStepsPostPILGen(Instance, Invocation, std::move(SM),
+//            /*ASTGuaranteedToCorrespondToPIL*/true,
+//                                                 PrimaryFile, PSPs, moduleIsPublic,
+//                                                 ReturnValue, observer, Stats);
+//      }
+//
+//      return result;
+//   }
+//
+//   // If there are primary inputs but no primary _source files_, there might be
+//   // a primary serialized input.
+//   bool result = false;
+//   for (FileUnit *fileUnit : mod->getFiles()) {
+//      if (auto SASTF = dyn_cast<SerializedAstFile>(fileUnit))
+//         if (Invocation.getFrontendOptions().InputsAndOutputs.isInputPrimary(
+//            SASTF->getFilename())) {
+//            auto SM = performPILGeneration(*SASTF, Instance.getPILTypes(), PILOpts);
+//            const PrimarySpecificPaths &PSPs =
+//               Instance.getPrimarySpecificPathsForPrimary(SASTF->getFilename());
+//            result |= performCompileStepsPostPILGen(Instance, Invocation, std::move(SM),
+//                                                    !fileIsPIB(SASTF),
+//                                                    mod, PSPs, moduleIsPublic,
+//                                                    ReturnValue, observer, Stats);
+//         }
+//   }
+//
+//   return result;
+//}
 
 /// Emits index data for all primary inputs, or the main module.
-static bool
-emitIndexData(CompilerInvocation &Invocation, CompilerInstance &Instance) {
-   bool hadEmitIndexDataError = false;
-   if (Instance.getPrimarySourceFiles().empty())
-      return emitIndexDataIfNeeded(nullptr, Invocation, Instance);
-   for (SourceFile *SF : Instance.getPrimarySourceFiles())
-      hadEmitIndexDataError = emitIndexDataIfNeeded(SF, Invocation, Instance) ||
-                              hadEmitIndexDataError;
-   return hadEmitIndexDataError;
-}
+//static bool
+//emitIndexData(CompilerInvocation &Invocation, CompilerInstance &Instance) {
+//   bool hadEmitIndexDataError = false;
+//   if (Instance.getPrimarySourceFiles().empty())
+//      return emitIndexDataIfNeeded(nullptr, Invocation, Instance);
+//   for (SourceFile *SF : Instance.getPrimarySourceFiles())
+//      hadEmitIndexDataError = emitIndexDataIfNeeded(SF, Invocation, Instance) ||
+//                              hadEmitIndexDataError;
+//   return hadEmitIndexDataError;
+//}
 
 /// Emits all "one-per-module" supplementary outputs that don't depend on
 /// anything past type-checking.
@@ -1136,35 +1138,35 @@ emitIndexData(CompilerInvocation &Invocation, CompilerInstance &Instance) {
 /// These are extracted out so that they can be invoked early when using
 /// `-typecheck`, but skipped for any mode that runs PIL diagnostics if there's
 /// an error found there (to get those diagnostics back to the user faster).
-static bool emitAnyWholeModulePostTypeCheckSupplementaryOutputs(
-   CompilerInstance &Instance, CompilerInvocation &Invocation,
-   bool moduleIsPublic) {
-   const FrontendOptions &opts = Invocation.getFrontendOptions();
-
-   // Record whether we failed to emit any of these outputs, but keep going; one
-   // failure does not mean skipping the rest.
-   bool hadAnyError = false;
-   // @todo
-//   if (opts.InputsAndOutputs.hasObjCHeaderOutputPath()) {
-//      hadAnyError |= printAsObjCIfNeeded(
-//         Invocation.getObjCHeaderOutputPathForAtMostOnePrimary(),
-//         Instance.getMainModule(), opts.ImplicitObjCHeaderPath, moduleIsPublic);
+//static bool emitAnyWholeModulePostTypeCheckSupplementaryOutputs(
+//   CompilerInstance &Instance, CompilerInvocation &Invocation,
+//   bool moduleIsPublic) {
+//   const FrontendOptions &opts = Invocation.getFrontendOptions();
+//
+//   // Record whether we failed to emit any of these outputs, but keep going; one
+//   // failure does not mean skipping the rest.
+//   bool hadAnyError = false;
+//   // @todo
+////   if (opts.InputsAndOutputs.hasObjCHeaderOutputPath()) {
+////      hadAnyError |= printAsObjCIfNeeded(
+////         Invocation.getObjCHeaderOutputPathForAtMostOnePrimary(),
+////         Instance.getMainModule(), opts.ImplicitObjCHeaderPath, moduleIsPublic);
+////   }
+//
+//   if (opts.InputsAndOutputs.hasModuleInterfaceOutputPath()) {
+//      hadAnyError |= printModuleInterfaceIfNeeded(
+//         Invocation.getModuleInterfaceOutputPathForWholeModule(),
+//         Invocation.getModuleInterfaceOptions(),
+//         Invocation.getLangOptions(),
+//         Instance.getMainModule());
 //   }
-
-   if (opts.InputsAndOutputs.hasModuleInterfaceOutputPath()) {
-      hadAnyError |= printModuleInterfaceIfNeeded(
-         Invocation.getModuleInterfaceOutputPathForWholeModule(),
-         Invocation.getModuleInterfaceOptions(),
-         Invocation.getLangOptions(),
-         Instance.getMainModule());
-   }
-
-   {
-      hadAnyError |= writeTBDIfNeeded(Invocation, Instance);
-   }
-
-   return hadAnyError;
-}
+//
+//   {
+//      hadAnyError |= writeTBDIfNeeded(Invocation, Instance);
+//   }
+//
+//   return hadAnyError;
+//}
 
 /// Performs the compile requested by the user.
 /// \param Instance Will be reset after performIRGeneration when the verifier
@@ -1186,18 +1188,19 @@ static bool performCompile(CompilerInstance &Instance,
 
    // We've been asked to precompile a bridging header or module; we want to
    // avoid touching any other inputs and just parse, emit and exit.
-   if (Action == FrontendOptions::ActionType::EmitPCH)
-      return precompileBridgingHeader(Invocation, Instance);
-   if (Action == FrontendOptions::ActionType::EmitPCM)
-      return precompileClangModule(Invocation, Instance);
-   if (Action == FrontendOptions::ActionType::DumpPCM)
-      return dumpPrecompiledClangModule(Invocation, Instance);
+   /// TODO
+//   if (Action == FrontendOptions::ActionType::EmitPCH)
+//      return precompileBridgingHeader(Invocation, Instance);
+//   if (Action == FrontendOptions::ActionType::EmitPCM)
+//      return precompileClangModule(Invocation, Instance);
+//   if (Action == FrontendOptions::ActionType::DumpPCM)
+//      return dumpPrecompiledClangModule(Invocation, Instance);
+   /// TODO
+//   if (Action == FrontendOptions::ActionType::CompileModuleFromInterface)
+//      return buildModuleFromInterface(Invocation, Instance);
 
-   if (Action == FrontendOptions::ActionType::CompileModuleFromInterface)
-      return buildModuleFromInterface(Invocation, Instance);
-
-   if (Invocation.getInputKind() == InputFileKind::LLVM)
-      return compileLLVMIR(Invocation, Instance, Stats);
+//   if (Invocation.getInputKind() == InputFileKind::LLVM)
+//      return compileLLVMIR(Invocation, Instance, Stats);
 
    if (FrontendOptions::shouldActionOnlyParse(Action)) {
       bool ParseDelayedDeclListsOnEnd =
@@ -1207,9 +1210,9 @@ static bool performCompile(CompilerInstance &Instance,
          Action == FrontendOptions::ActionType::EmitImportedModules,
          ParseDelayedDeclListsOnEnd);
    } else if (Action == FrontendOptions::ActionType::ResolveImports) {
-      Instance.performParseAndResolveImportsOnly();
+      //Instance.performParseAndResolveImportsOnly();
    } else {
-      Instance.performSema();
+      //Instance.performSema();
    }
 
    AstContext &Context = Instance.getAstContext();
@@ -1254,14 +1257,14 @@ static bool performCompile(CompilerInstance &Instance,
       Context.getClangModuleLoader()->printStatistics();
 
    emitReferenceDependenciesForAllPrimaryInputsIfNeeded(Invocation, Instance);
-   emitSwiftRangesForAllPrimaryInputsIfNeeded(Invocation, Instance);
+   emitPHPRangesForAllPrimaryInputsIfNeeded(Invocation, Instance);
    emitCompiledSourceForAllPrimaryInputsIfNeeded(Invocation, Instance);
 
-   if (Context.hadError()) {
-      //  Emit the index store data even if there were compiler errors.
-      (void)emitIndexData(Invocation, Instance);
-      return true;
-   }
+//   if (Context.hadError()) {
+//      //  Emit the index store data even if there were compiler errors.
+//      (void)emitIndexData(Invocation, Instance);
+//      return true;
+//   }
 
    (void)emitLoadedModuleTraceForAllPrimariesIfNeeded(
       Instance.getMainModule(), Instance.getDependencyTracker(), opts);
@@ -1274,389 +1277,389 @@ static bool performCompile(CompilerInstance &Instance,
       !Context.LangOpts.EnableAppExtensionRestrictions;
 
    // We've just been told to perform a typecheck, so we can return now.
-   if (Action == FrontendOptions::ActionType::Typecheck) {
-      if (emitIndexData(Invocation, Instance))
-         return true;
-      // FIXME: Whole-module outputs with a non-whole-module -typecheck ought to
-      // be disallowed, but the driver implements -index-file mode by generating a
-      // regular whole-module frontend command line and modifying it to index just
-      // one file (by making it a primary) instead of all of them. If that
-      // invocation also has flags to emit whole-module supplementary outputs, the
-      // compiler can crash trying to access information for non-type-checked
-      // declarations in the non-primary files. For now, prevent those crashes by
-      // guarding the emission of whole-module supplementary outputs.
-      if (opts.InputsAndOutputs.isWholeModule()) {
-         if (emitAnyWholeModulePostTypeCheckSupplementaryOutputs(Instance,
-                                                                 Invocation,
-                                                                 moduleIsPublic)) {
-            return true;
-         }
-      }
-      return false;
-   }
+//   if (Action == FrontendOptions::ActionType::Typecheck) {
+//      if (emitIndexData(Invocation, Instance))
+//         return true;
+//      // FIXME: Whole-module outputs with a non-whole-module -typecheck ought to
+//      // be disallowed, but the driver implements -index-file mode by generating a
+//      // regular whole-module frontend command line and modifying it to index just
+//      // one file (by making it a primary) instead of all of them. If that
+//      // invocation also has flags to emit whole-module supplementary outputs, the
+//      // compiler can crash trying to access information for non-type-checked
+//      // declarations in the non-primary files. For now, prevent those crashes by
+//      // guarding the emission of whole-module supplementary outputs.
+//      if (opts.InputsAndOutputs.isWholeModule()) {
+//         if (emitAnyWholeModulePostTypeCheckSupplementaryOutputs(Instance,
+//                                                                 Invocation,
+//                                                                 moduleIsPublic)) {
+//            return true;
+//         }
+//      }
+//      return false;
+//   }
 
-   assert(FrontendOptions::doesActionGeneratePIL(Action) &&
-          "All actions not requiring PILGen must have been handled!");
-
-   return performCompileStepsPostSema(Invocation, Instance, moduleIsPublic,
-                                      ReturnValue, observer, Stats);
+//   assert(FrontendOptions::doesActionGeneratePIL(Action) &&
+//          "All actions not requiring PILGen must have been handled!");
+//
+//   return performCompileStepsPostSema(Invocation, Instance, moduleIsPublic,
+//                                      ReturnValue, observer, Stats);
 }
 
 /// Get the main source file's private discriminator and attach it to
 /// the compile unit's flags.
-static void setPrivateDiscriminatorIfNeeded(IRGenOptions &IRGenOpts,
-                                            ModuleOrSourceFile MSF) {
-   if (IRGenOpts.DebugInfoLevel == IRGenDebugInfoLevel::None ||
-       !MSF.is<SourceFile *>())
-      return;
-   Identifier PD = MSF.get<SourceFile *>()->getPrivateDiscriminator();
-   if (!PD.empty()) {
-      if (!IRGenOpts.DebugFlags.empty())
-         IRGenOpts.DebugFlags += " ";
-      IRGenOpts.DebugFlags += ("-private-discriminator " + PD.str()).str();
-   }
-}
+//static void setPrivateDiscriminatorIfNeeded(IRGenOptions &IRGenOpts,
+//                                            ModuleOrSourceFile MSF) {
+//   if (IRGenOpts.DebugInfoLevel == IRGenDebugInfoLevel::None ||
+//       !MSF.is<SourceFile *>())
+//      return;
+//   Identifier PD = MSF.get<SourceFile *>()->getPrivateDiscriminator();
+//   if (!PD.empty()) {
+//      if (!IRGenOpts.DebugFlags.empty())
+//         IRGenOpts.DebugFlags += " ";
+//      IRGenOpts.DebugFlags += ("-private-discriminator " + PD.str()).str();
+//   }
+//}
 
-static bool serializePIB(PILModule *SM, const PrimarySpecificPaths &PSPs,
-                         AstContext &Context, ModuleOrSourceFile MSF) {
-   const std::string &moduleOutputPath =
-      PSPs.supplementaryOutputs.ModuleOutputPath;
-   assert(!moduleOutputPath.empty() && "must have an output path");
+//static bool serializePIB(PILModule *SM, const PrimarySpecificPaths &PSPs,
+//                         AstContext &Context, ModuleOrSourceFile MSF) {
+//   const std::string &moduleOutputPath =
+//      PSPs.supplementaryOutputs.ModuleOutputPath;
+//   assert(!moduleOutputPath.empty() && "must have an output path");
+//
+//   SerializationOptions serializationOpts;
+//   serializationOpts.OutputPath = moduleOutputPath.c_str();
+//   serializationOpts.SerializeAllPIL = true;
+//   serializationOpts.IsPIB = true;
+//
+//   serialize(MSF, serializationOpts, SM);
+//   return Context.hadError();
+//}
 
-   SerializationOptions serializationOpts;
-   serializationOpts.OutputPath = moduleOutputPath.c_str();
-   serializationOpts.SerializeAllPIL = true;
-   serializationOpts.IsPIB = true;
+//static void generateIR(IRGenOptions &IRGenOpts, std::unique_ptr<PILModule> SM,
+//                       const PrimarySpecificPaths &PSPs,
+//                       StringRef OutputFilename, ModuleOrSourceFile MSF,
+//                       std::unique_ptr<llvm::Module> &IRModule,
+//                       llvm::GlobalVariable *&HashGlobal,
+//                       ArrayRef<std::string> parallelOutputFilenames) {
+//   // FIXME: We shouldn't need to use the global context here, but
+//   // something is persisting across calls to performIRGeneration.
+//   auto &LLVMContext = get_global_llvm_context();
+//   IRModule = MSF.is<SourceFile *>()
+//              ? performIRGeneration(IRGenOpts, *MSF.get<SourceFile *>(),
+//                                    std::move(SM), OutputFilename, PSPs,
+//                                    LLVMContext, &HashGlobal)
+//              : performIRGeneration(IRGenOpts, MSF.get<ModuleDecl *>(),
+//                                    std::move(SM), OutputFilename, PSPs,
+//                                    LLVMContext, parallelOutputFilenames,
+//                                    &HashGlobal);
+//}
+//
+//static bool processCommandLineAndRunImmediately(CompilerInvocation &Invocation,
+//                                                CompilerInstance &Instance,
+//                                                std::unique_ptr<PILModule> SM,
+//                                                ModuleOrSourceFile MSF,
+//                                                FrontendObserver *observer,
+//                                                int &ReturnValue) {
+//   FrontendOptions &opts = Invocation.getFrontendOptions();
+//   assert(!MSF.is<SourceFile *>() && "-i doesn't work in -primary-file mode");
+//   IRGenOptions &IRGenOpts = Invocation.getIRGenOptions();
+//   IRGenOpts.UseJIT = true;
+//   IRGenOpts.DebugInfoLevel = IRGenDebugInfoLevel::Normal;
+//   IRGenOpts.DebugInfoFormat = IRGenDebugInfoFormat::DWARF;
+//   const ProcessCmdLine &CmdLine =
+//      ProcessCmdLine(opts.ImmediateArgv.begin(), opts.ImmediateArgv.end());
+//   Instance.setPILModule(std::move(SM));
+//
+//
+//   PrettyStackTraceStringAction trace(
+//      "running user code",
+//      MSF.is<SourceFile *>() ? MSF.get<SourceFile *>()->getFilename()
+//                             : MSF.get<ModuleDecl *>()->getModuleFilename());
+//
+//   ReturnValue =
+//      RunImmediately(Instance, CmdLine, IRGenOpts, Invocation.getPILOptions());
+//   return Instance.getAstContext().hadError();
+//}
+//
+//static bool validateTBDIfNeeded(CompilerInvocation &Invocation,
+//                                ModuleOrSourceFile MSF,
+//                                bool astGuaranteedToCorrespondToPIL,
+//                                llvm::Module &IRModule) {
+//   if (!astGuaranteedToCorrespondToPIL ||
+//       !inputFileKindCanHaveTBDValidated(Invocation.getInputKind()))
+//      return false;
+//
+//   if (Invocation.getPILOptions().CrossModuleOptimization)
+//      return false;
+//
+//   const auto &frontendOpts = Invocation.getFrontendOptions();
+//   auto mode = frontendOpts.ValidateTBDAgainstIR;
+//   // Ensure all cases are covered by using a switch here.
+//   switch (mode) {
+//      case FrontendOptions::TBDValidationMode::Default:
+//#ifndef NDEBUG
+//         // With a debug compiler, we do some validation by default.
+//         mode = FrontendOptions::TBDValidationMode::MissingFromTBD;
+//         break;
+//#else
+//      // Otherwise, the default is to do nothing.
+//    LLVM_FALLTHROUGH;
+//#endif
+//      case FrontendOptions::TBDValidationMode::None:
+//         return false;
+//      case FrontendOptions::TBDValidationMode::All:
+//      case FrontendOptions::TBDValidationMode::MissingFromTBD:
+//         break;
+//   }
+//
+//   const bool allSymbols = mode == FrontendOptions::TBDValidationMode::All;
+//   return MSF.is<SourceFile *>()
+//          ? validateTBD(MSF.get<SourceFile *>(), IRModule,
+//                        Invocation.getTBDGenOptions(), allSymbols)
+//          : validateTBD(MSF.get<ModuleDecl *>(), IRModule,
+//                        Invocation.getTBDGenOptions(), allSymbols);
+//}
 
-   serialize(MSF, serializationOpts, SM);
-   return Context.hadError();
-}
-
-static void generateIR(IRGenOptions &IRGenOpts, std::unique_ptr<PILModule> SM,
-                       const PrimarySpecificPaths &PSPs,
-                       StringRef OutputFilename, ModuleOrSourceFile MSF,
-                       std::unique_ptr<llvm::Module> &IRModule,
-                       llvm::GlobalVariable *&HashGlobal,
-                       ArrayRef<std::string> parallelOutputFilenames) {
-   // FIXME: We shouldn't need to use the global context here, but
-   // something is persisting across calls to performIRGeneration.
-   auto &LLVMContext = get_global_llvm_context();
-   IRModule = MSF.is<SourceFile *>()
-              ? performIRGeneration(IRGenOpts, *MSF.get<SourceFile *>(),
-                                    std::move(SM), OutputFilename, PSPs,
-                                    LLVMContext, &HashGlobal)
-              : performIRGeneration(IRGenOpts, MSF.get<ModuleDecl *>(),
-                                    std::move(SM), OutputFilename, PSPs,
-                                    LLVMContext, parallelOutputFilenames,
-                                    &HashGlobal);
-}
-
-static bool processCommandLineAndRunImmediately(CompilerInvocation &Invocation,
-                                                CompilerInstance &Instance,
-                                                std::unique_ptr<PILModule> SM,
-                                                ModuleOrSourceFile MSF,
-                                                FrontendObserver *observer,
-                                                int &ReturnValue) {
-   FrontendOptions &opts = Invocation.getFrontendOptions();
-   assert(!MSF.is<SourceFile *>() && "-i doesn't work in -primary-file mode");
-   IRGenOptions &IRGenOpts = Invocation.getIRGenOptions();
-   IRGenOpts.UseJIT = true;
-   IRGenOpts.DebugInfoLevel = IRGenDebugInfoLevel::Normal;
-   IRGenOpts.DebugInfoFormat = IRGenDebugInfoFormat::DWARF;
-   const ProcessCmdLine &CmdLine =
-      ProcessCmdLine(opts.ImmediateArgv.begin(), opts.ImmediateArgv.end());
-   Instance.setPILModule(std::move(SM));
-
-
-   PrettyStackTraceStringAction trace(
-      "running user code",
-      MSF.is<SourceFile *>() ? MSF.get<SourceFile *>()->getFilename()
-                             : MSF.get<ModuleDecl *>()->getModuleFilename());
-
-   ReturnValue =
-      RunImmediately(Instance, CmdLine, IRGenOpts, Invocation.getPILOptions());
-   return Instance.getAstContext().hadError();
-}
-
-static bool validateTBDIfNeeded(CompilerInvocation &Invocation,
-                                ModuleOrSourceFile MSF,
-                                bool astGuaranteedToCorrespondToPIL,
-                                llvm::Module &IRModule) {
-   if (!astGuaranteedToCorrespondToPIL ||
-       !inputFileKindCanHaveTBDValidated(Invocation.getInputKind()))
-      return false;
-
-   if (Invocation.getPILOptions().CrossModuleOptimization)
-      return false;
-
-   const auto &frontendOpts = Invocation.getFrontendOptions();
-   auto mode = frontendOpts.ValidateTBDAgainstIR;
-   // Ensure all cases are covered by using a switch here.
-   switch (mode) {
-      case FrontendOptions::TBDValidationMode::Default:
-#ifndef NDEBUG
-         // With a debug compiler, we do some validation by default.
-         mode = FrontendOptions::TBDValidationMode::MissingFromTBD;
-         break;
-#else
-      // Otherwise, the default is to do nothing.
-    LLVM_FALLTHROUGH;
-#endif
-      case FrontendOptions::TBDValidationMode::None:
-         return false;
-      case FrontendOptions::TBDValidationMode::All:
-      case FrontendOptions::TBDValidationMode::MissingFromTBD:
-         break;
-   }
-
-   const bool allSymbols = mode == FrontendOptions::TBDValidationMode::All;
-   return MSF.is<SourceFile *>()
-          ? validateTBD(MSF.get<SourceFile *>(), IRModule,
-                        Invocation.getTBDGenOptions(), allSymbols)
-          : validateTBD(MSF.get<ModuleDecl *>(), IRModule,
-                        Invocation.getTBDGenOptions(), allSymbols);
-}
-
-static bool generateCode(CompilerInvocation &Invocation,
-                         CompilerInstance &Instance, StringRef OutputFilename,
-                         llvm::Module *IRModule,
-                         llvm::GlobalVariable *HashGlobal,
-                         UnifiedStatsReporter *Stats) {
-   std::unique_ptr<llvm::TargetMachine> TargetMachine = createTargetMachine(
-      Invocation.getIRGenOptions(), Instance.getAstContext());
-   version::Version EffectiveLanguageVersion =
-      Instance.getAstContext().LangOpts.EffectiveLanguageVersion;
-
-   if (!Stats) {
-      // Free up some compiler resources now that we have an IRModule.
-      Instance.freePILModule();
-
-      // If there are multiple primary inputs it is too soon to free
-      // the AstContext, etc.. OTOH, if this compilation generates code for > 1
-      // primary input, then freeing it after processing the last primary is
-      // unlikely to reduce the peak heap size. So, only optimize the
-      // single-primary-case (or WMO).
-      if (!Invocation.getFrontendOptions()
-         .InputsAndOutputs.hasMultiplePrimaryInputs())
-         Instance.freeAstContext();
-   }
-
-   // Now that we have a single IR Module, hand it over to performLLVM.
-   return performLLVM(Invocation.getIRGenOptions(), &Instance.getDiags(),
-                      nullptr, HashGlobal, IRModule, TargetMachine.get(),
-                      EffectiveLanguageVersion, OutputFilename, Stats);
-}
-
-static bool performCompileStepsPostPILGen(
-   CompilerInstance &Instance, CompilerInvocation &Invocation,
-   std::unique_ptr<PILModule> SM, bool astGuaranteedToCorrespondToPIL,
-   ModuleOrSourceFile MSF, const PrimarySpecificPaths &PSPs,
-   bool moduleIsPublic, int &ReturnValue, FrontendObserver *observer,
-   UnifiedStatsReporter *Stats) {
-
-   FrontendOptions opts = Invocation.getFrontendOptions();
-   FrontendOptions::ActionType Action = opts.RequestedAction;
-   AstContext &Context = Instance.getAstContext();
-   PILOptions &PILOpts = Invocation.getPILOptions();
-   IRGenOptions &IRGenOpts = Invocation.getIRGenOptions();
-
-   Optional<BufferIndirectlyCausingDiagnosticRAII> ricd;
-   if (auto *SF = MSF.dyn_cast<SourceFile *>())
-      ricd.emplace(*SF);
-
-   if (observer)
-      observer->performedPILGeneration(*SM);
-
-   if (Stats)
-      countStatsPostPILGen(*Stats, *SM);
-
-   // We've been told to emit PIL after PILGen, so write it now.
-   if (Action == FrontendOptions::ActionType::EmitPILGen) {
-      return writePIL(*SM, PSPs, Instance, Invocation);
-   }
-
-   if (Action == FrontendOptions::ActionType::EmitPIBGen) {
-      serializePIB(SM.get(), PSPs, Instance.getAstContext(), MSF);
-      return Context.hadError();
-   }
-
-   std::unique_ptr<llvm::raw_fd_ostream> OptRecordFile =
-      createOptRecordFile(PILOpts.OptRecordFile, Instance.getDiags());
-   if (OptRecordFile) {
-      auto Output =
-         std::make_unique<llvm::yaml::Output>(*OptRecordFile,
-                                              &Instance.getSourceMgr());
-      SM->setOptRecordStream(std::move(Output), std::move(OptRecordFile));
-   }
-
-   // This is the action to be used to serialize PILModule.
-   // It may be invoked multiple times, but it will perform
-   // serialization only once. The serialization may either happen
-   // after high-level optimizations or after all optimizations are
-   // done, depending on the compiler setting.
-
-   auto SerializePILModuleAction = [&]() {
-      const SupplementaryOutputPaths &outs = PSPs.supplementaryOutputs;
-      if (outs.ModuleOutputPath.empty())
-         return;
-
-      SerializationOptions serializationOpts =
-         Invocation.computeSerializationOptions(outs, moduleIsPublic);
-      serialize(MSF, serializationOpts, SM.get());
-   };
-
-   // Set the serialization action, so that the PIL module
-   // can be serialized at any moment, e.g. during the optimization pipeline.
-   SM->setSerializePILAction(SerializePILModuleAction);
-
-   // Perform optimizations and mandatory/diagnostic passes.
-   if (Instance.performPILProcessing(SM.get(), Stats))
-      return true;
-
-   if (observer)
-      observer->performedPILProcessing(*SM);
-
-   emitAnyWholeModulePostTypeCheckSupplementaryOutputs(Instance, Invocation,
-                                                       moduleIsPublic);
-
-   setPrivateDiscriminatorIfNeeded(IRGenOpts, MSF);
-
-   if (Action == FrontendOptions::ActionType::EmitPIB)
-      return serializePIB(SM.get(), PSPs, Instance.getAstContext(), MSF);
-
-   {
-      if (PSPs.haveModuleOrModuleDocOutputPaths()) {
-         if (Action == FrontendOptions::ActionType::MergeModules ||
-             Action == FrontendOptions::ActionType::EmitModuleOnly) {
-            // What if MSF is a module?
-            // emitIndexDataIfNeeded already handles that case;
-            // it'll index everything.
-            return emitIndexDataIfNeeded(MSF.dyn_cast<SourceFile *>(), Invocation,
-                                         Instance) ||
-                   Context.hadError();
-         }
-      }
-   }
-
-   assert(Action >= FrontendOptions::ActionType::EmitPIL &&
-          "All actions not requiring PILPasses must have been handled!");
-
-   // We've been told to write canonical PIL, so write it now.
-   if (Action == FrontendOptions::ActionType::EmitPIL)
-      return writePIL(*SM, PSPs, Instance, Invocation);
-
-   assert(Action >= FrontendOptions::ActionType::Immediate &&
-          "All actions not requiring IRGen must have been handled!");
-   assert(Action != FrontendOptions::ActionType::REPL &&
-          "REPL mode must be handled immediately after Instance->performSema()");
-
-   // Check if we had any errors; if we did, don't proceed to IRGen.
-   if (Context.hadError())
-      return true;
-
-   runPILLoweringPasses(*SM);
-
-   // TODO: at this point we need to flush any the _tracing and profiling_
-   // in the UnifiedStatsReporter, because the those subsystems of the USR
-   // retain _pointers into_ the PILModule, and the PILModule's lifecycle is
-   // not presently such that it will outlive the USR (indeed, as it's
-   // destroyed on a separate thread, this fact isn't even _deterministic_
-   // after this point). If future plans require the USR tracing or
-   // profiling entities after this point, more rearranging will be required.
-   if (Stats)
-      Stats->flushTracesAndProfiles();
-
-   if (Action == FrontendOptions::ActionType::DumpTypeInfo)
-      return performDumpTypeInfo(IRGenOpts, *SM, get_global_llvm_context());
-
-   // TODO: remove once the frontend understands what action it should perform
-   IRGenOpts.OutputKind = getOutputKind(Action);
-   if (Action == FrontendOptions::ActionType::Immediate)
-      return processCommandLineAndRunImmediately(
-         Invocation, Instance, std::move(SM), MSF, observer, ReturnValue);
-
-   StringRef OutputFilename = PSPs.outputFilename;
-   std::vector<std::string> ParallelOutputFilenames =
-      Invocation.getFrontendOptions().InputsAndOutputs.copyOutputFilenames();
-   std::unique_ptr<llvm::Module> IRModule;
-   llvm::GlobalVariable *HashGlobal;
-   generateIR(
-      IRGenOpts, std::move(SM), PSPs, OutputFilename, MSF, IRModule, HashGlobal,
-      ParallelOutputFilenames);
-
-   // Walk the AST for indexing after IR generation. Walking it before seems
-   // to cause miscompilation issues.
-   if (emitIndexDataIfNeeded(MSF.dyn_cast<SourceFile *>(), Invocation, Instance))
-      return true;
-
-   // Just because we had an AST error it doesn't mean we can't performLLVM.
-   bool HadError = Instance.getAstContext().hadError();
-
-   // If the AST Context has no errors but no IRModule is available,
-   // parallelIRGen happened correctly, since parallel IRGen produces multiple
-   // modules.
-   if (!IRModule)
-      return HadError;
-
-   if (validateTBDIfNeeded(Invocation, MSF, astGuaranteedToCorrespondToPIL,
-                           *IRModule))
-      return true;
-
-   return generateCode(Invocation, Instance, OutputFilename, IRModule.get(),
-                       HashGlobal, Stats) ||
-          HadError;
-}
-
-static bool emitIndexDataIfNeeded(SourceFile *PrimarySourceFile,
-                                  const CompilerInvocation &Invocation,
-                                  CompilerInstance &Instance) {
-   const FrontendOptions &opts = Invocation.getFrontendOptions();
-
-   if (opts.IndexStorePath.empty())
-      return false;
-
-   // FIXME: provide index unit token(s) explicitly and only use output file
-   // paths as a fallback.
-
-   bool isDebugCompilation;
-   switch (Invocation.getPILOptions().OptMode) {
-      case OptimizationMode::NotSet:
-      case OptimizationMode::NoOptimization:
-         isDebugCompilation = true;
-         break;
-      case OptimizationMode::ForSpeed:
-      case OptimizationMode::ForSize:
-         isDebugCompilation = false;
-         break;
-   }
-
-   if (PrimarySourceFile) {
-      const PrimarySpecificPaths &PSPs =
-         opts.InputsAndOutputs.getPrimarySpecificPathsForPrimary(
-            PrimarySourceFile->getFilename());
-      if (index::indexAndRecord(PrimarySourceFile, PSPs.outputFilename,
-                                opts.IndexStorePath, opts.IndexSystemModules,
-                                isDebugCompilation, Invocation.getTargetTriple(),
-                                *Instance.getDependencyTracker())) {
-         return true;
-      }
-   } else {
-      std::string moduleToken =
-         Invocation.getModuleOutputPathForAtMostOnePrimary();
-      if (moduleToken.empty())
-         moduleToken = opts.InputsAndOutputs.getSingleOutputFilename();
-
-      if (index::indexAndRecord(Instance.getMainModule(), opts.InputsAndOutputs.copyOutputFilenames(),
-                                moduleToken, opts.IndexStorePath,
-                                opts.IndexSystemModules,
-                                isDebugCompilation, Invocation.getTargetTriple(),
-                                *Instance.getDependencyTracker())) {
-         return true;
-      }
-   }
-
-   return false;
-}
+//static bool generateCode(CompilerInvocation &Invocation,
+//                         CompilerInstance &Instance, StringRef OutputFilename,
+//                         llvm::Module *IRModule,
+//                         llvm::GlobalVariable *HashGlobal,
+//                         UnifiedStatsReporter *Stats) {
+//   std::unique_ptr<llvm::TargetMachine> TargetMachine = createTargetMachine(
+//      Invocation.getIRGenOptions(), Instance.getAstContext());
+//   version::Version EffectiveLanguageVersion =
+//      Instance.getAstContext().LangOpts.EffectiveLanguageVersion;
+//
+//   if (!Stats) {
+//      // Free up some compiler resources now that we have an IRModule.
+//      Instance.freePILModule();
+//
+//      // If there are multiple primary inputs it is too soon to free
+//      // the AstContext, etc.. OTOH, if this compilation generates code for > 1
+//      // primary input, then freeing it after processing the last primary is
+//      // unlikely to reduce the peak heap size. So, only optimize the
+//      // single-primary-case (or WMO).
+//      if (!Invocation.getFrontendOptions()
+//         .InputsAndOutputs.hasMultiplePrimaryInputs())
+//         Instance.freeAstContext();
+//   }
+//
+//   // Now that we have a single IR Module, hand it over to performLLVM.
+//   return performLLVM(Invocation.getIRGenOptions(), &Instance.getDiags(),
+//                      nullptr, HashGlobal, IRModule, TargetMachine.get(),
+//                      EffectiveLanguageVersion, OutputFilename, Stats);
+//}
+//
+//static bool performCompileStepsPostPILGen(
+//   CompilerInstance &Instance, CompilerInvocation &Invocation,
+//   std::unique_ptr<PILModule> SM, bool astGuaranteedToCorrespondToPIL,
+//   ModuleOrSourceFile MSF, const PrimarySpecificPaths &PSPs,
+//   bool moduleIsPublic, int &ReturnValue, FrontendObserver *observer,
+//   UnifiedStatsReporter *Stats) {
+//
+//   FrontendOptions opts = Invocation.getFrontendOptions();
+//   FrontendOptions::ActionType Action = opts.RequestedAction;
+//   AstContext &Context = Instance.getAstContext();
+//   PILOptions &PILOpts = Invocation.getPILOptions();
+//   IRGenOptions &IRGenOpts = Invocation.getIRGenOptions();
+//
+//   Optional<BufferIndirectlyCausingDiagnosticRAII> ricd;
+//   if (auto *SF = MSF.dyn_cast<SourceFile *>())
+//      ricd.emplace(*SF);
+//
+//   if (observer)
+//      observer->performedPILGeneration(*SM);
+//
+//   if (Stats)
+//      countStatsPostPILGen(*Stats, *SM);
+//
+//   // We've been told to emit PIL after PILGen, so write it now.
+//   if (Action == FrontendOptions::ActionType::EmitPILGen) {
+//      return writePIL(*SM, PSPs, Instance, Invocation);
+//   }
+//
+//   if (Action == FrontendOptions::ActionType::EmitPIBGen) {
+//      serializePIB(SM.get(), PSPs, Instance.getAstContext(), MSF);
+//      return Context.hadError();
+//   }
+//
+//   std::unique_ptr<llvm::raw_fd_ostream> OptRecordFile =
+//      createOptRecordFile(PILOpts.OptRecordFile, Instance.getDiags());
+//   if (OptRecordFile) {
+//      auto Output =
+//         std::make_unique<llvm::yaml::Output>(*OptRecordFile,
+//                                              &Instance.getSourceMgr());
+//      SM->setOptRecordStream(std::move(Output), std::move(OptRecordFile));
+//   }
+//
+//   // This is the action to be used to serialize PILModule.
+//   // It may be invoked multiple times, but it will perform
+//   // serialization only once. The serialization may either happen
+//   // after high-level optimizations or after all optimizations are
+//   // done, depending on the compiler setting.
+//
+//   auto SerializePILModuleAction = [&]() {
+//      const SupplementaryOutputPaths &outs = PSPs.supplementaryOutputs;
+//      if (outs.ModuleOutputPath.empty())
+//         return;
+//
+//      SerializationOptions serializationOpts =
+//         Invocation.computeSerializationOptions(outs, moduleIsPublic);
+//      serialize(MSF, serializationOpts, SM.get());
+//   };
+//
+//   // Set the serialization action, so that the PIL module
+//   // can be serialized at any moment, e.g. during the optimization pipeline.
+//   SM->setSerializePILAction(SerializePILModuleAction);
+//
+//   // Perform optimizations and mandatory/diagnostic passes.
+//   if (Instance.performPILProcessing(SM.get(), Stats))
+//      return true;
+//
+//   if (observer)
+//      observer->performedPILProcessing(*SM);
+//
+//   emitAnyWholeModulePostTypeCheckSupplementaryOutputs(Instance, Invocation,
+//                                                       moduleIsPublic);
+//
+//   setPrivateDiscriminatorIfNeeded(IRGenOpts, MSF);
+//
+//   if (Action == FrontendOptions::ActionType::EmitPIB)
+//      return serializePIB(SM.get(), PSPs, Instance.getAstContext(), MSF);
+//
+//   {
+//      if (PSPs.haveModuleOrModuleDocOutputPaths()) {
+//         if (Action == FrontendOptions::ActionType::MergeModules ||
+//             Action == FrontendOptions::ActionType::EmitModuleOnly) {
+//            // What if MSF is a module?
+//            // emitIndexDataIfNeeded already handles that case;
+//            // it'll index everything.
+//            return emitIndexDataIfNeeded(MSF.dyn_cast<SourceFile *>(), Invocation,
+//                                         Instance) ||
+//                   Context.hadError();
+//         }
+//      }
+//   }
+//
+//   assert(Action >= FrontendOptions::ActionType::EmitPIL &&
+//          "All actions not requiring PILPasses must have been handled!");
+//
+//   // We've been told to write canonical PIL, so write it now.
+//   if (Action == FrontendOptions::ActionType::EmitPIL)
+//      return writePIL(*SM, PSPs, Instance, Invocation);
+//
+//   assert(Action >= FrontendOptions::ActionType::Immediate &&
+//          "All actions not requiring IRGen must have been handled!");
+//   assert(Action != FrontendOptions::ActionType::REPL &&
+//          "REPL mode must be handled immediately after Instance->performSema()");
+//
+//   // Check if we had any errors; if we did, don't proceed to IRGen.
+//   if (Context.hadError())
+//      return true;
+//
+//   runPILLoweringPasses(*SM);
+//
+//   // TODO: at this point we need to flush any the _tracing and profiling_
+//   // in the UnifiedStatsReporter, because the those subsystems of the USR
+//   // retain _pointers into_ the PILModule, and the PILModule's lifecycle is
+//   // not presently such that it will outlive the USR (indeed, as it's
+//   // destroyed on a separate thread, this fact isn't even _deterministic_
+//   // after this point). If future plans require the USR tracing or
+//   // profiling entities after this point, more rearranging will be required.
+//   if (Stats)
+//      Stats->flushTracesAndProfiles();
+//
+//   if (Action == FrontendOptions::ActionType::DumpTypeInfo)
+//      return performDumpTypeInfo(IRGenOpts, *SM, get_global_llvm_context());
+//
+//   // TODO: remove once the frontend understands what action it should perform
+//   IRGenOpts.OutputKind = getOutputKind(Action);
+//   if (Action == FrontendOptions::ActionType::Immediate)
+//      return processCommandLineAndRunImmediately(
+//         Invocation, Instance, std::move(SM), MSF, observer, ReturnValue);
+//
+//   StringRef OutputFilename = PSPs.outputFilename;
+//   std::vector<std::string> ParallelOutputFilenames =
+//      Invocation.getFrontendOptions().InputsAndOutputs.copyOutputFilenames();
+//   std::unique_ptr<llvm::Module> IRModule;
+//   llvm::GlobalVariable *HashGlobal;
+//   generateIR(
+//      IRGenOpts, std::move(SM), PSPs, OutputFilename, MSF, IRModule, HashGlobal,
+//      ParallelOutputFilenames);
+//
+//   // Walk the AST for indexing after IR generation. Walking it before seems
+//   // to cause miscompilation issues.
+//   if (emitIndexDataIfNeeded(MSF.dyn_cast<SourceFile *>(), Invocation, Instance))
+//      return true;
+//
+//   // Just because we had an AST error it doesn't mean we can't performLLVM.
+//   bool HadError = Instance.getAstContext().hadError();
+//
+//   // If the AST Context has no errors but no IRModule is available,
+//   // parallelIRGen happened correctly, since parallel IRGen produces multiple
+//   // modules.
+//   if (!IRModule)
+//      return HadError;
+//
+//   if (validateTBDIfNeeded(Invocation, MSF, astGuaranteedToCorrespondToPIL,
+//                           *IRModule))
+//      return true;
+//
+//   return generateCode(Invocation, Instance, OutputFilename, IRModule.get(),
+//                       HashGlobal, Stats) ||
+//          HadError;
+//}
+//
+//static bool emitIndexDataIfNeeded(SourceFile *PrimarySourceFile,
+//                                  const CompilerInvocation &Invocation,
+//                                  CompilerInstance &Instance) {
+//   const FrontendOptions &opts = Invocation.getFrontendOptions();
+//
+//   if (opts.IndexStorePath.empty())
+//      return false;
+//
+//   // FIXME: provide index unit token(s) explicitly and only use output file
+//   // paths as a fallback.
+//
+//   bool isDebugCompilation;
+//   switch (Invocation.getPILOptions().OptMode) {
+//      case OptimizationMode::NotSet:
+//      case OptimizationMode::NoOptimization:
+//         isDebugCompilation = true;
+//         break;
+//      case OptimizationMode::ForSpeed:
+//      case OptimizationMode::ForSize:
+//         isDebugCompilation = false;
+//         break;
+//   }
+//
+//   if (PrimarySourceFile) {
+//      const PrimarySpecificPaths &PSPs =
+//         opts.InputsAndOutputs.getPrimarySpecificPathsForPrimary(
+//            PrimarySourceFile->getFilename());
+//      if (index::indexAndRecord(PrimarySourceFile, PSPs.outputFilename,
+//                                opts.IndexStorePath, opts.IndexSystemModules,
+//                                isDebugCompilation, Invocation.getTargetTriple(),
+//                                *Instance.getDependencyTracker())) {
+//         return true;
+//      }
+//   } else {
+//      std::string moduleToken =
+//         Invocation.getModuleOutputPathForAtMostOnePrimary();
+//      if (moduleToken.empty())
+//         moduleToken = opts.InputsAndOutputs.getSingleOutputFilename();
+//
+//      if (index::indexAndRecord(Instance.getMainModule(), opts.InputsAndOutputs.copyOutputFilenames(),
+//                                moduleToken, opts.IndexStorePath,
+//                                opts.IndexSystemModules,
+//                                isDebugCompilation, Invocation.getTargetTriple(),
+//                                *Instance.getDependencyTracker())) {
+//         return true;
+//      }
+//   }
+//
+//   return false;
+//}
 
 /// Returns true if an error occurred.
 static bool dumpAPI(ModuleDecl *Mod, StringRef OutDir) {
@@ -1755,12 +1758,12 @@ computeStatsReporter(const CompilerInvocation &Invocation, CompilerInstance *Ins
    auto ProfileEntities = Invocation.getFrontendOptions().ProfileEntities;
    SourceManager *SM = &Instance->getSourceMgr();
    clang::SourceManager *CSM = nullptr;
-   if (auto *clangImporter = static_cast<ClangImporter *>(
-      Instance->getAstContext().getClangModuleLoader())) {
-      CSM = &clangImporter->getClangAstContext().getSourceManager();
-   }
+//   if (auto *clangImporter = static_cast<ClangImporter *>(
+//      Instance->getAstContext().getClangModuleLoader())) {
+//      CSM = &clangImporter->getClangAstContext().getSourceManager();
+//   }
    return std::make_unique<UnifiedStatsReporter>(
-      "swift-frontend", FEOpts.ModuleName, InputName, TripleName, OutputType,
+      "polarphp-frontend", FEOpts.ModuleName, InputName, TripleName, OutputType,
       OptType, StatsOutputDir, SM, CSM, Trace,
       ProfileEvents, ProfileEntities);
 }
@@ -2056,9 +2059,9 @@ int polar::performFrontend(ArrayRef<const char *> Args,
       performCompile(*Instance, Invocation, Args, ReturnValue, observer,
                      StatsReporter.get());
 
-   if (!HadError) {
-      mangle::printManglingStats();
-   }
+//   if (!HadError) {
+//      mangle::printManglingStats();
+//   }
 
    if (!HadError && !Invocation.getFrontendOptions().DumpAPIPath.empty()) {
       HadError = dumpAPI(Instance->getMainModule(),

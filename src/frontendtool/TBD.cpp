@@ -48,8 +48,8 @@ bool polar::writeTBD(ModuleDecl *M, StringRef OutputFilename,
                                         OutputFilename, EC.message());
       return true;
    }
-
-   writeTBDFile(M, OS, Opts);
+   // TODO
+//   writeTBDFile(M, OS, Opts);
 
    return false;
 }
@@ -133,24 +133,24 @@ static bool validateSymbolSet(DiagnosticEngine &diags,
 
    return error;
 }
-
-bool polar::validateTBD(ModuleDecl *M, llvm::Module &IRModule,
-                        const TBDGenOptions &opts,
-                        bool diagnoseExtraSymbolsInTBD) {
-   llvm::StringSet<> symbols;
-   enumeratePublicSymbols(M, symbols, opts);
-
-   return validateSymbolSet(M->getAstContext().Diags, symbols, IRModule,
-                            diagnoseExtraSymbolsInTBD);
-}
-
-bool polar::validateTBD(FileUnit *file, llvm::Module &IRModule,
-                        const TBDGenOptions &opts,
-                        bool diagnoseExtraSymbolsInTBD) {
-   llvm::StringSet<> symbols;
-   enumeratePublicSymbols(file, symbols, opts);
-
-   return validateSymbolSet(file->getParentModule()->getAstContext().Diags,
-                            symbols, IRModule,
-                            diagnoseExtraSymbolsInTBD);
-}
+//
+//bool polar::validateTBD(ModuleDecl *M, llvm::Module &IRModule,
+//                        const TBDGenOptions &opts,
+//                        bool diagnoseExtraSymbolsInTBD) {
+//   llvm::StringSet<> symbols;
+//   enumeratePublicSymbols(M, symbols, opts);
+//
+//   return validateSymbolSet(M->getAstContext().Diags, symbols, IRModule,
+//                            diagnoseExtraSymbolsInTBD);
+//}
+//
+//bool polar::validateTBD(FileUnit *file, llvm::Module &IRModule,
+//                        const TBDGenOptions &opts,
+//                        bool diagnoseExtraSymbolsInTBD) {
+//   llvm::StringSet<> symbols;
+//   enumeratePublicSymbols(file, symbols, opts);
+//
+//   return validateSymbolSet(file->getParentModule()->getAstContext().Diags,
+//                            symbols, IRModule,
+//                            diagnoseExtraSymbolsInTBD);
+//}

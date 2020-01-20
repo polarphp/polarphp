@@ -2816,7 +2816,7 @@ ReplaceOpaqueTypesWithUnderlyingTypes::shouldPerformSubstitution(
 }
 
 static Type
-subst_opaque_types_with_underlying_types(Type ty, const DeclContext *inContext,
+substOpaqueTypesWithUnderlyingTypes(Type ty, const DeclContext *inContext,
                                          ResilienceExpansion contextExpansion,
                                          bool isWholeModuleContext) {
    ReplaceOpaqueTypesWithUnderlyingTypes replacer(inContext, contextExpansion,
@@ -2858,7 +2858,7 @@ static bool canSubstituteTypeInto(Type ty, const DeclContext *dc,
 
       case OpaqueSubstitutionKind::SubstituteNonResilientModule:
          // Can't access types that are not public from a different module.
-         return nominal->getEffectiveAccess() > AccessLevel::Interface;
+         return nominal->getEffectiveAccess() > AccessLevel::Internal;
    }
 }
 
@@ -2905,14 +2905,14 @@ operator()(SubstitutableType *maybeOpaqueType) const {
 
    // If the type still contains opaque types, recur.
    if (substTy->hasOpaqueArchetype()) {
-      return subst_opaque_types_with_underlying_types(
+      return substOpaqueTypesWithUnderlyingTypes(
          substTy, inContext, contextExpansion, isContextWholeModule);
    }
 
    return substTy;
 }
 
-static InterfaceConformanceRef subst_opaque_types_with_underlying_types(
+static InterfaceConformanceRef substOpaqueTypesWithUnderlyingTypes(
    InterfaceConformanceRef ref, Type origType, const DeclContext *inContext,
    ResilienceExpansion contextExpansion, bool isWholeModuleContext) {
    ReplaceOpaqueTypesWithUnderlyingTypes replacer(inContext, contextExpansion,
@@ -2921,7 +2921,7 @@ static InterfaceConformanceRef subst_opaque_types_with_underlying_types(
                     SubstFlags::SubstituteOpaqueArchetypes);
 }
 
-InterfaceConformanceRef subst_opaque_types_with_underlying_types(
+InterfaceConformanceRef substOpaqueTypesWithUnderlyingTypes(
    InterfaceConformanceRef ref, Type origType, TypeExpansionContext context) {
    ReplaceOpaqueTypesWithUnderlyingTypes replacer(
       context.getContext(), context.getResilienceExpansion(),
@@ -2985,7 +2985,7 @@ operator()(CanType maybeOpaqueType, Type replacementType,
 
    // If the type still contains opaque types, recur.
    if (substTy->hasOpaqueArchetype()) {
-      return subst_opaque_types_with_underlying_types(
+      return substOpaqueTypesWithUnderlyingTypes(
          substRef, substTy, inContext, contextExpansion, isContextWholeModule);
    }
    return substRef;

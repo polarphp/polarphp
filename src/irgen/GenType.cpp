@@ -1369,7 +1369,8 @@ const LoadableTypeInfo &IRGenModule::getUnknownObjectTypeInfo() {
 
 const LoadableTypeInfo &TypeConverter::getUnknownObjectTypeInfo() {
    if (UnknownObjectTI) return *UnknownObjectTI;
-   UnknownObjectTI = convertBuiltinUnknownObject();
+   /// TODO
+//   UnknownObjectTI = convertBuiltinUnknownObject();
    UnknownObjectTI->NextConverted = FirstType;
    FirstType = UnknownObjectTI;
    return *UnknownObjectTI;
@@ -1381,7 +1382,8 @@ const LoadableTypeInfo &IRGenModule::getBridgeObjectTypeInfo() {
 
 const LoadableTypeInfo &TypeConverter::getBridgeObjectTypeInfo() {
    if (BridgeObjectTI) return *BridgeObjectTI;
-   BridgeObjectTI = convertBuiltinBridgeObject();
+   /// TODO
+//   BridgeObjectTI = convertBuiltinBridgeObject();
    BridgeObjectTI->NextConverted = FirstType;
    FirstType = BridgeObjectTI;
    return *BridgeObjectTI;
@@ -2162,9 +2164,9 @@ TypeConverter::getMetatypeTypeInfo(MetatypeRepresentation representation) {
          // Thick metatypes are represented with a metadata pointer.
          return getTypeMetadataPtrTypeInfo();
 
-      case MetatypeRepresentation::ObjC:
-         // ObjC metatypes are represented with an objc_class pointer.
-         return getObjCClassPtrTypeInfo();
+//      case MetatypeRepresentation::ObjC:
+//         // ObjC metatypes are represented with an objc_class pointer.
+//         return getObjCClassPtrTypeInfo();
    }
    llvm_unreachable("bad representation");
 }

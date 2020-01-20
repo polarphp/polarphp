@@ -70,8 +70,8 @@ static bool isUnitTest(const ValueDecl *D) {
    // 5. ...is of at least 'internal' access (unless we can use
    //    Objective-C reflection)...
    if (!D->getAstContext().LangOpts.EnableObjCInterop &&
-       (D->getFormalAccess() < AccessLevel::Interface ||
-        parentNTD->getFormalAccess() < AccessLevel::Interface))
+       (D->getFormalAccess() < AccessLevel::Internal ||
+        parentNTD->getFormalAccess() < AccessLevel::Internal))
       return false;
 
    // 6. ...and starts with "test".

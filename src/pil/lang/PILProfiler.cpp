@@ -100,7 +100,7 @@ static bool isUnmapped(AstNode N) {
 }
 
 namespace polar {
-bool doesASTRequireProfiling(PILModule &M, AstNode N) {
+bool doesAstRequireProfiling(PILModule &M, AstNode N) {
    return M.getOptions().GenerateProfile && !isUnmapped(N);
 }
 } // namespace polar
@@ -151,7 +151,7 @@ PILProfiler *PILProfiler::create(PILModule &M, ForDefinition_t forDefinition,
       return nullptr;
 
    const auto &Opts = M.getOptions();
-   if (!doesASTRequireProfiling(M, N) && Opts.UseProfile.empty())
+   if (!doesAstRequireProfiling(M, N) && Opts.UseProfile.empty())
       return nullptr;
 
    if (!canCreateProfilerForAST(N, forDecl)) {

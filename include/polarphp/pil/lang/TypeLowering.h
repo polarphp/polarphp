@@ -737,8 +737,9 @@ public:
 
    /// True if a interface uses witness tables for dynamic dispatch.
    static bool interfaceRequiresWitnessTable(InterfaceDecl *P) {
-      return InterfaceDescriptorFlags::needsWitnessTable
-         (getInterfaceDispatchStrategy(P));
+      return false;
+//      return InterfaceDescriptorFlags::needsWitnessTable
+//         (getInterfaceDispatchStrategy(P));
    }
 
    /// True if a type is passed indirectly at +0 when used as the "self"

@@ -996,7 +996,7 @@ public:
       : AccessControlCheckerBase(/*checkUsableFromInline=*/true) {}
 
    static bool shouldSkipChecking(const ValueDecl *VD) {
-      if (VD->getFormalAccess() != AccessLevel::Interface)
+      if (VD->getFormalAccess() != AccessLevel::Internal)
          return true;
       return !VD->isUsableFromInline();
    };
@@ -2003,7 +2003,7 @@ static void checkExtensionGenericParamAccess(const ExtensionDecl *ED) {
          desiredAccessScope = AccessScope(DC, isPrivate);
          break;
       }
-      case AccessLevel::Interface:
+      case AccessLevel::Internal:
          desiredAccessScope = AccessScope(ED->getModuleContext());
          break;
       case AccessLevel::Public:

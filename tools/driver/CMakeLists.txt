@@ -19,6 +19,8 @@ polar_add_host_tool(polarphp
 target_link_libraries(polarphp
    PRIVATE
    PolarDriver
+   PolarLLParser
+   PolarDemangling
    PolarFrontendTool
    LLVMAArch64AsmParser
    LLVMAArch64CodeGen)

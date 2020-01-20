@@ -218,9 +218,10 @@ PILModule::lookUpWitnessTable(const InterfaceConformance *C,
    //
    // *NOTE* In practice, wtable will be deserializedTable, but I do not want to rely
    // on that behavior for now.
-   if (deserializeLazily)
-      if (auto deserialized = getPILLoader()->lookupWitnessTable(wtable))
-         return deserialized;
+   // TODO
+//   if (deserializeLazily)
+//      if (auto deserialized = getPILLoader()->lookupWitnessTable(wtable))
+//         return deserialized;
 
    // If we fail, just return the declaration.
    return wtable;
@@ -241,9 +242,10 @@ PILModule::lookUpDefaultWitnessTable(const InterfaceDecl *Interface,
             getPILLinkage(getDeclLinkage(Interface), ForDefinition);
          PILDefaultWitnessTable *wtable =
             PILDefaultWitnessTable::create(*this, linkage, Interface);
-         wtable = getPILLoader()->lookupDefaultWitnessTable(wtable);
-         if (wtable)
-            DefaultWitnessTableMap[Interface] = wtable;
+         /// TODO
+//         wtable = getPILLoader()->lookupDefaultWitnessTable(wtable);
+//         if (wtable)
+//            DefaultWitnessTableMap[Interface] = wtable;
          return wtable;
       }
 
@@ -323,17 +325,18 @@ PILFunction *PILModule::lookUpFunction(PILDeclRef fnRef) {
 }
 
 bool PILModule::loadFunction(PILFunction *F) {
-   PILFunction *NewF =
-      getPILLoader()->lookupPILFunction(F, /*onlyUpdateLinkage*/ false);
-   if (!NewF)
-      return false;
+   /// TODO
+//   PILFunction *NewF =
+//      getPILLoader()->lookupPILFunction(F, /*onlyUpdateLinkage*/ false);
+//   if (!NewF)
+   return false;
 
-   assert(F == NewF);
-   return true;
+//   assert(F == NewF);
+//   return true;
 }
 
 void PILModule::updateFunctionLinkage(PILFunction *F) {
-   getPILLoader()->lookupPILFunction(F, /*onlyUpdateLinkage*/ true);
+//   getPILLoader()->lookupPILFunction(F, /*onlyUpdateLinkage*/ true);
 }
 
 bool PILModule::linkFunction(PILFunction *F, PILModule::LinkingMode Mode) {
@@ -366,9 +369,11 @@ PILFunction *PILModule::findFunction(StringRef Name, PILLinkage Linkage) {
          // Perform this lookup only if a function with a given
          // name is present in the current module.
          // This is done to reduce the amount of IO from the
-         // swift module file.
-         if (!getPILLoader()->hasPILFunction(Name, Linkage))
-            return nullptr;
+         // typephp module file.
+//         if (!getPILLoader()->hasPILFunction(Name, Linkage))
+//            return nullptr;
+         /// TODO
+         return nullptr;
          // The function in the current module will be changed.
          F = CurF;
       }
@@ -377,12 +382,13 @@ PILFunction *PILModule::findFunction(StringRef Name, PILLinkage Linkage) {
       // or if it is known to exist, perform a lookup.
       if (!F) {
          // Try to load the function from other modules.
-         F = getPILLoader()->lookupPILFunction(Name, /*declarationOnly*/ true,
-                                               Linkage);
+//         F = getPILLoader()->lookupPILFunction(Name, /*declarationOnly*/ true,
+//                                               Linkage);
          // Bail if nothing was found and we are not sure if
          // this function exists elsewhere.
-         if (!F)
-            return nullptr;
+//         if (!F)
+         // TODO
+         return nullptr;
          assert(F && "PILFunction should be present in one of the modules");
          assert(F->getLinkage() == Linkage && "PILFunction has a wrong linkage");
       }
@@ -404,16 +410,20 @@ PILFunction *PILModule::findFunction(StringRef Name, PILLinkage Linkage) {
 bool PILModule::hasFunction(StringRef Name) {
    if (lookUpFunction(Name))
       return true;
-   return getPILLoader()->hasPILFunction(Name);
+   /// TODO
+   return false;
+//   return getPILLoader()->hasPILFunction(Name);
 }
 
 void PILModule::linkAllFromCurrentModule() {
-   getPILLoader()->getAllForModule(getTypePHPModule()->getName(),
-      /*PrimaryFile=*/nullptr);
+/// TODO
+//   getPILLoader()->getAllForModule(getTypePHPModule()->getName(),
+//      /*PrimaryFile=*/nullptr);
 }
 
 void PILModule::invalidatePILLoaderCaches() {
-   getPILLoader()->invalidateCaches();
+/// TODO
+//   getPILLoader()->invalidateCaches();
 }
 
 void PILModule::removeFromZombieList(StringRef Name) {
@@ -447,7 +457,8 @@ void PILModule::eraseFunction(PILFunction *F) {
 }
 
 void PILModule::invalidateFunctionInPILCache(PILFunction *F) {
-   getPILLoader()->invalidateFunction(F);
+   /// TODo
+//   getPILLoader()->invalidateFunction(F);
 }
 
 /// Erase a global PIL variable from the module.
@@ -466,22 +477,26 @@ PILVTable *PILModule::lookUpVTable(const ClassDecl *C) {
       return R->second;
 
    // If that fails, try to deserialize it. If that fails, return nullptr.
-   PILVTable *Vtbl = getPILLoader()->lookupVTable(C);
-   if (!Vtbl)
-      return nullptr;
+//   PILVTable *Vtbl = getPILLoader()->lookupVTable(C);
+   /// TODO
+   return nullptr;
+//   if (!Vtbl)
+//      return nullptr;
 
    // If we succeeded, map C -> VTbl in the table and return VTbl.
-   VTableMap[C] = Vtbl;
-   return Vtbl;
+//   VTableMap[C] = Vtbl;
+//   return Vtbl;
 }
 
 SerializedPILLoader *PILModule::getPILLoader() {
    // If the PILLoader is null, create it.
-   if (!PILLoader)
-      PILLoader = SerializedPILLoader::create(
-         getAstContext(), this, &deserializationNotificationHandlers);
-   // Return the SerializedPILLoader.
-   return PILLoader.get();
+//   if (!PILLoader)
+//      PILLoader = SerializedPILLoader::create(
+//         getAstContext(), this, &deserializationNotificationHandlers);
+//   // Return the SerializedPILLoader.
+//   return PILLoader.get();
+   /// TODO
+   return nullptr;
 }
 
 /// Given a conformance \p C and a protocol requirement \p Requirement,
@@ -690,7 +705,7 @@ PILLinkage polar::getDeclPILLinkage(const ValueDecl *decl) {
       case AccessLevel::FilePrivate:
          linkage = PILLinkage::Private;
          break;
-      case AccessLevel::Interface:
+      case AccessLevel::Internal:
          linkage = PILLinkage::Hidden;
          break;
       case AccessLevel::Public:

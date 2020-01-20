@@ -16,7 +16,7 @@
 #include "llvm/ADT/StringRef.h"
 #include "polarphp/demangling/Punycode.h"
 
-namespace polar::mangling {
+namespace polar::mangle {
 
 using llvm::StringRef;
 

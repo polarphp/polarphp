@@ -43,10 +43,10 @@ class SerializedModuleLoaderBase : public ModuleLoader {
 protected:
    AstContext &Ctx;
    ModuleLoadingMode LoadMode;
-   bool IgnorePolarphpSourceInfoFile;
+   bool IgnorePHPSourceInfoFile;
    SerializedModuleLoaderBase(AstContext &ctx, DependencyTracker *tracker,
                               ModuleLoadingMode LoadMode,
-                              bool IgnorePolarphpSourceInfoFile);
+                              bool IgnorePHPSourceInfoFile);
 
    void collectVisibleTopLevelModuleNamesImpl(SmallVectorImpl<Identifier> &names,
                                               StringRef extension) const;
@@ -277,7 +277,7 @@ public:
 /// A file-unit loaded from a serialized AST file.
 class SerializedAstFile final : public LoadedFile {
    friend class SerializedModuleLoaderBase;
-   friend class SerializedSILLoader;
+   friend class SerializedPILLoader;
    friend class ModuleFile;
 
    ModuleFile &File;

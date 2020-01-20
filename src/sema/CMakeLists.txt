@@ -29,4 +29,5 @@ polar_add_host_library(PolarSema STATIC
 target_link_libraries(PolarSema PRIVATE
    PolarAST
    PolarLLParser
-   PolarSerialization)
+#   PolarSerialization
+   )

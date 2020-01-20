@@ -22,7 +22,7 @@
 
 namespace polar::demangling {
 
-using namespace polar::mangling;
+using namespace polar::mangle;
 
 //////////////////////////////////
 // Private utility functions    //

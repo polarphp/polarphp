@@ -244,7 +244,8 @@ private:
   /// deserialize. Previously this was created when the PILModule was
   /// constructed. In certain cases this was before all Modules had been loaded
   /// causing us to not
-  std::unique_ptr<SerializedPILLoader> PILLoader;
+  ///  TODO
+//  std::unique_ptr<SerializedPILLoader> PILLoader;
 
   /// The indexed profile data to be used for PGO, or nullptr.
   std::unique_ptr<llvm::IndexedInstrProfReader> PGOReader;

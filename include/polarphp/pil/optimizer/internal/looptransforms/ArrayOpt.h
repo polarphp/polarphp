@@ -235,7 +235,7 @@ protected:
    }
 };
 
-PILTransform *createPolarphpArrayPropertyOpt();
+PILTransform *createTypePHPArrayPropertyOpt();
 PILTransform *createCOWArrayOpts();
 
 } // namespace polar

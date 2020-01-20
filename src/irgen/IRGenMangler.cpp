@@ -97,7 +97,7 @@ IRGenMangler::withSymbolicReferences(IRGenModule &IGM,
          // manglings already, and the runtime ought to have a lookup table for
          // them. Symbolic referencing would be wasteful.
          if (type->getModuleContext()->isStdlibModule()
-             && mangling::getStandardTypeSubst(type->getName().str())) {
+             && mangle::getStandardTypeSubst(type->getName().str())) {
             return false;
          }
 

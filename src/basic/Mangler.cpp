@@ -12,8 +12,9 @@
 
 #include "polarphp/basic/Mangler.h"
 #include "polarphp/demangling/Demangler.h"
-#include "polarphp/Demangling/Punycode.h"
-#include "polarphp/Demangling/ManglingMacros.h"
+#include "polarphp/demangling/Punycode.h"
+#include "polarphp/demangling/ManglingMacros.h"
+#include "polarphp/demangling/ManglingUtils.h"
 #include "llvm/ADT/StringMap.h"
 #include "llvm/Support/CommandLine.h"
 #include <algorithm>
@@ -26,7 +27,7 @@ using polar::demangling::Demangler;
 
 #ifndef NDEBUG
 
-llvm::cl::opt<bool> PrintSwiftManglingStats(
+llvm::cl::opt<bool> PrintPolarphpManglingStats(
    "print-polarphp-mangling-stats", llvm::cl::init(false),
    llvm::cl::desc("Print statistics about polarphp symbol mangling"));
 
@@ -60,7 +61,7 @@ static llvm::StringMap<OpStatEntry> OpStats;
 } // end anonymous namespace
 
 void Mangler::recordOpStatImpl(StringRef op, size_t OldPos) {
-   if (PrintSwiftManglingStats) {
+   if (PrintPolarphpManglingStats) {
       OpStatEntry &E = OpStats[op];
       E.num++;
       E.size += Storage.size() - OldPos;
@@ -71,7 +72,7 @@ void Mangler::recordOpStatImpl(StringRef op, size_t OldPos) {
 
 void printManglingStats() {
 #ifndef NDEBUG
-   if (!PrintSwiftManglingStats)
+   if (!PrintPolarphpManglingStats)
       return;
 
    std::sort(SizeStats.begin(), SizeStats.end(),

@@ -1469,7 +1469,7 @@ bool polar::calleesAreStaticallyKnowable(PILModule &module,
                return false;
          }
          LLVM_FALLTHROUGH;
-      case AccessLevel::Interface:
+      case AccessLevel::Internal:
          return module.isWholeModule();
       case AccessLevel::FilePrivate:
       case AccessLevel::Private:

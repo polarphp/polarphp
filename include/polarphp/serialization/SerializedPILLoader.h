@@ -52,8 +52,10 @@ public:
   static std::unique_ptr<SerializedPILLoader>
   create(AstContext &ctx, PILModule *PILMod,
          DeserializationNotificationHandlerSet *callbacks) {
-    return std::unique_ptr<SerializedPILLoader>(
-        new SerializedPILLoader(ctx, PILMod, callbacks));
+      /// TODO
+      return nullptr;
+//    return std::unique_ptr<SerializedPILLoader>(
+//        new SerializedPILLoader(ctx, PILMod, callbacks));
   }
   ~SerializedPILLoader();
 

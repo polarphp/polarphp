@@ -403,8 +403,8 @@ class CompilerInstance {
    SourceManager SourceMgr;
    DiagnosticEngine Diagnostics{SourceMgr};
    std::unique_ptr<AstContext> Context;
-   std::unique_ptr<lowering::TypeConverter> ThePILTypes;
-   std::unique_ptr<PILModule> ThePILModule;
+//   std::unique_ptr<lowering::TypeConverter> ThePILTypes;
+//   std::unique_ptr<PILModule> ThePILModule;
 
    std::unique_ptr<PersistentParserState> PersistentState;
 
@@ -492,15 +492,15 @@ public:
    /// The CompilerInstance takes ownership of the given PILModule object.
    void setPILModule(std::unique_ptr<PILModule> M);
 
-   PILModule *getPILModule() {
-      return ThePILModule.get();
-   }
-
-   std::unique_ptr<PILModule> takePILModule();
-
-   bool hasPILModule() {
-      return static_cast<bool>(ThePILModule);
-   }
+//   PILModule *getPILModule() {
+//      return ThePILModule.get();
+//   }
+//
+//   std::unique_ptr<PILModule> takePILModule();
+//
+//   bool hasPILModule() {
+//      return static_cast<bool>(ThePILModule);
+//   }
 
    ModuleDecl *getMainModule();
 
@@ -554,7 +554,7 @@ private:
    void setUpLLVMArguments();
    void setUpDiagnosticOptions();
    bool setUpModuleLoaders();
-   bool isInputSwift() {
+   bool isInputPHP() {
       return Invocation.getInputKind() == InputFileKind::PHP;
    }
    bool isInPILMode() {

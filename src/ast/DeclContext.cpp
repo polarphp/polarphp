@@ -955,7 +955,7 @@ AccessLevel AccessScope::accessLevelForDiagnostics() const {
    if (isPublic())
       return AccessLevel::Public;
    if (isa<ModuleDecl>(getDeclContext()))
-      return AccessLevel::Interface;
+      return AccessLevel::Internal;
    if (getDeclContext()->isModuleScopeContext()) {
       return isPrivate() ? AccessLevel::Private : AccessLevel::FilePrivate;
    }

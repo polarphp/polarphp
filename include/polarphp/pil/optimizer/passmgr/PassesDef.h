@@ -115,7 +115,7 @@ PASS(ConditionForwarding, "condition-forwarding",
 PASS(ConstantEvaluatorTester, "test-constant-evaluator",
       "Test constant evaluator")
 PASS(ConstantEvaluableSubsetChecker, "test-constant-evaluable-subset",
-     "Test Swift code snippets expected to be constant evaluable")
+     "Test polarphp code snippets expected to be constant evaluable")
 PASS(CopyForwarding, "copy-forwarding",
      "Copy Forwarding to Remove Redundant Copies")
 PASS(CopyPropagation, "copy-propagation",
@@ -295,7 +295,7 @@ PASS(StackPromotion, "stack-promotion",
      "Stack Promotion of Class Objects")
 PASS(StripDebugInfo, "strip-debug-info",
      "Strip Debug Information")
-PASS(SwiftArrayPropertyOpt, "array-property-opt",
+PASS(TypePHPArrayPropertyOpt, "array-property-opt",
      "Loop Specialization for Array Properties")
 PASS(UnsafeGuaranteedPeephole, "unsafe-guaranteed-peephole",
      "PIL retain/release Peephole Removal for Builtin.unsafeGuaranteed")

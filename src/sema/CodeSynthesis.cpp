@@ -185,7 +185,7 @@ static ConstructorDecl *createImplicitConstructor(NominalTypeDecl *decl,
    assert(!decl->hasClangNode());
 
    SourceLoc Loc = decl->getLoc();
-   auto accessLevel = AccessLevel::Interface;
+   auto accessLevel = AccessLevel::Internal;
 
    // Determine the parameter type of the implicit constructor.
    SmallVector<ParamDecl*, 8> params;
@@ -457,7 +457,7 @@ configureInheritedDesignatedInitAttributes(ClassDecl *classDecl,
    assert(ctor->getDeclContext() == classDecl);
 
    AccessLevel access = classDecl->getFormalAccess();
-   access = std::max(access, AccessLevel::Interface);
+   access = std::max(access, AccessLevel::Internal);
    access = std::min(access, superclassCtor->getFormalAccess());
 
    ctor->setAccess(access);
@@ -472,7 +472,7 @@ configureInheritedDesignatedInitAttributes(ClassDecl *classDecl,
          auto *clonedAttr = new (ctx) InlinableAttr(/*implicit=*/true);
          ctor->getAttrs().add(clonedAttr);
 
-      } else if (access == AccessLevel::Interface && !superclassCtor->isDynamic()){
+      } else if (access == AccessLevel::Internal && !superclassCtor->isDynamic()){
          // Inherit the @usableFromInline attribute.
          auto *clonedAttr = new (ctx) UsableFromInlineAttr(/*implicit=*/true);
          ctor->getAttrs().add(clonedAttr);

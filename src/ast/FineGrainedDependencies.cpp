@@ -109,7 +109,8 @@ SourceFileDepGraphNode *SourceFileDepGraph::findExistingNodeOrCreateIfNew(
 }
 
 std::string DependencyKey::demangleTypeAsContext(StringRef s) {
-   return polar::demangling::demangleTypeAsString(s.str());
+/// TODO
+//   return polar::demangling::demangleTypeAsString(s.str());
 }
 
 //==============================================================================

@@ -22,19 +22,19 @@ polar_add_host_library(PolarFrontendTool STATIC
    ${POLAR_FRONTEND_TOOL_SOURCES})
 
 target_link_libraries(PolarFrontendTool PRIVATE
-   PolarClangImporter
+#   PolarClangImporter
    PolarDemangling
    PolarFrontend
-   PolarIDE
-   PolarImmediate
-   PolarIndex
-   PolarIRGen
+#   PolarIDE
+#   PolarImmediate
+#   PolarIndex
+#   PolarIRGen
    PolarOption
-   PolarSerialization
-   PolarPIL
-   PolarPILGen
-   PolarPILOptimizer
-   PolarTBDGen
+#   PolarSerialization
+#   PolarPIL
+#   PolarPILGen
+#   PolarPILOptimizer
+#   PolarTBDGen
    )
 
 target_link_libraries(PolarFrontendTool PUBLIC

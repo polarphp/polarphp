@@ -668,7 +668,7 @@ void ArrayPropertiesSpecializer::specializeLoopNest() {
 }
 
 namespace {
-class PolarphpArrayPropertyOptPass : public PILFunctionTransform {
+class TypePHPArrayPropertyOptPass : public PILFunctionTransform {
 
    void run() override {
       auto *Fn = getFunction();
@@ -736,6 +736,6 @@ class PolarphpArrayPropertyOptPass : public PILFunctionTransform {
 };
 } // end anonymous namespace
 
-PILTransform *polar::createPolarphpArrayPropertyOpt() {
-   return new PolarphpArrayPropertyOptPass();
+PILTransform *polar::createTypePHPArrayPropertyOpt() {
+   return new TypePHPArrayPropertyOptPass();
 }

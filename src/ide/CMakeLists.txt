@@ -21,7 +21,7 @@ polar_add_host_library(PolarIDE STATIC
 
 target_link_libraries(PolarIDE PRIVATE
    PolarAST
-   PolarClangImporter
+#   PolarClangImporter
    PolarFrontend
    PolarLLParser
    PolarSema)

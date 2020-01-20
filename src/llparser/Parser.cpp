@@ -111,11 +111,15 @@ void tokenize(const LangOptions &LangOpts, const SourceManager &SM,
 
 void PILParserTUStateBase::anchor() {}
 
-void performCodeCompletionSecondPass(
+} // polar::llparser
+
+void polar::performCodeCompletionSecondPass(
    PersistentParserState &ParserState,
    CodeCompletionCallbacksFactory &Factory) {
    Parser::performCodeCompletionSecondPass(ParserState, Factory);
 }
+
+namespace polar::llparser {
 
 void Parser::performCodeCompletionSecondPass(
    PersistentParserState &ParserState,

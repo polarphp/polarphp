@@ -255,7 +255,7 @@ void addHighLevelLoopOptPasses(PILPassPipelinePlan &P) {
    P.addCOWArrayOpts();
    // Cleanup.
    P.addDCE();
-   P.addSwiftArrayPropertyOpt();
+   P.addTypePHPArrayPropertyOpt();
 }
 
 // Perform classic SSA optimizations.

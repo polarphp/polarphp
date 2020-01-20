@@ -12,7 +12,7 @@
 
 #include "polarphp/demangling/ManglingUtils.h"
 
-namespace polar::mangling {
+namespace polar::mangle {
 
 bool isNonAscii(StringRef str) {
    for (unsigned char c : str) {

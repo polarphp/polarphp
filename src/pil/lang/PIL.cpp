@@ -42,7 +42,7 @@ FormalLinkage polar::getDeclLinkage(const ValueDecl *D) {
       case AccessLevel::Public:
       case AccessLevel::Open:
          return FormalLinkage::PublicUnique;
-      case AccessLevel::Interface:
+      case AccessLevel::Internal:
          return FormalLinkage::HiddenUnique;
       case AccessLevel::FilePrivate:
       case AccessLevel::Private:
@@ -88,7 +88,7 @@ polar::getLinkageForInterfaceConformance(const RootInterfaceConformance *C,
       case AccessLevel::FilePrivate:
          return (definition ? PILLinkage::Private : PILLinkage::PrivateExternal);
 
-      case AccessLevel::Interface:
+      case AccessLevel::Internal:
          return (definition ? PILLinkage::Hidden : PILLinkage::HiddenExternal);
 
       default:

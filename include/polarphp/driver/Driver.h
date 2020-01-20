@@ -205,7 +205,7 @@ public:
       return DriverExecutable;
    }
 
-   ArrayRef<std::string> getSwiftProgramArgs() const {
+   ArrayRef<std::string> getPHPProgramArgs() const {
       return DriverExecutableArgs;
    }
 
@@ -384,11 +384,6 @@ private:
                                      StringRef workingDirectory,
                                      llvm::SmallString<128> &Buf,
                                      CommandOutput *Output) const;
-
-//   void chooseObjectiveCHeaderOutputPath(Compilation &C,
-//                                         const TypeToPathMap *OutputMap,
-//                                         StringRef workingDirectory,
-//                                         CommandOutput *Output) const;
 
    void chooseLoadedModuleTracePath(Compilation &C,
                                     StringRef workingDirectory,

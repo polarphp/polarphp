@@ -71,44 +71,45 @@ bool polar::emitImportedModules(AstContext &Context, ModuleDecl *mainModule,
    }
 
    // And now look in the C code we're possibly using.
-   auto clangImporter =
-      static_cast<ClangImporter *>(Context.getClangModuleLoader());
+   /// TODO
+//   auto clangImporter =
+//      static_cast<ClangImporter *>(Context.getClangModuleLoader());
 
-   StringRef implicitHeaderPath = opts.ImplicitObjCHeaderPath;
-   if (!implicitHeaderPath.empty()) {
-      if (!clangImporter->importBridgingHeader(implicitHeaderPath, mainModule)) {
-         ModuleDecl::ImportFilter importFilter;
-         importFilter |= ModuleDecl::ImportFilterKind::Public;
-         importFilter |= ModuleDecl::ImportFilterKind::Private;
-         importFilter |= ModuleDecl::ImportFilterKind::ImplementationOnly;
+//   StringRef implicitHeaderPath = opts.ImplicitObjCHeaderPath;
+//   if (!implicitHeaderPath.empty()) {
+//      if (!clangImporter->importBridgingHeader(implicitHeaderPath, mainModule)) {
+//         ModuleDecl::ImportFilter importFilter;
+//         importFilter |= ModuleDecl::ImportFilterKind::Public;
+//         importFilter |= ModuleDecl::ImportFilterKind::Private;
+//         importFilter |= ModuleDecl::ImportFilterKind::ImplementationOnly;
+//
+//         SmallVector<ModuleDecl::ImportedModule, 16> imported;
+//         clangImporter->getImportedHeaderModule()->getImportedModules(
+//            imported, importFilter);
+//
+//         for (auto IM : imported) {
+//            if (auto clangModule = IM.second->findUnderlyingClangModule())
+//               Modules.insert(getTopLevelName(clangModule));
+//            else
+//               assert(IM.second->isStdlibModule() &&
+//                      "unexpected non-stdlib swift module");
+//         }
+//      }
+//   }
 
-         SmallVector<ModuleDecl::ImportedModule, 16> imported;
-         clangImporter->getImportedHeaderModule()->getImportedModules(
-            imported, importFilter);
-
-         for (auto IM : imported) {
-            if (auto clangModule = IM.second->findUnderlyingClangModule())
-               Modules.insert(getTopLevelName(clangModule));
-            else
-               assert(IM.second->isStdlibModule() &&
-                      "unexpected non-stdlib swift module");
-         }
-      }
-   }
-
-   if (opts.ImportUnderlyingModule) {
-      auto underlyingModule = clangImporter->loadModule(
-         SourceLoc(), std::make_pair(mainModule->getName(), SourceLoc()));
-      if (!underlyingModule) {
-         Context.Diags.diagnose(SourceLoc(),
-                                diag::error_underlying_module_not_found,
-                                mainModule->getName());
-         return true;
-      }
-      auto clangModule = underlyingModule->findUnderlyingClangModule();
-
-      findAllClangImports(clangModule, Modules);
-   }
+//   if (opts.ImportUnderlyingModule) {
+//      auto underlyingModule = clangImporter->loadModule(
+//         SourceLoc(), std::make_pair(mainModule->getName(), SourceLoc()));
+//      if (!underlyingModule) {
+//         Context.Diags.diagnose(SourceLoc(),
+//                                diag::error_underlying_module_not_found,
+//                                mainModule->getName());
+//         return true;
+//      }
+//      auto clangModule = underlyingModule->findUnderlyingClangModule();
+//
+//      findAllClangImports(clangModule, Modules);
+//   }
 
    for (auto name : Modules) {
       out << name << "\n";

@@ -1202,6 +1202,7 @@ public:
       // TODO: maybe we can do this lazily or maybe we should disallow PIL passes
       // to create critical edges.
       bool EdgeChanged = splitAllCriticalEdges(*F, nullptr, nullptr);
+      /// TODO
       if (EdgeChanged)
          POA->invalidateFunction(F);
 

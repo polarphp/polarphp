@@ -17,7 +17,12 @@
 #ifndef POLARPHP_LLPARSER_TOKENKINDS_H
 #define POLARPHP_LLPARSER_TOKENKINDS_H
 
+#include "polarphp/basic/LLVM.h"
+
 namespace polar::llparser {
+
+
+
 enum class tok {
 #define TOKEN(X) X,
 #include "polarphp/llparser/TokenKindsDef.h"
